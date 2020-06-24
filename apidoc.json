@@ -1,0 +1,17 @@
+{
+    "name": "Sibyl",
+    "version": "1.0.0",
+    "description": "Official documentation about Sibyl Restful APIs.",
+    "title": "Sibyl Restful APIs",
+    "url": "http://localhost:3000/api/v1",
+    "sampleUrl": "http://localhost:3000/api/v1",
+    "header": {
+        "title": "General",
+        "filename": "header.md"
+    },
+    "order": ["Entity", "Feature", "Model", "Computing", "Test"],
+    "template": {
+        "withCompare": true,
+        "withGenerator": true
+    }
+}
