@@ -1,0 +1,40 @@
+* {
+    box-sizing: border-box;
+}
+
+body,
+p,
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto';
+    color: #828282;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-weight: normal;
+    color: #000;
+    margin: 0;
+    padding: 0;
+}
+
+h2 {
+    font-size: 22px;
+}
+
+ul {
+    list-style-type: none;
+}
+
+.clear {
+    clear: both;
+    width: 100%;
+    font-size: 0;
+    line-height: 0;
+}
