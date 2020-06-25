@@ -1,0 +1,78 @@
+@import '../../assets/sass/colors.scss';
+
+.sidebar {
+    width: 65px;
+    height: 100vh;
+    padding-top: 28px;
+    background: $dark-blue;
+    transition: all 0.2s ease-in-out;
+    float: left;
+    overflow: hidden;
+
+    .menu {
+        a {
+            display: block;
+            padding: 20px 20px 20px 16px;
+            opacity: 0.6;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border-left: 4px solid transparent;
+            white-space: nowrap;
+
+            &:hover,
+            &.active {
+                opacity: 1;
+                background: $blue;
+                border-left: 4px solid $mauve;
+            }
+
+            span,
+            svg {
+                display: inline-block;
+                vertical-align: middle;
+            }
+            span {
+                margin-left: 20px;
+            }
+        }
+        li {
+            &:first-child {
+                text-align: center;
+                padding: 20px 20px 20px 16px;
+                cursor: pointer;
+                &:hover {
+                    background: transparent;
+                    border-left-color: transparent;
+                }
+            }
+            &:last-child {
+                border-top: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            a {
+                color: #fff;
+            }
+        }
+    }
+
+    &.expanded {
+        width: 224px;
+        .menu {
+            li {
+                &:first-child {
+                    text-align: right;
+                }
+            }
+        }
+    }
+
+    .logo {
+        width: 80%;
+        margin: 0 auto;
+        height: 35px;
+
+        svg {
+            width: 100%;
+        }
+    }
+}

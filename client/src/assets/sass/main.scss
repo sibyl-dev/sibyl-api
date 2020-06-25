@@ -1,0 +1,14 @@
+@import './reset.scss';
+@import './colors.scss';
+
+.main-wrapper {
+    width: 100%;
+    .dash-container {
+        float: left;
+        width: calc(100% - 224px);
+        transition: width 0.2s ease-in-out;
+        &.full-width {
+            width: calc(100% - 65px);
+        }
+    }
+}
