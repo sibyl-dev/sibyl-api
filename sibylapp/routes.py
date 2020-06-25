@@ -10,4 +10,6 @@ def add_routes(app):
     # configure RESTful APIs
     api = Api(app)
 
-    api.add_resource(ctrl.test.Test, current_api_version + 'test/')
+    api.add_resource(ctrl.entity.Entity, current_api_version + 'entities/<string:entity_id>/')
+
+    # api.add_resource(ctrl.test.Test, current_api_version + 'test/')

@@ -3,14 +3,14 @@
 
 host: "localhost" # mongodb server address
 port: 27017 # mongodb server port
-db: "mtv" # database name
+db: "sibylapp" # database name
 username: # for auth
 password: # for auth
 
 # docker
 dk_host: "db" # mongodb server address
 dk_port: 27017 # mongodb server port
-dk_db: "mtv" # database name
+dk_db: "sibylapp" # database name
 dk_username: # for auth
 dk_password: # for auth
 
