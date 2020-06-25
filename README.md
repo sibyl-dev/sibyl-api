@@ -16,7 +16,7 @@ Explanation tool for machine learning
 
 <!-- - Documentation: https://HDI-Project.github.io/sibylapp -->
 
--   The Restful APIs documentation: http://18.223.186.158/apidoc/
+-   The Restful APIs documentation: http://18.223.186.158/
 -   Homepage: https://github.com/DAI-Lab/sibylapp
 
 # Overview
