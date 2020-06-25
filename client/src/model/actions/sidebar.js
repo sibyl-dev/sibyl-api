@@ -6,3 +6,12 @@ export function toggleSidebarStateAction(sidebarState) {
     });
   };
 }
+
+export function setActivePageAction(pageName) {
+  return function (dispatch) {
+    dispatch({
+      type: 'SET_ACTIVE_PAGE',
+      pageName,
+    });
+  };
+}

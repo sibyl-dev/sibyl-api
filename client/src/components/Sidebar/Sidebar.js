@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { toggleSidebarStateAction } from '../../model/actions/sidebar';
+import { toggleSidebarStateAction, setActivePageAction } from '../../model/actions/sidebar';
 import { getIsSidebarCollapsed } from '../../model/selectors/sidebar';
 import {
   IndicatorIcon,
@@ -16,7 +16,7 @@ import './Sidebar.scss';
 
 class Sidebar extends Component {
   render() {
-    const { toggleSidebarState, isSidebarCollapsed } = this.props;
+    const { toggleSidebarState, isSidebarCollapsed, setActivePage } = this.props;
 
     return (
       <div className={`sidebar ${!isSidebarCollapsed && `expanded`}`}>
@@ -28,31 +28,31 @@ class Sidebar extends Component {
             <IndicatorIcon dir={!isSidebarCollapsed && 'left'} />
           </li>
           <li>
-            <NavLink exact to="/" activeClassName="active">
+            <NavLink exact to="/" activeClassName="active" onClick={() => setActivePage('Score')}>
               <ScoreIcon />
               <span>Score</span>
             </NavLink>
           </li>
           <li>
-            <NavLink exact to="/details" activeClassName="active">
+            <NavLink exact to="/details" activeClassName="active" onClick={() => setActivePage('Details')}>
               <DetailsIcon />
               <span>Details</span>
             </NavLink>
           </li>
           <li>
-            <NavLink exact to="/sandbox">
+            <NavLink exact to="/sandbox" onClick={() => setActivePage('Sandbox')}>
               <SandboxIcon />
               <span>Sandbox</span>
             </NavLink>
           </li>
           <li>
-            <NavLink exact to="/similar-children">
+            <NavLink exact to="/similar-children" onClick={() => setActivePage('Similar Children')}>
               <SimilarChildrenIcon />
               <span>Similar Children</span>
             </NavLink>
           </li>
           <li>
-            <NavLink exact to="/model">
+            <NavLink exact to="/model" onClick={() => setActivePage('Model')}>
               <ModelIcon />
               <span>About Model</span>
             </NavLink>
@@ -69,7 +69,6 @@ export default connect(
   }),
   (dispatch) => ({
     toggleSidebarState: (sidebarState) => dispatch(toggleSidebarStateAction(sidebarState)),
+    setActivePage: (pageName) => dispatch(setActivePageAction(pageName)),
   }),
 )(Sidebar);
-
-// export default Sidebar;

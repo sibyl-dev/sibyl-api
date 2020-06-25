@@ -12,6 +12,7 @@ ul {
 body {
     font-family: 'Roboto';
     color: #828282;
+    font-size: 16px;
 }
 
 h1,
@@ -37,4 +38,11 @@ ul {
     width: 100%;
     font-size: 0;
     line-height: 0;
+}
+
+table {
+    width: 100%;
+}
+b {
+    color: #000;
 }

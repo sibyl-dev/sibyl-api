@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { getIsSidebarCollapsed } from './model/selectors/sidebar';
 import Sidebar from './components/Sidebar/Sidebar';
 import Header from './components/Header/Header';
-import Dashboard from './components/Dashboard';
+import Dashboard from './components/Dashboard/Dashboard';
 import './assets/sass/main.scss';
 
 class App extends Component {
