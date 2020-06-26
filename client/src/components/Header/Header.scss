@@ -1,28 +1,26 @@
-.header {
-    .main-header,
-    .sub-header {
-        padding: 20px 40px;
-        ul {
-            display: flex;
-            align-items: center;
-        }
-        li {
-            flex: 1;
-            justify-content: space-between;
-            &:last-child {
-                text-align: right;
-                strong {
-                    color: #4f4f4f;
-                }
+.main-header,
+.sub-header {
+    padding: 20px 40px;
+    ul {
+        display: flex;
+        align-items: center;
+    }
+    li {
+        flex: 1;
+        justify-content: space-between;
+        &:last-child {
+            text-align: right;
+            strong {
+                color: #4f4f4f;
             }
         }
     }
+}
 
-    .sub-header {
-        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.06) inset;
-        background: #fff;
-        border: 1px solid rgba(0, 0, 0, 0.06);
-    }
+.sub-header {
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.06) inset;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
 
     button {
         border: 1px solid #bdbdbd;

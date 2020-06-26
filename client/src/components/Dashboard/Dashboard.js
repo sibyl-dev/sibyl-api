@@ -5,6 +5,7 @@ import Details from '../Details/Details';
 import './Dashboard.scss';
 import Sandbox from '../Sandbox/Sandbox';
 import NotFound from '../common/NotFound';
+import Model from '../Model/Model';
 
 const Dashboard = () => {
   return (
@@ -12,6 +13,7 @@ const Dashboard = () => {
       <Switch>
         <Route path="/details" component={Details} />
         <Route path="/sandbox" exact component={Sandbox} />
+        <Route path="/model" component={Model} />
         <Route path="/" exact component={Score} />
         <Route path="*" component={NotFound} />
       </Switch>

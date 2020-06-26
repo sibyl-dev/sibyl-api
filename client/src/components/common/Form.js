@@ -17,11 +17,10 @@ const valueSelect = [
   { value: 'Numerical', label: 'Numerical', isFixed: true },
 ];
 
-const contribValues = [
-  { value: 'Contrib 1', label: 'Contrib 1', isFixed: true },
-  { value: 'Contrib 2', label: 'Contrib 2', isFixed: true },
-  { value: 'Contrib 3', label: 'Contrib 3', icon: 'green', isFixed: true },
-  { value: 'Contrib 4', label: 'Contrib 4', isFixed: true },
+const diffValues = [
+  { value: 'Difference', label: 'Difference', isFixed: true },
+  { value: 'Risk', label: 'Risk', isFixed: true },
+  { value: 'Protective', label: 'Protective', isFixed: true },
 ];
 
 const categoryFormatOptions = ({ label, icon }) => (
@@ -57,17 +56,17 @@ export const ValueSelect = () => (
     classNamePrefix="sibyl-select"
     className="sibyl-select"
     options={valueSelect}
-    placeholder="Value"
+    placeholder="Changed Value"
   />
 );
 
-export const ContribSelect = () => (
+export const DiffSelect = () => (
   <Select
     isSearchable={false}
     isMulti={false}
     classNamePrefix="sibyl-select"
     className="sibyl-select"
-    options={contribValues}
-    placeholder="Value"
+    options={diffValues}
+    placeholder="Difference"
   />
 );

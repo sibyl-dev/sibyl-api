@@ -1,9 +1,8 @@
 import React from 'react';
 
-const Score = () => (
+export const Model = () => (
   <div className="component-wrapper">
-    <p>Score here</p>
+    <p>Model here</p>
   </div>
 );
-
-export default Score;
+export default Model;

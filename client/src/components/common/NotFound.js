@@ -9,11 +9,13 @@ class NotFound extends Component {
   }
   render() {
     return (
-      <DashWrapper>
-        <div className="info">
-          <p>Sorry. We didn't found what you're looking for</p>
-        </div>
-      </DashWrapper>
+      <div className="component-wrapper">
+        <DashWrapper>
+          <div className="info">
+            <p>Sorry. We didn't found what you're looking for</p>
+          </div>
+        </DashWrapper>
+      </div>
     );
   }
 }

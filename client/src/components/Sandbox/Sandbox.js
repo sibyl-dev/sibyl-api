@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { DashWrapper } from '../common/DashWrapper';
-import { CategorySelect, ValueSelect, ContribSelect } from '../common/Form';
+import { CategorySelect, ValueSelect, DiffSelect } from '../common/Form';
 
 import './Sandbox.scss';
 import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
@@ -9,7 +9,7 @@ import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
 class Sandbox extends Component {
   render() {
     return (
-      <div>
+      <div className="component-wrapper">
         <div className="dash-title">
           <h4>Model predictions if each value was changed</h4>
         </div>
@@ -21,13 +21,13 @@ class Sandbox extends Component {
               </li>
               <li className="sep" />
               <li>
-                <ValueSelect />
-              </li>
-              <li>
                 <CategorySelect />
               </li>
               <li>
-                <ContribSelect />
+                <ValueSelect />
+              </li>
+              <li>
+                <DiffSelect />
               </li>
             </ul>
           </header>
