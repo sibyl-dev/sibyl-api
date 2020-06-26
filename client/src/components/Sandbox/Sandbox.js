@@ -2,9 +2,19 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { DashWrapper } from '../common/DashWrapper';
 import { CategorySelect, ValueSelect, DiffSelect } from '../common/Form';
+import Search from '../common/Search';
 
 import './Sandbox.scss';
 import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
+
+// mock search result
+const hayStack = [
+  { feature: 'Child in focus had a prior court active child welfare case' },
+  { feature: 'Child in focus is younger than 1 years old' },
+  { feature: 'Feature #1' },
+  { feature: 'Feature #2' },
+  { feature: 'Feature #3' },
+];
 
 class Sandbox extends Component {
   render() {
@@ -17,7 +27,7 @@ class Sandbox extends Component {
           <header className="dash-header">
             <ul className="dash-controls">
               <li>
-                <input type="text" placeholder="Search feature" />
+                <Search hayStack={hayStack} />
               </li>
               <li className="sep" />
               <li>
