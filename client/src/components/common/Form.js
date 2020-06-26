@@ -12,7 +12,9 @@ const categoryOptions = [
 ];
 
 const valueSelect = [
-  { value: 'True/False', label: 'True/False', isFixed: true },
+  { value: 'All', label: 'All', isFixed: true },
+  { value: 'True -> False', label: 'True -> False', isFixed: true },
+  { value: 'False -> True', label: 'False -> True', isFixed: true },
   { value: 'Categorycal', label: 'Categorycal', isFixed: true },
   { value: 'Numerical', label: 'Numerical', isFixed: true },
 ];
@@ -39,7 +41,7 @@ export const CategorySelect = () => {
   return (
     <Select
       isSearchable={false}
-      isMulti={false}
+      isMulti={true}
       classNamePrefix="sibyl-select"
       className="sibyl-select"
       formatOptionLabel={categoryFormatOptions}

@@ -9,8 +9,7 @@ table {
         tr {
             border-bottom: 1px solid #f2f2f2;
             &:hover {
-                td,
-                th {
+                td {
                     background: rgba(242, 242, 242, 0.6);
                     transition: all 0.2s ease-in-out;
                 }
