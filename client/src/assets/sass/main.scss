@@ -1,0 +1,18 @@
+@import './reset.scss';
+@import './colors.scss';
+@import './table.scss';
+@import './icons.scss';
+@import './form.scss';
+
+.main-wrapper {
+    width: 100%;
+    min-width: 1200px;
+    .dash-container {
+        float: left;
+        width: calc(100% - 224px);
+        transition: width 0.2s ease-in-out;
+        &.full-width {
+            width: calc(100% - 65px);
+        }
+    }
+}
