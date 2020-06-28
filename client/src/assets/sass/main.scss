@@ -8,11 +8,13 @@
     width: 100%;
     min-width: 1200px;
     .dash-container {
-        float: left;
         width: calc(100% - 224px);
-        transition: width 0.2s ease-in-out;
+        transition: width 0.2s ease-in-out, transform 0.2s ease-in-out;
+        padding-bottom: 30px;
+        transform: translateX(224px);
         &.full-width {
             width: calc(100% - 65px);
+            transform: translateX(65px);
         }
     }
 }

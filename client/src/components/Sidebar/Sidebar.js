@@ -17,9 +17,10 @@ import './Sidebar.scss';
 class Sidebar extends Component {
   render() {
     const { toggleSidebarState, isSidebarCollapsed, setActivePage } = this.props;
+    const sidebarClassNames = isSidebarCollapsed ? 'sidebar' : 'sidebar expanded';
 
     return (
-      <div className={`sidebar ${!isSidebarCollapsed && `expanded`}`}>
+      <div className={sidebarClassNames}>
         <div className="logo">
           <MetLogo state={!isSidebarCollapsed && `full`} />
         </div>

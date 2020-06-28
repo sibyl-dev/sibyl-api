@@ -13,3 +13,28 @@ input {
         color: $light-gray;
     }
 }
+
+button {
+    cursor: pointer;
+    outline: none;
+    &:disabled {
+        cursor: not-allowed;
+    }
+
+    &.clean {
+        border: none;
+        background: none;
+        &:hover {
+            background: none;
+        }
+    }
+
+    &.trash {
+        &:hover {
+            path {
+                fill: $dark-red;
+                transition: all 0.2s ease-in-out;
+            }
+        }
+    }
+}

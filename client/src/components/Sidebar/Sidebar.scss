@@ -6,9 +6,9 @@
     padding-top: 28px;
     background: $dark-blue;
     transition: all 0.2s ease-in-out;
-    float: left;
     overflow: hidden;
-
+    position: fixed;
+    z-index: 1;
     .menu {
         a {
             display: block;
