@@ -6,6 +6,7 @@ from flask import Flask
 from flask_cors import CORS
 from gevent.pywsgi import WSGIServer
 from termcolor import colored
+from mongoengine import connect
 
 from sibylapp import g
 from sibylapp.routes import add_routes
@@ -15,8 +16,14 @@ LOGGER = logging.getLogger(__name__)
 
 class SibylApp:
 
-    def __init__(self, conf):
+    def __init__(self, conf, docker):
         self._conf = conf.copy()
+        if not docker:
+            self._db = connect(db=conf['db'], host=conf['host'], port=conf['port'],
+                               username=conf['username'], password=conf['password'])
+        else:
+            self._db = connect(db=conf['dk_db'], host=conf['dk_host'], port=conf['dk_port'],
+                               username=conf['dk_username'], password=conf['dk_password'])
 
     def _init_flask_app(self, env):
         app = Flask(

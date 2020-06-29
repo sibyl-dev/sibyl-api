@@ -1,6 +1,7 @@
 import logging
 
 from flask_restful import Resource
+from sibylapp.db import schema
 
 LOGGER = logging.getLogger(__name__)
 
@@ -56,6 +57,19 @@ class Entities(Resource):
         @apiSuccess {Object} [entities.property] ID of the entity.
         @apiSuccess {String} [entities.property.name] Name of the entity.
         """
+        doc = {
+            'eid': 'xc1',
+            'features': [
+                {'name': 'n1', 'value': 1}
+            ],
+            'property': {
+                'name': 'harry',
+                'case_ids': ['1', '2', '6']
+            }
+        }
+        docs = schema.Entity.find({'eid': 'xc1'})
+        for doc in docs:
+            print(doc)
 
         return {}
 

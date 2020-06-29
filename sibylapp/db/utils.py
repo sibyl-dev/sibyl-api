@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from pymongo import MongoClient
 
-from sibyl.db import schema
+from sibylapp.db import schema
 
 LOGGER = logging.getLogger(__name__)
 
