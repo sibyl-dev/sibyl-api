@@ -9,10 +9,11 @@ import './assets/sass/main.scss';
 class App extends Component {
   render() {
     const { isSidebarCollapsed } = this.props;
+    const dashContainerClassNames = isSidebarCollapsed ? 'dash-container full-width' : 'dash-container';
     return (
       <div className="main-wrapper">
         <Sidebar />
-        <div className={`dash-container ${isSidebarCollapsed && `full-width`}`}>
+        <div className={dashContainerClassNames}>
           <Header />
           <Dashboard />
         </div>

@@ -6,6 +6,7 @@ import Search from '../common/Search';
 
 import './Sandbox.scss';
 import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
+import SandboxFilters from './SandboxFilters';
 
 // mock search result
 const hayStack = [
@@ -20,6 +21,7 @@ class Sandbox extends Component {
   render() {
     return (
       <div className="component-wrapper">
+        <SandboxFilters />
         <div className="dash-title">
           <h4>Model predictions if each value was changed</h4>
         </div>
