@@ -14,6 +14,48 @@ input {
     }
 }
 
+input {
+    &[type='checkbox'] {
+        opacity: 0;
+        position: absolute;
+        z-index: -1;
+        + label {
+            span {
+                position: relative;
+                border: 1px solid #828282;
+                display: inline-block;
+                width: 14px;
+                height: 14px;
+                margin-right: 10px;
+                vertical-align: middle;
+                width: 14px;
+                height: 14px;
+                border-radius: 2px;
+                transition: all 0.2s ease-in-out;
+
+                &:before {
+                    content: '';
+                    position: absolute;
+                    left: 1px;
+                    top: -4px;
+                    color: #fff;
+                }
+            }
+        }
+
+        &:checked {
+            + label {
+                span {
+                    background: #828282;
+                    &:before {
+                        content: '\2713';
+                    }
+                }
+            }
+        }
+    }
+}
+
 button {
     cursor: pointer;
     outline: none;

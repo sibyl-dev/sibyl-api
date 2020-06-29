@@ -1,5 +1,5 @@
 import React from 'react';
-import { TableFullIcon, TableSplitIcon } from '../../assets/icons/icons';
+import { ExcamationIcon } from '../../assets/icons/icons';
 import './Header.scss';
 import { connect } from 'react-redux';
 import { getPageName } from '../../model/selectors/sidebar';
@@ -14,6 +14,9 @@ const Header = (props) => {
           </li>
           <li>
             Prediction Score: <strong>15</strong>
+            <button type="button" className="clean">
+              <ExcamationIcon />
+            </button>
           </li>
         </ul>
       </div>

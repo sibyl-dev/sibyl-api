@@ -34,8 +34,9 @@
         align-items: center;
 
         h4 {
-            display: inline-block;
-            justify-content: flex-start;
+            button {
+                vertical-align: middle;
+            }
         }
 
         .filter-tab {
