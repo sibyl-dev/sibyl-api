@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import Select from 'react-select';
-import { TrashIcon } from '../../assets/icons/icons';
+import { TrashIcon, QuestionIcon } from '../../assets/icons/icons';
+// import { ModalDialog } from 'react-bootstrap';
+import ModalDialog from '../common/ModalDialog';
 
 const featureOptions = [
   { value: 'All', label: 'All', icon: 'all', isFixed: true },
@@ -27,8 +29,15 @@ class SandboxFilters extends Component {
       maxFeaturesCount: 4,
       storedFeatures: {},
       storedValues: {},
+      isModalOpen: true,
     };
     this.onAddFeature = this.onAddFeature.bind(this);
+  }
+
+  toggleModalState(modalState) {
+    this.setState({
+      isModalOpen: modalState,
+    });
   }
 
   renderFeatureComponent() {
@@ -143,12 +152,17 @@ class SandboxFilters extends Component {
   }
 
   render() {
-    const { featuresCount, maxFeaturesCount } = this.state;
+    const { featuresCount, maxFeaturesCount, isModalOpen } = this.state;
 
     return (
       <div className="sandbox-filters">
         <header>
-          <h4>Experiment with changes</h4>
+          <h4>
+            Experiment with changes
+            <button type="button" className="clean" onClick={() => this.toggleModalState(true)}>
+              <QuestionIcon />
+            </button>
+          </h4>
           <div className="filter-tab">
             Updated Prediction: <strong>19</strong>
           </div>
@@ -180,6 +194,26 @@ class SandboxFilters extends Component {
               </tr>
             </tfoot>
           </table>
+          <ModalDialog isOpen={isModalOpen} title="Notice" onClose={() => this.toggleModalState(false)}>
+            <p>
+              The predictions on this screen show how the model’s predictions would change under different
+              circumstances. Here, you can look into what the model values, and make changes based on information you
+              may have.
+            </p>
+            <p className="highlight">It DOES NOT predict how reality would change under these conditions.</p>
+            <p className="note">
+              Press on the &quot;
+              <QuestionIcon width="10" height="10" color="#6B9AD1" />
+              &quot; icon near "Experiment with changes" title to re-visit this message.
+            </p>
+            <p>
+              <input type="checkbox" id="remind" />
+              <label htmlFor="remind">
+                <span />
+                Don't remind me again
+              </label>
+            </p>
+          </ModalDialog>
         </div>
       </div>
     );
