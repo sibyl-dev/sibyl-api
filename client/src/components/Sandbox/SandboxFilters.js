@@ -29,7 +29,7 @@ class SandboxFilters extends Component {
       maxFeaturesCount: 4,
       storedFeatures: {},
       storedValues: {},
-      isModalOpen: true,
+      isModalOpen: false,
     };
     this.onAddFeature = this.onAddFeature.bind(this);
   }
