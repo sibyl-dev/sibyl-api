@@ -50,3 +50,23 @@ b {
 label {
     cursor: pointer;
 }
+
+.scroll-style::-webkit-scrollbar {
+    width: 4px;
+    height: 9px;
+}
+
+.scroll-style::-webkit-scrollbar-thumb {
+    height: 3px;
+    background-clip: padding-box;
+    border-radius: 5px;
+    background-color: #eae9e9;
+}
+
+.scroll-style::-webkit-scrollbar-track {
+    border-radius: 5px;
+}
+
+.no-shadow {
+    box-shadow: none;
+}

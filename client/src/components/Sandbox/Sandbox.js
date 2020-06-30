@@ -4,9 +4,9 @@ import { DashWrapper } from '../common/DashWrapper';
 import { CategorySelect, ValueSelect, DiffSelect } from '../common/Form';
 import Search from '../common/Search';
 
-import './Sandbox.scss';
 import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
 import SandboxFilters from './SandboxFilters';
+import './Sandbox.scss';
 
 // mock search result
 const hayStack = [

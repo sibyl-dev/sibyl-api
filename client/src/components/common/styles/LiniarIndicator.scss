@@ -1,0 +1,45 @@
+@import '../../../assets/sass/colors.scss';
+.percentage-indicator {
+    $border-radius: 4px;
+    width: 100%;
+    height: 8px;
+    border-radius: $border-radius;
+    background: rgba($light-gray, 0.5);
+    position: relative;
+    z-index: 0;
+
+    &,
+    .left-percentage,
+    .right-percentage {
+        height: 8px;
+    }
+
+    .left-percentage,
+    .right-percentage,
+    .separator {
+        position: absolute;
+    }
+
+    .separator {
+        left: 50%;
+        width: 1px;
+        height: 16px;
+        top: -50%;
+        border-radius: 1px;
+        background: $light-gray;
+    }
+
+    .left-percentage {
+        background: $light-blue;
+        border-top-left-radius: $border-radius;
+        border-bottom-left-radius: $border-radius;
+        right: 50%;
+    }
+
+    .right-percentage {
+        background: $dark-red;
+        border-top-right-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+        left: 50%;
+    }
+}
