@@ -11,7 +11,6 @@ const SearchComponent = ({ hayStack, placeholder }) => (
       id="highlights-demo"
       options={hayStack}
       getOptionLabel={(option) => option.feature}
-      disablePortal={true}
       renderInput={(params) => (
         <div ref={params.InputProps.ref}>
           <input type="text" {...params.inputProps} placeholder={placeholder} />
