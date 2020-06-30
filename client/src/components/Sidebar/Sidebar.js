@@ -12,20 +12,21 @@ import {
   ModelIcon,
   MetLogo,
 } from '../../assets/icons/icons';
+
 import './Sidebar.scss';
 
 class Sidebar extends Component {
   render() {
     const { toggleSidebarState, isSidebarCollapsed, setActivePage } = this.props;
     const sidebarClassNames = isSidebarCollapsed ? 'sidebar' : 'sidebar expanded';
-
     return (
       <div className={sidebarClassNames}>
         <div className="logo">
           <MetLogo state={!isSidebarCollapsed && `full`} />
         </div>
+
         <ul className="menu">
-          <li onClick={() => toggleSidebarState(!isSidebarCollapsed)}>
+          <li onClick={() => toggleSidebarState(!isSidebarCollapsed)} className="sidebar-trigger">
             <IndicatorIcon dir={!isSidebarCollapsed && 'left'} />
           </li>
           <li>
@@ -52,11 +53,28 @@ class Sidebar extends Component {
               <span>Similar Children</span>
             </NavLink>
           </li>
-          <li>
-            <NavLink exact to="/model" onClick={() => setActivePage('Model')}>
+          <li className="model">
+            <button type="button" className="clean about-model" onClick={() => toggleSidebarState(!isSidebarCollapsed)}>
               <ModelIcon />
               <span>About Model</span>
-            </NavLink>
+              <IndicatorIcon dir="right" />
+            </button>
+            <ul>
+              <li>
+                <NavLink
+                  exact
+                  to="/global-feature-importance"
+                  onClick={() => setActivePage('Global Feature Importance')}
+                >
+                  <span>Global Feature Importance</span>
+                </NavLink>
+              </li>
+              <li>
+                <NavLink exact to="/feature-distribution" onClick={() => setActivePage('Feature Distribution')}>
+                  <span>Feature Distribution</span>
+                </NavLink>
+              </li>
+            </ul>
           </li>
         </ul>
       </div>

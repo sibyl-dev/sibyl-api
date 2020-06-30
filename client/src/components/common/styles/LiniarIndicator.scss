@@ -10,12 +10,14 @@
 
     &,
     .left-percentage,
-    .right-percentage {
+    .right-percentage,
+    .progress {
         height: 8px;
     }
 
     .left-percentage,
     .right-percentage,
+    .progress,
     .separator {
         position: absolute;
     }
@@ -41,5 +43,11 @@
         border-top-right-radius: $border-radius;
         border-bottom-right-radius: $border-radius;
         left: 50%;
+    }
+
+    .progress {
+        left: 0;
+        background: $dark-mauve;
+        border-radius: $border-radius;
     }
 }
