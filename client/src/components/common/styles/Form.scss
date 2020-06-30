@@ -22,6 +22,11 @@
     .sibyl-select__indicator-separator {
         display: none;
     }
+
+    .sibyl-select__menu {
+        z-index: 8;
+    }
+
     .sibyl-select__menu-list {
         .sibyl-select__option--is-focused,
         .sibyl-select__option--is-selected {
@@ -34,9 +39,34 @@
             padding-left: 15px;
         }
     }
+
+    .sibyl-select__clear-indicator {
+        cursor: pointer;
+    }
+
+    .sibyl-select__dropdown-indicator {
+        padding: 0 5px 0 0;
+    }
+
+    .sibyl-select__multi-value {
+        background: $mid-gray;
+        border-radius: 16px;
+        padding: 3px;
+        .sibyl-select__multi-value__remove {
+            padding: 0 2px 0 0;
+            color: #4f4f4f;
+            cursor: pointer;
+            &:hover {
+                background-color: transparent;
+            }
+        }
+    }
+    .sibyl-select__clear-indicator {
+        padding: 0;
+    }
     i {
         &.bullet {
-            margin-right: 10px;
+            margin-right: 2px;
         }
     }
 
