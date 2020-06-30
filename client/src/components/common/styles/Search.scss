@@ -6,6 +6,10 @@
         min-width: 100%;
         top: 43px;
 
+        li {
+            white-space: nowrap;
+        }
+
         .MuiAutocomplete-paper {
             margin: 0;
             font-weight: normal;
