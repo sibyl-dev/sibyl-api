@@ -1,0 +1,102 @@
+@import '../../../assets/sass/colors.scss';
+.score-wrapper {
+    background: $exp-bg;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    min-width: 460px;
+
+    h4 {
+        color: #4f4f4f;
+    }
+
+    header {
+        margin-bottom: 20px;
+
+        ul {
+            display: flex;
+            justify-content: space-around;
+        }
+        li {
+            flex: 1;
+            align-self: center;
+            &:last-child {
+                text-align: right;
+            }
+
+            span {
+                background: rgba($dark-mauve, 0.06);
+                padding: 12px;
+                border-radius: 8px;
+                display: inline-block;
+                strong {
+                    color: #333333;
+                }
+            }
+        }
+    }
+
+    .score-scale {
+        .progress {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba($light-gray, 0.2);
+            z-index: -1;
+            margin-top: -9px;
+        }
+        .score-values {
+            z-index: 1;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+
+            li {
+                cursor: pointer;
+                align-self: flex-end;
+                text-align: center;
+                transition: all 0.1s ease-in-out;
+                height: 40px;
+                position: relative;
+                width: 32px;
+                &:after {
+                    transition: all 0.1s ease-in-out;
+                    background: $dark-mauve;
+                    content: '';
+                    border-radius: 100%;
+                    width: 0px;
+                    height: 0px;
+                    position: absolute;
+                    bottom: 5px;
+                    right: 0;
+                    left: 0;
+                    margin: 0 auto;
+                }
+
+                &:hover,
+                &.active,
+                &.active-neighbor:hover {
+                    color: #4f4f4f;
+                    font-weight: bold;
+                    border-radius: 16px;
+                    background: rgba($dark-mauve, 0.1);
+                    transform: translatey(13px);
+                    height: 80px;
+                    padding: 6px;
+                    margin-bottom: 5px;
+                    font-size: 18px;
+                    &:after {
+                        width: 20px;
+                        height: 20px;
+                    }
+                }
+
+                &.active-neighbor {
+                    transition: all 0.1s ease-in-out;
+                    height: 50px;
+                }
+            }
+        }
+    }
+}
