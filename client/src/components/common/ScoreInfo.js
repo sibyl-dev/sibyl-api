@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './styles/ScoreInfo.scss';
+import GrayBoxWrapper from './GrayBoxWrapper';
 
 const values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
@@ -31,7 +32,7 @@ class SoreInfo extends Component {
           }
         };
         return (
-          <li className={getItemsClassNames()} onClick={() => this.setActiveScore(currentValue)}>
+          <li key={currentValue} className={getItemsClassNames()} onClick={() => this.setActiveScore(currentValue)}>
             {currentValue}
           </li>
         );
@@ -41,7 +42,7 @@ class SoreInfo extends Component {
     return (
       <div className="score">
         <div className="score-scale">
-          <ul className="score-values">{renderValues(15)}</ul>
+          <ul className="score-values">{renderValues()}</ul>
           <div className="progress" />
         </div>
       </div>
@@ -51,21 +52,23 @@ class SoreInfo extends Component {
   render() {
     const { activeScore } = this.state;
     return (
-      <div className="score-wrapper">
-        <header>
-          <ul>
-            <li>
-              <h4>Show info about children who scored</h4>
-            </li>
-            <li>
-              <span>
-                Score <strong>{activeScore}</strong>
-              </span>
-            </li>
-          </ul>
-        </header>
-        <div>{this.renderScoreScale()}</div>
-      </div>
+      <GrayBoxWrapper>
+        <div className="score-wrapper">
+          <header>
+            <ul>
+              <li>
+                <h4>Show info about children who scored</h4>
+              </li>
+              <li>
+                <span>
+                  Score <strong>{activeScore}</strong>
+                </span>
+              </li>
+            </ul>
+          </header>
+          <div>{this.renderScoreScale()}</div>
+        </div>
+      </GrayBoxWrapper>
     );
   }
 }

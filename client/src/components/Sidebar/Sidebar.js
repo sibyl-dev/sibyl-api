@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { toggleSidebarStateAction, setActivePageAction } from '../../model/actions/sidebar';
 import { getIsSidebarCollapsed } from '../../model/selectors/sidebar';

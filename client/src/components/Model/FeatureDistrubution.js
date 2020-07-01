@@ -4,6 +4,8 @@ import DashWrapper from '../common/DashWrapper';
 import Search from '../common/Search';
 import { ProgressIndicator } from '../common/LiniarIndicator';
 import ScoreInfo from '../common/ScoreInfo';
+import PieChart from '../common/PieChart';
+import './Model.scss';
 
 // mock search result
 const hayStack = [
@@ -16,12 +18,17 @@ const hayStack = [
 
 const FeatureDistribution = () => (
   <div className="component-wrapper">
-    <table>
-      <tr>
-        <td>
-          <ScoreInfo />
-        </td>
-      </tr>
+    <table className="distrib-info">
+      <tbody>
+        <tr>
+          <td>
+            <ScoreInfo />
+          </td>
+          <td>
+            <PieChart />
+          </td>
+        </tr>
+      </tbody>
     </table>
     <DashWrapper>
       <header className="dash-header">
