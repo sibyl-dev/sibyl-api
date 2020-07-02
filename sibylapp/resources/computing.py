@@ -3,6 +3,8 @@ import logging
 from flask_restful import Resource
 from flask import request
 from explanation_toolkit import local_feature_explanation as lfe
+from sibylapp.db import schema
+import pandas as pd
 
 LOGGER = logging.getLogger(__name__)
 
@@ -75,8 +77,10 @@ class ModifiedPrediction(Resource):
         model_id = request.args.get('model_id', None)
         changes = request.args.get('changes', None)
 
-        predict = load_predict(model_id)  # load the prediction function associated with model_id
-        entity_features = load_entity(entity_id) # load the entity's features
+        model = schema.Model.find_one(id=model_id)  # load the prediction function associated with model_id
+        entity = schema.Entity.find_one(id=entity_id) # load the entity's features
+        entity_features = pd.DataFrame.from_dict(entity.features)
+
 
         features = []
         new_values = []
@@ -85,7 +89,7 @@ class ModifiedPrediction(Resource):
             new_values.append(change[1])
 
         new_pred = modify_and_repredict(
-            predict, entity_features, features, new_values)
+            model.predict() , entity_features, features, new_values)
         return new_pred, 200
 
 

@@ -2,9 +2,11 @@ import logging
 
 from flask_restful import Resource
 from sibylapp.db import schema
+from flask import request
 
 LOGGER = logging.getLogger(__name__)
 
+# TODO: get_entity(): refer to MTV's get_signal()
 
 class Entity(Resource):
     def get(self, entity_id):
@@ -39,8 +41,18 @@ class Entity(Resource):
                 } 
             }
         """
+        #http://localhost:3000/api/v1/entities/balalala/
+        # TODO: format validation for entity_id (ensure string)
+        entity = schema.Entity.find_one(eid=entity_id)
+        if entity is None:
+            LOGGER.exception('Error getting entity. '
+                             'Entity %s does not exist.', entity_id)
+            return {
+                       'message': 'Entity {} does not exist'.format(entity_id)
+                   }, 400
 
-        return {'id': entity_id}, 200
+        # TODO: use get_entity
+        return entity, 200
 
 
 class Entities(Resource):
@@ -57,21 +69,10 @@ class Entities(Resource):
         @apiSuccess {Object} [entities.property] ID of the entity.
         @apiSuccess {String} [entities.property.name] Name of the entity.
         """
-        doc = {
-            'eid': 'xc1',
-            'features': [
-                {'name': 'n1', 'value': 1}
-            ],
-            'property': {
-                'name': 'harry',
-                'case_ids': ['1', '2', '6']
-            }
-        }
-        docs = schema.Entity.find({'eid': 'xc1'})
-        for doc in docs:
-            print(doc)
-
-        return {}
+        entities = schema.Entity.find()
+        # TODO: add error checking
+        # TODO: use [get_entity()], refer to MTV
+        return entities, 200
 
 
 class Outcome(Resource):
@@ -87,5 +88,16 @@ class Outcome(Resource):
 
         @apiSuccess {Object[]} History/Outcomes List of Outcome Objects. TODO
         """
+        #http://localhost:3000/api/v1/outcome/?entity_id=balalala&param2=balalalal&param3=baba
+        entity_id = request.args.get('entity_id', None)
+        entity = schema.Entity.find_one(id=entity_id)
+        if entity is None:
+            LOGGER.exception('Error getting entity. '
+                             'Entity %s does not exist.', entity_id)
+            return {
+                       'message': 'Entity {} does not exist'.format(entity_id)
+                   }, 400
 
-        pass
+        # TODO: convert to dictionary, convert events
+        outcomes = entity.outcomes
+        return outcomes, 200

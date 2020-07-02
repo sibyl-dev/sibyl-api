@@ -33,6 +33,8 @@ class Test(Resource):
 
         @apiParam {String} param2 Param2.
         """
+        #http://localhost:3000/api/v1/test/12321/
+        #body
         if request.json is not None:
             body = request.json
         else:

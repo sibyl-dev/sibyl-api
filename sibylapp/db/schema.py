@@ -15,21 +15,6 @@ from sibylapp.db.base import SibylAppDocument
 LOGGER = logging.getLogger(__name__)
 
 
-class Entity(SibylAppDocument):
-    """Entity object.
-
-    A **Entity** represents ...
-    """
-    eid = fields.StringField()
-
-    features = fields.ListField(fields.DictField()) # {feature:value}
-    property = fields.DictField() # {property:value}
-
-    outcomes = fields.ListField(fields.ReferenceField(Event))  # contains Event objects
-
-    unique_key_fields = ['eid']
-
-
 class Event(SibylAppDocument):
     """Event object.
 
@@ -40,6 +25,25 @@ class Event(SibylAppDocument):
     # TODO: choices from config
     type = fields.StringField(required=True)
     property = fields.DictField() # {property:value}
+
+
+class Entity(SibylAppDocument):
+    """Entity object.
+
+    A **Entity** represents ...
+    """
+
+    # TODO: add y value
+
+    eid = fields.StringField()
+    # TODO: default function to assign value to counter if eid not given
+
+    features = fields.ListField(fields.DictField()) # {feature:value}
+    property = fields.DictField() # {property:value}
+
+    outcomes = fields.ListField(fields.ReferenceField(Event))  # contains Event objects
+
+    unique_key_fields = ['eid']
 
 
 class Category(SibylAppDocument):
