@@ -7,7 +7,7 @@ import Sandbox from '../Sandbox/Sandbox';
 import NotFound from '../common/NotFound';
 import Model from '../Model/Model';
 import FeatureImportance from '../Model/FeatureImportance';
-import GlobalFeatures from '../Model/GlobalFeatures';
+import FeatureDistrubution from '../Model/FeatureDistrubution';
 
 const Dashboard = () => {
   return (
@@ -17,7 +17,7 @@ const Dashboard = () => {
         <Route path="/sandbox" exact component={Sandbox} />
         <Route path="/model" component={Model} />
         <Route path="/global-feature-importance" component={FeatureImportance} />
-        <Route path="/feature-distribution" component={GlobalFeatures} />
+        <Route path="/feature-distribution" component={FeatureDistrubution} />
         <Route path="/" exact component={Score} />
         <Route path="*" component={NotFound} />
       </Switch>
