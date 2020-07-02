@@ -9,4 +9,10 @@ const LiniarIndicator = ({ percentageLeft, percentaceRight }) => (
   </div>
 );
 
+export const ProgressIndicator = ({ progressWidth }) => (
+  <div className="percentage-indicator">
+    <div className="progress" style={{ width: progressWidth }} />
+  </div>
+);
+
 export default LiniarIndicator;

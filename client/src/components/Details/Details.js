@@ -3,7 +3,7 @@ import { TableFullIcon, TableSplitIcon, SortIcon } from '../../assets/icons/icon
 import DashWrapper from '../common/DashWrapper';
 import Select from 'react-select';
 import Search from '../common/Search';
-import { CategorySelect, ValueSelect } from '../common/Form';
+import { CategorySelect } from '../common/Form';
 import LiniarIndicator from '../common/LiniarIndicator';
 
 import './Details.scss';
