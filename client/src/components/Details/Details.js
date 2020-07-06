@@ -4,9 +4,13 @@ import DashWrapper from '../common/DashWrapper';
 import Select from 'react-select';
 import Search from '../common/Search';
 import { CategorySelect } from '../common/Form';
-import LiniarIndicator from '../common/LiniarIndicator';
+import { BiProgressBar } from '../common/ProgressBars';
 
 import './Details.scss';
+import { connect } from 'react-redux';
+import { getEntityAction } from '../../model/actions/entities';
+import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entitites';
+import { current } from 'immer';
 
 // mock search result
 const hayStack = [
@@ -33,6 +37,10 @@ class Details extends Component {
       isViewSplitted: false,
     };
     this.changeViewMode = this.changeViewMode.bind(this);
+  }
+
+  componentDidMount() {
+    this.props.getFeaturesList(15);
   }
 
   changeViewMode() {
@@ -115,7 +123,23 @@ class Details extends Component {
     );
   }
 
+  // getting the contribution max value to set the min/max range (-range, range)
+  getContributionsMaxValue(stack) {
+    let maxRange = 0;
+    const values = Object.values(stack);
+    values.map((currentValue) => (maxRange = Math.max(maxRange, Math.abs(currentValue))));
+    return maxRange;
+  }
+
   renderUnifiedMode() {
+    const { isEntityLoading, entityData } = this.props;
+    const { featuresData, contributions, features } = entityData;
+
+    const getFeatureType = (feature) => {
+      const { name } = feature;
+      return parseInt(features[name]) > 0 ? 'True' : 'False';
+    };
+
     return (
       <div>
         {this.renderDashHeader()}
@@ -139,127 +163,26 @@ class Details extends Component {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="align-center">
-                  <i className="bullet red"></i>
-                </td>
-                <td>Child in focus had a prior court active child welfare case</td>
-                <td className="align-right">True</td>
-                <td className="align-center">
-                  <LiniarIndicator percentageLeft="0" percentaceRight="50" />
-                </td>
-              </tr>
-              <tr>
-                <td className="align-center">
-                  <i className="bullet orange"></i>
-                </td>
-                <td>Days the child in focus was in child welfare placement in the last 90 days</td>
-                <td className="align-right">True</td>
-                <td className="align-center">
-                  <LiniarIndicator percentageLeft="0" percentaceRight="40" />
-                </td>
-              </tr>
-              <tr>
-                <td className="align-center">
-                  <i className="bullet orange"></i>
-                </td>
-                <td>Days the child in focus was in child welfare placement in the last 90 days</td>
-                <td className="align-right">True</td>
-                <td className="align-center">
-                  <LiniarIndicator percentageLeft="0" percentaceRight="30" />
-                </td>
-              </tr>
-              <tr>
-                <td className="align-center">
-                  <i className="bullet orange"></i>
-                </td>
-                <td>Days the child in focus was in child welfare placement in the last 90 days</td>
-                <td className="align-right">True</td>
-                <td className="align-center">
-                  <LiniarIndicator percentageLeft="0" percentaceRight="20" />
-                </td>
-              </tr>
-              <tr>
-                <td className="align-center">
-                  <i className="bullet orange"></i>
-                </td>
-                <td>Days the child in focus was in child welfare placement in the last 90 days</td>
-                <td className="align-right">True</td>
-                <td className="align-center">
-                  <LiniarIndicator percentageLeft="0" percentaceRight="15" />
-                </td>
-              </tr>
-              <tr>
-                <td className="align-center">
-                  <i className="bullet orange"></i>
-                </td>
-                <td>Days the child in focus was in child welfare placement in the last 90 days</td>
-                <td className="align-right">True</td>
-                <td className="align-center">
-                  <LiniarIndicator percentageLeft="0" percentaceRight="10" />
-                </td>
-              </tr>
-
-              <tr>
-                <td className="align-center">
-                  <i className="bullet orange"></i>
-                </td>
-                <td>Feature #1</td>
-                <td className="align-right">True</td>
-                <td className="align-center">
-                  <LiniarIndicator percentageLeft="10" percentaceRight="0" />
-                </td>
-              </tr>
-              <tr>
-                <td className="align-center">
-                  <i className="bullet orange"></i>
-                </td>
-                <td>Feature #1</td>
-                <td className="align-right">True</td>
-                <td className="align-center">
-                  <LiniarIndicator percentageLeft="15" percentaceRight="0" />
-                </td>
-              </tr>
-              <tr>
-                <td className="align-center">
-                  <i className="bullet orange"></i>
-                </td>
-                <td>Feature #1</td>
-                <td className="align-right">True</td>
-                <td className="align-center">
-                  <LiniarIndicator percentageLeft="20" percentaceRight="0" />
-                </td>
-              </tr>
-              <tr>
-                <td className="align-center">
-                  <i className="bullet orange"></i>
-                </td>
-                <td>Feature #1</td>
-                <td className="align-right">True</td>
-                <td className="align-center">
-                  <LiniarIndicator percentageLeft="30" percentaceRight="0" />
-                </td>
-              </tr>
-              <tr>
-                <td className="align-center">
-                  <i className="bullet orange"></i>
-                </td>
-                <td>Feature #1</td>
-                <td className="align-right">True</td>
-                <td className="align-center">
-                  <LiniarIndicator percentageLeft="40" percentaceRight="0" />
-                </td>
-              </tr>
-              <tr>
-                <td className="align-center">
-                  <i className="bullet orange"></i>
-                </td>
-                <td>Feature #1</td>
-                <td className="align-right">True</td>
-                <td className="align-center">
-                  <LiniarIndicator percentageLeft="50" percentaceRight="0" />
-                </td>
-              </tr>
+              {!isEntityLoading &&
+                featuresData.map((currentFeature, featureIndex) => (
+                  <tr key={featureIndex}>
+                    <td className="align-center">
+                      <i className="bullet red"></i>
+                    </td>
+                    <td>{currentFeature.description}</td>
+                    <td className="align-right">
+                      {currentFeature.type === 'Boolean' ? getFeatureType(currentFeature) : ''}
+                    </td>
+                    <td className="align-center" width="145">
+                      <BiProgressBar
+                        percentage={contributions[currentFeature.name]}
+                        width="110"
+                        height="8"
+                        maxRange={this.getContributionsMaxValue(contributions)}
+                      />
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -268,6 +191,13 @@ class Details extends Component {
   }
 
   renderSplitMode() {
+    const { isEntityLoading, entityData } = this.props;
+    const { featuresData, contributions, features } = entityData;
+
+    const getFeatureType = (feature) => {
+      const { name } = feature;
+      return parseInt(features[name]) > 0 ? 'True' : 'False';
+    };
     return (
       <div className="split-wrapper">
         <div className="split-side">
@@ -296,66 +226,26 @@ class Details extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td className="align-center ">
-                      <i className="bullet red"></i>
-                    </td>
-                    <td>Child in focus had a prior court active child welfare case</td>
-                    <td className="align-right">True</td>
-                    <td className="align-center">
-                      <LiniarIndicator percentageLeft="0" percentaceRight="50" />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="align-center">
-                      <i className="bullet orange"></i>
-                    </td>
-                    <td>Days the child in focus was in child welfare placement in the last 90 days</td>
-                    <td className="align-right">True</td>
-                    <td className="align-center">
-                      <LiniarIndicator percentageLeft="0" percentaceRight="40" />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="align-center">
-                      <i className="bullet orange"></i>
-                    </td>
-                    <td>Days the child in focus was in child welfare placement in the last 90 days</td>
-                    <td className="align-right">True</td>
-                    <td className="align-center">
-                      <LiniarIndicator percentageLeft="0" percentaceRight="30" />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="align-center">
-                      <i className="bullet orange"></i>
-                    </td>
-                    <td>Days the child in focus was in child welfare placement in the last 90 days</td>
-                    <td className="align-right">True</td>
-                    <td className="align-center">
-                      <LiniarIndicator percentageLeft="0" percentaceRight="20" />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="align-center">
-                      <i className="bullet orange"></i>
-                    </td>
-                    <td>Days the child in focus was in child welfare placement in the last 90 days</td>
-                    <td className="align-right">True</td>
-                    <td className="align-center">
-                      <LiniarIndicator percentageLeft="0" percentaceRight="15" />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="align-center">
-                      <i className="bullet orange"></i>
-                    </td>
-                    <td>Days the child in focus was in child welfare placement in the last 90 days</td>
-                    <td className="align-right">True</td>
-                    <td className="align-center">
-                      <LiniarIndicator percentageLeft="0" percentaceRight="10" />
-                    </td>
-                  </tr>
+                  {!isEntityLoading &&
+                    featuresData.map((currentFeature, featureIndex) => (
+                      <tr key={featureIndex}>
+                        <td className="align-center">
+                          <i className="bullet red"></i>
+                        </td>
+                        <td>{currentFeature.description}</td>
+                        <td className="align-right">
+                          {currentFeature.type === 'Boolean' ? getFeatureType(currentFeature) : ''}
+                        </td>
+                        <td className="align-center" width="145">
+                          <BiProgressBar
+                            percentage={contributions[currentFeature.name]}
+                            width="110"
+                            height="8"
+                            maxRange={this.getContributionsMaxValue(contributions)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -388,66 +278,26 @@ class Details extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td className="align-center">
-                      <i className="bullet orange"></i>
-                    </td>
-                    <td>Feature #1</td>
-                    <td className="align-right">True</td>
-                    <td className="align-center">
-                      <LiniarIndicator percentageLeft="10" percentaceRight="0" />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="align-center">
-                      <i className="bullet orange"></i>
-                    </td>
-                    <td>Feature #1</td>
-                    <td className="align-right">True</td>
-                    <td className="align-center">
-                      <LiniarIndicator percentageLeft="15" percentaceRight="0" />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="align-center">
-                      <i className="bullet orange"></i>
-                    </td>
-                    <td>Feature #1</td>
-                    <td className="align-right">True</td>
-                    <td className="align-center">
-                      <LiniarIndicator percentageLeft="20" percentaceRight="0" />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="align-center">
-                      <i className="bullet orange"></i>
-                    </td>
-                    <td>Feature #1</td>
-                    <td className="align-right">True</td>
-                    <td className="align-center">
-                      <LiniarIndicator percentageLeft="30" percentaceRight="0" />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="align-center">
-                      <i className="bullet orange"></i>
-                    </td>
-                    <td>Feature #1</td>
-                    <td className="align-right">True</td>
-                    <td className="align-center">
-                      <LiniarIndicator percentageLeft="40" percentaceRight="0" />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="align-center">
-                      <i className="bullet orange"></i>
-                    </td>
-                    <td>Feature #1</td>
-                    <td className="align-right">True</td>
-                    <td className="align-center">
-                      <LiniarIndicator percentageLeft="50" percentaceRight="0" />
-                    </td>
-                  </tr>
+                  {!isEntityLoading &&
+                    featuresData.map((currentFeature, featureIndex) => (
+                      <tr key={featureIndex}>
+                        <td className="align-center">
+                          <i className="bullet red"></i>
+                        </td>
+                        <td>{currentFeature.description}</td>
+                        <td className="align-right">
+                          {currentFeature.type === 'Boolean' ? getFeatureType(currentFeature) : ''}
+                        </td>
+                        <td className="align-center" width="145">
+                          <BiProgressBar
+                            percentage={contributions[currentFeature.name]}
+                            width="110"
+                            height="8"
+                            maxRange={this.getContributionsMaxValue(contributions)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -459,6 +309,7 @@ class Details extends Component {
 
   render() {
     const { isViewSplitted } = this.state;
+
     return (
       <div>
         {this.renderSubheader()}
@@ -472,4 +323,12 @@ class Details extends Component {
   }
 }
 
-export default Details;
+export default connect(
+  (state) => ({
+    isEntityLoading: getIsEntitiesLoading(state),
+    entityData: getCurrentEntityData(state),
+  }),
+  (dispatch) => ({
+    getFeaturesList: (entityID) => dispatch(getEntityAction(entityID)),
+  }),
+)(Details);
