@@ -13,7 +13,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       <Switch>
-        <Route path="/details" component={Details} />
+        <Route path="/entity/:id" component={Details} />
         <Route path="/sandbox" exact component={Sandbox} />
         <Route path="/model" component={Model} />
         <Route path="/global-feature-importance" component={FeatureImportance} />

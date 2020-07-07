@@ -36,7 +36,7 @@ class Sidebar extends Component {
             </NavLink>
           </li>
           <li>
-            <NavLink exact to="/details" activeClassName="active" onClick={() => setActivePage('Details')}>
+            <NavLink exact to="/entity/15" activeClassName="active" onClick={() => setActivePage('Details')}>
               <DetailsIcon />
               <span>Details</span>
             </NavLink>

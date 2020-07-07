@@ -1,11 +1,12 @@
 import React from 'react';
+import * as d3 from 'd3';
 import './styles/LiniarIndicator.scss';
 
-const LiniarIndicator = ({ percentageLeft, percentaceRight }) => (
+export const LiniarIndicator = ({ percentageLeft, percentageRight, percentage }) => (
   <div className="percentage-indicator">
     <div className="left-percentage" style={{ width: `${percentageLeft}%` }}></div>
     <div className="separator"></div>
-    <div className="right-percentage" style={{ width: `${percentaceRight}%` }}></div>
+    <div className="right-percentage" style={{ width: `${percentageRight}%` }}></div>
   </div>
 );
 
@@ -14,5 +15,3 @@ export const ProgressIndicator = ({ progressWidth }) => (
     <div className="progress" style={{ width: progressWidth }} />
   </div>
 );
-
-export default LiniarIndicator;
