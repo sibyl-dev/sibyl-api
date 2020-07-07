@@ -1,0 +1,26 @@
+@import './colors.scss';
+.dash-title {
+    padding-bottom: 20px;
+}
+.dash-wrapper {
+    width: 100%;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 7px 0 0 0;
+
+    header {
+        padding: 7px;
+    }
+
+    .info {
+        padding: 30px;
+        text-align: center;
+    }
+
+    .dash-header {
+        padding: 8px;
+        background: $dark-gray;
+        margin: 0 7px;
+        border-radius: 8px;
+    }
+}

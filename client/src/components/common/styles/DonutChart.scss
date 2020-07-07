@@ -1,0 +1,22 @@
+.donut-chart {
+    display: flex;
+
+    .chart {
+        flex: 1.5;
+    }
+
+    .legend {
+        flex: 2;
+        i {
+            width: 8px;
+            height: 8px;
+            display: inline-block;
+            margin-right: 8px;
+            border-radius: 100%;
+            vertical-align: middle;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+    }
+}
