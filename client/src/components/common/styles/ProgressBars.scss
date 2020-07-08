@@ -1,8 +1,48 @@
+@import '../../../assets/sass/colors.scss';
 .bidi-progress-bar {
     .bar-positive {
-        fill: #ff5146;
+        fill: $dark-red;
     }
     .bar-negative {
-        fill: #2d9cdb;
+        fill: $light-blue;
+    }
+}
+
+.percentage-progress-bar {
+    font-size: 14px;
+    min-width: 280px;
+
+    li {
+        display: inline-block;
+        padding: 18px 5px 0 5px;
+        vertical-align: bottom;
+
+        &:first-child {
+            padding-left: 0;
+        }
+
+        &:last-child {
+            padding-right: 0;
+        }
+
+        &.progress-info {
+            width: 200px;
+            align-items: baseline;
+            vertical-align: top;
+            padding-top: 0;
+
+            span {
+                width: 48%;
+                margin-bottom: 8px;
+                text-align: center;
+                display: inline-block;
+            }
+        }
+    }
+
+    .percentage-indicator {
+        .progress {
+            border-radius: 0;
+        }
     }
 }

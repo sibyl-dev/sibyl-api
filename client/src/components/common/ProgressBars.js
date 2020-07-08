@@ -48,3 +48,25 @@ export const BiProgressBar = (props) => {
     </svg>
   );
 };
+
+export const PercentageProgressBar = ({ negativeProgress }) => {
+  const positiveProgress = 100 - negativeProgress;
+  return (
+    <div className="percentage-progress-bar">
+      <ul>
+        <li>False</li>
+        <li className="progress-info">
+          <div>
+            <span>{negativeProgress}%</span> <span>{positiveProgress}%</span>
+          </div>
+          <div>
+            <div className="percentage-indicator">
+              <div className="progress" style={{ width: `${negativeProgress}%` }} />
+            </div>
+          </div>
+        </li>
+        <li>True</li>
+      </ul>
+    </div>
+  );
+};
