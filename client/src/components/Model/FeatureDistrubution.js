@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { Component } from 'react';
 import DashWrapper from '../common/DashWrapper';
 
 import Search from '../common/Search';
-import { ProgressIndicator } from '../common/LiniarIndicator';
 import ScoreInfo from '../common/ScoreInfo';
 import PieChart from '../common/PieChart';
+import { connect } from 'react-redux';
+import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entitites';
+import { getEntityAction } from '../../model/actions/entities';
+import { PercentageProgressBar } from '../common/ProgressBars';
+import DayGraph from '../common/DayGraph';
 import './Model.scss';
 
 // mock search result
@@ -16,21 +20,13 @@ const hayStack = [
   { feature: 'Feature #3' },
 ];
 
-const FeatureDistribution = () => (
-  <div className="component-wrapper">
-    <table className="distrib-info">
-      <tbody>
-        <tr>
-          <td>
-            <ScoreInfo />
-          </td>
-          <td>
-            <PieChart />
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <DashWrapper>
+class FeatureDistribution extends Component {
+  componentDidMount() {
+    this.props.getFeaturesList(15);
+  }
+
+  renderDashHeader() {
+    return (
       <header className="dash-header">
         <ul className="dash-controls">
           <li>
@@ -39,56 +35,64 @@ const FeatureDistribution = () => (
           <li>&nbsp;</li>
         </ul>
       </header>
-      <table className="dash-table">
-        <thead>
-          <tr>
-            <th>Feature</th>
-            <th width="20%" className="align-right">
-              Importance
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Child in focus had a prior court active child welfare case</td>
-            <td className="align-right">
-              <ProgressIndicator progressWidth="90%" />
-            </td>
-          </tr>
-          <tr>
-            <td>Days the child in focus was in child welfare placement in the last 90 days</td>
-            <td className="align-right">
-              <ProgressIndicator progressWidth="85%" />
-            </td>
-          </tr>
-          <tr>
-            <td>Feature #1</td>
-            <td className="align-right">
-              <ProgressIndicator progressWidth="70%" />
-            </td>
-          </tr>
-          <tr>
-            <td>Feature #2</td>
-            <td className="align-right">
-              <ProgressIndicator progressWidth="65%" />
-            </td>
-          </tr>
-          <tr>
-            <td>Feature #3</td>
-            <td className="align-right">
-              <ProgressIndicator progressWidth="50%" />
-            </td>
-          </tr>
-          <tr>
-            <td>Feature #4</td>
-            <td className="align-right">
-              <ProgressIndicator progressWidth="45%" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </DashWrapper>
-  </div>
-);
+    );
+  }
 
-export default FeatureDistribution;
+  render() {
+    const { entityData, isEntityLoading } = this.props;
+    const { featuresData } = entityData;
+    return (
+      <div className="component-wrapper">
+        <table className="distrib-info">
+          <tbody>
+            <tr>
+              <td>
+                <ScoreInfo />
+              </td>
+              <td>
+                <PieChart />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <DashWrapper>
+          {this.renderDashHeader()}
+          <div className="sticky-wrapper scroll-style" style={{ maxHeight: '600px' }}>
+            <table className="dash-table sticky-header">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th width="25%" className="align-right">
+                    Distribution of Values
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {!isEntityLoading &&
+                  featuresData.map((currentFeature, featureIndex) => (
+                    <tr key={featureIndex}>
+                      <td>{currentFeature.description}</td>
+                      <td className="align-right">
+                        <DayGraph data={[24, 40]} maxData={42} graphIndex={featureIndex} />
+                        <PercentageProgressBar negativeProgress="20" />
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </DashWrapper>
+      </div>
+    );
+  }
+}
+
+export default connect(
+  (state) => ({
+    isEntityLoading: getIsEntitiesLoading(state),
+    entityData: getCurrentEntityData(state),
+  }),
+  (dispatch) => ({
+    getFeaturesList: (entityID) => dispatch(getEntityAction(entityID)),
+  }),
+)(FeatureDistribution);
