@@ -30,7 +30,7 @@ const mockValues = [
   { value: 'Value 5', label: 'Value 5', isFixed: true },
 ];
 
-class Details extends Component {
+export class Details extends Component {
   constructor(props) {
     super(props);
     this.state = {
