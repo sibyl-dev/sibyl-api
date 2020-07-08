@@ -4,11 +4,12 @@ import DashWrapper from '../common/DashWrapper';
 import Search from '../common/Search';
 import ScoreInfo from '../common/ScoreInfo';
 import PieChart from '../common/PieChart';
-import './Model.scss';
 import { connect } from 'react-redux';
 import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entitites';
 import { getEntityAction } from '../../model/actions/entities';
 import { PercentageProgressBar } from '../common/ProgressBars';
+import DayGraph from '../common/DayGraph';
+import './Model.scss';
 
 // mock search result
 const hayStack = [
@@ -72,6 +73,7 @@ class FeatureDistribution extends Component {
                     <tr key={featureIndex}>
                       <td>{currentFeature.description}</td>
                       <td className="align-right">
+                        <DayGraph data={[24, 40]} maxData={42} graphIndex={featureIndex} />
                         <PercentageProgressBar negativeProgress="20" />
                       </td>
                     </tr>
