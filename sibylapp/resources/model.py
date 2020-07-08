@@ -4,11 +4,24 @@ from flask_restful import Resource
 from flask import request
 from sibylapp.db import schema
 
-from explanation_toolkit import global_explanation
-
+import pickle
 import pandas as pd
 
+from sibylapp.db.model_utils import ModelWrapper
+
+
 LOGGER = logging.getLogger(__name__)
+
+
+def get_model(model_doc, basic=True):
+    model = {
+        'id': str(model_doc.id),
+        'name': model_doc.name
+    }
+    if not basic:
+        model['description'] = model_doc.description
+        model['performance'] = model_doc.performance
+    return model
 
 
 class Model(Resource):
@@ -29,13 +42,13 @@ class Model(Resource):
         """
         model = schema.Model.find_one(id=model_id)
         if model is None:
-            LOGGER.exception('Error getting entity. '
-                             'Entity %s does not exist.', model_id)
+            LOGGER.exception('Error getting model. '
+                             'Model %s does not exist.', model_id)
             return {
-                       'message': 'Entity {} does not exist'.format(model_id)
+                       'message': 'Model {} does not exist'.format(model_id)
                    }, 400
 
-        return model, 200
+        return get_model(model, basic=False), 200
 
 
 class Models(Resource):
@@ -51,9 +64,14 @@ class Models(Resource):
         @apiSuccess {String} models.id ID of the model.
         @apiSuccess {String} models.name Name of the model.
         """
-        models = schema.Model.find()
-
-        return models, 200
+        documents = schema.Model.find()
+        try:
+            model = [get_model(document, basic=True) for document in documents]
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
+        else:
+            return {'models': model}, 200
 
 
 class Importance(Resource):
@@ -70,17 +88,17 @@ class Importance(Resource):
         @apiSuccess {Object} importances Feature importance object.
         @apiSuccess {Number} importances.[key] Importance value of the feature [key].
         """
-        # TODO: calculate if not already present
         model_id = request.args.get('model_id', None)
-        model = schema.Entity.find_one(id=model_id)
+        model = schema.Model.find_one(id=model_id)
+        if model is None:
+            LOGGER.exception('Error getting model. '
+                             'Model %s does not exist.', model_id)
+            return {
+                       'message': 'Model {} does not exist'.format(model_id)
+                   }, 400
 
         importances = model.importances
-        if importances is None:
-            training_set = model.training_set
-            data = schema.Entity.find(training_set.entity_ids)
-            y = ...
-            importances = global_explanation.get_global_importance(model.model, data, y)
-        return importances, 200
+        return {'importances': importances}
 
 
 class Prediction(Resource):
@@ -101,19 +119,17 @@ class Prediction(Resource):
         model_id = request.args.get('model_id', None)
         entity_id = request.args.get('entity_id', None)
 
-        model = schema.Entity.find_one(id=model_id)
+        entity = schema.Entity.find_one(eid=entity_id)
+        entity_features = pd.DataFrame(entity.features, index=[0])
 
-        if model.predictions is None:
-            model.predictions = {}
-
-        if entity_id not in model.predictions:
-            entity = schema.Entity.find_one(
-                id=entity_id)  # load the entity's features
-            entity_features = pd.DataFrame.from_dict(entity.features)
-            prediction = model.model.predict(entity_features)
-            model.predictions[entity_id] = prediction
-            model.save()
-
-        prediction = model.predictions[entity_id]
-
-        return prediction, 200
+        model = schema.Model.find_one(id=model_id)
+        if model is None:
+            LOGGER.exception('Error getting model. '
+                             'Model %s does not exist.', model_id)
+            return {
+                       'message': 'Model {} does not exist'.format(model_id)
+                   }, 400
+        model_bytes = model.model
+        model = pickle.loads(model_bytes)
+        prediction = model.predict(entity_features)[0]
+        return {"score": prediction}, 200

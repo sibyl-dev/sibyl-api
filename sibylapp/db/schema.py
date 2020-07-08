@@ -67,8 +67,6 @@ class TrainingSet(SibylAppDocument):
 
     A **Dataset** represents ...
     """
-    # TODO: should we enforce 1-to-1 mappings between datasets and models for
-    #  simplicity?
     entity_ids = fields.ListField(fields.ReferenceField(Entity))
     neighbors = fields.BinaryField()  # trained NN classifier
 
@@ -84,7 +82,6 @@ class Model(SibylAppDocument):
     description = fields.StringField()
     performance = fields.StringField()
     importances = fields.DictField()  # {feature_name:importance}
-    predictions = fields.DictField()  # {entity_id:prediction}
 
     explainer = fields.BinaryField()  # trained contribution explainer
     training_set = fields.ReferenceField(TrainingSet)

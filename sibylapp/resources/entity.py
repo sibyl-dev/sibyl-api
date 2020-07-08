@@ -6,7 +6,34 @@ from flask import request
 
 LOGGER = logging.getLogger(__name__)
 
-# TODO: get_entity(): refer to MTV's get_signal()
+
+def __valid_id(val):
+    pass
+    #if not val:
+        #raise ValidationError
+
+
+def get_outcomes(entity_doc):
+    outcomes = []
+    for event_doc in entity_doc.outcomes:
+        outcomes.append({
+            'datetime': event_doc.datetime,
+            'type': event_doc.type,
+            'property': event_doc.property
+        })
+    outcomes = {'outcomes': outcomes}
+    return outcomes
+
+
+def get_entity(entity_doc, features=True):
+    entity = {
+        'eid': entity_doc.eid,
+        'property': entity_doc.property,
+    }
+    if features:
+        entity['features'] = entity_doc.features
+    return entity
+
 
 class Entity(Resource):
     def get(self, entity_id):
@@ -43,7 +70,7 @@ class Entity(Resource):
         """
         #http://localhost:3000/api/v1/entities/balalala/
         # TODO: format validation for entity_id (ensure string)
-        entity = schema.Entity.find_one(eid=entity_id)
+        entity = schema.Entity.find_one(eid=str(entity_id))
         if entity is None:
             LOGGER.exception('Error getting entity. '
                              'Entity %s does not exist.', entity_id)
@@ -51,8 +78,7 @@ class Entity(Resource):
                        'message': 'Entity {} does not exist'.format(entity_id)
                    }, 400
 
-        # TODO: use get_entity
-        return entity, 200
+        return get_entity(entity, features=True), 200
 
 
 class Entities(Resource):
@@ -69,10 +95,16 @@ class Entities(Resource):
         @apiSuccess {Object} [entities.property] ID of the entity.
         @apiSuccess {String} [entities.property.name] Name of the entity.
         """
-        entities = schema.Entity.find()
-        # TODO: add error checking
-        # TODO: use [get_entity()], refer to MTV
-        return entities, 200
+        documents = schema.Entity.find()
+        try:
+            entities = \
+                [get_entity(document, features=False) for document in documents]
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
+        else:
+            print(entities)
+            return {'entities': entities}
 
 
 class Outcome(Resource):
@@ -88,9 +120,8 @@ class Outcome(Resource):
 
         @apiSuccess {Object[]} History/Outcomes List of Outcome Objects. TODO
         """
-        #http://localhost:3000/api/v1/outcome/?entity_id=balalala&param2=balalalal&param3=baba
         entity_id = request.args.get('entity_id', None)
-        entity = schema.Entity.find_one(id=entity_id)
+        entity = schema.Entity.find_one(eid=entity_id)
         if entity is None:
             LOGGER.exception('Error getting entity. '
                              'Entity %s does not exist.', entity_id)
@@ -98,6 +129,5 @@ class Outcome(Resource):
                        'message': 'Entity {} does not exist'.format(entity_id)
                    }, 400
 
-        # TODO: convert to dictionary, convert events
-        outcomes = entity.outcomes
+        outcomes = get_outcomes(entity)
         return outcomes, 200

@@ -7,6 +7,27 @@ from sibylapp.db import schema
 LOGGER = logging.getLogger(__name__)
 
 
+def get_feature(feature_doc):
+    feature = {
+        'name': feature_doc.name,
+        'description': feature_doc.description,
+        'type': feature_doc.type
+    }
+    if feature_doc.category is not None:
+        feature['category'] = feature_doc.category.name
+    else:
+        feature['category'] = None
+    return feature
+
+
+def get_category(category_doc):
+    category = {
+        'name': category_doc.name,
+        'color': category_doc.color
+    }
+    return category
+
+
 class Feature(Resource):
     def get(self, feature_name):
         """
@@ -23,8 +44,13 @@ class Feature(Resource):
         @apiSuccess {String="numeric","binary","category"} type Value type.
         """
         feature = schema.Feature.find_one(name=feature_name)
+        if feature is None:
+            LOGGER.exception('Error getting feature. '
+                             'Feature %s does not exist.', feature_name)
+            return {'message':
+                    'Feature {} does not exist'.format(feature_name)}, 400
 
-        return feature, 200
+        return get_feature(feature), 200
 
 
 class Features(Resource):
@@ -44,9 +70,14 @@ class Features(Resource):
         @apiSuccess {String="numeric","binary","category"} features.type
             Value type of the feature.
         """
-        features = schema.Feature.find()
-
-        return features, 200
+        documents = schema.Feature.find()
+        try:
+            features = [get_feature(document) for document in documents]
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
+        else:
+            return {'features': features}, 200
 
 
 class Categories(Resource):
@@ -62,5 +93,11 @@ class Categories(Resource):
         @apiSuccess {String} categories.name Name of category.
         @apiSuccess {String} categories.color Color of category.
         """
-        categories = schema.Category.find()
-        return categories, 200
+        documents = schema.Category.find()
+        try:
+            categories = [get_category(document) for document in documents]
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
+        else:
+            return {'categories': categories}
