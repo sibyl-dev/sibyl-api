@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Cookies from 'universal-cookie';
 import { NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { toggleSidebarStateAction, setActivePageAction } from '../../model/actions/sidebar';
@@ -19,6 +20,9 @@ class Sidebar extends Component {
   render() {
     const { toggleSidebarState, isSidebarCollapsed, setActivePage } = this.props;
     const sidebarClassNames = isSidebarCollapsed ? 'sidebar' : 'sidebar expanded';
+    const cookies = new Cookies();
+    const entityID = cookies.get('entityID') || 0;
+
     return (
       <div className={sidebarClassNames}>
         <div className="logo">
@@ -36,7 +40,7 @@ class Sidebar extends Component {
             </NavLink>
           </li>
           <li>
-            <NavLink exact to="/entity/15" activeClassName="active" onClick={() => setActivePage('Details')}>
+            <NavLink exact to={`/entity/${entityID}`} activeClassName="active" onClick={() => setActivePage('Details')}>
               <DetailsIcon />
               <span>Details</span>
             </NavLink>
@@ -47,12 +51,14 @@ class Sidebar extends Component {
               <span>Sandbox</span>
             </NavLink>
           </li>
+          {/*
+          Temporarily 'disabled'
           <li>
             <NavLink exact to="/similar-children" onClick={() => setActivePage('Similar Children')}>
               <SimilarChildrenIcon />
               <span>Similar Children</span>
             </NavLink>
-          </li>
+          </li> */}
           <li className="model">
             <button type="button" className="clean about-model" onClick={() => toggleSidebarState(!isSidebarCollapsed)}>
               <ModelIcon />

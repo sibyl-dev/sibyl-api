@@ -70,3 +70,9 @@ export const PercentageProgressBar = ({ negativeProgress }) => {
     </div>
   );
 };
+
+export const ProgressIndicator = ({ progressWidth }) => (
+  <div className="percentage-indicator">
+    <div className="progress" style={{ width: `${progressWidth}%` }} />
+  </div>
+);

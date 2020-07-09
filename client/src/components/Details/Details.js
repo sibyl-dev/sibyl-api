@@ -5,12 +5,11 @@ import Select from 'react-select';
 import Search from '../common/Search';
 import { CategorySelect } from '../common/Form';
 import { BiProgressBar } from '../common/ProgressBars';
-
-import './Details.scss';
 import { connect } from 'react-redux';
 import { getEntityAction } from '../../model/actions/entities';
 import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entitites';
-import { current } from 'immer';
+
+import './Details.scss';
 
 // mock search result
 const hayStack = [
@@ -37,10 +36,6 @@ export class Details extends Component {
       isViewSplitted: false,
     };
     this.changeViewMode = this.changeViewMode.bind(this);
-  }
-
-  componentDidMount() {
-    this.props.getFeaturesList(15);
   }
 
   changeViewMode() {
@@ -143,7 +138,7 @@ export class Details extends Component {
     return (
       <div>
         {this.renderDashHeader()}
-        <div className="sticky-wrapper scroll-style" style={{ maxHeight: '600px' }}>
+        <div className="sticky-wrapper scroll-style">
           <table className="dash-table sticky-header">
             <thead>
               <tr>
@@ -198,13 +193,14 @@ export class Details extends Component {
       const { name } = feature;
       return parseInt(features[name]) > 0 ? 'True' : 'False';
     };
+
     return (
       <div className="split-wrapper">
         <div className="split-side">
           <h4>Risk Factors</h4>
           <div className="split-container">
             {this.renderDashHeader()}
-            <div className="sticky-wrapper scroll-style" style={{ maxHeight: '600px' }}>
+            <div className="sticky-wrapper scroll-style">
               <table className="dash-table sticky-header">
                 <thead>
                   <tr>
@@ -256,7 +252,7 @@ export class Details extends Component {
           <h4>Protective Factors</h4>
           <div className="split-container">
             {this.renderDashHeader()}
-            <div className="sticky-wrapper scroll-style" style={{ maxHeight: '600px' }}>
+            <div className="sticky-wrapper scroll-style">
               <table className="dash-table sticky-header">
                 <thead>
                   <tr>
@@ -323,12 +319,7 @@ export class Details extends Component {
   }
 }
 
-export default connect(
-  (state) => ({
-    isEntityLoading: getIsEntitiesLoading(state),
-    entityData: getCurrentEntityData(state),
-  }),
-  (dispatch) => ({
-    getFeaturesList: (entityID) => dispatch(getEntityAction(entityID)),
-  }),
-)(Details);
+export default connect((state) => ({
+  isEntityLoading: getIsEntitiesLoading(state),
+  entityData: getCurrentEntityData(state),
+}))(Details);
