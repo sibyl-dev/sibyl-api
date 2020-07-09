@@ -25,4 +25,7 @@ def add_routes(app):
     api.add_resource(ctrl.model.Importance, API_VERSION + 'importance/')
     api.add_resource(ctrl.model.Prediction, API_VERSION + 'prediction/')
 
-    api.add_resource(ctrl.computing.FeatureContributions, API_VERSION + 'computing/contributions/')
+    api.add_resource(ctrl.computing.FeatureContributions, API_VERSION + 'contributions/')
+    api.add_resource(ctrl.computing.FeatureDistributions, API_VERSION + 'feature_distributions/')
+    api.add_resource(ctrl.computing.SingleChangePredictions, API_VERSION + 'single_change_predictions/')
+    api.add_resource(ctrl.computing.ModifiedPrediction, API_VERSION + 'modified_prediction/')

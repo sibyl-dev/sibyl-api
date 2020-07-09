@@ -8,11 +8,23 @@ import logging
 from datetime import datetime
 
 from mongoengine import CASCADE, fields
+from mongoengine import ValidationError
 from pip._internal.operations import freeze
 
 from sibylapp.db.base import SibylAppDocument
+import pandas as pd
 
 LOGGER = logging.getLogger(__name__)
+
+
+def _valid_id(val):
+    if val is not None and not isinstance(val, str):
+        raise ValidationError("eid must be type string, given %s" % val)
+
+
+def _eid_exists(val):
+    if Entity.find_one(eid=val) is None:
+        raise ValidationError("eid provided (%s) does not exist" % val)
 
 
 class Event(SibylAppDocument):
@@ -20,13 +32,11 @@ class Event(SibylAppDocument):
 
     A **Event** represents ...
     """
-    eid = fields.StringField()
+    eid = fields.StringField(required=True, validation=_eid_exists)
     datetime = fields.DateTimeField(required=True)
     # TODO: choices from config
     type = fields.StringField(required=True)
     property = fields.DictField()  # {property:value}
-
-    # TODO: verify eid is in Entity collection
 
 
 class Entity(SibylAppDocument):
@@ -34,9 +44,9 @@ class Entity(SibylAppDocument):
 
     A **Entity** represents ...
     """
-    eid = fields.StringField()
+    eid = fields.StringField(validation=_valid_id)
 
-    features = fields.ListField(fields.DictField())  # {feature:value}
+    features = fields.DictField()  # {feature:value}
     property = fields.DictField()  # {property:value}
 
     outcomes = fields.ListField(fields.ReferenceField(Event))  # contains Event objects
@@ -57,7 +67,7 @@ class Feature(SibylAppDocument):
     name = fields.StringField(required=True)
     description = fields.StringField()
     category = fields.ReferenceField(Category)
-    type = fields.StringField(choices=['boolean', 'categorical', 'numeric'])
+    type = fields.StringField(choices=['binary', 'categorical', 'numeric'])
 
     unique_key_fields = ['name']
 
@@ -67,8 +77,13 @@ class TrainingSet(SibylAppDocument):
 
     A **Dataset** represents ...
     """
-    entity_ids = fields.ListField(fields.ReferenceField(Entity))
+    entities = fields.ListField(fields.ReferenceField(Entity))
     neighbors = fields.BinaryField()  # trained NN classifier
+
+    def to_dataframe(self):
+        features = [entity.features for entity in self.entities]
+        training_set_df = pd.DataFrame(features)
+        return training_set_df
 
 
 class Model(SibylAppDocument):

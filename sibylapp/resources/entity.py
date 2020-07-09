@@ -7,12 +7,6 @@ from flask import request
 LOGGER = logging.getLogger(__name__)
 
 
-def __valid_id(val):
-    pass
-    #if not val:
-        #raise ValidationError
-
-
 def get_outcomes(entity_doc):
     outcomes = []
     for event_doc in entity_doc.outcomes:
@@ -68,8 +62,6 @@ class Entity(Resource):
                 } 
             }
         """
-        #http://localhost:3000/api/v1/entities/balalala/
-        # TODO: format validation for entity_id (ensure string)
         entity = schema.Entity.find_one(eid=str(entity_id))
         if entity is None:
             LOGGER.exception('Error getting entity. '
@@ -128,6 +120,5 @@ class Outcome(Resource):
             return {
                        'message': 'Entity {} does not exist'.format(entity_id)
                    }, 400
-
         outcomes = get_outcomes(entity)
         return outcomes, 200

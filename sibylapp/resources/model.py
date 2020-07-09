@@ -122,14 +122,18 @@ class Prediction(Resource):
         entity = schema.Entity.find_one(eid=entity_id)
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        model = schema.Model.find_one(id=model_id)
-        if model is None:
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
             LOGGER.exception('Error getting model. '
                              'Model %s does not exist.', model_id)
             return {
                        'message': 'Model {} does not exist'.format(model_id)
                    }, 400
-        model_bytes = model.model
-        model = pickle.loads(model_bytes)
+        model_bytes = model_doc.model
+        try:
+            model = pickle.loads(model_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
         prediction = model.predict(entity_features)[0]
         return {"score": prediction}, 200

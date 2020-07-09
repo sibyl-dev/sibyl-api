@@ -3,8 +3,11 @@ import logging
 from flask_restful import Resource
 from flask import request
 from explanation_toolkit import local_feature_explanation as lfe
+from explanation_toolkit import global_explanation as ge
 from sibylapp.db import schema
 import pandas as pd
+
+import pickle
 
 LOGGER = logging.getLogger(__name__)
 
@@ -48,10 +51,56 @@ class SingleChangePredictions(Resource):
         @apiSuccess {String} changes.item1 Name of the feature to change.
         @apiSuccess {String} changes.item2 New prediction of the feature.
         """
-        entity_id = request.args.get('entity_id', None)
-        model_id = request.args.get('model_id', None)
-        changes = request.args.get('changes', None)
-        pass
+        attrs = ['entity_id', 'model_id', 'changes']
+        d = {}
+        body = request.json
+        for attr in attrs:
+            d[attr] = None
+            if body is not None:
+                d[attr] = body.get(attr)
+            else:
+                if attr in request.form:
+                    d[attr] = request.form[attr]
+        # validate data type
+        try:
+            d['entity_id'] = str(d['entity_id'])
+            d['model_id'] = str(d['model_id'])
+            for change in d['changes']:
+                change[0] = str(change[0])
+                change[1] = float(change[1])
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 400
+
+        entity_id = d["entity_id"]
+        model_id = d["model_id"]
+        changes = d["changes"]
+        entity = schema.Entity.find_one(eid=entity_id)
+        entity_features = pd.DataFrame(entity.features, index=[0])
+
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
+            LOGGER.exception('Error getting model. '
+                             'Model %s does not exist.', model_id)
+            return {
+                       'message': 'Model {} does not exist'.format(model_id)
+                   }, 400
+        model_bytes = model_doc.model
+        try:
+            model = pickle.loads(model_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
+
+        predictions = []
+        for change in changes:
+            feature = change[0]
+            value = change[1]
+            modified = entity_features.copy()
+            modified[feature] = value
+            prediction = model.predict(entity_features)[0]
+            predictions.append([feature, prediction])
+        return {"changes": predictions}
 
 
 class ModifiedPrediction(Resource):
@@ -73,31 +122,61 @@ class ModifiedPrediction(Resource):
         @apiSuccess {Number} prediction New prediction after making
             the requested changes.
         """
-        entity_id = request.args.get('entity_id', None)
-        model_id = request.args.get('model_id', None)
-        changes = request.args.get('changes', None)
+        attrs = ['entity_id', 'model_id', 'changes']
+        d = {}
+        body = request.json
+        for attr in attrs:
+            d[attr] = None
+            if body is not None:
+                d[attr] = body.get(attr)
+            else:
+                if attr in request.form:
+                    d[attr] = request.form[attr]
+        # validate data type
+        try:
+            d['entity_id'] = str(d['entity_id'])
+            d['model_id'] = str(d['model_id'])
+            for change in d['changes']:
+                change[0] = str(change[0])
+                change[1] = float(change[1])
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 400
 
-        model = schema.Model.find_one(id=model_id)  # load the prediction function associated with model_id
-        entity = schema.Entity.find_one(id=entity_id) # load the entity's features
-        entity_features = pd.DataFrame.from_dict(entity.features)
+        entity_id = d["entity_id"]
+        model_id = d["model_id"]
+        changes = d["changes"]
+        entity = schema.Entity.find_one(eid=entity_id)
+        entity_features = pd.DataFrame(entity.features, index=[0])
 
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
+            LOGGER.exception('Error getting model. '
+                             'Model %s does not exist.', model_id)
+            return {
+                       'message': 'Model {} does not exist'.format(model_id)
+                   }, 400
+        model_bytes = model_doc.model
+        try:
+            model = pickle.loads(model_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
 
-        features = []
-        new_values = []
+        modified = entity_features.copy()
         for change in changes:
-            features.append(change[0])
-            new_values.append(change[1])
-
-        new_pred = modify_and_repredict(
-            model.predict() , entity_features, features, new_values)
-        return new_pred, 200
+            feature = change[0]
+            value = change[1]
+            modified[feature] = value
+        prediction = model.predict(entity_features)[0]
+        return {"prediction": prediction}
 
 
 class FeatureDistributions(Resource):
     def post(self):
         """
-        @api {post} /modified_prediction/ Get feature distributions 
-        @apiName GetFeatureDistributions
+        @api {post} /feature_distributions/ Get feature distributions
+        @apiName PostFeatureDistributions
         @apiGroup Computing
         @apiVersion 1.0.0
         @apiDescription Get the distributions of all features
@@ -105,26 +184,73 @@ class FeatureDistributions(Resource):
         @apiParam {Number} prediction Prediction Prediction to look at distributions for.
         @apiParam {String} model_id ID of model to use for predictions.
 
-        @apiSuccess {Object[]} distributions Information about the distributions of each
+        @apiSuccess {Object} distributions Information about the distributions of each
             feature for each feature.
+        @apiSuccess {String} distributions.key Feature name
+        @apiSuccess {String="numeric","binary","category"} distributions.type Feature type
+        @apiSuccess {5-tuple} distributions.metrics [min, 1st quartile, median, 3rd quartile, max]
+        @apiSuccess {Number[]} distributions.values Unique values
+        @apiSuccess {Number[]} distributions.counts Count of each unique value
         """
-        prediction = request.args.get('prediction', None)
-        model_id = request.args.get('model_id', None)
+        attrs = ['prediction', 'model_id']
+        attrs_type = [float, str]
+        d = dict()
+        body = request.json
+        for attr in attrs:
+            d[attr] = None
+            if body is not None:
+                d[attr] = body.get(attr)
+            else:
+                if attr in request.form:
+                    d[attr] = request.form[attr]
 
-        dataset = load_dataset(model_id)
-        predict = load_predict(model_id)
-        features = load_features(model_id)
+        # validate data type
+        try:
+            for i, attr in enumerate(attrs):
+                d[attr] = attrs_type[i](d[attr])
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 400
+
+        prediction = d["prediction"]
+        model_id = d["model_id"]
+
+        # LOAD IN AND VALIDATE MODEL
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
+            LOGGER.exception('Error getting model. '
+                             'Model %s does not exist.', model_id)
+            return {'message': 'Model {} does not exist'.format(model_id)}, 400
+        model_bytes = model_doc.model
+        try:
+            model = pickle.loads(model_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
+
+        dataset_doc = model_doc.training_set
+        if dataset_doc is None:
+            LOGGER.exception('Error getting dataset. '
+                             'Model %s does not have a dataset.', model_id)
+            return {'message': 'Model {} does have a dataset'.format(model_id)}, 400
+
+        dataset = dataset_doc.to_dataframe()
+
+        feature_docs = schema.Feature.find()
+        features = [{"name":feature_doc.name, "type":feature_doc.type}
+                    for feature_doc in feature_docs]
+        features = pd.DataFrame(features)
 
         boolean_features = features[
-            features['Variable Type'] == 'Boolean'].index
+            features['type'] == 'binary']["name"]
         categorical_dataset = dataset[boolean_features]
 
         numeric_features = features[
-            features['Variable Type'] == 'Numeric'].index
+            features['type'] == 'numeric']["name"]
         numeric_dataset = dataset[numeric_features]
 
         distributions = {}
-        rows = ge.get_rows_by_output(prediction, predict, dataset,
+        rows = ge.get_rows_by_output(prediction, model.predict, dataset,
                                      row_labels=None)
 
         cat_summary = ge.summary_categorical(categorical_dataset.iloc[rows])
@@ -138,30 +264,91 @@ class FeatureDistributions(Resource):
             distributions[name] = {"type": "numeric",
                                    "metrics": num_summary[i]}
 
-        return distributions
+        return {"distributions": distributions}
 
 
 class FeatureContributions(Resource):
     def post(self):
         """
-        @api {get} /computing/contributions/ Get feature contributions 
+        @api {post} /contributions/ Get feature contributions
         @apiName GetFeatureContributions
         @apiGroup Computing
         @apiVersion 1.0.0
         @apiDescription  get the contributions of all features
 
         @apiParam {String} entity_id ID of the entity to compute.
-        @apiParam {String} model ID of the model to compute.
+        @apiParam {String} model_id ID of the model to compute.
 
         @apiSuccess {Object} contributions Feature contribution object (key-value pair).
         @apiSuccess {Number} contributions.[key] Contribution value of the feature [key].
         """
-        entity_id = request.args.get('entity_id', None)
-        model_id = request.args.get('model_id', None)
 
-        entity_features = load_entity(entity_id)
-        model = load_model(model_id)
-        explainer = load_explainer(model_id)
+        # LOAD IN AND CHECK ATTRIBUTES:
+        attrs = ['entity_id', 'model_id']
+        attrs_type = [str, str]
+        d = dict()
+        body = request.json
+        for attr in attrs:
+            d[attr] = None
+            if body is not None:
+                d[attr] = body.get(attr)
+            else:
+                if attr in request.form:
+                    d[attr] = request.form[attr]
 
-        contributions = lfe.get_contributions(entity_features, explainer)
-        return contributions, 200
+        # validate data type
+        try:
+            for i, attr in enumerate(attrs):
+                d[attr] = attrs_type[i](d[attr])
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 400
+
+        entity_id = d["entity_id"]
+        model_id = d["model_id"]
+
+        # LOAD IN AND VALIDATE ENTITY
+        entity = schema.Entity.find_one(eid=str(entity_id))
+        if entity is None:
+            LOGGER.exception('Error getting entity. '
+                             'Entity %s does not exist.', entity_id)
+            return {
+                       'message': 'Entity {} does not exist'.format(entity_id)
+                   }, 400
+        entity_features = pd.DataFrame(entity.features, index=[0])
+        if entity_features is None:
+            LOGGER.exception('Entity %s has no features. ',
+                             entity_id)
+            return {
+                       'message': 'Entity {} does not have features.'
+                           .format(entity_id)
+                   }, 400
+
+        # LOAD IN AND VALIDATE MODEL
+        model = schema.Model.find_one(id=model_id)
+        if model is None:
+            LOGGER.exception('Error getting model. '
+                             'Model %s does not exist.', model_id)
+            return {'message': 'Model {} does not exist'.format(model_id)}, 400
+
+        explainer_bytes = model.explainer
+        if explainer_bytes is None:
+            LOGGER.exception('Model %s explainer has not been trained. ',
+                             model_id)
+            return {
+                       'message': 'Model {} does not have trained explainer'
+                           .format(model_id)
+                   }, 400
+
+        try:
+            explainer = pickle.loads(explainer_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
+        else:
+            contributions = lfe.get_contributions(entity_features, explainer)[0].tolist()
+            print(contributions)
+            keys = list(entity_features.keys())
+            contribution_dict = dict(zip(keys, contributions))
+            return {"contributions":contribution_dict}, 200
+
