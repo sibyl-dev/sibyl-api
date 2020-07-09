@@ -9,6 +9,7 @@ from datetime import datetime
 
 from mongoengine import CASCADE, fields
 from mongoengine import ValidationError
+from mongoengine import NULLIFY, CASCADE, PULL, DENY
 from pip._internal.operations import freeze
 
 from sibylapp.db.base import SibylAppDocument
@@ -49,7 +50,8 @@ class Entity(SibylAppDocument):
     features = fields.DictField()  # {feature:value}
     property = fields.DictField()  # {property:value}
 
-    outcomes = fields.ListField(fields.ReferenceField(Event))  # contains Event objects
+    outcomes = fields.ListField(
+        fields.ReferenceField(Event, reverse_delete_rule=PULL))
 
     unique_key_fields = ['eid']
 
@@ -66,7 +68,7 @@ class Feature(SibylAppDocument):
     """
     name = fields.StringField(required=True)
     description = fields.StringField()
-    category = fields.ReferenceField(Category)
+    category = fields.ReferenceField(Category, reverse_delete_rule=NULLIFY)
     type = fields.StringField(choices=['binary', 'categorical', 'numeric'])
 
     unique_key_fields = ['name']
@@ -77,7 +79,8 @@ class TrainingSet(SibylAppDocument):
 
     A **Dataset** represents ...
     """
-    entities = fields.ListField(fields.ReferenceField(Entity))
+    entities = fields.ListField(
+        fields.ReferenceField(Entity, reverse_delete_rule=PULL))
     neighbors = fields.BinaryField()  # trained NN classifier
 
     def to_dataframe(self):
@@ -99,4 +102,4 @@ class Model(SibylAppDocument):
     importances = fields.DictField()  # {feature_name:importance}
 
     explainer = fields.BinaryField()  # trained contribution explainer
-    training_set = fields.ReferenceField(TrainingSet)
+    training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
