@@ -6,7 +6,6 @@ import ScoreInfo from '../common/ScoreInfo';
 import PieChart from '../common/PieChart';
 import { connect } from 'react-redux';
 import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entitites';
-import { getEntityAction } from '../../model/actions/entities';
 import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';
 import './Model.scss';
@@ -21,10 +20,6 @@ const hayStack = [
 ];
 
 class FeatureDistribution extends Component {
-  componentDidMount() {
-    this.props.getFeaturesList(15);
-  }
-
   renderDashHeader() {
     return (
       <header className="dash-header">
@@ -57,7 +52,7 @@ class FeatureDistribution extends Component {
         </table>
         <DashWrapper>
           {this.renderDashHeader()}
-          <div className="sticky-wrapper scroll-style" style={{ maxHeight: '600px' }}>
+          <div className="sticky-wrapper scroll-style">
             <table className="dash-table sticky-header">
               <thead>
                 <tr>
@@ -87,12 +82,7 @@ class FeatureDistribution extends Component {
   }
 }
 
-export default connect(
-  (state) => ({
-    isEntityLoading: getIsEntitiesLoading(state),
-    entityData: getCurrentEntityData(state),
-  }),
-  (dispatch) => ({
-    getFeaturesList: (entityID) => dispatch(getEntityAction(entityID)),
-  }),
-)(FeatureDistribution);
+export default connect((state) => ({
+  isEntityLoading: getIsEntitiesLoading(state),
+  entityData: getCurrentEntityData(state),
+}))(FeatureDistribution);
