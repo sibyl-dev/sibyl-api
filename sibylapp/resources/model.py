@@ -7,8 +7,6 @@ from sibylapp.db import schema
 import pickle
 import pandas as pd
 
-from sibylapp.db.model_utils import ModelWrapper
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -104,22 +102,22 @@ class Importance(Resource):
 class Prediction(Resource):
     def get(self):
         """
-        @api {get} /prediction/ Get prediction score of an entity
+        @api {get} /prediction/ Get prediction of an entity
         @apiName GetPrediction
         @apiGroup Model
         @apiVersion 1.0.0
-        @apiDescription Get prediction score of a specified entity.
+        @apiDescription Get prediction of a specified entity.
 
-        @apiParam {String} model_id ID of the model to get prediction scores.
-        @apiParam {String} entity_id ID of the entity to get prediction scores.
+        @apiParam {String} model_id ID of the model to get prediction.
+        @apiParam {String} eid ID of the entity to get prediction.
 
-        @apiSuccess {Number} score Prediction score of the entity by the
+        @apiSuccess {Number} output Prediction of the entity by the
             specified model.
         """
         model_id = request.args.get('model_id', None)
-        entity_id = request.args.get('entity_id', None)
+        eid = request.args.get('eid', None)
 
-        entity = schema.Entity.find_one(eid=entity_id)
+        entity = schema.Entity.find_one(eid=eid)
         entity_features = pd.DataFrame(entity.features, index=[0])
 
         model_doc = schema.Model.find_one(id=model_id)
@@ -136,4 +134,4 @@ class Prediction(Resource):
             LOGGER.exception(e)
             return {'message': str(e)}, 500
         prediction = model.predict(entity_features)[0]
-        return {"score": prediction}, 200
+        return {"output": prediction}, 200

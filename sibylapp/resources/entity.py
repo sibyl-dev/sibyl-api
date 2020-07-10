@@ -29,16 +29,24 @@ def get_entity(entity_doc, features=True):
     return entity
 
 
+def get_case(case_doc):
+    case = {
+        'id': case_doc.case_id,
+        'property': case_doc.property
+    }
+    return case
+
+
 class Entity(Resource):
-    def get(self, entity_id):
+    def get(self, eid):
         """
-        @api {get} /entities/:entity_id/ Get an entity by ID
+        @api {get} /entities/:eid/ Get an entity by ID
         @apiName GetEntity
         @apiGroup Entity
         @apiVersion 1.0.0
         @apiDescription Get the detailed information of an entity.
 
-        @apiSuccess {String} id ID of the entity.
+        @apiSuccess {String} eid ID of the entity.
         @apiSuccess {Object[]} features List of features.
         @apiSuccess {String} features.name  Feature name.
         @apiSuccess {Number|String} features.value Feature value.
@@ -62,12 +70,12 @@ class Entity(Resource):
                 } 
             }
         """
-        entity = schema.Entity.find_one(eid=str(entity_id))
+        entity = schema.Entity.find_one(eid=str(eid))
         if entity is None:
             LOGGER.exception('Error getting entity. '
-                             'Entity %s does not exist.', entity_id)
+                             'Entity %s does not exist.', eid)
             return {
-                       'message': 'Entity {} does not exist'.format(entity_id)
+                       'message': 'Entity {} does not exist'.format(eid)
                    }, 400
 
         return get_entity(entity, features=True), 200
@@ -82,8 +90,8 @@ class Entities(Resource):
         @apiVersion 1.0.0
         @apiDescription Get meta information of all the entities.
 
-        @apiSuccess {Object[]} entities List of entities.
-        @apiSuccess {String} entities.id ID of the entity.
+        @apiSuccess {String} id Case id.
+        @apiSuccess {Object[]} entities.id ID of the entity.
         @apiSuccess {Object} [entities.property] ID of the entity.
         @apiSuccess {String} [entities.property.name] Name of the entity.
         """
@@ -108,17 +116,81 @@ class Outcome(Resource):
         @apiVersion 1.0.0
         @apiDescription Get the history/outcome of a entity.
 
-        @apiParam {String} [entity_id] Id of the entity.
+        @apiParam {String} [eid] Id of the entity.
 
         @apiSuccess {Object[]} History/Outcomes List of Outcome Objects. TODO
         """
-        entity_id = request.args.get('entity_id', None)
-        entity = schema.Entity.find_one(eid=entity_id)
+        eid = request.args.get('eid', None)
+        entity = schema.Entity.find_one(eid=eid)
         if entity is None:
             LOGGER.exception('Error getting entity. '
-                             'Entity %s does not exist.', entity_id)
+                             'Entity %s does not exist.', eid)
             return {
-                       'message': 'Entity {} does not exist'.format(entity_id)
+                       'message': 'Entity {} does not exist'.format(eid)
                    }, 400
         outcomes = get_outcomes(entity)
         return outcomes, 200
+
+
+class Case(Resource):
+    def get(self, case_id):
+        """
+        @api {get} /case/:case_id/ Get details of a case
+        @apiName GetCase
+        @apiGroup Case
+        @apiVersion 1.0.0
+        @apiDescription Get details of a specific case.
+
+        @apiParam {String} [case_id] Id of the case.
+
+        @apiSuccess {String} id ID of the case.
+        @apiSuccess {String} property properties of the case
+        @apiSuccess {String} [property.team] Team that handled the case.
+        """
+        case = schema.Case.find_one(case_id=case_id)
+        if case is None:
+            LOGGER.exception('Error getting feature. '
+                             'Feature %s does not exist.', case_id)
+            return {'message':
+                    'Feature {} does not exist'.format(case_id)}, 400
+
+        return get_case(case), 200
+
+
+class Cases(Resource):
+    def get(self):
+        """
+        @api {get} /cases/ Get a list of cases
+        @apiName GetCases
+        @apiGroup Case
+        @apiVersion 1.0.0
+        @apiDescription Get a list of cases.
+
+        @apiSuccess {String[]} cases List of Case ids
+        """
+        documents = schema.Case.find()
+        try:
+            case = [document.case_id for document in documents]
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
+        else:
+            return {'cases': case}, 200
+
+
+class EntitiesInCase(Resource):
+    def get(self, case_id):
+        """
+        @api {get} /entities_in_case/:case_id/ Get entities involved in a case
+        @apiName GetEntitiesInCase
+        @apiGroup Case
+        @apiVersion 1.0.0
+        @apiDescription Get entities involved in a case
+
+        @apiSuccess {String[]} eids EIDs of entities involved in the case.
+        """
+        entities = schema.Entity.find(property__case_id__contains=case_id)
+        if entities is None:
+            LOGGER.log('Case %s has no entities', case_id)
+            return []
+        return [document.eid for document in entities], 200

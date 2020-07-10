@@ -5,9 +5,8 @@ This module contains the classes that define the Orion Database Schema:
 """
 
 import logging
-from datetime import datetime
 
-from mongoengine import CASCADE, fields
+from mongoengine import fields
 from mongoengine import ValidationError
 from mongoengine import NULLIFY, CASCADE, PULL, DENY
 from pip._internal.operations import freeze
@@ -103,3 +102,12 @@ class Model(SibylAppDocument):
 
     explainer = fields.BinaryField()  # trained contribution explainer
     training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
+
+
+class Case(SibylAppDocument):
+    """Case object.
+
+    A **Case** represents ...
+    """
+    case_id = fields.StringField(required=True, validation=_valid_id)
+    property = fields.DictField()
