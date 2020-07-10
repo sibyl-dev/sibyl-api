@@ -1,4 +1,4 @@
-@import '../../assets/sass/colors.scss';
+@import "../../assets/sass/colors.scss";
 
 .sidebar {
     width: 64px;
@@ -91,7 +91,7 @@
 
                     &:before,
                     &:after {
-                        content: '';
+                        content: "";
                         position: absolute;
                         width: 90%;
                         left: 2%;

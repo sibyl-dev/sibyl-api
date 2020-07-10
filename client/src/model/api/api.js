@@ -1,4 +1,4 @@
-const baseUrl = 'http://localhost:5000';
+const baseUrl = 'http://localhost:4200';
 
 export const api = {
   get(url, dataType = 'json') {
