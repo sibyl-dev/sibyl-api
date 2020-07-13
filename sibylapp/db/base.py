@@ -94,7 +94,7 @@ class SibylAppMeta(TopLevelDocumentMetaclass):
         return super().__new__(mcs, name, bases, attrs)
 
 
-class SibylAppDocument(Document, metaclass=MTVMeta):
+class SibylAppDocument(Document, metaclass=SibylAppMeta):
     """Parent class for all the Document classes in Orion.
 
     This class defines a few defaults, such as the ``instert_time`` field
@@ -200,21 +200,6 @@ class SibylAppDocument(Document, metaclass=MTVMeta):
             document = cls.insert(**kwargs)
 
         return document
-
-
-class Status:
-    """Mixin that adds a status field and a method to check its live value."""
-
-    status = fields.StringField()
-
-    STATUS_PENDING = 'PENDING'
-    STATUS_RUNNING = 'RUNNING'
-    STATUS_SUCCESS = 'SUCCESS'
-    STATUS_ERRORED = 'ERRORED'
-
-    def get_status(self):
-        self.reload()
-        return self.status
 
 
 def key_has_dollar(d):
