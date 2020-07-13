@@ -223,25 +223,29 @@ export class Details extends Component {
                 </thead>
                 <tbody>
                   {!isEntityLoading &&
-                    featuresData.map((currentFeature, featureIndex) => (
-                      <tr key={featureIndex}>
-                        <td className="align-center">
-                          <i className="bullet red"></i>
-                        </td>
-                        <td>{currentFeature.description}</td>
-                        <td className="align-right">
-                          {currentFeature.type === 'Boolean' ? getFeatureType(currentFeature) : ''}
-                        </td>
-                        <td className="align-center" width="145">
-                          <BiProgressBar
-                            percentage={contributions[currentFeature.name]}
-                            width="110"
-                            height="8"
-                            maxRange={this.getContributionsMaxValue(contributions)}
-                          />
-                        </td>
-                      </tr>
-                    ))}
+                    featuresData.map(
+                      (currentFeature, featureIndex) =>
+                        contributions[currentFeature.name] > 0 && (
+                          <tr key={featureIndex}>
+                            <td className="align-center">
+                              <i className="bullet red"></i>
+                            </td>
+                            <td>{currentFeature.description}</td>
+                            <td className="align-right">
+                              {currentFeature.type === 'Boolean' ? getFeatureType(currentFeature) : ''}
+                            </td>
+                            <td className="align-center" width="145">
+                              <BiProgressBar
+                                percentage={contributions[currentFeature.name]}
+                                width="110"
+                                height="8"
+                                maxRange={this.getContributionsMaxValue(contributions)}
+                                isSingle
+                              />
+                            </td>
+                          </tr>
+                        ),
+                    )}
                 </tbody>
               </table>
             </div>
@@ -275,25 +279,29 @@ export class Details extends Component {
                 </thead>
                 <tbody>
                   {!isEntityLoading &&
-                    featuresData.map((currentFeature, featureIndex) => (
-                      <tr key={featureIndex}>
-                        <td className="align-center">
-                          <i className="bullet red"></i>
-                        </td>
-                        <td>{currentFeature.description}</td>
-                        <td className="align-right">
-                          {currentFeature.type === 'Boolean' ? getFeatureType(currentFeature) : ''}
-                        </td>
-                        <td className="align-center" width="145">
-                          <BiProgressBar
-                            percentage={contributions[currentFeature.name]}
-                            width="110"
-                            height="8"
-                            maxRange={this.getContributionsMaxValue(contributions)}
-                          />
-                        </td>
-                      </tr>
-                    ))}
+                    featuresData.map(
+                      (currentFeature, featureIndex) =>
+                        contributions[currentFeature.name] < 0 && (
+                          <tr key={featureIndex}>
+                            <td className="align-center">
+                              <i className="bullet red"></i>
+                            </td>
+                            <td>{currentFeature.description}</td>
+                            <td className="align-right">
+                              {currentFeature.type === 'Boolean' ? getFeatureType(currentFeature) : ''}
+                            </td>
+                            <td className="align-center" width="145">
+                              <BiProgressBar
+                                percentage={contributions[currentFeature.name]}
+                                width="110"
+                                height="8"
+                                maxRange={this.getContributionsMaxValue(contributions)}
+                                isSingle
+                              />
+                            </td>
+                          </tr>
+                        ),
+                    )}
                 </tbody>
               </table>
             </div>

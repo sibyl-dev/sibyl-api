@@ -33,7 +33,7 @@ describe('Testing Details component -> ', () => {
       ],
     },
   };
-  it('Should render without crashing (unified mode)', () => {
+  it('Should render without crashing', () => {
     const detailsComponent = renderWithStore(
       {},
       <TestWrapper>
