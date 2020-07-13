@@ -6,8 +6,8 @@ from sibylapp.resources import entity, feature, model, computing, test
 
 __all__ = (
     'entity',
-    'features',
-    'children',
+    'feature',
+    'model',
     'computing',
     'test'
 )
