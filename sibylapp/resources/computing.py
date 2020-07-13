@@ -6,10 +6,15 @@ from explanation_toolkit import local_feature_explanation as lfe
 from explanation_toolkit import global_explanation as ge
 from sibylapp.db import schema
 import pandas as pd
+import json
+import pathlib
+import os
 
 import pickle
 
 LOGGER = logging.getLogger(__name__)
+
+use_dummy_functions = True
 
 
 class Similarities(Resource):
@@ -210,7 +215,7 @@ class FeatureDistributions(Resource):
                                                     If type is "categorical" or "binary": [[values],[counts]]
         """
         attrs = ['prediction', 'model_id']
-        attrs_type = [float, str]
+        attrs_type = [int, str]
         d = dict()
         body = request.json
         for attr in attrs:
@@ -244,6 +249,13 @@ class FeatureDistributions(Resource):
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 500
+
+        if use_dummy_functions:
+            directory = pathlib.Path(__file__).parent.absolute()
+            with open(os.path.join(directory,'distributions.json'), 'r') as f:
+                all_distributions = json.load(f)
+            return {"distributions":
+                    all_distributions[str(prediction)]['distributions']}
 
         dataset_doc = model_doc.training_set
         if dataset_doc is None:
@@ -302,7 +314,7 @@ class PredictionCount(Resource):
         @apiSuccess {Number} count Number of entities who are predicted as prediction in the training set
         """
         attrs = ['prediction', 'model_id']
-        attrs_type = [float, str]
+        attrs_type = [int, str]
         d = dict()
         body = request.json
         for attr in attrs:
@@ -323,6 +335,13 @@ class PredictionCount(Resource):
 
         prediction = d["prediction"]
         model_id = d["model_id"]
+
+        if use_dummy_functions:
+            directory = pathlib.Path(__file__).parent.absolute()
+            with open(os.path.join(directory,'distributions.json'), 'r') as f:
+                all_distributions = json.load(f)
+            return {"count:":
+                    all_distributions[str(prediction)]["total cases"]}
 
         # LOAD IN AND VALIDATE MODEL
         model_doc = schema.Model.find_one(id=model_id)
