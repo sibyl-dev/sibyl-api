@@ -1,7 +1,13 @@
 """SibylApp Database Schema.
 
-This module contains the classes that define the Orion Database Schema:
+This module contains the classes that define the SibylApp Database Schema:
+    * Event
     * Entitiy
+    * Category
+    * Feature
+    * TrainingSet
+    * Model
+    * Case
 """
 
 import logging
