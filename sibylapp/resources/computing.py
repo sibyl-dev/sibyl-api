@@ -2,8 +2,8 @@ import logging
 
 from flask_restful import Resource
 from flask import request
-from explanation_toolkit import local_feature_explanation as lfe
-from explanation_toolkit import global_explanation as ge
+from sibyl import local_feature_explanation as lfe
+from sibyl import global_explanation as ge
 from sibylapp.db import schema
 import pandas as pd
 import json
@@ -452,7 +452,6 @@ class FeatureContributions(Resource):
             return {'message': str(e)}, 500
         else:
             contributions = lfe.get_contributions(entity_features, explainer)[0].tolist()
-            print(contributions)
             keys = list(entity_features.keys())
             contribution_dict = dict(zip(keys, contributions))
             return {"contributions":contribution_dict}, 200
