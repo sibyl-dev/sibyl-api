@@ -1,5 +1,6 @@
 import React from 'react';
 import * as d3 from 'd3';
+import { ArrowIcon } from '../../assets/icons/icons';
 import './styles/ProgressBars.scss';
 
 const renderRightPercentage = (xCoord, yCoord, barWidth, barHeight) => {
@@ -24,28 +25,54 @@ const renderLeftPercentage = (xCoord, yCoord, width, height) => {
             z`;
 };
 
-const drawBar = (percentage, maxRange, width, height) => {
-  var xCoord = d3.scaleLinear().domain([-maxRange, maxRange]).range([0, width]);
+const drawBar = (percentage, maxRange, width, height, isSingle) => {
+  var xCoord = d3
+    .scaleLinear()
+    .domain([isSingle ? 0 : -maxRange, maxRange])
+    .range([0, width]);
 
   const barWidth = xCoord(percentage) - xCoord(0);
 
   return barWidth >= 0
-    ? renderRightPercentage(width / 2, height / 2, barWidth, height)
-    : renderLeftPercentage(width / 2, height / 2, barWidth, height);
+    ? renderRightPercentage(isSingle ? 0 : width / 2, height / 2, barWidth, height)
+    : renderLeftPercentage(isSingle ? width : width / 2, height / 2, barWidth, height);
 };
 
 export const BiProgressBar = (props) => {
   let { percentage, maxRange, width, height } = props;
+  let isSingle = props.isSingle || false;
   percentage = Number(percentage);
 
-  const getProgressBarClassName = (percentage) => (percentage > 0 ? 'bar-positive' : 'bar-negative');
+  const getProgressBarClassName = (percentage) => (percentage >= 0 ? 'bar-positive' : 'bar-negative');
 
   return (
-    <svg width={width} height="18" className="bidi-progress-bar">
-      <rect width={width} height={height} rx={height / 2} fill="rgba(189, 189, 189, 0.5)" y={height / 2} />
-      <path d={drawBar(percentage, maxRange, width, height)} className={getProgressBarClassName(percentage)} />
-      <rect className="separator" fill="#BDBDBD" x={width / 2} rx="1" ry="1" width="2" height={height} />
-    </svg>
+    <ul className="bidi-wrapper">
+      <li>{!isSingle && <ArrowIcon dir="down" />}</li>
+      <li>
+        <svg width={width} height="18" className="bidi-progress-bar">
+          <defs>
+            <clipPath id="focusClip">
+              <rect width={width} height="8" rx="4" y="4" />
+            </clipPath>
+          </defs>
+          <rect width={width} height={height} rx={height / 2} fill="rgba(189, 189, 189, 0.5)" y={height / 2} />
+          <g clipPath="url(#focusClip)">
+            <path
+              d={drawBar(percentage, maxRange, width, height, isSingle)}
+              className={getProgressBarClassName(percentage)}
+            />
+          </g>
+          {!isSingle && (
+            <rect className="separator" fill="#BDBDBD" x={width / 2} rx="1" ry="1" width="2" height={height} />
+          )}
+        </svg>
+      </li>
+      <li>
+        {!isSingle && <ArrowIcon dir="up" />}
+        {isSingle && percentage < 0 && <ArrowIcon dir="down" />}
+        {isSingle && percentage > 0 && <ArrowIcon dir="up" />}
+      </li>
+    </ul>
   );
 };
 

@@ -78,3 +78,22 @@
         }
     }
 }
+
+.bidi-wrapper {
+    min-width: 165px;
+    li {
+        display: inline-block;
+        margin: 0 7px;
+        vertical-align: top;
+        &:first-child {
+            margin-left: 0;
+        }
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+
+    .arrow {
+        width: 12px;
+    }
+}

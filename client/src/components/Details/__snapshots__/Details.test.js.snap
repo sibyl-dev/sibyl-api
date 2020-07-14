@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Testing Details component ->  Should render without crashing (unified mode) 1`] = `
+exports[`Testing Details component ->  Should render without crashing 1`] = `
 <div>
   <div
     class="sub-header"
@@ -258,7 +258,6 @@ exports[`Testing Details component ->  Should render without crashing (unified m
           </header>
           <div
             class="sticky-wrapper scroll-style"
-            style="max-height:600px"
           >
             <table
               class="dash-table sticky-header"
@@ -329,38 +328,88 @@ exports[`Testing Details component ->  Should render without crashing (unified m
                     class="align-center"
                     width="145"
                   >
-                    <svg
-                      class="bidi-progress-bar"
-                      height="18"
-                      width="110"
+                    <ul
+                      class="bidi-wrapper"
                     >
-                      <rect
-                        fill="rgba(189, 189, 189, 0.5)"
-                        height="8"
-                        rx="4"
-                        width="110"
-                        y="4"
-                      />
-                      <path
-                        class="bar-negative"
-                        d="M 55, 4
+                      <li>
+                        <svg
+                          class="arrow undefined"
+                          fill="none"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          width="16"
+                        >
+                          <path
+                            d="M6.99997 1V12.17L2.11997 7.29C1.72997 6.9 1.08997 6.9 0.699971 7.29C0.309971 7.68 0.309971 8.31 0.699971 8.7L7.28997 15.29C7.67997 15.68 8.30997 15.68 8.69997 15.29L15.29 8.7C15.68 8.31 15.68 7.68 15.29 7.29C14.9 6.9 14.27 6.9 13.88 7.29L8.99997 12.17V1C8.99997 0.45 8.54997 0 7.99997 0C7.44997 0 6.99997 0.45 6.99997 1Z"
+                            fill="#BDBDBD"
+                          />
+                        </svg>
+                      </li>
+                      <li>
+                        <svg
+                          class="bidi-progress-bar"
+                          height="18"
+                          width="110"
+                        >
+                          <defs>
+                            <clipPath
+                              id="focusClip"
+                            >
+                              <rect
+                                height="8"
+                                rx="4"
+                                width="110"
+                                y="4"
+                              />
+                            </clipPath>
+                          </defs>
+                          <rect
+                            fill="rgba(189, 189, 189, 0.5)"
+                            height="8"
+                            rx="4"
+                            width="110"
+                            y="4"
+                          />
+                          <g
+                            clip-path="url(#focusClip)"
+                          >
+                            <path
+                              class="bar-positive"
+                              d="M 55, 4
             h  0
             a  0,  0 0 0 1 0, 0
             v  8
             a  0, 0 0 0 1 -0, 0
             h  0
             z"
-                      />
-                      <rect
-                        class="separator"
-                        fill="#BDBDBD"
-                        height="8"
-                        rx="1"
-                        ry="1"
-                        width="2"
-                        x="55"
-                      />
-                    </svg>
+                            />
+                          </g>
+                          <rect
+                            class="separator"
+                            fill="#BDBDBD"
+                            height="8"
+                            rx="1"
+                            ry="1"
+                            width="2"
+                            x="55"
+                          />
+                        </svg>
+                      </li>
+                      <li>
+                        <svg
+                          class="arrow undefined"
+                          fill="none"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          width="16"
+                        >
+                          <path
+                            d="M6.99997 15V3.83L2.11997 8.71C1.72997 9.1 1.08997 9.1 0.699971 8.71C0.309971 8.32 0.309971 7.69 0.699971 7.3L7.28997 0.709999C7.67997 0.319999 8.30997 0.319999 8.69997 0.709999L15.29 7.3C15.68 7.69 15.68 8.32 15.29 8.71C14.9 9.1 14.27 9.1 13.88 8.71L8.99997 3.83V15C8.99997 15.55 8.54997 16 7.99997 16C7.44997 16 6.99997 15.55 6.99997 15Z"
+                            fill="#BDBDBD"
+                          />
+                        </svg>
+                      </li>
+                    </ul>
                   </td>
                 </tr>
                 <tr>
@@ -383,38 +432,88 @@ exports[`Testing Details component ->  Should render without crashing (unified m
                     class="align-center"
                     width="145"
                   >
-                    <svg
-                      class="bidi-progress-bar"
-                      height="18"
-                      width="110"
+                    <ul
+                      class="bidi-wrapper"
                     >
-                      <rect
-                        fill="rgba(189, 189, 189, 0.5)"
-                        height="8"
-                        rx="4"
-                        width="110"
-                        y="4"
-                      />
-                      <path
-                        class="bar-negative"
-                        d="M 55, 4
+                      <li>
+                        <svg
+                          class="arrow undefined"
+                          fill="none"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          width="16"
+                        >
+                          <path
+                            d="M6.99997 1V12.17L2.11997 7.29C1.72997 6.9 1.08997 6.9 0.699971 7.29C0.309971 7.68 0.309971 8.31 0.699971 8.7L7.28997 15.29C7.67997 15.68 8.30997 15.68 8.69997 15.29L15.29 8.7C15.68 8.31 15.68 7.68 15.29 7.29C14.9 6.9 14.27 6.9 13.88 7.29L8.99997 12.17V1C8.99997 0.45 8.54997 0 7.99997 0C7.44997 0 6.99997 0.45 6.99997 1Z"
+                            fill="#BDBDBD"
+                          />
+                        </svg>
+                      </li>
+                      <li>
+                        <svg
+                          class="bidi-progress-bar"
+                          height="18"
+                          width="110"
+                        >
+                          <defs>
+                            <clipPath
+                              id="focusClip"
+                            >
+                              <rect
+                                height="8"
+                                rx="4"
+                                width="110"
+                                y="4"
+                              />
+                            </clipPath>
+                          </defs>
+                          <rect
+                            fill="rgba(189, 189, 189, 0.5)"
+                            height="8"
+                            rx="4"
+                            width="110"
+                            y="4"
+                          />
+                          <g
+                            clip-path="url(#focusClip)"
+                          >
+                            <path
+                              class="bar-positive"
+                              d="M 55, 4
             h  0
             a  0,  0 0 0 1 0, 0
             v  8
             a  0, 0 0 0 1 -0, 0
             h  0
             z"
-                      />
-                      <rect
-                        class="separator"
-                        fill="#BDBDBD"
-                        height="8"
-                        rx="1"
-                        ry="1"
-                        width="2"
-                        x="55"
-                      />
-                    </svg>
+                            />
+                          </g>
+                          <rect
+                            class="separator"
+                            fill="#BDBDBD"
+                            height="8"
+                            rx="1"
+                            ry="1"
+                            width="2"
+                            x="55"
+                          />
+                        </svg>
+                      </li>
+                      <li>
+                        <svg
+                          class="arrow undefined"
+                          fill="none"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          width="16"
+                        >
+                          <path
+                            d="M6.99997 15V3.83L2.11997 8.71C1.72997 9.1 1.08997 9.1 0.699971 8.71C0.309971 8.32 0.309971 7.69 0.699971 7.3L7.28997 0.709999C7.67997 0.319999 8.30997 0.319999 8.69997 0.709999L15.29 7.3C15.68 7.69 15.68 8.32 15.29 8.71C14.9 9.1 14.27 9.1 13.88 8.71L8.99997 3.83V15C8.99997 15.55 8.54997 16 7.99997 16C7.44997 16 6.99997 15.55 6.99997 15Z"
+                            fill="#BDBDBD"
+                          />
+                        </svg>
+                      </li>
+                    </ul>
                   </td>
                 </tr>
               </tbody>
