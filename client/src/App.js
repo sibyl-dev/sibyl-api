@@ -5,7 +5,7 @@ import Sidebar from './components/Sidebar/Sidebar';
 import Header from './components/Header/Header';
 import Dashboard from './components/Dashboard/Dashboard';
 import { setEntityIdAction, getEntityAction } from './model/actions/entities';
-import { getCurrentEntityID } from './model/selectors/entitites';
+import { getCurrentEntityID } from './model/selectors/entities';
 import './assets/sass/main.scss';
 
 class App extends Component {

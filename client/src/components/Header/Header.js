@@ -2,7 +2,7 @@ import React from 'react';
 import { ExcamationIcon } from '../../assets/icons/icons';
 import { connect } from 'react-redux';
 import { getPageName } from '../../model/selectors/sidebar';
-import { getCurrentEntityData, getIsEntitiesLoading } from '../../model/selectors/entitites';
+import { getCurrentEntityData, getIsEntitiesLoading } from '../../model/selectors/entities';
 import './Header.scss';
 
 const Header = (props) => {
