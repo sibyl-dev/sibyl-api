@@ -2,7 +2,7 @@ const baseUrl = 'http://localhost:3000/api/v1';
 
 export const api = {
   get(url, dataType = 'json') {
-    const apiUrl = `${baseUrl}${url}/`;
+    const apiUrl = `${baseUrl}${url}`;
 
     const promise = fetch(apiUrl, {
       mode: 'cors',

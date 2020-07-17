@@ -3,6 +3,8 @@ import createReducer from '../store/createReducer';
 const initialState = {
   isEntityDataLoading: true,
   isEntityContributionsLoading: true,
+  isEntityScoreLoading: true,
+  entityScore: null,
   entityData: [],
   entityContributions: [],
   entityID: null,
@@ -40,6 +42,21 @@ function GET_ENTITY_CONTRIBUTIONS_FAILURE(nextState) {
   nextState.entityContributions = [];
 }
 
+// -----
+function GET_ENTITY_SCORE_REQUEST(nextState) {
+  nextState.isEntityScoreLoading = true;
+}
+
+function GET_ENTITY_SCORE_SUCCESS(nextState, action) {
+  nextState.isEntityScoreLoading = false;
+  nextState.entityScore = action.result.output;
+}
+
+function GET_ENTITY_SCORE_FAILURE(nextState) {
+  nextState.isEntityContributionsLoading = false;
+  nextState.entityScore = null;
+}
+
 export default createReducer(initialState, {
   GET_ENTITY_DATA_REQUEST,
   GET_ENTITY_DATA_SUCCESS,
@@ -48,4 +65,7 @@ export default createReducer(initialState, {
   GET_ENTITY_CONTRIBUTIONS_REQUEST,
   GET_ENTITY_CONTRIBUTIONS_SUCCESS,
   GET_ENTITY_CONTRIBUTIONS_FAILURE,
+  GET_ENTITY_SCORE_REQUEST,
+  GET_ENTITY_SCORE_SUCCESS,
+  GET_ENTITY_SCORE_FAILURE,
 });

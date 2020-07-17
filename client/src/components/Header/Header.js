@@ -2,11 +2,11 @@ import React from 'react';
 import { ExcamationIcon } from '../../assets/icons/icons';
 import { connect } from 'react-redux';
 import { getPageName } from '../../model/selectors/sidebar';
-import { getCurrentEntityData, getIsEntitiesLoading } from '../../model/selectors/entities';
+import { getIsEntityScoreLoading, getEntityScore } from '../../model/selectors/entities';
 import './Header.scss';
 
 const Header = (props) => {
-  const { isEntityDataLoading, entityData } = props;
+  const { isEntityScoreLoading, entityScore } = props;
 
   return (
     <div className="header">
@@ -16,9 +16,9 @@ const Header = (props) => {
             <h2>{props.pageName}</h2>
           </li>
           <li>
-            {!isEntityDataLoading && (
+            {!isEntityScoreLoading && (
               <span>
-                Prediction Score: <strong>{entityData.score}</strong>
+                Prediction Score: <strong>{entityScore}</strong>
                 <button type="button" className="clean">
                   <ExcamationIcon />
                 </button>
@@ -32,6 +32,6 @@ const Header = (props) => {
 };
 export default connect((state) => ({
   pageName: getPageName(state),
-  isEntityDataLoading: getIsEntitiesLoading(state),
-  entityData: getCurrentEntityData(state),
+  isEntityScoreLoading: getIsEntityScoreLoading(state),
+  entityScore: getEntityScore(state),
 }))(Header);
