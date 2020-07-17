@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import DashWrapper from '../common/DashWrapper';
 import Search from '../common/Search';
 import { ProgressIndicator } from '../common/ProgressBars';
-import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entities';
+import { getFeaturesImportances, getFeaturesData } from '../../model/selectors/features';
 
 // mock search result
 const hayStack = [
@@ -41,9 +41,14 @@ const BoxNote = () => (
   </div>
 );
 
+const getFeatureImportanceMax = (importances) => {
+  return Math.max.apply(null, Object.values(importances));
+};
+
 const FeatureImportance = (props) => {
-  const { entityData, isEntityLoading } = props;
-  const { featuresData } = entityData;
+  const { featuresImportances, features } = props;
+  const importanceMax = getFeatureImportanceMax(featuresImportances);
+
   return (
     <div className="component-wrapper">
       <BoxNote />
@@ -67,15 +72,19 @@ const FeatureImportance = (props) => {
               </tr>
             </thead>
             <tbody>
-              {!isEntityLoading &&
-                featuresData.map((currentFeature, featureIndex) => (
-                  <tr key={featureIndex}>
+              {features.map((currentFeature) => {
+                return (
+                  <tr key={currentFeature.name}>
                     <td>{currentFeature.description}</td>
-                    <td className="align-right">
-                      <ProgressIndicator progressWidth="90" />
+                    <td>
+                      <ProgressIndicator
+                        maxValue={importanceMax}
+                        progressWidth={featuresImportances[currentFeature.name]}
+                      />
                     </td>
                   </tr>
-                ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -85,6 +94,6 @@ const FeatureImportance = (props) => {
 };
 
 export default connect((state) => ({
-  isEntityLoading: getIsEntitiesLoading(state),
-  entityData: getCurrentEntityData(state),
+  features: getFeaturesData(state),
+  featuresImportances: getFeaturesImportances(state),
 }))(FeatureImportance);

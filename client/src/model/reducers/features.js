@@ -4,6 +4,7 @@ const initialState = {
   featuresData: [],
   isCategoriesLoading: true,
   categories: [],
+  featuresImportances: {},
 };
 
 function GET_FEATURES_DATA_REQUEST(nextState) {
@@ -35,6 +36,11 @@ function GET_CATEGORIES_FAILURE(nextState) {
   nextState.categories = [];
 }
 
+// ------------------
+function GET_FEATURES_IMPORTANCES_SUCCESS(nextState, action) {
+  nextState.featuresImportances = action.result.importances;
+}
+
 export default createReducer(initialState, {
   GET_FEATURES_DATA_REQUEST,
   GET_FEATURES_DATA_SUCCESS,
@@ -42,4 +48,5 @@ export default createReducer(initialState, {
   GET_CATEGORIES_REQUEST,
   GET_CATEGORIES_SUCCESS,
   GET_CATEGORIES_FAILURE,
+  GET_FEATURES_IMPORTANCES_SUCCESS,
 });

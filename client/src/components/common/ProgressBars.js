@@ -98,8 +98,11 @@ export const PercentageProgressBar = ({ negativeProgress }) => {
   );
 };
 
-export const ProgressIndicator = ({ progressWidth }) => (
-  <div className="percentage-indicator">
-    <div className="progress" style={{ width: `${progressWidth}%` }} />
-  </div>
-);
+export const ProgressIndicator = ({ maxValue, progressWidth }) => {
+  const width = (progressWidth * 100) / maxValue;
+  return (
+    <div className="percentage-indicator">
+      <div className="progress" style={{ width: `${width}%` }} />
+    </div>
+  );
+};

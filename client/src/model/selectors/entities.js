@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import Cookies from 'universal-cookie';
 
 export const getIsEntitiesLoading = (state) => state.entities.isEntityDataLoading;
 export const getCurrentEntityData = (state) => state.entities.entityData;
@@ -8,7 +9,16 @@ export const getEntityContributions = (state) => state.entities.entityContributi
 export const getIsEntityScoreLoading = (state) => state.entities.isEntityScoreLoading;
 export const getEntityScore = (state) => state.entities.entityScore;
 
-export const getCurrentEntityID = (state) => state.entities.entityID;
+export const currentEntityID = (state) => state.entities.entityID;
+
+export const getCurrentEntityID = createSelector([currentEntityID], (entityID) => {
+  const cookies = new Cookies();
+
+  if (entityID === null) {
+    entityID = cookies.get('entityID');
+  }
+  return entityID;
+});
 
 // @TODO - finish and use this selector for entityData,
 // this sorts contributions in descendat order
