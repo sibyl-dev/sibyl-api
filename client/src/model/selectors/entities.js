@@ -1,7 +1,11 @@
 import { createSelector } from 'reselect';
 
-export const getCurrentEntityData = (state) => state.entities.entityData;
 export const getIsEntitiesLoading = (state) => state.entities.isEntityDataLoading;
+export const getCurrentEntityData = (state) => state.entities.entityData;
+export const getIsEntityContributionsLoading = (state) => state.entities.isEntityontributionsLoading;
+export const getIsEntityContribLoading = (state) => state.entities.isEntityContributionsLoading;
+export const getEntityContributions = (state) => state.entities.entityContributions;
+
 export const getCurrentEntityID = (state) => state.entities.entityID;
 
 // @TODO - finish and use this selector for entityData,

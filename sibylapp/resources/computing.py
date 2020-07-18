@@ -2,8 +2,8 @@ import logging
 
 from flask_restful import Resource
 from flask import request
-from sibyl import local_feature_explanation as lfe
-from sibyl import global_explanation as ge
+from sibyl.sibyl import local_feature_explanation as lfe
+from sibyl.sibyl import global_explanation as ge
 from sibylapp.db import schema
 import pandas as pd
 import json
@@ -37,21 +37,21 @@ class Similarities(Resource):
 class SingleChangePredictions(Resource):
     def post(self):
         """
-        @api {post} /single_change_predictions/ Post single prediction 
+        @api {post} /single_change_predictions/ Post single prediction
         @apiName PostSinglePrediction
         @apiGroup Computing
         @apiVersion 1.0.0
-        @apiDescription Get the list of updated predictions after making 
+        @apiDescription Get the list of updated predictions after making
         single changes.
 
         @apiParam {String} eid ID of entity to predict on.
         @apiParam {String} model_id ID of model to use for predictions.
-        @apiParam {2-Tuple[]} changes List of features to change and 
+        @apiParam {2-Tuple[]} changes List of features to change and
             their new values.
         @apiParam {String} changes.item1 Name of the feature to change.
         @apiParam {String} changes.item2 Changed Value of the feature.
 
-        @apiSuccess {2-Tuple[]} changes List of features to change and 
+        @apiSuccess {2-Tuple[]} changes List of features to change and
             their new values.
         @apiSuccess {String} changes.item1 Name of the feature to change.
         @apiSuccess {String} changes.item2 New prediction of the feature.
@@ -120,7 +120,7 @@ class SingleChangePredictions(Resource):
 class ModifiedPrediction(Resource):
     def post(self):
         """
-        @api {post} /modified_prediction/ Post multiple prediction 
+        @api {post} /modified_prediction/ Post multiple prediction
         @apiName PostMultiplePrediction
         @apiGroup Computing
         @apiVersion 1.0.0
@@ -128,7 +128,7 @@ class ModifiedPrediction(Resource):
 
         @apiParam {String} eid ID of entity to predict on.
         @apiParam {String} model_id ID of model to use for predictions.
-        @apiParam {2-Tuple[]} changes List of features to change and 
+        @apiParam {2-Tuple[]} changes List of features to change and
             their new values.
         @apiParam {String} changes.item1 Name of the feature to change.
         @apiParam {String} changes.item2 Changed Value of the feature.

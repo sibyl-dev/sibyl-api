@@ -5,7 +5,7 @@ import Search from '../common/Search';
 import ScoreInfo from '../common/ScoreInfo';
 import PieChart from '../common/PieChart';
 import { connect } from 'react-redux';
-import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entitites';
+import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entities';
 import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';
 import './Model.scss';

@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import DashWrapper from '../common/DashWrapper';
 import Search from '../common/Search';
 import { ProgressIndicator } from '../common/ProgressBars';
-import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entitites';
+import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entities';
 
 // mock search result
 const hayStack = [

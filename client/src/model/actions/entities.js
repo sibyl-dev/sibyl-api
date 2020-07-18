@@ -1,6 +1,9 @@
 import Cookies from 'universal-cookie';
 import { api } from '../api/api';
-import { getCurrentEntityID } from '../selectors/entitites';
+import { getFeaturesAction, getCategoriesAction } from './features';
+import { getCurrentEntityID } from '../selectors/entities';
+
+const modelID = '5f0dc12ea69e913b28b44292';
 
 export function setEntityIdAction(entityID) {
   return function (dispatch) {
@@ -13,6 +16,21 @@ export function setEntityIdAction(entityID) {
       entityID: parseInt(entityID),
     };
     dispatch(action);
+  };
+}
+
+export function getEntityContributionsAction() {
+  return function (dispatch, getState) {
+    const entityID = getCurrentEntityID(getState());
+    dispatch({ type: 'GET_ENTITY_CONTRIBUTIONS_REQUEST' });
+
+    api
+      .post(`/contributions/`, { eid: entityID, model_id: modelID })
+      .then((response) => response.json())
+      .then((data) => {
+        dispatch({ type: 'GET_ENTITY_CONTRIBUTIONS_SUCCESS', entityContributions: data.contributions });
+      })
+      .catch((error) => dispatch({ type: 'GET_ENTITY_CONTRIBUTIONS_FAILURE', error }));
   };
 }
 
@@ -29,6 +47,10 @@ export function getEntityAction() {
       type: 'GET_ENTITY_DATA',
       promise: api.get(`/entities/${entityID}`),
     };
-    dispatch(action);
+
+    dispatch(action)
+      .then(dispatch(getCategoriesAction()))
+      .then(dispatch(getFeaturesAction()))
+      .then(dispatch(getEntityContributionsAction()));
   };
 }

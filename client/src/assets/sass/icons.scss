@@ -1,4 +1,4 @@
-@import './colors.scss';
+@import "./colors.scss";
 .arrow {
     &.red {
         path {
@@ -30,6 +30,9 @@ i {
         }
         &.green {
             background: #27ae60;
+        }
+        &.gray {
+            background: #ccc;
         }
     }
 }

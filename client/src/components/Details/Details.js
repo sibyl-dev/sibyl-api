@@ -1,13 +1,25 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { TableFullIcon, TableSplitIcon, SortIcon } from '../../assets/icons/icons';
 import DashWrapper from '../common/DashWrapper';
 import Select from 'react-select';
 import Search from '../common/Search';
 import { CategorySelect } from '../common/Form';
 import { BiProgressBar } from '../common/ProgressBars';
-import { connect } from 'react-redux';
-import { getEntityAction } from '../../model/actions/entities';
-import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entitites';
+
+import {
+  getIsEntitiesLoading,
+  getCurrentEntityData,
+  getIsEntityContribLoading,
+  getEntityContributions,
+} from '../../model/selectors/entities';
+
+import {
+  getIsFeaturesLoding,
+  getFeaturesData,
+  getIsCategoriesLoading,
+  getFeatureCategories,
+} from '../../model/selectors/features';
 
 import './Details.scss';
 
@@ -126,14 +138,39 @@ export class Details extends Component {
     return maxRange;
   }
 
-  renderUnifiedMode() {
-    const { isEntityLoading, entityData } = this.props;
-    const { featuresData, contributions, features } = entityData;
+  getFeatureType = (feature) => {
+    const { entityData } = this.props;
+    const { name, type } = feature;
+    return type === 'numeric' ? (entityData.features[name] > 0 ? 'True' : 'False') : entityData.features[name];
+  };
 
-    const getFeatureType = (feature) => {
-      const { name } = feature;
-      return parseInt(features[name]) > 0 ? 'True' : 'False';
-    };
+  getFeatureColor = (feature) => {
+    const { featureCategories } = this.props;
+    const colorIndex = featureCategories.findIndex((currentCategory) => currentCategory.name === feature);
+
+    if (colorIndex === -1) {
+      return null;
+    }
+
+    if (featureCategories[colorIndex].color !== null) {
+      return <i className="bullet" style={{ background: `#${featureCategories[colorIndex].color}` }}></i>;
+    }
+
+    return <i className="bullet gray"></i>;
+  };
+
+  renderUnifiedMode() {
+    const {
+      isEntityLoading,
+      isFeaturesLoading,
+      isCategoriesLoading,
+      isEntityContribLoading,
+      features,
+      entityContributions,
+    } = this.props;
+
+    const isDataLoading = isEntityLoading || isFeaturesLoading || isCategoriesLoading || isEntityContribLoading;
+    const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue(entityContributions) : 0;
 
     return (
       <div>
@@ -158,26 +195,29 @@ export class Details extends Component {
               </tr>
             </thead>
             <tbody>
-              {!isEntityLoading &&
-                featuresData.map((currentFeature, featureIndex) => (
+              {!isDataLoading && features.length > 0 ? (
+                features.map((currentFeature, featureIndex) => (
                   <tr key={featureIndex}>
-                    <td className="align-center">
-                      <i className="bullet red"></i>
-                    </td>
+                    <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
                     <td>{currentFeature.description}</td>
-                    <td className="align-right">
-                      {currentFeature.type === 'Boolean' ? getFeatureType(currentFeature) : ''}
-                    </td>
+                    <td className="align-right">{this.getFeatureType(currentFeature)}</td>
                     <td className="align-center" width="145">
                       <BiProgressBar
-                        percentage={contributions[currentFeature.name]}
+                        percentage={entityContributions[currentFeature.name]}
                         width="110"
                         height="8"
-                        maxRange={this.getContributionsMaxValue(contributions)}
+                        maxRange={maxContributionRange}
                       />
                     </td>
                   </tr>
-                ))}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4">
+                    <p>No Entity Data</p>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -186,13 +226,9 @@ export class Details extends Component {
   }
 
   renderSplitMode() {
-    const { isEntityLoading, entityData } = this.props;
-    const { featuresData, contributions, features } = entityData;
-
-    const getFeatureType = (feature) => {
-      const { name } = feature;
-      return parseInt(features[name]) > 0 ? 'True' : 'False';
-    };
+    const { features, isFeaturesLoading, isEntityContribLoading, entityContributions } = this.props;
+    const isDataLoading = isEntityContribLoading || isFeaturesLoading;
+    const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue(entityContributions) : 0;
 
     return (
       <div className="split-wrapper">
@@ -222,30 +258,31 @@ export class Details extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {!isEntityLoading &&
-                    featuresData.map(
+                  {!isDataLoading && features.length > 0 ? (
+                    features.map(
                       (currentFeature, featureIndex) =>
-                        contributions[currentFeature.name] > 0 && (
+                        entityContributions[currentFeature.name] > 0 && (
                           <tr key={featureIndex}>
-                            <td className="align-center">
-                              <i className="bullet red"></i>
-                            </td>
+                            <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
                             <td>{currentFeature.description}</td>
-                            <td className="align-right">
-                              {currentFeature.type === 'Boolean' ? getFeatureType(currentFeature) : ''}
-                            </td>
+                            <td className="align-right">{this.getFeatureType(currentFeature)}</td>
                             <td className="align-center" width="145">
                               <BiProgressBar
-                                percentage={contributions[currentFeature.name]}
+                                percentage={entityContributions[currentFeature.name]}
                                 width="110"
                                 height="8"
-                                maxRange={this.getContributionsMaxValue(contributions)}
+                                maxRange={maxContributionRange}
                                 isSingle
                               />
                             </td>
                           </tr>
                         ),
-                    )}
+                    )
+                  ) : (
+                    <tr>
+                      <td colSpan="4">No Entity Data</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -278,30 +315,31 @@ export class Details extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {!isEntityLoading &&
-                    featuresData.map(
+                  {!isDataLoading && features.length > 0 ? (
+                    features.map(
                       (currentFeature, featureIndex) =>
-                        contributions[currentFeature.name] < 0 && (
+                        entityContributions[currentFeature.name] < 0 && (
                           <tr key={featureIndex}>
-                            <td className="align-center">
-                              <i className="bullet red"></i>
-                            </td>
+                            <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
                             <td>{currentFeature.description}</td>
-                            <td className="align-right">
-                              {currentFeature.type === 'Boolean' ? getFeatureType(currentFeature) : ''}
-                            </td>
+                            <td className="align-right">{this.getFeatureType(currentFeature)}</td>
                             <td className="align-center" width="145">
                               <BiProgressBar
-                                percentage={contributions[currentFeature.name]}
+                                percentage={entityContributions[currentFeature.name]}
                                 width="110"
                                 height="8"
-                                maxRange={this.getContributionsMaxValue(contributions)}
+                                maxRange={maxContributionRange}
                                 isSingle
                               />
                             </td>
                           </tr>
                         ),
-                    )}
+                    )
+                  ) : (
+                    <tr>
+                      <td colSpan="4">No Entity Data</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -329,5 +367,11 @@ export class Details extends Component {
 
 export default connect((state) => ({
   isEntityLoading: getIsEntitiesLoading(state),
+  isFeaturesLoading: getIsFeaturesLoding(state),
+  isCategoriesLoading: getIsCategoriesLoading(state),
+  isEntityContribLoading: getIsEntityContribLoading(state),
   entityData: getCurrentEntityData(state),
+  features: getFeaturesData(state),
+  featureCategories: getFeatureCategories(state),
+  entityContributions: getEntityContributions(state),
 }))(Details);
