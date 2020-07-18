@@ -3,14 +3,13 @@ import { api } from '../api/api';
 import { getFeaturesAction, getCategoriesAction } from './features';
 import { getCurrentEntityID } from '../selectors/entities';
 
-const modelID = '5f0dc12ea69e913b28b44292';
+export const modelID = '5f0dc12ea69e913b28b44292';
 
 export function setEntityIdAction(entityID) {
   return function (dispatch) {
     const cookies = new Cookies();
     cookies.remove('entityID');
     cookies.set('entityID', entityID, { path: '/' });
-
     const action = {
       type: 'SET_ENTITY_ID',
       entityID: parseInt(entityID),
@@ -47,12 +46,7 @@ export function getEntityPredictionScoreAction() {
 
 export function getEntityAction() {
   return function (dispatch, getState) {
-    let entityID = getCurrentEntityID(getState());
-    const cookies = new Cookies();
-
-    if (entityID === null) {
-      entityID = cookies.get('entityID');
-    }
+    const entityID = getCurrentEntityID(getState());
 
     const action = {
       type: 'GET_ENTITY_DATA',
