@@ -34,6 +34,17 @@ export function getEntityContributionsAction() {
   };
 }
 
+export function getEntityPredictionScoreAction() {
+  return function (dispatch, getState) {
+    const entityID = getCurrentEntityID(getState());
+    const action = {
+      type: 'GET_ENTITY_SCORE',
+      promise: api.get(`/prediction/?model_id=${modelID}&eid=${entityID}`),
+    };
+    dispatch(action);
+  };
+}
+
 export function getEntityAction() {
   return function (dispatch, getState) {
     let entityID = getCurrentEntityID(getState());
@@ -45,12 +56,13 @@ export function getEntityAction() {
 
     const action = {
       type: 'GET_ENTITY_DATA',
-      promise: api.get(`/entities/${entityID}`),
+      promise: api.get(`/entities/${entityID}/`),
     };
 
     dispatch(action)
       .then(dispatch(getCategoriesAction()))
       .then(dispatch(getFeaturesAction()))
-      .then(dispatch(getEntityContributionsAction()));
+      .then(dispatch(getEntityContributionsAction()))
+      .then(dispatch(getEntityPredictionScoreAction()));
   };
 }
