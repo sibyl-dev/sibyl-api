@@ -5,9 +5,14 @@ import Search from '../common/Search';
 import ScoreInfo from '../common/ScoreInfo';
 import PieChart from '../common/PieChart';
 import { connect } from 'react-redux';
-import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entities';
+import {
+  getIsEntitiesLoading,
+  getIsEntityDistributionsLoading,
+  getEntityDistributions,
+} from '../../model/selectors/entities';
 import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';
+import { getFeaturesData } from '../../model/selectors/features';
 import './Model.scss';
 
 // mock search result
@@ -33,9 +38,49 @@ class FeatureDistribution extends Component {
     );
   }
 
+  drawDistribution(currentFeature) {
+    const { distributions } = this.props;
+    if (distributions[currentFeature] === undefined) {
+      return <p>No data to be displayed</p>;
+    }
+
+    if (distributions[currentFeature] !== undefined && distributions[currentFeature].type === 'numeric') {
+      const data = distributions[currentFeature].metrics;
+      return <DayGraph data={data} graphIndex={currentFeature} />;
+    }
+
+    if (distributions[currentFeature].type === 'category') {
+      const data = distributions[currentFeature].metrics;
+
+      if (data[0].length === 1 || ('' + data[1][0]).length > 4) {
+        return <PercentageProgressBar negativeProgress="0" />;
+      }
+
+      const negativeProgress = parseInt(('' + data[1][1]).slice(0, 2));
+
+      if (data[1][0].toString().length > 3) {
+        return <PercentageProgressBar negativeProgress={negativeProgress} />;
+      }
+
+      return <p>No Category data to be displayed</p>;
+    }
+  }
+
   render() {
-    const { entityData, isEntityLoading } = this.props;
-    const { featuresData } = entityData;
+    const { isDistributionsLoading, distributions, isEntityLoading, features } = this.props;
+    const isDataLoading = isDistributionsLoading || isEntityLoading;
+
+    // if (!isDataLoading) {
+    //   Object.keys(distributions).map((currentDistribution) => {
+    //     if (distributions[currentDistribution].type === 'category') {
+    //       console.log(distributions[currentDistribution].metrics[0], distributions[currentDistribution].metrics[1]);
+    //     }
+    //     if (distributions[currentDistribution].type === 'numeric') {
+    //       console.log(distributions[currentDistribution].metrics);
+    //     }
+    //   });
+    // }
+
     return (
       <div className="component-wrapper">
         <table className="distrib-info">
@@ -63,14 +108,11 @@ class FeatureDistribution extends Component {
                 </tr>
               </thead>
               <tbody>
-                {!isEntityLoading &&
-                  featuresData.map((currentFeature, featureIndex) => (
+                {!isDataLoading &&
+                  features.map((currentFeature, featureIndex) => (
                     <tr key={featureIndex}>
                       <td>{currentFeature.description}</td>
-                      <td className="align-right">
-                        <DayGraph data={[24, 40]} maxData={42} graphIndex={featureIndex} />
-                        <PercentageProgressBar negativeProgress="20" />
-                      </td>
+                      <td className="align-right">{this.drawDistribution(currentFeature.name)}</td>
                     </tr>
                   ))}
               </tbody>
@@ -84,5 +126,7 @@ class FeatureDistribution extends Component {
 
 export default connect((state) => ({
   isEntityLoading: getIsEntitiesLoading(state),
-  entityData: getCurrentEntityData(state),
+  isDistributionsLoading: getIsEntityDistributionsLoading(state),
+  distributions: getEntityDistributions(state),
+  features: getFeaturesData(state),
 }))(FeatureDistribution);
