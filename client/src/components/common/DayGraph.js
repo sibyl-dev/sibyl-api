@@ -92,7 +92,7 @@ class DayGraph extends Component {
           <g className="axis-x"></g>
           <g className="data">{this.drawData(data)}</g>
         </svg>
-      )) || <p>No data to be displayed.</p>
+      )) || <p>No data to display.</p>
     );
   }
 }

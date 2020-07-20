@@ -41,7 +41,7 @@ class FeatureDistribution extends Component {
   drawDistribution(currentFeature) {
     const { distributions } = this.props;
     if (distributions[currentFeature] === undefined) {
-      return <p>No data to be displayed</p>;
+      return <p>No data to display</p>;
     }
 
     if (distributions[currentFeature] !== undefined && distributions[currentFeature].type === 'numeric') {
@@ -52,17 +52,14 @@ class FeatureDistribution extends Component {
     if (distributions[currentFeature].type === 'category') {
       const data = distributions[currentFeature].metrics;
 
-      if (data[0].length === 1 || ('' + data[1][0]).length > 4) {
-        return <PercentageProgressBar negativeProgress="0" />;
+      if (data[0].length === 1) {
+        return <PercentageProgressBar negativeProgress={0} />;
       }
 
-      const negativeProgress = parseInt(('' + data[1][1]).slice(0, 2));
+      const maxPercentage = data[1][0] + data[1][1];
+      const negativeProgress = Math.floor((data[1][1] / maxPercentage) * 100);
 
-      if (data[1][0].toString().length > 3) {
-        return <PercentageProgressBar negativeProgress={negativeProgress} />;
-      }
-
-      return <p>No Category data to be displayed</p>;
+      return <PercentageProgressBar negativeProgress={negativeProgress} />;
     }
   }
 
@@ -70,16 +67,24 @@ class FeatureDistribution extends Component {
     const { isDistributionsLoading, distributions, isEntityLoading, features } = this.props;
     const isDataLoading = isDistributionsLoading || isEntityLoading;
 
-    // if (!isDataLoading) {
-    //   Object.keys(distributions).map((currentDistribution) => {
-    //     if (distributions[currentDistribution].type === 'category') {
-    //       console.log(distributions[currentDistribution].metrics[0], distributions[currentDistribution].metrics[1]);
-    //     }
-    //     if (distributions[currentDistribution].type === 'numeric') {
-    //       console.log(distributions[currentDistribution].metrics);
-    //     }
-    //   });
-    // }
+    if (!isDataLoading) {
+      // Object.keys(distributions).map((currentDistribution) => {
+      // if (distributions[currentDistribution].type === 'category') {
+      //   const maxPercentage =
+      //     distributions[currentDistribution].metrics[1][0] + distributions[currentDistribution].metrics[1][1];
+      //   const negativeProgress = Math.floor((distributions[currentDistribution].metrics[1][1] / maxPercentage) * 100);
+      //   // console.log(negativeProgress);
+      //   console.log(
+      //     distributions[currentDistribution].metrics[0],
+      //     distributions[currentDistribution].metrics[1],
+      //     negativeProgress,
+      //   );
+      // }
+      // if (distributions[currentDistribution].type === 'numeric') {
+      //   console.log(distributions[currentDistribution].metrics);
+      // }
+      // });
+    }
 
     return (
       <div className="component-wrapper">
