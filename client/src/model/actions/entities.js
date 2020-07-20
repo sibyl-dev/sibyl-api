@@ -44,6 +44,20 @@ export function getEntityPredictionScoreAction() {
   };
 }
 
+export function getEntityFeatureDistributionAction() {
+  return function (dispatch, getState) {
+    const entityID = getCurrentEntityID(getState());
+    dispatch({ type: 'GET_ENTITY_DISTRIBUTIONS_REQUEST' });
+    api
+      .post(`/feature_distributions/`, { prediction: 20, model_id: modelID })
+      .then((response) => response.json())
+      .then((entityData) => {
+        dispatch({ type: 'GET_ENTITY_DISTRIBUTIONS_SUCCESS', entityDistributions: entityData.distributions });
+      })
+      .catch((err) => dispatch('GET_ENTITY_DISTRIBUTIONS_FAILURE', err));
+  };
+}
+
 export function getEntityAction() {
   return function (dispatch, getState) {
     const entityID = getCurrentEntityID(getState());
@@ -57,6 +71,7 @@ export function getEntityAction() {
       .then(dispatch(getCategoriesAction()))
       .then(dispatch(getFeaturesAction()))
       .then(dispatch(getEntityContributionsAction()))
-      .then(dispatch(getEntityPredictionScoreAction()));
+      .then(dispatch(getEntityPredictionScoreAction()))
+      .then(dispatch(getEntityFeatureDistributionAction()));
   };
 }

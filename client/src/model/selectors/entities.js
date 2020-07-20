@@ -8,6 +8,8 @@ export const getIsEntityContribLoading = (state) => state.entities.isEntityContr
 export const getEntityContributions = (state) => state.entities.entityContributions;
 export const getIsEntityScoreLoading = (state) => state.entities.isEntityScoreLoading;
 export const getEntityScore = (state) => state.entities.entityScore;
+export const getIsEntityDistributionsLoading = (state) => state.entities.isEntityDistributionsLoading;
+export const getEntityDistributions = (state) => state.entities.entityDistributions;
 
 export const currentEntityID = (state) => state.entities.entityID;
 
