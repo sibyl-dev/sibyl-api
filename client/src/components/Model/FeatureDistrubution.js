@@ -64,27 +64,8 @@ class FeatureDistribution extends Component {
   }
 
   render() {
-    const { isDistributionsLoading, distributions, isEntityLoading, features } = this.props;
+    const { isDistributionsLoading, isEntityLoading, features } = this.props;
     const isDataLoading = isDistributionsLoading || isEntityLoading;
-
-    if (!isDataLoading) {
-      // Object.keys(distributions).map((currentDistribution) => {
-      // if (distributions[currentDistribution].type === 'category') {
-      //   const maxPercentage =
-      //     distributions[currentDistribution].metrics[1][0] + distributions[currentDistribution].metrics[1][1];
-      //   const negativeProgress = Math.floor((distributions[currentDistribution].metrics[1][1] / maxPercentage) * 100);
-      //   // console.log(negativeProgress);
-      //   console.log(
-      //     distributions[currentDistribution].metrics[0],
-      //     distributions[currentDistribution].metrics[1],
-      //     negativeProgress,
-      //   );
-      // }
-      // if (distributions[currentDistribution].type === 'numeric') {
-      //   console.log(distributions[currentDistribution].metrics);
-      // }
-      // });
-    }
 
     return (
       <div className="component-wrapper">

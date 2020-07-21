@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import './styles/ScoreInfo.scss';
 import GrayBoxWrapper from './GrayBoxWrapper';
+import { connect } from 'react-redux';
+import { setPredictionScoreAction } from '../../model/actions/entities';
+import { getActivePredictionScore, getIsEntitiesLoading } from '../../model/selectors/entities';
 
-const values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+const scoreValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
-class SoreInfo extends Component {
+class ScoreInfo extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -12,17 +15,25 @@ class SoreInfo extends Component {
     };
   }
 
-  setActiveScore(score) {
-    this.setState({
-      activeScore: score,
-    });
+  componentDidMount() {
+    const { activeScore, setActiveScore } = this.props;
+
+    activeScore !== null && setActiveScore(activeScore);
+  }
+
+  componentDidUpdate(nextState) {
+    const { activeScore, setActiveScore } = this.props;
+
+    if (nextState.activeScore !== activeScore) {
+      setActiveScore(activeScore);
+    }
   }
 
   renderScoreScale() {
-    const { activeScore } = this.state;
+    const { activeScore, setActiveScore } = this.props;
     const renderValues = () => {
-      return values.map((currentValue, index) => {
-        const activeIndex = values.indexOf(activeScore);
+      return scoreValues.map((currentValue, index) => {
+        const activeIndex = scoreValues.indexOf(activeScore);
         const getItemsClassNames = () => {
           if (index === activeIndex) {
             return 'active';
@@ -32,7 +43,7 @@ class SoreInfo extends Component {
           }
         };
         return (
-          <li key={currentValue} className={getItemsClassNames()} onClick={() => this.setActiveScore(currentValue)}>
+          <li key={currentValue} className={getItemsClassNames()} onClick={() => setActiveScore(currentValue)}>
             {currentValue}
           </li>
         );
@@ -50,7 +61,8 @@ class SoreInfo extends Component {
   }
 
   render() {
-    const { activeScore } = this.state;
+    const { activeScore } = this.props;
+
     return (
       <GrayBoxWrapper>
         <div className="score-wrapper">
@@ -73,4 +85,12 @@ class SoreInfo extends Component {
   }
 }
 
-export default SoreInfo;
+export default connect(
+  (state) => ({
+    activeScore: getActivePredictionScore(state),
+    isEntitiesLoading: getIsEntitiesLoading(state),
+  }),
+  (dispatch) => ({
+    setActiveScore: (score) => dispatch(setPredictionScoreAction(score)),
+  }),
+)(ScoreInfo);
