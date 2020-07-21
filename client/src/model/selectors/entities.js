@@ -10,6 +10,7 @@ export const getIsEntityScoreLoading = (state) => state.entities.isEntityScoreLo
 export const getEntityScore = (state) => state.entities.entityScore;
 export const getIsEntityDistributionsLoading = (state) => state.entities.isEntityDistributionsLoading;
 export const getEntityDistributions = (state) => state.entities.entityDistributions;
+export const getPredictionScore = (state) => state.entities.predictionScore;
 
 export const currentEntityID = (state) => state.entities.entityID;
 
@@ -40,5 +41,12 @@ export const getCurrentEntityDataSorted = createSelector(
     sortedContrib.sort((a, b) => b[1] - a[1]);
 
     return currentEntities;
+  },
+);
+
+export const getActivePredictionScore = createSelector(
+  [getPredictionScore, getEntityScore],
+  (predictionScore, entityScore) => {
+    return predictionScore !== null ? predictionScore : entityScore;
   },
 );

@@ -1,7 +1,7 @@
 import Cookies from 'universal-cookie';
 import { api } from '../api/api';
 import { getFeaturesAction, getCategoriesAction } from './features';
-import { getCurrentEntityID } from '../selectors/entities';
+import { getCurrentEntityID, getActivePredictionScore } from '../selectors/entities';
 
 export const modelID = '5f0dc12ea69e913b28b44292';
 
@@ -46,15 +46,26 @@ export function getEntityPredictionScoreAction() {
 
 export function getEntityFeatureDistributionAction() {
   return function (dispatch, getState) {
-    const entityID = getCurrentEntityID(getState());
     dispatch({ type: 'GET_ENTITY_DISTRIBUTIONS_REQUEST' });
+    const predictionScore = getActivePredictionScore(getState());
     api
-      .post(`/feature_distributions/`, { prediction: 20, model_id: modelID })
+      .post(`/feature_distributions/`, { prediction: predictionScore, model_id: modelID })
       .then((response) => response.json())
       .then((entityData) => {
         dispatch({ type: 'GET_ENTITY_DISTRIBUTIONS_SUCCESS', entityDistributions: entityData.distributions });
       })
       .catch((err) => dispatch('GET_ENTITY_DISTRIBUTIONS_FAILURE', err));
+  };
+}
+
+export function setPredictionScoreAction(predictionScore) {
+  return function (dispatch) {
+    const setActiveScoreAction = {
+      type: 'SET_PREDICTION_SCORE',
+      predictionScore,
+    };
+
+    dispatch(setActiveScoreAction).then(dispatch(getEntityFeatureDistributionAction()));
   };
 }
 
@@ -71,7 +82,6 @@ export function getEntityAction() {
       .then(dispatch(getCategoriesAction()))
       .then(dispatch(getFeaturesAction()))
       .then(dispatch(getEntityContributionsAction()))
-      .then(dispatch(getEntityPredictionScoreAction()))
-      .then(dispatch(getEntityFeatureDistributionAction()));
+      .then(dispatch(getEntityPredictionScoreAction()));
   };
 }
