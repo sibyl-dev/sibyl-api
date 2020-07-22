@@ -5,6 +5,7 @@ import DashWrapper from '../common/DashWrapper';
 import Select from 'react-select';
 import Search from '../common/Search';
 import { CategorySelect } from '../common/Form';
+import MetTooltip from '../common/MetTooltip';
 import { BiProgressBar } from '../common/ProgressBars';
 
 import {
@@ -45,43 +46,42 @@ export class Details extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isViewSplitted: false,
+      viewMode: 'unified',
     };
-    this.changeViewMode = this.changeViewMode.bind(this);
   }
 
-  changeViewMode() {
-    const { isViewSplitted } = this.state;
-
+  changeViewMode(viewMode) {
     this.setState({
-      isViewSplitted: !isViewSplitted,
+      viewMode,
     });
   }
 
   renderSubheader() {
-    const { isViewSplitted } = this.state;
+    const { isViewSplitted, viewMode } = this.state;
 
     return (
       <div className="sub-header">
         <ul>
-          <li>{isViewSplitted ? <Search hayStack={hayStack} /> : <h4>Risk Factors List</h4>}</li>
+          <li>{viewMode === 'split' ? <Search hayStack={hayStack} /> : <h4>Risk Factors List</h4>}</li>
           <li>
-            <button
-              type="button"
-              className={`view-full ${!isViewSplitted ? 'active' : ''}`}
-              onClick={this.changeViewMode}
-              disabled={!isViewSplitted}
-            >
-              <TableFullIcon />
-            </button>
-            <button
-              type="button"
-              className={`view-split ${isViewSplitted ? 'active' : ''}`}
-              onClick={this.changeViewMode}
-              disabled={isViewSplitted}
-            >
-              <TableSplitIcon />
-            </button>
+            <MetTooltip title="Single Table View" placement="top">
+              <button
+                type="button"
+                className={`view-full ${viewMode === 'unified' ? 'active' : ''}`}
+                onClick={() => this.changeViewMode('unified')}
+              >
+                <TableFullIcon />
+              </button>
+            </MetTooltip>
+            <MetTooltip title="Split View Comparison" placement="top">
+              <button
+                type="button"
+                className={`view-split ${viewMode === 'split' ? 'active' : ''}`}
+                onClick={() => this.changeViewMode('split')}
+              >
+                <TableSplitIcon />
+              </button>
+            </MetTooltip>
           </li>
         </ul>
       </div>
@@ -89,11 +89,11 @@ export class Details extends Component {
   }
 
   renderDashHeader() {
-    const { isViewSplitted } = this.state;
+    const { viewMode } = this.state;
     return (
       <header className="dash-header">
         <ul className="dash-controls">
-          {!isViewSplitted && (
+          {viewMode === 'unified' && (
             <React.Fragment>
               <li>
                 <Search hayStack={hayStack} />
@@ -350,14 +350,14 @@ export class Details extends Component {
   }
 
   render() {
-    const { isViewSplitted } = this.state;
+    const { viewMode } = this.state;
 
     return (
       <div>
         {this.renderSubheader()}
         <div className="component-wrapper no-shadow">
-          <DashWrapper className={`${isViewSplitted ? 'no-shadow' : ''} `}>
-            {isViewSplitted ? this.renderSplitMode() : this.renderUnifiedMode()}
+          <DashWrapper className={`${viewMode === 'split' ? 'no-shadow' : ''} `}>
+            {viewMode === 'split' ? this.renderSplitMode() : this.renderUnifiedMode()}
           </DashWrapper>
         </div>
       </div>
