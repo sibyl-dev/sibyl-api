@@ -1,17 +1,9 @@
 import React, { Component } from 'react';
 import Select from 'react-select';
 import { TrashIcon, QuestionIcon } from '../../assets/icons/icons';
-// import { ModalDialog } from 'react-bootstrap';
 import ModalDialog from '../common/ModalDialog';
-
-const featureOptions = [
-  { value: 'All', label: 'All', icon: 'all', isFixed: true },
-  { value: 'Category 1', label: 'Category 1', icon: 'red', isFixed: true },
-  { value: 'Category 2', label: 'Category 2', icon: 'blue', isFixed: true },
-  { value: 'Category 3', label: 'Category 3', icon: 'green', isFixed: true },
-  { value: 'Category 4', label: 'Category 4', icon: 'red', isFixed: true },
-  { value: 'Category 5', label: 'Category 5', icon: 'orange', isFixed: true },
-];
+import { connect } from 'react-redux';
+import { getIsFeaturesLoding, getFeaturesData } from '../../model/selectors/features';
 
 const featureValues = [
   { value: 'All', label: 'All', isFixed: true },
@@ -20,6 +12,15 @@ const featureValues = [
   { value: 'Categorycal', label: 'Categorycal', isFixed: true },
   { value: 'Numerical', label: 'Numerical', isFixed: true },
 ];
+
+const dropdownFeatures = (currentFeatures) => {
+  const enhancedFeatures = [];
+  currentFeatures.map((feature) => {
+    const { description, name } = feature;
+    enhancedFeatures.push({ value: name, label: description });
+  });
+  return enhancedFeatures;
+};
 
 class SandboxFilters extends Component {
   constructor(props) {
@@ -41,11 +42,17 @@ class SandboxFilters extends Component {
   }
 
   renderFeatureComponent() {
+    const { features, isFeaturesLoading } = this.props;
     const { featuresCount, storedFeatures, storedValues } = this.state;
 
+    if (isFeaturesLoading) {
+      return; // loader should be returned here;
+    }
+
     return featuresCount.map((currentFeature, featureIndex) => {
-      const selectedFeature = Object.keys(storedFeatures).length ? storedFeatures[featureIndex] : null;
-      const selectedValue = Object.keys(storedValues).length ? storedValues[featureIndex] : null;
+      const selectedFeature = Object.keys(storedFeatures).length ? storedFeatures[currentFeature] : null;
+      const selectedValue = Object.keys(storedValues).length ? storedValues[currentFeature] : null;
+
       return (
         <tr key={`${currentFeature}_${featureIndex}`}>
           <td width="3%" className="counter">
@@ -57,9 +64,9 @@ class SandboxFilters extends Component {
               isMulti={false}
               classNamePrefix="sibyl-select"
               className="sibyl-select"
-              options={featureOptions}
+              options={dropdownFeatures(features)}
               placeholder="Select / Search a Feature"
-              onChange={(value) => this.onFeatureOptionUpdate(featureIndex, value)}
+              onChange={(value) => this.onFeatureOptionUpdate(currentFeature, value)}
               value={selectedFeature}
             />
           </td>
@@ -74,20 +81,24 @@ class SandboxFilters extends Component {
               className="sibyl-select"
               options={featureValues}
               placeholder="Change Value"
-              onChange={(value) => this.onFeatureValueUpdate(featureIndex, value)}
+              onChange={(value) => this.onFeatureValueUpdate(currentFeature, value)}
               value={selectedValue}
             />
           </td>
           <td align="center" width="9%">
             <ul className="feature-controls">
               <li>
-                <button type="button" className="clean reset-feature" onClick={() => this.onResetFeature(featureIndex)}>
+                <button
+                  type="button"
+                  className="clean reset-feature"
+                  onClick={() => this.onResetFeature(currentFeature)}
+                >
                   Reset
                 </button>
               </li>
               <li>
                 {featureIndex !== 0 && (
-                  <button type="button" className="clean trash" onClick={() => this.onRemoveFeature(featureIndex)}>
+                  <button type="button" className="clean trash" onClick={() => this.onRemoveFeature(currentFeature)}>
                     <TrashIcon />
                   </button>
                 )}
@@ -135,25 +146,48 @@ class SandboxFilters extends Component {
     if (featuresCount.length === maxFeaturesCount) {
       return null;
     }
-
-    this.setState({ featuresCount: [...featuresCount, featuresCount.length + 1] });
+    this.setState({ featuresCount: [...featuresCount, featuresCount[featuresCount.length - 1] + 1] });
   }
 
-  onRemoveFeature(featureIndex) {
+  onRemoveFeature(feature) {
     const { featuresCount, storedFeatures, storedValues } = this.state;
     if (featuresCount.length === 1) {
       return;
     }
 
-    featuresCount.splice(featuresCount.indexOf(featureIndex), 1);
-    delete storedFeatures[featureIndex];
-    delete storedValues[featureIndex];
+    featuresCount.splice(featuresCount.indexOf(feature), 1);
+    delete storedFeatures[feature];
+    delete storedValues[feature];
     this.setState({ featuresCount });
   }
 
-  render() {
-    const { featuresCount, maxFeaturesCount, isModalOpen } = this.state;
+  renderModal() {
+    const { isModalOpen } = this.state;
+    return (
+      <ModalDialog isOpen={isModalOpen} title="Notice" onClose={() => this.toggleModalState(false)}>
+        <p>
+          The predictions on this screen show how the model’s predictions would change under different circumstances.
+          Here, you can look into what the model values, and make changes based on information you may have.
+        </p>
+        <p className="highlight">It DOES NOT predict how reality would change under these conditions.</p>
+        <p className="note">
+          Press on the &quot;
+          <QuestionIcon width="10" height="10" color="#6B9AD1" />
+          &quot; icon near "Experiment with changes" title to re-visit this message.
+        </p>
+        <p>
+          <input type="checkbox" id="remind" />
+          <label htmlFor="remind">
+            <span />
+            Don't remind me again
+          </label>
+        </p>
+      </ModalDialog>
+    );
+  }
 
+  render() {
+    const { featuresCount, maxFeaturesCount } = this.state;
     return (
       <div className="sandbox-filters">
         <header>
@@ -194,30 +228,14 @@ class SandboxFilters extends Component {
               </tr>
             </tfoot>
           </table>
-          <ModalDialog isOpen={isModalOpen} title="Notice" onClose={() => this.toggleModalState(false)}>
-            <p>
-              The predictions on this screen show how the model’s predictions would change under different
-              circumstances. Here, you can look into what the model values, and make changes based on information you
-              may have.
-            </p>
-            <p className="highlight">It DOES NOT predict how reality would change under these conditions.</p>
-            <p className="note">
-              Press on the &quot;
-              <QuestionIcon width="10" height="10" color="#6B9AD1" />
-              &quot; icon near "Experiment with changes" title to re-visit this message.
-            </p>
-            <p>
-              <input type="checkbox" id="remind" />
-              <label htmlFor="remind">
-                <span />
-                Don't remind me again
-              </label>
-            </p>
-          </ModalDialog>
+          {this.renderModal()}
         </div>
       </div>
     );
   }
 }
 
-export default SandboxFilters;
+export default connect((state) => ({
+  isFeaturesLoading: getIsFeaturesLoding(state),
+  features: getFeaturesData(state),
+}))(SandboxFilters);
