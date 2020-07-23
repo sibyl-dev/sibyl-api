@@ -2,8 +2,8 @@ import logging
 
 from flask_restful import Resource
 from flask import request
-from sibyl.sibyl import local_feature_explanation as lfe
-from sibyl.sibyl import global_explanation as ge
+from sibyl import local_feature_explanation as lfe
+from sibyl import global_explanation as ge
 from sibylapp.db import schema
 import pandas as pd
 import json
@@ -76,12 +76,12 @@ class SingleChangePredictions(Resource):
                 if schema.Feature.find_one(name=change[0]) is None:
                     LOGGER.exception('Invalid feature %s' % change[0])
                     return {'message': 'Invalid feature {}'.format(change[0])
-                               }, 400
-                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [0,1]:
+                            }, 400
+                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [0, 1]:
                     LOGGER.exception('Feature %s is binary, change value of %s is invalid.'
                                      % (change[0], change[1]))
                     return {'message': 'Feature {} is binary, invalid change value'.format(change[0])
-                           }, 400
+                            }, 400
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 400
@@ -97,8 +97,8 @@ class SingleChangePredictions(Resource):
             LOGGER.exception('Error getting model. '
                              'Model %s does not exist.', model_id)
             return {
-                       'message': 'Model {} does not exist'.format(model_id)
-                   }, 400
+                'message': 'Model {} does not exist'.format(model_id)
+            }, 400
         model_bytes = model_doc.model
         try:
             model = pickle.loads(model_bytes)
@@ -156,12 +156,12 @@ class ModifiedPrediction(Resource):
                 if schema.Feature.find_one(name=change[0]) is None:
                     LOGGER.exception('Invalid feature %s' % change[0])
                     return {'message': 'Invalid feature {}'.format(change[0])
-                               }, 400
-                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [0,1]:
+                            }, 400
+                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [0, 1]:
                     LOGGER.exception('Feature %s is binary, change value of %s is invalid.'
                                      % (change[0], change[1]))
                     return {'message': 'Feature {} is binary, invalid change value'.format(change[0])
-                           }, 400
+                            }, 400
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 400
@@ -177,8 +177,8 @@ class ModifiedPrediction(Resource):
             LOGGER.exception('Error getting model. '
                              'Model %s does not exist.', model_id)
             return {
-                       'message': 'Model {} does not exist'.format(model_id)
-                   }, 400
+                'message': 'Model {} does not exist'.format(model_id)
+            }, 400
         model_bytes = model_doc.model
         try:
             model = pickle.loads(model_bytes)
@@ -252,7 +252,7 @@ class FeatureDistributions(Resource):
 
         if use_dummy_functions:
             directory = pathlib.Path(__file__).parent.absolute()
-            with open(os.path.join(directory,'distributions.json'), 'r') as f:
+            with open(os.path.join(directory, 'distributions.json'), 'r') as f:
                 all_distributions = json.load(f)
             return {"distributions":
                     all_distributions[str(prediction)]['distributions']}
@@ -266,7 +266,7 @@ class FeatureDistributions(Resource):
         dataset = dataset_doc.to_dataframe()
 
         feature_docs = schema.Feature.find()
-        features = [{"name":feature_doc.name, "type":feature_doc.type}
+        features = [{"name": feature_doc.name, "type": feature_doc.type}
                     for feature_doc in feature_docs]
         features = pd.DataFrame(features)
 
@@ -338,7 +338,7 @@ class PredictionCount(Resource):
 
         if use_dummy_functions:
             directory = pathlib.Path(__file__).parent.absolute()
-            with open(os.path.join(directory,'distributions.json'), 'r') as f:
+            with open(os.path.join(directory, 'distributions.json'), 'r') as f:
                 all_distributions = json.load(f)
             return {"count:":
                     all_distributions[str(prediction)]["total cases"]}
@@ -418,16 +418,16 @@ class FeatureContributions(Resource):
             LOGGER.exception('Error getting entity. '
                              'Entity %s does not exist.', eid)
             return {
-                       'message': 'Entity {} does not exist'.format(eid)
-                   }, 400
+                'message': 'Entity {} does not exist'.format(eid)
+            }, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
         if entity_features is None:
             LOGGER.exception('Entity %s has no features. ',
                              eid)
             return {
-                       'message': 'Entity {} does not have features.'
-                           .format(eid)
-                   }, 400
+                'message': 'Entity {} does not have features.'
+                .format(eid)
+            }, 400
 
         # LOAD IN AND VALIDATE MODEL
         model = schema.Model.find_one(id=model_id)
@@ -441,9 +441,9 @@ class FeatureContributions(Resource):
             LOGGER.exception('Model %s explainer has not been trained. ',
                              model_id)
             return {
-                       'message': 'Model {} does not have trained explainer'
-                           .format(model_id)
-                   }, 400
+                'message': 'Model {} does not have trained explainer'
+                .format(model_id)
+            }, 400
 
         try:
             explainer = pickle.loads(explainer_bytes)
@@ -454,5 +454,4 @@ class FeatureContributions(Resource):
             contributions = lfe.get_contributions(entity_features, explainer)[0].tolist()
             keys = list(entity_features.keys())
             contribution_dict = dict(zip(keys, contributions))
-            return {"contributions":contribution_dict}, 200
-
+            return {"contributions": contribution_dict}, 200

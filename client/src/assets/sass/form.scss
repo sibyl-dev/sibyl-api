@@ -1,8 +1,9 @@
-@import './colors.scss';
+@import "./colors.scss";
 input {
     outline: none;
     font-size: 14px;
-    &[type='text'] {
+    &[type="text"],
+    &[type="number"] {
         height: 40px;
         border-radius: 8px;
         border: 1px solid $light-gray;
@@ -12,10 +13,18 @@ input {
     &::placeholder {
         color: $light-gray;
     }
+
+    &[type="number"] {
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    }
 }
 
 input {
-    &[type='checkbox'] {
+    &[type="checkbox"] {
         opacity: 0;
         position: absolute;
         z-index: -1;
@@ -34,7 +43,7 @@ input {
                 transition: all 0.2s ease-in-out;
 
                 &:before {
-                    content: '';
+                    content: "";
                     position: absolute;
                     left: 1px;
                     top: -4px;
@@ -48,7 +57,7 @@ input {
                 span {
                     background: #828282;
                     &:before {
-                        content: '\2713';
+                        content: "\2713";
                     }
                 }
             }
