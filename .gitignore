@@ -132,3 +132,7 @@ ENV/
 .mypy_cache/
 
 .idea/*
+
+dbdata/
+sibylapp/db/data
+sibyl/
