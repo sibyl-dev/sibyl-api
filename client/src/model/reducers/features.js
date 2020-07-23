@@ -5,6 +5,7 @@ const initialState = {
   isCategoriesLoading: true,
   categories: [],
   featuresImportances: {},
+  newFeatureScore: null,
 };
 
 function GET_FEATURES_DATA_REQUEST(nextState) {
@@ -41,6 +42,11 @@ function GET_FEATURES_IMPORTANCES_SUCCESS(nextState, action) {
   nextState.featuresImportances = action.result.importances;
 }
 
+// -----------------
+function UPDATE_FEATURE_PREDICTION_SUCCESS(nextState, { newFeatureScore }) {
+  nextState.newFeatureScore = newFeatureScore;
+}
+
 export default createReducer(initialState, {
   GET_FEATURES_DATA_REQUEST,
   GET_FEATURES_DATA_SUCCESS,
@@ -49,4 +55,5 @@ export default createReducer(initialState, {
   GET_CATEGORIES_SUCCESS,
   GET_CATEGORIES_FAILURE,
   GET_FEATURES_IMPORTANCES_SUCCESS,
+  UPDATE_FEATURE_PREDICTION_SUCCESS,
 });

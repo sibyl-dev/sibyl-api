@@ -1,5 +1,6 @@
 import { api } from '../api/api';
 import { modelID } from './entities';
+import { getCurrentEntityID } from '../selectors/entities';
 
 export function getCategoriesAction() {
   return function (dispatch) {
@@ -29,5 +30,21 @@ export function getFeaturesAction() {
     };
 
     dispatch(action).then(dispatch(getFeaturesImportanceAction()));
+  };
+}
+
+export function updateFeaturePredictionScore(featuresData) {
+  return function (dispatch, getState) {
+    const entityID = getCurrentEntityID(getState());
+    const payLoad = {
+      eid: entityID,
+      model_id: modelID,
+      changes: featuresData,
+    };
+
+    api
+      .post('/modified_prediction/', payLoad)
+      .then((response) => response.json())
+      .then((score) => dispatch({ type: 'UPDATE_FEATURE_PREDICTION_SUCCESS', newFeatureScore: score.prediction }));
   };
 }

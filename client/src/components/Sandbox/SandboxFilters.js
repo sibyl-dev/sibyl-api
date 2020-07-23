@@ -3,21 +3,20 @@ import Select from 'react-select';
 import { TrashIcon, QuestionIcon } from '../../assets/icons/icons';
 import ModalDialog from '../common/ModalDialog';
 import { connect } from 'react-redux';
-import { getIsFeaturesLoding, getFeaturesData } from '../../model/selectors/features';
+import { updateFeaturePredictionScore } from '../../model/actions/features';
+import { getIsFeaturesLoding, getFeaturesData, getUpdatedFeatureScore } from '../../model/selectors/features';
+import { getEntityScore } from '../../model/selectors/entities';
 
 const featureValues = [
-  { value: 'All', label: 'All', isFixed: true },
-  { value: 'True -> False', label: 'True -> False', isFixed: true },
-  { value: 'False -> True', label: 'False -> True', isFixed: true },
-  { value: 'Categorycal', label: 'Categorycal', isFixed: true },
-  { value: 'Numerical', label: 'Numerical', isFixed: true },
+  { value: '0', label: 'True -> False' },
+  { value: '1', label: 'False -> True' },
 ];
 
 const dropdownFeatures = (currentFeatures) => {
   const enhancedFeatures = [];
   currentFeatures.map((feature) => {
-    const { description, name } = feature;
-    enhancedFeatures.push({ value: name, label: description });
+    const { description, name, type } = feature;
+    enhancedFeatures.push({ value: name, label: description, type });
   });
   return enhancedFeatures;
 };
@@ -41,104 +40,44 @@ class SandboxFilters extends Component {
     });
   }
 
-  renderFeatureComponent() {
-    const { features, isFeaturesLoading } = this.props;
-    const { featuresCount, storedFeatures, storedValues } = this.state;
-
-    if (isFeaturesLoading) {
-      return; // loader should be returned here;
-    }
-
-    return featuresCount.map((currentFeature, featureIndex) => {
-      const selectedFeature = Object.keys(storedFeatures).length ? storedFeatures[currentFeature] : null;
-      const selectedValue = Object.keys(storedValues).length ? storedValues[currentFeature] : null;
-
-      return (
-        <tr key={`${currentFeature}_${featureIndex}`}>
-          <td width="3%" className="counter">
-            {featureIndex + 1}
-          </td>
-          <td width="50%">
-            <Select
-              isSearchable={true}
-              isMulti={false}
-              classNamePrefix="sibyl-select"
-              className="sibyl-select"
-              options={dropdownFeatures(features)}
-              placeholder="Select / Search a Feature"
-              onChange={(value) => this.onFeatureOptionUpdate(currentFeature, value)}
-              value={selectedFeature}
-            />
-          </td>
-          <td>
-            <div className="separator" />
-          </td>
-          <td width="30%">
-            <Select
-              isSearchable={false}
-              isMulti={false}
-              classNamePrefix="sibyl-select"
-              className="sibyl-select"
-              options={featureValues}
-              placeholder="Change Value"
-              onChange={(value) => this.onFeatureValueUpdate(currentFeature, value)}
-              value={selectedValue}
-            />
-          </td>
-          <td align="center" width="9%">
-            <ul className="feature-controls">
-              <li>
-                <button
-                  type="button"
-                  className="clean reset-feature"
-                  onClick={() => this.onResetFeature(currentFeature)}
-                >
-                  Reset
-                </button>
-              </li>
-              <li>
-                {featureIndex !== 0 && (
-                  <button type="button" className="clean trash" onClick={() => this.onRemoveFeature(currentFeature)}>
-                    <TrashIcon />
-                  </button>
-                )}
-              </li>
-            </ul>
-          </td>
-        </tr>
-      );
-    });
-  }
-
   onResetFeature(featureIndex) {
     this.setState({
       storedFeatures: {
         ...this.state.storedFeatures,
-        [featureIndex]: null,
+        [featureIndex]: { value: null },
       },
       storedValues: {
         ...this.state.storedValues,
-        [featureIndex]: null,
+        [featureIndex]: { value: null },
       },
     });
   }
 
   onFeatureOptionUpdate(featureIndex, featureValue) {
-    this.setState({
-      storedFeatures: {
-        ...this.state.storedFeatures,
-        [featureIndex]: featureValue,
+    this.setState(
+      {
+        storedFeatures: {
+          ...this.state.storedFeatures,
+          [featureIndex]: featureValue,
+        },
       },
-    });
+      () => {
+        this.onFeatureScoreUpdate();
+        this.renderFeatureValues(featureIndex);
+      },
+    );
   }
 
   onFeatureValueUpdate(valueIndex, value) {
-    this.setState({
-      storedValues: {
-        ...this.state.storedValues,
-        [valueIndex]: value,
+    this.setState(
+      {
+        storedValues: {
+          ...this.state.storedValues,
+          [valueIndex]: value,
+        },
       },
-    });
+      () => this.onFeatureScoreUpdate(),
+    );
   }
 
   onAddFeature() {
@@ -159,6 +98,32 @@ class SandboxFilters extends Component {
     delete storedFeatures[feature];
     delete storedValues[feature];
     this.setState({ featuresCount });
+  }
+
+  onFeatureScoreUpdate() {
+    const { storedFeatures, storedValues } = this.state;
+    const { updateScore } = this.props;
+
+    if (Object.keys(storedFeatures).length !== Object.keys(storedValues).length) {
+      return;
+    }
+
+    let storedData = [];
+    Object.keys(storedFeatures).map((feature) => {
+      const isPayloadCompleted =
+        storedFeatures[feature] !== null &&
+        storedFeatures[feature].value !== null &&
+        storedValues[feature] !== null &&
+        storedValues[feature].value !== null &&
+        storedValues[feature].value !== '';
+
+      if (!isPayloadCompleted) {
+        return;
+      }
+      storedData.push([storedFeatures[feature].value, storedValues[feature].value]);
+    });
+
+    storedData.length !== 0 && updateScore(storedData);
   }
 
   renderModal() {
@@ -186,8 +151,95 @@ class SandboxFilters extends Component {
     );
   }
 
+  renderFeatureValues(currentFeature) {
+    const { storedFeatures, storedValues } = this.state;
+    const featureType = storedFeatures[currentFeature] ? storedFeatures[currentFeature].type : null;
+    const selectedValue = Object.keys(storedValues).length ? storedValues[currentFeature] : null;
+
+    if (featureType === 'numeric') {
+      return (
+        <input
+          type="number"
+          onKeyUp={(event) => this.onFeatureValueUpdate(currentFeature, { value: event.target.value })}
+        />
+      );
+    }
+
+    return (
+      <Select
+        isSearchable={false}
+        isMulti={false}
+        classNamePrefix="sibyl-select"
+        className="sibyl-select"
+        options={featureValues}
+        placeholder="Change Value"
+        onChange={(value) => this.onFeatureValueUpdate(currentFeature, value)}
+        value={selectedValue}
+      />
+    );
+  }
+
+  renderFeatureComponent() {
+    const { features, isFeaturesLoading } = this.props;
+    const { featuresCount, storedFeatures, storedValues } = this.state;
+
+    if (isFeaturesLoading) {
+      return; // loader should be returned here;
+    }
+
+    return featuresCount.map((currentFeature, featureIndex) => {
+      const selectedFeature = Object.keys(storedFeatures).length ? storedFeatures[currentFeature] : null;
+
+      return (
+        <tr key={`${currentFeature}_${featureIndex}`}>
+          <td width="3%" className="counter">
+            {featureIndex + 1}
+          </td>
+          <td width="50%">
+            <Select
+              isSearchable={true}
+              isMulti={false}
+              classNamePrefix="sibyl-select"
+              className="sibyl-select"
+              options={dropdownFeatures(features)}
+              placeholder="Select / Search a Feature"
+              onChange={(value) => this.onFeatureOptionUpdate(currentFeature, value)}
+              value={selectedFeature}
+            />
+          </td>
+          <td>
+            <div className="separator" />
+          </td>
+          <td width="30%">{this.renderFeatureValues(currentFeature)}</td>
+          <td align="center" width="9%">
+            <ul className="feature-controls">
+              <li>
+                <button
+                  type="button"
+                  className="clean reset-feature"
+                  onClick={() => this.onResetFeature(currentFeature)}
+                >
+                  Reset
+                </button>
+              </li>
+              <li>
+                {featureIndex !== 0 && (
+                  <button type="button" className="clean trash" onClick={() => this.onRemoveFeature(currentFeature)}>
+                    <TrashIcon />
+                  </button>
+                )}
+              </li>
+            </ul>
+          </td>
+        </tr>
+      );
+    });
+  }
+
   render() {
     const { featuresCount, maxFeaturesCount } = this.state;
+    const { entityScore, updatedScore } = this.props;
+
     return (
       <div className="sandbox-filters">
         <header>
@@ -198,7 +250,7 @@ class SandboxFilters extends Component {
             </button>
           </h4>
           <div className="filter-tab">
-            Updated Prediction: <strong>19</strong>
+            Updated Prediction: <strong>{updatedScore !== null ? updatedScore : entityScore}</strong>
           </div>
         </header>
         <div className="filter-wrapper">
@@ -235,7 +287,14 @@ class SandboxFilters extends Component {
   }
 }
 
-export default connect((state) => ({
-  isFeaturesLoading: getIsFeaturesLoding(state),
-  features: getFeaturesData(state),
-}))(SandboxFilters);
+export default connect(
+  (state) => ({
+    isFeaturesLoading: getIsFeaturesLoding(state),
+    features: getFeaturesData(state),
+    entityScore: getEntityScore(state),
+    updatedScore: getUpdatedFeatureScore(state),
+  }),
+  (dispatch) => ({
+    updateScore: (featuresData) => dispatch(updateFeaturePredictionScore(featuresData)),
+  }),
+)(SandboxFilters);

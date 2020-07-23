@@ -132,3 +132,4 @@ ENV/
 .mypy_cache/
 
 .idea/*
+db/
