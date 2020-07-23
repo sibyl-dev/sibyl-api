@@ -1,0 +1,57 @@
+.tooltip {
+    position: absolute;
+    z-index: 1070;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+    text-decoration: none;
+    font-size: 0.875rem;
+    word-wrap: break-word;
+    opacity: 0;
+
+    &.show {
+        opacity: 0.9;
+    }
+
+    .fade {
+        transition: opacity 0.15s linear;
+    }
+
+    .arrow {
+        position: absolute;
+        display: block;
+        width: 0.8rem;
+        height: 0.4rem;
+
+        &:before {
+            position: absolute;
+            content: "";
+            border-color: transparent;
+            border-style: solid;
+        }
+    }
+}
+
+.tooltip-inner {
+    max-width: 200px;
+    padding: 6px 10px;
+    color: #fff;
+    text-align: center;
+    background-color: #4f4f4f;
+    border-radius: 0.25rem;
+    font-size: 14px;
+}
+
+.bs-tooltip-auto[x-placement^="top"],
+.bs-tooltip-top {
+    padding: 0.4rem 0;
+    .arrow {
+        bottom: 0;
+        &::before {
+            top: 0;
+            border-width: 0.4rem 0.4rem 0;
+            border-top-color: #4f4f4f;
+        }
+    }
+}
