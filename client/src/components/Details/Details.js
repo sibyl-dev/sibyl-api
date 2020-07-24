@@ -16,7 +16,7 @@ import {
 } from '../../model/selectors/entities';
 
 import {
-  getIsFeaturesLoding,
+  getIsFeaturesLoading,
   getFeaturesData,
   getIsCategoriesLoading,
   getFeatureCategories,
@@ -367,7 +367,7 @@ export class Details extends Component {
 
 export default connect((state) => ({
   isEntityLoading: getIsEntitiesLoading(state),
-  isFeaturesLoading: getIsFeaturesLoding(state),
+  isFeaturesLoading: getIsFeaturesLoading(state),
   isCategoriesLoading: getIsCategoriesLoading(state),
   isEntityContribLoading: getIsEntityContribLoading(state),
   entityData: getCurrentEntityData(state),

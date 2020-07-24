@@ -4,7 +4,7 @@ import { TrashIcon, QuestionIcon } from '../../assets/icons/icons';
 import ModalDialog from '../common/ModalDialog';
 import { connect } from 'react-redux';
 import { updateFeaturePredictionScore } from '../../model/actions/features';
-import { getIsFeaturesLoding, getFeaturesData, getUpdatedFeatureScore } from '../../model/selectors/features';
+import { getIsFeaturesLoading, getFeaturesData, getUpdatedFeatureScore } from '../../model/selectors/features';
 import { getEntityScore } from '../../model/selectors/entities';
 
 const featureValues = [
@@ -289,7 +289,7 @@ class SandboxFilters extends Component {
 
 export default connect(
   (state) => ({
-    isFeaturesLoading: getIsFeaturesLoding(state),
+    isFeaturesLoading: getIsFeaturesLoading(state),
     features: getFeaturesData(state),
     entityScore: getEntityScore(state),
     updatedScore: getUpdatedFeatureScore(state),

@@ -7,7 +7,7 @@ import SandboxFilters from './SandboxFilters';
 import { getModelPredictionAction } from '../../model/actions/features';
 import { getIsEntitiesLoading } from '../../model/selectors/entities';
 import {
-  getIsFeaturesLoding,
+  getIsFeaturesLoading,
   getModelPredictionData,
   getIsModelPredictLoading,
   getFeaturesData,
@@ -152,7 +152,7 @@ class Sandbox extends Component {
 export default connect(
   (state) => ({
     isEntityLoading: getIsEntitiesLoading(state),
-    isFeaturesLoading: getIsFeaturesLoding(state),
+    isFeaturesLoading: getIsFeaturesLoading(state),
     isModelPredictionLoading: getIsModelPredictLoading(state),
     features: getFeaturesData(state),
     modelPredictionData: getModelPredictionData(state),

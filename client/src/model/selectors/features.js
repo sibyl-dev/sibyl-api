@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 import { getCurrentEntityData } from './entities';
 
 export const getFeaturesImportances = (state) => state.features.featuresImportances;
-export const getIsFeaturesLoding = (state) => state.features.isFeaturesLoading;
+export const getIsFeaturesLoading = (state) => state.features.isFeaturesLoading;
 export const getIsCategoriesLoading = (state) => state.features.isCategoriesLoading;
 export const getFeatureCategories = (state) => state.features.categories;
 export const getCurrentFeatures = (state) => state.features.featuresData;
@@ -13,8 +13,8 @@ export const getReversedModelPrediction = (state) => state.features.reversedMode
 
 // @TODO - later sort
 export const getFeaturesImportancesSorted = createSelector(
-  [getFeaturesImportances, getIsFeaturesLoding],
-  (importances, isFeaturesLoading) => {
+  [getFeaturesImportances, getIsFeaturesLoading, getCurrentFeatures],
+  (importances, isFeaturesLoading, currentFeatures) => {
     const sortable = [];
 
     for (var importanceValues in importances) {
@@ -36,14 +36,14 @@ export const getFeaturesImportancesSorted = createSelector(
 );
 
 export const getFeaturesData = createSelector(
-  [getIsFeaturesLoding, getCurrentFeatures],
+  [getIsFeaturesLoading, getCurrentFeatures],
   (isFeaturesLoading, features) => {
     return !isFeaturesLoading ? features : [];
   },
 );
 
 export const getModelPredictionPayload = createSelector(
-  [getIsFeaturesLoding, getCurrentFeatures, getCurrentEntityData],
+  [getIsFeaturesLoading, getCurrentFeatures, getCurrentEntityData],
   (isFeaturesLoading, features, entityData) => {
     if (isFeaturesLoading) {
       return;
