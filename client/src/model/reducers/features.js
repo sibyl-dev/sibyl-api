@@ -6,6 +6,9 @@ const initialState = {
   categories: [],
   featuresImportances: {},
   newFeatureScore: null,
+  isModelPredictionLoading: true,
+  currendModelPredition: [],
+  reversedModelPrediction: [],
 };
 
 function GET_FEATURES_DATA_REQUEST(nextState) {
@@ -47,6 +50,23 @@ function UPDATE_FEATURE_PREDICTION_SUCCESS(nextState, { newFeatureScore }) {
   nextState.newFeatureScore = newFeatureScore;
 }
 
+// -----------------
+function GET_MODEL_PREDICTION_REQUEST(nextState) {
+  nextState.isModelPredictionLoading = true;
+}
+
+function GET_MODEL_PREDICTION_SUCCESS(nextState, { currentPrediction, reversedPrediction }) {
+  nextState.currendModelPredition = currentPrediction;
+  nextState.reversedModelPrediction = reversedPrediction;
+  nextState.isModelPredictionLoading = false;
+}
+
+function GET_MODEL_PREDICTION_FAILURE(nextState) {
+  nextState.isModelPredictionLoading = false;
+  nextState.currendModelPredition = [];
+  nextState.reversedModelPrediction = [];
+}
+
 export default createReducer(initialState, {
   GET_FEATURES_DATA_REQUEST,
   GET_FEATURES_DATA_SUCCESS,
@@ -56,4 +76,7 @@ export default createReducer(initialState, {
   GET_CATEGORIES_FAILURE,
   GET_FEATURES_IMPORTANCES_SUCCESS,
   UPDATE_FEATURE_PREDICTION_SUCCESS,
+  GET_MODEL_PREDICTION_REQUEST,
+  GET_MODEL_PREDICTION_SUCCESS,
+  GET_MODEL_PREDICTION_FAILURE,
 });
