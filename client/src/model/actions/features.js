@@ -1,6 +1,7 @@
 import { api } from '../api/api';
 import { modelID } from './entities';
 import { getCurrentEntityID } from '../selectors/entities';
+import { getModelPredictionPayload } from '../selectors/features';
 
 export function getCategoriesAction() {
   return function (dispatch) {
@@ -46,5 +47,41 @@ export function updateFeaturePredictionScore(featuresData) {
       .post('/modified_prediction/', payLoad)
       .then((response) => response.json())
       .then((score) => dispatch({ type: 'UPDATE_FEATURE_PREDICTION_SUCCESS', newFeatureScore: score.prediction }));
+  };
+}
+
+export function getModelPredictionAction() {
+  return function (dispatch, getState) {
+    const entityID = getCurrentEntityID(getState());
+    const { currentFeatures, reversedFeatures } = getModelPredictionPayload(getState());
+    const currentPredictionPayload = {
+      eid: entityID,
+      model_id: modelID,
+      changes: currentFeatures,
+    };
+
+    const reversePredictionPayload = {
+      eid: entityID,
+      model_id: modelID,
+      changes: reversedFeatures,
+    };
+    dispatch({ type: 'GET_MODEL_PREDICTION_REQUEST' });
+
+    api
+      .post('/single_change_predictions/', currentPredictionPayload)
+      .then((res) => res.json())
+      .then((prediction) => {
+        api
+          .post('/single_change_predictions/', reversePredictionPayload)
+          .then((response) => response.json())
+          .then((reversePredict) => {
+            dispatch({
+              type: 'GET_MODEL_PREDICTION_SUCCESS',
+              currentPrediction: prediction.changes,
+              reversedPrediction: reversePredict.changes,
+            });
+          });
+      })
+      .catch((error) => dispatch({ type: 'GET_MODEL_PREDICTION_FAILURE', error }));
   };
 }
