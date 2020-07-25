@@ -112,7 +112,7 @@ class SingleChangePredictions(Resource):
             value = change[1]
             modified = entity_features.copy()
             modified[feature] = value
-            prediction = model.predict(entity_features)[0]
+            prediction = model.predict(modified)[0]
             predictions.append([feature, prediction])
         return {"changes": predictions}
 
@@ -191,7 +191,7 @@ class ModifiedPrediction(Resource):
             feature = change[0]
             value = change[1]
             modified[feature] = value
-        prediction = model.predict(entity_features)[0]
+        prediction = model.predict(modified)[0]
         return {"prediction": prediction}
 
 
