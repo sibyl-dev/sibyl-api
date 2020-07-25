@@ -181,6 +181,7 @@ class SandboxFilters extends Component {
 
   renderFeatureComponent() {
     const { features, isFeaturesLoading } = this.props;
+    const { processedFeatures } = features;
     const { featuresCount, storedFeatures, storedValues } = this.state;
 
     if (isFeaturesLoading) {
@@ -201,7 +202,7 @@ class SandboxFilters extends Component {
               isMulti={false}
               classNamePrefix="sibyl-select"
               className="sibyl-select"
-              options={dropdownFeatures(features)}
+              options={dropdownFeatures(processedFeatures)}
               placeholder="Select / Search a Feature"
               onChange={(value) => this.onFeatureOptionUpdate(currentFeature, value)}
               value={selectedFeature}

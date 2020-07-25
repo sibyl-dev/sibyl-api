@@ -103,3 +103,17 @@
         }
     }
 }
+
+.dash-table {
+    &.sandbox {
+        tbody {
+            td.spaced {
+                &,
+                span,
+                svg {
+                    vertical-align: middle;
+                }
+            }
+        }
+    }
+}

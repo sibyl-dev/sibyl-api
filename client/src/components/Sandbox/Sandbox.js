@@ -26,6 +26,13 @@ const hayStack = [
 ];
 
 class Sandbox extends Component {
+  componentDidMount() {
+    const { isFeaturesLoading, getModelPrediction } = this.props;
+    if (!isFeaturesLoading) {
+      getModelPrediction();
+    }
+  }
+
   componentDidUpdate(prevProps) {
     const { isFeaturesLoading, getModelPrediction } = this.props;
     if (prevProps.isFeaturesLoading !== isFeaturesLoading && !isFeaturesLoading) {
@@ -72,7 +79,17 @@ class Sandbox extends Component {
 
   render() {
     const { modelPredictionData, isModelPredictionLoading, isFeaturesLoading, features } = this.props;
+    const { processedFeatures } = features;
     const isDataLoading = isFeaturesLoading || isModelPredictionLoading;
+
+    const arrowIconProps = (data) => {
+      const arrowClassName = data === 0 ? 'gray' : data > 0 ? 'red' : 'blue';
+      const arrowDir = data === 0 ? 'equal' : data > 0 ? 'up' : 'down';
+      return {
+        className: arrowClassName,
+        dir: arrowDir,
+      };
+    };
     return (
       <div className="component-wrapper">
         <SandboxFilters />
@@ -82,7 +99,7 @@ class Sandbox extends Component {
         <DashWrapper>
           {this.renderDashHeader()}
           <div className="sticky-wrapper scroll-style">
-            <table className="dash-table sticky-header">
+            <table className="dash-table sticky-header sandbox">
               <thead>
                 <tr>
                   <th className="align-center">Category</th>
@@ -90,7 +107,7 @@ class Sandbox extends Component {
                   <th className="align-right" width="15%">
                     Changed Value
                   </th>
-                  <th className="align-right" width="16%">
+                  <th className="align-right" width="185">
                     <ul className="sort">
                       <li>New Prediction</li>
                       <li>
@@ -114,7 +131,7 @@ class Sandbox extends Component {
               </thead>
               <tbody>
                 {(!isDataLoading &&
-                  features.map((currentFeature) => {
+                  processedFeatures.map((currentFeature) => {
                     if (modelPredictionData[currentFeature.name]) {
                       const currentData = modelPredictionData[currentFeature.name];
                       return (
@@ -128,7 +145,8 @@ class Sandbox extends Component {
                           <td className="align-right">{this.renderOrderValues(currentData)}</td>
                           <td className="align-right">{currentData.reversedScore}</td>
                           <td className="align-right spaced" valign="middle">
-                            <span>{currentData.currentDifference}</span> <ArrowIcon className="blue" />
+                            <span>{currentData.currentDifference}</span>
+                            <ArrowIcon {...arrowIconProps(currentData.currentDifference)} />
                           </td>
                         </tr>
                       );
