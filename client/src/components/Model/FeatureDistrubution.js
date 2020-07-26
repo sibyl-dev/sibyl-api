@@ -12,7 +12,7 @@ import {
 } from '../../model/selectors/entities';
 import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';
-import { getFeaturesData } from '../../model/selectors/features';
+import { getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
 import './Model.scss';
 
 // mock search result
@@ -64,8 +64,9 @@ class FeatureDistribution extends Component {
   }
 
   render() {
-    const { isDistributionsLoading, isEntityLoading, features } = this.props;
-    const isDataLoading = isDistributionsLoading || isEntityLoading;
+    const { isDistributionsLoading, isEntityLoading, features, isFeaturesLoading } = this.props;
+    const { processedFeatures } = features;
+    const isDataLoading = isDistributionsLoading || isEntityLoading || isFeaturesLoading;
 
     return (
       <div className="component-wrapper">
@@ -94,13 +95,19 @@ class FeatureDistribution extends Component {
                 </tr>
               </thead>
               <tbody>
-                {!isDataLoading &&
-                  features.map((currentFeature, featureIndex) => (
+                {(!isDataLoading &&
+                  processedFeatures.map((currentFeature, featureIndex) => (
                     <tr key={featureIndex}>
                       <td>{currentFeature.description}</td>
                       <td className="align-right">{this.drawDistribution(currentFeature.name)}</td>
                     </tr>
-                  ))}
+                  ))) || (
+                  <tr>
+                    <td colSpan="2">
+                      <p>Loading...</p>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -111,6 +118,7 @@ class FeatureDistribution extends Component {
 }
 
 export default connect((state) => ({
+  isFeaturesLoading: getIsFeaturesLoading(state),
   isEntityLoading: getIsEntitiesLoading(state),
   isDistributionsLoading: getIsEntityDistributionsLoading(state),
   distributions: getEntityDistributions(state),

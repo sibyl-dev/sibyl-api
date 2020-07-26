@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import DashWrapper from '../common/DashWrapper';
 import Search from '../common/Search';
 import { ProgressIndicator } from '../common/ProgressBars';
-import { getFeaturesImportances, getFeaturesData } from '../../model/selectors/features';
+import { getFeaturesImportances, getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
 
 // mock search result
 const hayStack = [
@@ -46,7 +46,8 @@ const getFeatureImportanceMax = (importances) => {
 };
 
 const FeatureImportance = (props) => {
-  const { featuresImportances, features } = props;
+  const { featuresImportances, features, isFeaturesLoading } = props;
+  const { processedFeatures } = features;
   const importanceMax = getFeatureImportanceMax(featuresImportances);
 
   return (
@@ -72,19 +73,20 @@ const FeatureImportance = (props) => {
               </tr>
             </thead>
             <tbody>
-              {features.map((currentFeature) => {
-                return (
-                  <tr key={currentFeature.name}>
-                    <td>{currentFeature.description}</td>
-                    <td>
-                      <ProgressIndicator
-                        maxValue={importanceMax}
-                        progressWidth={featuresImportances[currentFeature.name]}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
+              {!isFeaturesLoading &&
+                processedFeatures.map((currentFeature) => {
+                  return (
+                    <tr key={currentFeature.name}>
+                      <td>{currentFeature.description}</td>
+                      <td>
+                        <ProgressIndicator
+                          maxValue={importanceMax}
+                          progressWidth={featuresImportances[currentFeature.name]}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
@@ -94,6 +96,7 @@ const FeatureImportance = (props) => {
 };
 
 export default connect((state) => ({
+  isFeaturesLoading: getIsFeaturesLoading(state),
   features: getFeaturesData(state),
   featuresImportances: getFeaturesImportances(state),
 }))(FeatureImportance);

@@ -4,7 +4,7 @@ import { TrashIcon, QuestionIcon } from '../../assets/icons/icons';
 import ModalDialog from '../common/ModalDialog';
 import { connect } from 'react-redux';
 import { updateFeaturePredictionScore } from '../../model/actions/features';
-import { getIsFeaturesLoding, getFeaturesData, getUpdatedFeatureScore } from '../../model/selectors/features';
+import { getIsFeaturesLoading, getFeaturesData, getUpdatedFeatureScore } from '../../model/selectors/features';
 import { getEntityScore } from '../../model/selectors/entities';
 
 const featureValues = [
@@ -41,16 +41,19 @@ class SandboxFilters extends Component {
   }
 
   onResetFeature(featureIndex) {
-    this.setState({
-      storedFeatures: {
-        ...this.state.storedFeatures,
-        [featureIndex]: { value: null },
+    this.setState(
+      {
+        storedFeatures: {
+          ...this.state.storedFeatures,
+          [featureIndex]: { value: null },
+        },
+        storedValues: {
+          ...this.state.storedValues,
+          [featureIndex]: { value: null },
+        },
       },
-      storedValues: {
-        ...this.state.storedValues,
-        [featureIndex]: { value: null },
-      },
-    });
+      () => this.onFeatureScoreUpdate(),
+    );
   }
 
   onFeatureOptionUpdate(featureIndex, featureValue) {
@@ -76,7 +79,9 @@ class SandboxFilters extends Component {
           [valueIndex]: value,
         },
       },
-      () => this.onFeatureScoreUpdate(),
+      () => {
+        this.onFeatureScoreUpdate();
+      },
     );
   }
 
@@ -97,7 +102,7 @@ class SandboxFilters extends Component {
     featuresCount.splice(featuresCount.indexOf(feature), 1);
     delete storedFeatures[feature];
     delete storedValues[feature];
-    this.setState({ featuresCount });
+    this.setState({ featuresCount }, () => this.onFeatureScoreUpdate());
   }
 
   onFeatureScoreUpdate() {
@@ -114,6 +119,7 @@ class SandboxFilters extends Component {
         storedFeatures[feature] !== null &&
         storedFeatures[feature].value !== null &&
         storedValues[feature] !== null &&
+        storedValues[feature] !== undefined &&
         storedValues[feature].value !== null &&
         storedValues[feature].value !== '';
 
@@ -181,6 +187,7 @@ class SandboxFilters extends Component {
 
   renderFeatureComponent() {
     const { features, isFeaturesLoading } = this.props;
+    const { processedFeatures } = features;
     const { featuresCount, storedFeatures, storedValues } = this.state;
 
     if (isFeaturesLoading) {
@@ -201,7 +208,7 @@ class SandboxFilters extends Component {
               isMulti={false}
               classNamePrefix="sibyl-select"
               className="sibyl-select"
-              options={dropdownFeatures(features)}
+              options={dropdownFeatures(processedFeatures)}
               placeholder="Select / Search a Feature"
               onChange={(value) => this.onFeatureOptionUpdate(currentFeature, value)}
               value={selectedFeature}
@@ -289,7 +296,7 @@ class SandboxFilters extends Component {
 
 export default connect(
   (state) => ({
-    isFeaturesLoading: getIsFeaturesLoding(state),
+    isFeaturesLoading: getIsFeaturesLoading(state),
     features: getFeaturesData(state),
     entityScore: getEntityScore(state),
     updatedScore: getUpdatedFeatureScore(state),

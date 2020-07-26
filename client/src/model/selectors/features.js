@@ -1,8 +1,8 @@
 import { createSelector } from 'reselect';
-import { getCurrentEntityData } from './entities';
+import { getCurrentEntityData, getEntityContributions } from './entities';
 
 export const getFeaturesImportances = (state) => state.features.featuresImportances;
-export const getIsFeaturesLoding = (state) => state.features.isFeaturesLoading;
+export const getIsFeaturesLoading = (state) => state.features.isFeaturesLoading;
 export const getIsCategoriesLoading = (state) => state.features.isCategoriesLoading;
 export const getFeatureCategories = (state) => state.features.categories;
 export const getCurrentFeatures = (state) => state.features.featuresData;
@@ -13,8 +13,8 @@ export const getReversedModelPrediction = (state) => state.features.reversedMode
 
 // @TODO - later sort
 export const getFeaturesImportancesSorted = createSelector(
-  [getFeaturesImportances, getIsFeaturesLoding],
-  (importances, isFeaturesLoading) => {
+  [getFeaturesImportances, getIsFeaturesLoading, getCurrentFeatures],
+  (importances, isFeaturesLoading, currentFeatures) => {
     const sortable = [];
 
     for (var importanceValues in importances) {
@@ -36,14 +36,31 @@ export const getFeaturesImportancesSorted = createSelector(
 );
 
 export const getFeaturesData = createSelector(
-  [getIsFeaturesLoding, getCurrentFeatures],
-  (isFeaturesLoading, features) => {
-    return !isFeaturesLoading ? features : [];
+  [getIsFeaturesLoading, getCurrentFeatures, getCurrentEntityData, getEntityContributions],
+  (isFeaturesLoading, features, entityData, contributions) => {
+    const entityFeatures = entityData.features;
+    const processedFeatures = [];
+
+    features.map((currentFeature) => {
+      processedFeatures.push({
+        ...currentFeature,
+        [currentFeature.name]: entityFeatures[currentFeature.name],
+        contributionValue: contributions[currentFeature.name],
+      });
+    });
+
+    processedFeatures.sort((current, next) => next.contributionValue - current.contributionValue);
+
+    const positiveFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue > 0);
+    const negativeFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue < 0);
+    negativeFeaturesContrib.sort((current, next) => current.contributionValue - next.contributionValue);
+
+    return !isFeaturesLoading ? { processedFeatures, positiveFeaturesContrib, negativeFeaturesContrib } : [];
   },
 );
 
 export const getModelPredictionPayload = createSelector(
-  [getIsFeaturesLoding, getCurrentFeatures, getCurrentEntityData],
+  [getIsFeaturesLoading, getCurrentFeatures, getCurrentEntityData],
   (isFeaturesLoading, features, entityData) => {
     if (isFeaturesLoading) {
       return;
@@ -70,19 +87,14 @@ export const getModelPredictionData = createSelector(
     if (isModelLoading) {
       return;
     }
-    const { features } = entityData;
-    let currentPredictionData = {};
 
+    let currentPredictionData = {};
     currentPrediction.map((predictItem, predIndex) => {
       if (predictItem[0] === reversedPrediction[predIndex][0]) {
         const currentDiff = predictItem[1] - reversedPrediction[predIndex][1];
-        const reversedDiff = reversedPrediction[predIndex][1] - predictItem[1];
         const data = {
-          currentScore: predictItem[1],
           reversedScore: reversedPrediction[predIndex][1],
           currentDifference: currentDiff,
-          reversedDifference: reversedDiff,
-          currentOrder: features[predictItem[0]],
         };
         Object.assign(currentPredictionData, { ...currentPredictionData, [predictItem[0]]: data });
       }

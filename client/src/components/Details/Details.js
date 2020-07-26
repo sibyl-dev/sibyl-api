@@ -8,15 +8,10 @@ import { CategorySelect } from '../common/Form';
 import MetTooltip from '../common/MetTooltip';
 import { BiProgressBar } from '../common/ProgressBars';
 
-import {
-  getIsEntitiesLoading,
-  getCurrentEntityData,
-  getIsEntityContribLoading,
-  getEntityContributions,
-} from '../../model/selectors/entities';
+import { getIsEntitiesLoading, getCurrentEntityData, getIsEntityContribLoading } from '../../model/selectors/entities';
 
 import {
-  getIsFeaturesLoding,
+  getIsFeaturesLoading,
   getFeaturesData,
   getIsCategoriesLoading,
   getFeatureCategories,
@@ -57,7 +52,7 @@ export class Details extends Component {
   }
 
   renderSubheader() {
-    const { isViewSplitted, viewMode } = this.state;
+    const { viewMode } = this.state;
 
     return (
       <div className="sub-header">
@@ -131,10 +126,12 @@ export class Details extends Component {
   }
 
   // getting the contribution max value to set the min/max range (-range, range)
-  getContributionsMaxValue(stack) {
+  getContributionsMaxValue(features) {
     let maxRange = 0;
-    const values = Object.values(stack);
-    values.map((currentValue) => (maxRange = Math.max(maxRange, Math.abs(currentValue))));
+    features.map((currentFeature) => {
+      const { contributionValue } = currentFeature;
+      maxRange = maxRange > contributionValue ? maxRange : contributionValue;
+    });
     return maxRange;
   }
 
@@ -160,17 +157,11 @@ export class Details extends Component {
   };
 
   renderUnifiedMode() {
-    const {
-      isEntityLoading,
-      isFeaturesLoading,
-      isCategoriesLoading,
-      isEntityContribLoading,
-      features,
-      entityContributions,
-    } = this.props;
+    const { isEntityLoading, isFeaturesLoading, isCategoriesLoading, isEntityContribLoading, features } = this.props;
+    const { processedFeatures } = features;
 
     const isDataLoading = isEntityLoading || isFeaturesLoading || isCategoriesLoading || isEntityContribLoading;
-    const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue(entityContributions) : 0;
+    const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue(processedFeatures) : 0;
 
     return (
       <div>
@@ -195,15 +186,15 @@ export class Details extends Component {
               </tr>
             </thead>
             <tbody>
-              {!isDataLoading && features.length > 0 ? (
-                features.map((currentFeature, featureIndex) => (
+              {!isDataLoading && processedFeatures.length > 0 ? (
+                processedFeatures.map((currentFeature, featureIndex) => (
                   <tr key={featureIndex}>
                     <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
                     <td>{currentFeature.description}</td>
                     <td className="align-right">{this.getFeatureType(currentFeature)}</td>
                     <td className="align-center" width="145">
                       <BiProgressBar
-                        percentage={entityContributions[currentFeature.name]}
+                        percentage={currentFeature.contributionValue}
                         width="110"
                         height="8"
                         maxRange={maxContributionRange}
@@ -214,7 +205,7 @@ export class Details extends Component {
               ) : (
                 <tr>
                   <td colSpan="4">
-                    <p>No Entity Data</p>
+                    <p>Loading ...</p>
                   </td>
                 </tr>
               )}
@@ -226,9 +217,10 @@ export class Details extends Component {
   }
 
   renderSplitMode() {
-    const { features, isFeaturesLoading, isEntityContribLoading, entityContributions } = this.props;
+    const { features, isFeaturesLoading, isEntityContribLoading } = this.props;
+    const { processedFeatures, positiveFeaturesContrib, negativeFeaturesContrib } = features;
     const isDataLoading = isEntityContribLoading || isFeaturesLoading;
-    const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue(entityContributions) : 0;
+    const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue(processedFeatures) : 0;
 
     return (
       <div className="split-wrapper">
@@ -258,29 +250,26 @@ export class Details extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {!isDataLoading && features.length > 0 ? (
-                    features.map(
-                      (currentFeature, featureIndex) =>
-                        entityContributions[currentFeature.name] > 0 && (
-                          <tr key={featureIndex}>
-                            <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
-                            <td>{currentFeature.description}</td>
-                            <td className="align-right">{this.getFeatureType(currentFeature)}</td>
-                            <td className="align-center" width="145">
-                              <BiProgressBar
-                                percentage={entityContributions[currentFeature.name]}
-                                width="110"
-                                height="8"
-                                maxRange={maxContributionRange}
-                                isSingle
-                              />
-                            </td>
-                          </tr>
-                        ),
-                    )
+                  {!isDataLoading && positiveFeaturesContrib.length > 0 ? (
+                    positiveFeaturesContrib.map((currentFeature, featureIndex) => (
+                      <tr key={featureIndex}>
+                        <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
+                        <td>{currentFeature.description}</td>
+                        <td className="align-right">{this.getFeatureType(currentFeature)}</td>
+                        <td className="align-center" width="145">
+                          <BiProgressBar
+                            percentage={currentFeature.contributionValue}
+                            width="110"
+                            height="8"
+                            maxRange={maxContributionRange}
+                            isSingle
+                          />
+                        </td>
+                      </tr>
+                    ))
                   ) : (
                     <tr>
-                      <td colSpan="4">No Entity Data</td>
+                      <td colSpan="4">Loading...</td>
                     </tr>
                   )}
                 </tbody>
@@ -315,17 +304,17 @@ export class Details extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {!isDataLoading && features.length > 0 ? (
-                    features.map(
+                  {!isDataLoading && negativeFeaturesContrib.length > 0 ? (
+                    negativeFeaturesContrib.map(
                       (currentFeature, featureIndex) =>
-                        entityContributions[currentFeature.name] < 0 && (
+                        currentFeature.contributionValue < 0 && (
                           <tr key={featureIndex}>
                             <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
                             <td>{currentFeature.description}</td>
                             <td className="align-right">{this.getFeatureType(currentFeature)}</td>
                             <td className="align-center" width="145">
                               <BiProgressBar
-                                percentage={entityContributions[currentFeature.name]}
+                                percentage={currentFeature.contributionValue}
                                 width="110"
                                 height="8"
                                 maxRange={maxContributionRange}
@@ -337,7 +326,7 @@ export class Details extends Component {
                     )
                   ) : (
                     <tr>
-                      <td colSpan="4">No Entity Data</td>
+                      <td colSpan="4">Loading...</td>
                     </tr>
                   )}
                 </tbody>
@@ -367,11 +356,10 @@ export class Details extends Component {
 
 export default connect((state) => ({
   isEntityLoading: getIsEntitiesLoading(state),
-  isFeaturesLoading: getIsFeaturesLoding(state),
+  isFeaturesLoading: getIsFeaturesLoading(state),
   isCategoriesLoading: getIsCategoriesLoading(state),
   isEntityContribLoading: getIsEntityContribLoading(state),
   entityData: getCurrentEntityData(state),
   features: getFeaturesData(state),
   featureCategories: getFeatureCategories(state),
-  entityContributions: getEntityContributions(state),
 }))(Details);
