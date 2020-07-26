@@ -41,16 +41,19 @@ class SandboxFilters extends Component {
   }
 
   onResetFeature(featureIndex) {
-    this.setState({
-      storedFeatures: {
-        ...this.state.storedFeatures,
-        [featureIndex]: { value: null },
+    this.setState(
+      {
+        storedFeatures: {
+          ...this.state.storedFeatures,
+          [featureIndex]: { value: null },
+        },
+        storedValues: {
+          ...this.state.storedValues,
+          [featureIndex]: { value: null },
+        },
       },
-      storedValues: {
-        ...this.state.storedValues,
-        [featureIndex]: { value: null },
-      },
-    });
+      () => this.onFeatureScoreUpdate(),
+    );
   }
 
   onFeatureOptionUpdate(featureIndex, featureValue) {
@@ -76,7 +79,9 @@ class SandboxFilters extends Component {
           [valueIndex]: value,
         },
       },
-      () => this.onFeatureScoreUpdate(),
+      () => {
+        this.onFeatureScoreUpdate();
+      },
     );
   }
 
@@ -97,7 +102,7 @@ class SandboxFilters extends Component {
     featuresCount.splice(featuresCount.indexOf(feature), 1);
     delete storedFeatures[feature];
     delete storedValues[feature];
-    this.setState({ featuresCount });
+    this.setState({ featuresCount }, () => this.onFeatureScoreUpdate());
   }
 
   onFeatureScoreUpdate() {
@@ -114,6 +119,7 @@ class SandboxFilters extends Component {
         storedFeatures[feature] !== null &&
         storedFeatures[feature].value !== null &&
         storedValues[feature] !== null &&
+        storedValues[feature] !== undefined &&
         storedValues[feature].value !== null &&
         storedValues[feature].value !== '';
 
