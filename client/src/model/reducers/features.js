@@ -11,6 +11,8 @@ const initialState = {
   reversedModelPrediction: [],
   filterCriteria: '',
   sortContribDir: 'asc',
+  currentFilterValue: 'all',
+  filterValue: 'all',
 };
 
 function GET_FEATURES_DATA_REQUEST(nextState) {
@@ -70,6 +72,7 @@ function GET_MODEL_PREDICTION_FAILURE(nextState) {
 }
 
 // ------------------
+// when entering search string within the search field (filter by feature name)
 function SET_FILTER_CRITERIA(nextState, { filterCriteria }) {
   nextState.filterCriteria = filterCriteria;
 }
@@ -77,6 +80,12 @@ function SET_FILTER_CRITERIA(nextState, { filterCriteria }) {
 // ------------------
 function SET_FEATURE_CONTRIB_SORT_DIRECTION(nextState, { sortContribDir }) {
   nextState.sortContribDir = sortContribDir;
+}
+
+// ------------------
+// when selecting a filter value from dropdown (filter by feature type: numeric, binary)
+function SET_FILTER_VALUE(nextState, { filterValue }) {
+  nextState.filterValue = filterValue;
 }
 
 export default createReducer(initialState, {
@@ -93,4 +102,5 @@ export default createReducer(initialState, {
   GET_MODEL_PREDICTION_FAILURE,
   SET_FILTER_CRITERIA,
   SET_FEATURE_CONTRIB_SORT_DIRECTION,
+  SET_FILTER_VALUE,
 });
