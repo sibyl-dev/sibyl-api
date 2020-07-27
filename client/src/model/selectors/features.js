@@ -11,6 +11,7 @@ export const getIsModelPredictLoading = (state) => state.features.isModelPredict
 export const getCurrentModelPrediction = (state) => state.features.currendModelPredition;
 export const getReversedModelPrediction = (state) => state.features.reversedModelPrediction;
 export const getFeaturesFilterCriteria = (state) => state.features.filterCriteria;
+export const getSortingContribDir = (state) => state.features.sortContribDir;
 
 // @TODO - later sort
 export const getFeaturesImportancesSorted = createSelector(
@@ -37,8 +38,15 @@ export const getFeaturesImportancesSorted = createSelector(
 );
 
 export const getFeaturesData = createSelector(
-  [getIsFeaturesLoading, getCurrentFeatures, getCurrentEntityData, getEntityContributions, getFeaturesFilterCriteria],
-  (isFeaturesLoading, features, entityData, contributions, filterCriteria) => {
+  [
+    getIsFeaturesLoading,
+    getCurrentFeatures,
+    getCurrentEntityData,
+    getEntityContributions,
+    getFeaturesFilterCriteria,
+    getSortingContribDir,
+  ],
+  (isFeaturesLoading, features, entityData, contributions, filterCriteria, sortContribDir) => {
     const entityFeatures = entityData.features;
     let processedFeatures = [];
 
@@ -50,7 +58,11 @@ export const getFeaturesData = createSelector(
       });
     });
 
-    processedFeatures.sort((current, next) => next.contributionValue - current.contributionValue);
+    processedFeatures.sort((current, next) =>
+      sortContribDir === 'asc'
+        ? next.contributionValue - current.contributionValue
+        : current.contributionValue - next.contributionValue,
+    );
 
     if (filterCriteria) {
       const regex = new RegExp(filterCriteria, 'gi');
@@ -59,7 +71,12 @@ export const getFeaturesData = createSelector(
 
     const positiveFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue > 0);
     const negativeFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue < 0);
-    negativeFeaturesContrib.sort((current, next) => current.contributionValue - next.contributionValue);
+
+    negativeFeaturesContrib.sort((current, next) =>
+      sortContribDir === 'asc'
+        ? current.contributionValue - next.contributionValue
+        : next.contributionValue - current.contributionValue,
+    );
 
     return !isFeaturesLoading ? { processedFeatures, positiveFeaturesContrib, negativeFeaturesContrib } : [];
   },

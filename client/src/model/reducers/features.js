@@ -10,6 +10,7 @@ const initialState = {
   currendModelPredition: [],
   reversedModelPrediction: [],
   filterCriteria: '',
+  sortContribDir: 'asc',
 };
 
 function GET_FEATURES_DATA_REQUEST(nextState) {
@@ -46,12 +47,12 @@ function GET_FEATURES_IMPORTANCES_SUCCESS(nextState, action) {
   nextState.featuresImportances = action.result.importances;
 }
 
-// -----------------
+// ------------------
 function UPDATE_FEATURE_PREDICTION_SUCCESS(nextState, { newFeatureScore }) {
   nextState.newFeatureScore = newFeatureScore;
 }
 
-// -----------------
+// ------------------
 function GET_MODEL_PREDICTION_REQUEST(nextState) {
   nextState.isModelPredictionLoading = true;
 }
@@ -68,8 +69,14 @@ function GET_MODEL_PREDICTION_FAILURE(nextState) {
   nextState.reversedModelPrediction = [];
 }
 
+// ------------------
 function SET_FILTER_CRITERIA(nextState, { filterCriteria }) {
   nextState.filterCriteria = filterCriteria;
+}
+
+// ------------------
+function SET_FEATURE_CONTRIB_SORT_DIRECTION(nextState, { sortContribDir }) {
+  nextState.sortContribDir = sortContribDir;
 }
 
 export default createReducer(initialState, {
@@ -85,4 +92,5 @@ export default createReducer(initialState, {
   GET_MODEL_PREDICTION_SUCCESS,
   GET_MODEL_PREDICTION_FAILURE,
   SET_FILTER_CRITERIA,
+  SET_FEATURE_CONTRIB_SORT_DIRECTION,
 });

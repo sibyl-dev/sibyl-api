@@ -91,3 +91,9 @@ export function setFilterCriteriaAction(filterValue) {
     dispatch({ type: 'SET_FILTER_CRITERIA', filterCriteria: filterValue });
   };
 }
+
+export function sortFeaturesByContribAction(direction) {
+  return function (dispatch) {
+    dispatch({ type: 'SET_FEATURE_CONTRIB_SORT_DIRECTION', sortContribDir: direction });
+  };
+}
