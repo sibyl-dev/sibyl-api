@@ -7,7 +7,7 @@ import Search from '../common/Search';
 import { CategorySelect } from '../common/Form';
 import MetTooltip from '../common/MetTooltip';
 import { BiProgressBar } from '../common/ProgressBars';
-
+import { sortFeaturesByContribAction } from '../../model/actions/features';
 import { getIsEntitiesLoading, getCurrentEntityData, getIsEntityContribLoading } from '../../model/selectors/entities';
 
 import {
@@ -15,6 +15,7 @@ import {
   getFeaturesData,
   getIsCategoriesLoading,
   getFeatureCategories,
+  getSortingContribDir,
 } from '../../model/selectors/features';
 
 import './Details.scss';
@@ -147,6 +148,12 @@ export class Details extends Component {
     return <i className="bullet gray"></i>;
   };
 
+  setSortContribDirection() {
+    const { setSortContribDir, currentSortDir } = this.props;
+    const currentDirection = currentSortDir === 'asc' ? 'desc' : 'asc';
+    setSortContribDir(currentDirection);
+  }
+
   renderUnifiedMode() {
     const { isEntityLoading, isFeaturesLoading, isCategoriesLoading, isEntityContribLoading, features } = this.props;
     const { processedFeatures } = features;
@@ -168,7 +175,7 @@ export class Details extends Component {
                   <ul className="sort">
                     <li>Contribution</li>
                     <li>
-                      <button type="button">
+                      <button type="button" onClick={() => this.setSortContribDirection()}>
                         <SortIcon />
                       </button>
                     </li>
@@ -242,7 +249,7 @@ export class Details extends Component {
                       <ul className="sort">
                         <li>Contribution</li>
                         <li>
-                          <button type="button">
+                          <button type="button" onClick={() => this.setSortContribDirection()}>
                             <SortIcon />
                           </button>
                         </li>
@@ -306,7 +313,7 @@ export class Details extends Component {
                       <ul className="sort">
                         <li>Contribution</li>
                         <li>
-                          <button type="button">
+                          <button type="button" onClick={() => this.setSortContribDirection()}>
                             <SortIcon />
                           </button>
                         </li>
@@ -375,12 +382,18 @@ export class Details extends Component {
   }
 }
 
-export default connect((state) => ({
-  isEntityLoading: getIsEntitiesLoading(state),
-  isFeaturesLoading: getIsFeaturesLoading(state),
-  isCategoriesLoading: getIsCategoriesLoading(state),
-  isEntityContribLoading: getIsEntityContribLoading(state),
-  entityData: getCurrentEntityData(state),
-  features: getFeaturesData(state),
-  featureCategories: getFeatureCategories(state),
-}))(Details);
+export default connect(
+  (state) => ({
+    isEntityLoading: getIsEntitiesLoading(state),
+    isFeaturesLoading: getIsFeaturesLoading(state),
+    isCategoriesLoading: getIsCategoriesLoading(state),
+    isEntityContribLoading: getIsEntityContribLoading(state),
+    entityData: getCurrentEntityData(state),
+    features: getFeaturesData(state),
+    featureCategories: getFeatureCategories(state),
+    currentSortDir: getSortingContribDir(state),
+  }),
+  (dispatch) => ({
+    setSortContribDir: (direction) => dispatch(sortFeaturesByContribAction(direction)),
+  }),
+)(Details);
