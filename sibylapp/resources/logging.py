@@ -8,14 +8,21 @@ from sibylapp.utils import read_config
 
 LOGGER = logging.getLogger(__name__)
 
+log_headers = ["timestamp", "user_id", "event_element",
+               "event_action", "event_details"]
 
-def format_message(message):
+
+def format_message(event):
+    """
+    Formats as csv row
+    :param event: dictionary of event components
+    :return: formatted string for saving
+    """
     s = ""
-    for key in message:
-        s += key
-        s += ": "
-        s += message[key]
-        s += "\n"
+    for header in log_headers:
+        s += str(event[header])
+        s += ","
+
     s += "\n"
     return s
 
@@ -29,45 +36,73 @@ class Logging(Resource):
         @apiVersion 1.0.0
         @apiDescription Save information to the log.
 
-        @apiParam {String} log_message Message to add to log
+        @apiParam {Object} event Details of event to log
+        @apiParam {String} event.element Element that was interacted with
+        @apiParam {String="click", "type", "filter"} event.action
+                  click=clicked on button, type=filled in textbox,
+                  filter=filtered a table)
+        @apiParam {String} event.details Details of event
+                  (text that was put in textbox, filter that was selected)
+        @apiParam {Float} timestamp Timestamp of the event in seconds since
+                                    Epoch
         @apiParam {String} user_id Id of user using the app
-
-        @apiSuccess {String} timestamp Timestamp added to log
         """
-        timestamp = str(time.time())
         body = request.json
-        log_message = body.get("log_message")
-        if log_message is None:
-            LOGGER.warning('No message provided')
-            log_message = ""
-
-        try:
-            log_message = str(log_message)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {'message': str(e)}, 400
 
         user_id = body.get("user_id")
         if user_id is None:
             user_id = ""
-
         try:
             user_id = str(user_id)
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 400
 
-        full_message = {"user": user_id,
+        timestamp = body.get("timestamp")
+        if timestamp is None:
+            LOGGER.exception('Must provide timestamp to log')
+            return {'Must provide timestamp to log'}, 400
+        try:
+            timestamp = float(timestamp)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 400
+
+        event = body.get("event")
+        if event is None:
+            LOGGER.exception('Must provide event to log')
+            return {'Must provide event to log'}, 400
+        if "element" not in event:
+            LOGGER.exception('Event must have element')
+            return {'Event must have element'}, 400
+        if "action" not in event:
+            LOGGER.exception('Event must have action')
+            return {'Event must have action'}, 400
+
+        event_element = event["element"]
+        event_action = event["action"]
+        if "details" in event:
+            event_details = event["details"]
+        else:
+            event_details = ""
+
+        full_message = {"user_id": user_id,
                         "timestamp": timestamp,
-                        "message": log_message}
+                        "event_element": event_element,
+                        "event_action": event_action,
+                        "event_details": event_details
+                        }
 
         config = read_config('./sibylapp/config.yaml')
         log_file = config["log_filename"]
         try:
             with open(log_file, "a+") as f:
+                if f.tell() == 0:
+                    f.write(",".join(log_headers))
+                    f.write("\n")
                 f.write(format_message(full_message))
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 400
 
-        return {"timestamp":timestamp}
+        return {"message": "log successful"}, 200

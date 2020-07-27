@@ -23,4 +23,4 @@ TESTING: False
 
 # LOGGING
 #===================================
-log_filename: "screening_log.txt"
+log_filename: "screening_log.csv"
