@@ -10,6 +10,7 @@ export const getUpdatedFeatureScore = (state) => state.features.newFeatureScore;
 export const getIsModelPredictLoading = (state) => state.features.isModelPredictionLoading;
 export const getCurrentModelPrediction = (state) => state.features.currendModelPredition;
 export const getReversedModelPrediction = (state) => state.features.reversedModelPrediction;
+export const getFeaturesFilterCriteria = (state) => state.features.filterCriteria;
 
 // @TODO - later sort
 export const getFeaturesImportancesSorted = createSelector(
@@ -36,10 +37,10 @@ export const getFeaturesImportancesSorted = createSelector(
 );
 
 export const getFeaturesData = createSelector(
-  [getIsFeaturesLoading, getCurrentFeatures, getCurrentEntityData, getEntityContributions],
-  (isFeaturesLoading, features, entityData, contributions) => {
+  [getIsFeaturesLoading, getCurrentFeatures, getCurrentEntityData, getEntityContributions, getFeaturesFilterCriteria],
+  (isFeaturesLoading, features, entityData, contributions, filterCriteria) => {
     const entityFeatures = entityData.features;
-    const processedFeatures = [];
+    let processedFeatures = [];
 
     features.map((currentFeature) => {
       processedFeatures.push({
@@ -50,6 +51,11 @@ export const getFeaturesData = createSelector(
     });
 
     processedFeatures.sort((current, next) => next.contributionValue - current.contributionValue);
+
+    if (filterCriteria) {
+      const regex = new RegExp(filterCriteria, 'gi');
+      processedFeatures = processedFeatures.filter((currentFeature) => currentFeature.description.match(regex));
+    }
 
     const positiveFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue > 0);
     const negativeFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue < 0);

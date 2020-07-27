@@ -130,30 +130,39 @@ class Sandbox extends Component {
                 </tr>
               </thead>
               <tbody>
-                {(!isDataLoading &&
-                  processedFeatures.map((currentFeature) => {
-                    if (modelPredictionData[currentFeature.name]) {
-                      const currentData = modelPredictionData[currentFeature.name];
-                      return (
-                        <tr key={currentFeature.name}>
-                          <td className="align-center">
-                            <i className="bullet gray"></i>
-                          </td>
-                          <td>
-                            <span>{currentFeature.description}</span>
-                          </td>
-                          <td className="align-right">{this.renderOrderValues(currentData)}</td>
-                          <td className="align-right">{currentData.reversedScore}</td>
-                          <td className="align-right spaced" valign="middle">
-                            <span>{currentData.currentDifference}</span>
-                            <ArrowIcon {...arrowIconProps(currentData.currentDifference)} />
-                          </td>
-                        </tr>
-                      );
-                    }
-                  })) || (
+                {!isDataLoading ? (
+                  processedFeatures.length > 0 ? (
+                    processedFeatures.map((currentFeature) => {
+                      if (modelPredictionData[currentFeature.name]) {
+                        const currentData = modelPredictionData[currentFeature.name];
+                        return (
+                          <tr key={currentFeature.name}>
+                            <td className="align-center">
+                              <i className="bullet gray"></i>
+                            </td>
+                            <td>
+                              <span>{currentFeature.description}</span>
+                            </td>
+                            <td className="align-right">{this.renderOrderValues(currentData)}</td>
+                            <td className="align-right">{currentData.reversedScore}</td>
+                            <td className="align-right spaced" valign="middle">
+                              <span>{currentData.currentDifference}</span>
+                              <ArrowIcon {...arrowIconProps(currentData.currentDifference)} />
+                            </td>
+                          </tr>
+                        );
+                      }
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="align-center">
+                        <p>No Matches found....</p>
+                      </td>
+                    </tr>
+                  )
+                ) : (
                   <tr>
-                    <td colSpan="6">
+                    <td colSpan="6" className="align-center">
                       <p>Loading....</p>
                     </td>
                   </tr>

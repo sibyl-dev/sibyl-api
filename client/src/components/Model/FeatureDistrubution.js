@@ -95,15 +95,24 @@ class FeatureDistribution extends Component {
                 </tr>
               </thead>
               <tbody>
-                {(!isDataLoading &&
-                  processedFeatures.map((currentFeature, featureIndex) => (
-                    <tr key={featureIndex}>
-                      <td>{currentFeature.description}</td>
-                      <td className="align-right">{this.drawDistribution(currentFeature.name)}</td>
+                {!isDataLoading ? (
+                  processedFeatures.length > 0 ? (
+                    processedFeatures.map((currentFeature, featureIndex) => (
+                      <tr key={featureIndex}>
+                        <td>{currentFeature.description}</td>
+                        <td className="align-right">{this.drawDistribution(currentFeature.name)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="2" className="align-center">
+                        <p>No matches found...</p>
+                      </td>
                     </tr>
-                  ))) || (
+                  )
+                ) : (
                   <tr>
-                    <td colSpan="2">
+                    <td colSpan="2" className="align-center">
                       <p>Loading...</p>
                     </td>
                   </tr>
