@@ -12,6 +12,7 @@ export const getCurrentModelPrediction = (state) => state.features.currendModelP
 export const getReversedModelPrediction = (state) => state.features.reversedModelPrediction;
 export const getFeaturesFilterCriteria = (state) => state.features.filterCriteria;
 export const getSortingContribDir = (state) => state.features.sortContribDir;
+export const getSelectedFilterValues = (state) => state.features.filterValue;
 
 // @TODO - later sort
 export const getFeaturesImportancesSorted = createSelector(
@@ -45,8 +46,9 @@ export const getFeaturesData = createSelector(
     getEntityContributions,
     getFeaturesFilterCriteria,
     getSortingContribDir,
+    getSelectedFilterValues,
   ],
-  (isFeaturesLoading, features, entityData, contributions, filterCriteria, sortContribDir) => {
+  (isFeaturesLoading, features, entityData, contributions, filterCriteria, sortContribDir, filterValues) => {
     const entityFeatures = entityData.features;
     let processedFeatures = [];
 
@@ -63,6 +65,10 @@ export const getFeaturesData = createSelector(
         ? next.contributionValue - current.contributionValue
         : current.contributionValue - next.contributionValue,
     );
+
+    if (filterValues !== 'all') {
+      processedFeatures = processedFeatures.filter((currentFeature) => currentFeature.type === filterValues);
+    }
 
     if (filterCriteria) {
       const regex = new RegExp(filterCriteria, 'gi');

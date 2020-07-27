@@ -7,7 +7,7 @@ import Search from '../common/Search';
 import { CategorySelect } from '../common/Form';
 import MetTooltip from '../common/MetTooltip';
 import { BiProgressBar } from '../common/ProgressBars';
-import { sortFeaturesByContribAction } from '../../model/actions/features';
+import { sortFeaturesByContribAction, setFilterValuesAction } from '../../model/actions/features';
 import { getIsEntitiesLoading, getCurrentEntityData, getIsEntityContribLoading } from '../../model/selectors/entities';
 
 import {
@@ -16,17 +16,21 @@ import {
   getIsCategoriesLoading,
   getFeatureCategories,
   getSortingContribDir,
+  getSelectedFilterValues,
 } from '../../model/selectors/features';
 
 import './Details.scss';
 
-const mockValues = [
+const filterValues = [
+  { value: 'all', label: 'All', isFixed: true, selected: true },
+  { value: 'binary', label: 'True/False', isFixed: true },
+  { value: 'numeric', label: 'Numerical', isFixed: true },
+];
+
+const mockContribValues = [
   { value: 'All', label: 'All', isFixed: true },
-  { value: 'Value 1', label: 'Value 1', isFixed: true },
-  { value: 'Value 2', label: 'Value 2', isFixed: true },
-  { value: 'Value 3', label: 'Value 3', isFixed: true },
-  { value: 'Value 4', label: 'Value 4', isFixed: true },
-  { value: 'Value 5', label: 'Value 5', isFixed: true },
+  { value: 'binary', label: 'Value 1', isFixed: true },
+  { value: 'numeric', label: 'Value 2', isFixed: true },
 ];
 
 export class Details extends Component {
@@ -77,6 +81,7 @@ export class Details extends Component {
 
   renderDashHeader() {
     const { viewMode } = this.state;
+    const { setFilterValues, currentFilterValue } = this.props;
     return (
       <header className="dash-header">
         <ul className="dash-controls">
@@ -98,8 +103,10 @@ export class Details extends Component {
               isMulti={false}
               classNamePrefix="sibyl-select"
               className="sibyl-select"
-              options={mockValues}
+              options={filterValues}
               placeholder="All Values"
+              value={filterValues.filter((currentValue) => currentValue.value === currentFilterValue)}
+              onChange={(filterValue) => setFilterValues(filterValue.value)}
             />
           </li>
           <li>
@@ -108,7 +115,7 @@ export class Details extends Component {
               isMulti={false}
               classNamePrefix="sibyl-select"
               className="sibyl-select"
-              options={mockValues}
+              options={mockContribValues}
               placeholder="Contribution"
             />
           </li>
@@ -130,7 +137,7 @@ export class Details extends Component {
   getFeatureType = (feature) => {
     const { entityData } = this.props;
     const { name, type } = feature;
-    return type === 'numeric' ? (entityData.features[name] > 0 ? 'True' : 'False') : entityData.features[name];
+    return type === 'binary' ? (entityData.features[name] > 0 ? 'True' : 'False') : entityData.features[name];
   };
 
   getFeatureColor = (feature) => {
@@ -392,8 +399,10 @@ export default connect(
     features: getFeaturesData(state),
     featureCategories: getFeatureCategories(state),
     currentSortDir: getSortingContribDir(state),
+    currentFilterValue: getSelectedFilterValues(state),
   }),
   (dispatch) => ({
     setSortContribDir: (direction) => dispatch(sortFeaturesByContribAction(direction)),
+    setFilterValues: (filterValue) => dispatch(setFilterValuesAction(filterValue)),
   }),
 )(Details);

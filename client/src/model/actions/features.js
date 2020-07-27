@@ -97,3 +97,9 @@ export function sortFeaturesByContribAction(direction) {
     dispatch({ type: 'SET_FEATURE_CONTRIB_SORT_DIRECTION', sortContribDir: direction });
   };
 }
+
+export function setFilterValuesAction(filterValue) {
+  return function (dispatch) {
+    dispatch({ type: 'SET_FILTER_VALUE', filterValue });
+  };
+}
