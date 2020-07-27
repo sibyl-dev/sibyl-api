@@ -19,15 +19,6 @@ import {
 
 import './Details.scss';
 
-// mock search result
-const hayStack = [
-  { feature: 'Child in focus had a prior court active child welfare case' },
-  { feature: 'Child in focus is younger than 1 years old' },
-  { feature: 'Feature #1' },
-  { feature: 'Feature #2' },
-  { feature: 'Feature #3' },
-];
-
 const mockValues = [
   { value: 'All', label: 'All', isFixed: true },
   { value: 'Value 1', label: 'Value 1', isFixed: true },
@@ -57,7 +48,7 @@ export class Details extends Component {
     return (
       <div className="sub-header">
         <ul>
-          <li>{viewMode === 'split' ? <Search hayStack={hayStack} /> : <h4>Risk Factors List</h4>}</li>
+          <li>{viewMode === 'split' ? <Search /> : <h4>Risk Factors List</h4>}</li>
           <li>
             <MetTooltip title="Single Table View" placement="top">
               <button
@@ -91,7 +82,7 @@ export class Details extends Component {
           {viewMode === 'unified' && (
             <React.Fragment>
               <li>
-                <Search hayStack={hayStack} />
+                <Search />
               </li>
               <li className="sep" />
             </React.Fragment>
@@ -186,25 +177,35 @@ export class Details extends Component {
               </tr>
             </thead>
             <tbody>
-              {!isDataLoading && processedFeatures.length > 0 ? (
-                processedFeatures.map((currentFeature, featureIndex) => (
-                  <tr key={featureIndex}>
-                    <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
-                    <td>{currentFeature.description}</td>
-                    <td className="align-right">{this.getFeatureType(currentFeature)}</td>
-                    <td className="align-center" width="145">
-                      <BiProgressBar
-                        percentage={currentFeature.contributionValue}
-                        width="110"
-                        height="8"
-                        maxRange={maxContributionRange}
-                      />
+              {!isDataLoading ? (
+                processedFeatures.length > 0 ? (
+                  processedFeatures.map((currentFeature, featureIndex) => (
+                    <tr key={featureIndex}>
+                      <td className="align-center" width="12">
+                        {this.getFeatureColor(currentFeature.category)}
+                      </td>
+                      <td>{currentFeature.description}</td>
+                      <td className="align-right">{this.getFeatureType(currentFeature)}</td>
+                      <td className="align-center" width="145">
+                        <BiProgressBar
+                          percentage={currentFeature.contributionValue}
+                          width="110"
+                          height="8"
+                          maxRange={maxContributionRange}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="align-center">
+                      No Matches found...
                     </td>
                   </tr>
-                ))
+                )
               ) : (
                 <tr>
-                  <td colSpan="4">
+                  <td colSpan="4" className="align-center">
                     <p>Loading ...</p>
                   </td>
                 </tr>
@@ -250,26 +251,36 @@ export class Details extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {!isDataLoading && positiveFeaturesContrib.length > 0 ? (
-                    positiveFeaturesContrib.map((currentFeature, featureIndex) => (
-                      <tr key={featureIndex}>
-                        <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
-                        <td>{currentFeature.description}</td>
-                        <td className="align-right">{this.getFeatureType(currentFeature)}</td>
-                        <td className="align-center" width="145">
-                          <BiProgressBar
-                            percentage={currentFeature.contributionValue}
-                            width="110"
-                            height="8"
-                            maxRange={maxContributionRange}
-                            isSingle
-                          />
+                  {!isDataLoading ? (
+                    positiveFeaturesContrib.length > 0 ? (
+                      positiveFeaturesContrib.map((currentFeature, featureIndex) => (
+                        <tr key={featureIndex}>
+                          <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
+                          <td>{currentFeature.description}</td>
+                          <td className="align-right">{this.getFeatureType(currentFeature)}</td>
+                          <td className="align-center" width="145">
+                            <BiProgressBar
+                              percentage={currentFeature.contributionValue}
+                              width="110"
+                              height="8"
+                              maxRange={maxContributionRange}
+                              isSingle
+                            />
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className="align-center">
+                          No Matches found...
                         </td>
                       </tr>
-                    ))
+                    )
                   ) : (
                     <tr>
-                      <td colSpan="4">Loading...</td>
+                      <td colSpan="4" className="align-center">
+                        Loading...
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -304,29 +315,39 @@ export class Details extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {!isDataLoading && negativeFeaturesContrib.length > 0 ? (
-                    negativeFeaturesContrib.map(
-                      (currentFeature, featureIndex) =>
-                        currentFeature.contributionValue < 0 && (
-                          <tr key={featureIndex}>
-                            <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
-                            <td>{currentFeature.description}</td>
-                            <td className="align-right">{this.getFeatureType(currentFeature)}</td>
-                            <td className="align-center" width="145">
-                              <BiProgressBar
-                                percentage={currentFeature.contributionValue}
-                                width="110"
-                                height="8"
-                                maxRange={maxContributionRange}
-                                isSingle
-                              />
-                            </td>
-                          </tr>
-                        ),
+                  {!isDataLoading ? (
+                    negativeFeaturesContrib.length > 0 ? (
+                      negativeFeaturesContrib.map(
+                        (currentFeature, featureIndex) =>
+                          currentFeature.contributionValue < 0 && (
+                            <tr key={featureIndex}>
+                              <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
+                              <td>{currentFeature.description}</td>
+                              <td className="align-right">{this.getFeatureType(currentFeature)}</td>
+                              <td className="align-center" width="145">
+                                <BiProgressBar
+                                  percentage={currentFeature.contributionValue}
+                                  width="110"
+                                  height="8"
+                                  maxRange={maxContributionRange}
+                                  isSingle
+                                />
+                              </td>
+                            </tr>
+                          ),
+                      )
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className="align-center">
+                          No Matches found...
+                        </td>
+                      </tr>
                     )
                   ) : (
                     <tr>
-                      <td colSpan="4">Loading...</td>
+                      <td colSpan="4" className="align-center">
+                        Loading...
+                      </td>
                     </tr>
                   )}
                 </tbody>

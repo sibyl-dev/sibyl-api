@@ -9,6 +9,7 @@ const initialState = {
   isModelPredictionLoading: true,
   currendModelPredition: [],
   reversedModelPrediction: [],
+  filterCriteria: '',
 };
 
 function GET_FEATURES_DATA_REQUEST(nextState) {
@@ -67,6 +68,10 @@ function GET_MODEL_PREDICTION_FAILURE(nextState) {
   nextState.reversedModelPrediction = [];
 }
 
+function SET_FILTER_CRITERIA(nextState, { filterCriteria }) {
+  nextState.filterCriteria = filterCriteria;
+}
+
 export default createReducer(initialState, {
   GET_FEATURES_DATA_REQUEST,
   GET_FEATURES_DATA_SUCCESS,
@@ -79,4 +84,5 @@ export default createReducer(initialState, {
   GET_MODEL_PREDICTION_REQUEST,
   GET_MODEL_PREDICTION_SUCCESS,
   GET_MODEL_PREDICTION_FAILURE,
+  SET_FILTER_CRITERIA,
 });

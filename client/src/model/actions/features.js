@@ -85,3 +85,9 @@ export function getModelPredictionAction() {
       .catch((error) => dispatch({ type: 'GET_MODEL_PREDICTION_FAILURE', error }));
   };
 }
+
+export function setFilterCriteriaAction(filterValue) {
+  return function (dispatch) {
+    dispatch({ type: 'SET_FILTER_CRITERIA', filterCriteria: filterValue });
+  };
+}
