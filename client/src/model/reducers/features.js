@@ -13,6 +13,7 @@ const initialState = {
   sortContribDir: 'asc',
   currentFilterValue: 'all',
   filterValue: 'all',
+  filterCategs: null,
 };
 
 function GET_FEATURES_DATA_REQUEST(nextState) {
@@ -88,6 +89,11 @@ function SET_FILTER_VALUE(nextState, { filterValue }) {
   nextState.filterValue = filterValue;
 }
 
+// ------------------
+function SET_FILTER_CATEGS(nextState, { filterCategs }) {
+  nextState.filterCategs = filterCategs;
+}
+
 export default createReducer(initialState, {
   GET_FEATURES_DATA_REQUEST,
   GET_FEATURES_DATA_SUCCESS,
@@ -103,4 +109,5 @@ export default createReducer(initialState, {
   SET_FILTER_CRITERIA,
   SET_FEATURE_CONTRIB_SORT_DIRECTION,
   SET_FILTER_VALUE,
+  SET_FILTER_CATEGS,
 });

@@ -2,15 +2,6 @@ import React from 'react';
 import Select from 'react-select';
 import './styles/Form.scss';
 
-const categoryOptions = [
-  { value: 'All', label: 'All', icon: 'all', isFixed: true },
-  { value: 'Category 1', label: 'Category 1', icon: 'red', isFixed: true },
-  { value: 'Category 2', label: 'Category 2', icon: 'blue', isFixed: true },
-  { value: 'Category 3', label: 'Category 3', icon: 'green', isFixed: true },
-  { value: 'Category 4', label: 'Category 4', icon: 'red', isFixed: true },
-  { value: 'Category 5', label: 'Category 5', icon: 'orange', isFixed: true },
-];
-
 const valueSelect = [
   { value: 'All', label: 'All', isFixed: true },
   { value: 'True -> False', label: 'True -> False', isFixed: true },
@@ -29,7 +20,7 @@ const categoryFormatOptions = ({ label, icon }) => (
   <div className="select-row">
     {icon !== 'all' ? (
       <div>
-        <i className={`bullet ${icon}`} /> {label}{' '}
+        <i className="bullet" style={{ background: icon }} /> {label}
       </div>
     ) : (
       label
@@ -37,7 +28,19 @@ const categoryFormatOptions = ({ label, icon }) => (
   </div>
 );
 
-export const CategorySelect = () => {
+export const CategorySelect = (props) => {
+  const { options, onChange, value } = props;
+  const catOptions = [];
+
+  options.map((currentOption) => {
+    catOptions.push({
+      value: currentOption.name,
+      label: currentOption.name,
+      icon: currentOption.color,
+      isFixed: true,
+    });
+  });
+
   return (
     <Select
       isSearchable={false}
@@ -45,8 +48,10 @@ export const CategorySelect = () => {
       classNamePrefix="sibyl-select"
       className="sibyl-select"
       formatOptionLabel={categoryFormatOptions}
-      options={categoryOptions}
+      options={catOptions}
       placeholder="Category"
+      onChange={onChange}
+      value={value !== null && catOptions.filter((currentOpts) => value.indexOf(currentOpts.value) !== -1)}
     />
   );
 };

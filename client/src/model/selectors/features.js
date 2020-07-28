@@ -4,7 +4,7 @@ import { getCurrentEntityData, getEntityContributions } from './entities';
 export const getFeaturesImportances = (state) => state.features.featuresImportances;
 export const getIsFeaturesLoading = (state) => state.features.isFeaturesLoading;
 export const getIsCategoriesLoading = (state) => state.features.isCategoriesLoading;
-export const getFeatureCategories = (state) => state.features.categories;
+export const getCurrentFeatureCategories = (state) => state.features.categories;
 export const getCurrentFeatures = (state) => state.features.featuresData;
 export const getUpdatedFeatureScore = (state) => state.features.newFeatureScore;
 export const getIsModelPredictLoading = (state) => state.features.isModelPredictionLoading;
@@ -13,30 +13,7 @@ export const getReversedModelPrediction = (state) => state.features.reversedMode
 export const getFeaturesFilterCriteria = (state) => state.features.filterCriteria;
 export const getSortingContribDir = (state) => state.features.sortContribDir;
 export const getSelectedFilterValues = (state) => state.features.filterValue;
-
-// @TODO - later sort
-export const getFeaturesImportancesSorted = createSelector(
-  [getFeaturesImportances, getIsFeaturesLoading, getCurrentFeatures],
-  (importances, isFeaturesLoading, currentFeatures) => {
-    const sortable = [];
-
-    for (var importanceValues in importances) {
-      sortable.push([importanceValues, importances[importanceValues]]);
-    }
-
-    sortable.sort(function (a, b) {
-      return b[1] - a[1];
-    });
-
-    let sortedImportances = {};
-    sortable.forEach(function (item) {
-      sortedImportances[item[0]] = item[1];
-      console.log(item[1]);
-    });
-
-    return sortedImportances;
-  },
-);
+export const getFilterCategories = (state) => state.features.filterCategs;
 
 export const getFeaturesData = createSelector(
   [
@@ -47,8 +24,18 @@ export const getFeaturesData = createSelector(
     getFeaturesFilterCriteria,
     getSortingContribDir,
     getSelectedFilterValues,
+    getFilterCategories,
   ],
-  (isFeaturesLoading, features, entityData, contributions, filterCriteria, sortContribDir, filterValues) => {
+  (
+    isFeaturesLoading,
+    features,
+    entityData,
+    contributions,
+    filterCriteria,
+    sortContribDir,
+    filterValues,
+    filterCategs,
+  ) => {
     const entityFeatures = entityData.features;
     let processedFeatures = [];
 
@@ -73,6 +60,12 @@ export const getFeaturesData = createSelector(
     if (filterCriteria) {
       const regex = new RegExp(filterCriteria, 'gi');
       processedFeatures = processedFeatures.filter((currentFeature) => currentFeature.description.match(regex));
+    }
+
+    if (filterCategs !== null && filterCategs.length > 0) {
+      processedFeatures = processedFeatures.filter(
+        (currentFeature) => filterCategs.indexOf(currentFeature.category) !== -1,
+      );
     }
 
     const positiveFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue > 0);
@@ -120,7 +113,7 @@ export const getModelPredictionData = createSelector(
     let currentPredictionData = {};
     currentPrediction.map((predictItem, predIndex) => {
       if (predictItem[0] === reversedPrediction[predIndex][0]) {
-        const currentDiff = predictItem[1] - reversedPrediction[predIndex][1];
+        const currentDiff = reversedPrediction[predIndex][1] - predictItem[1];
         const data = {
           reversedScore: reversedPrediction[predIndex][1],
           currentDifference: currentDiff,
@@ -129,5 +122,38 @@ export const getModelPredictionData = createSelector(
       }
     });
     return currentPredictionData;
+  },
+);
+
+export const getFeatureCategories = createSelector(
+  [getIsCategoriesLoading, getCurrentFeatureCategories],
+  (isCategoriesLoading, featureCategories) => {
+    if (isCategoriesLoading) {
+      return [];
+    }
+    const categoryColors = [
+      '#eb5757',
+      '#f2994a',
+      '#21b0b0',
+      '#27ae60',
+      '#9B51E0',
+      '#2D9CDB',
+      '#FF5146',
+      '#219653',
+      '#2F80ED',
+      '#9e09b8',
+      '#b8096e',
+      '#2e6ccb',
+    ];
+    let categories = [];
+
+    featureCategories.map((currentCategory, catIndex) => {
+      categories.push({
+        name: currentCategory.name,
+        color: currentCategory.color === null ? categoryColors[catIndex] : currentCategory.color,
+      });
+    });
+
+    return categories;
   },
 );

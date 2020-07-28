@@ -7,7 +7,11 @@ import Search from '../common/Search';
 import { CategorySelect } from '../common/Form';
 import MetTooltip from '../common/MetTooltip';
 import { BiProgressBar } from '../common/ProgressBars';
-import { sortFeaturesByContribAction, setFilterValuesAction } from '../../model/actions/features';
+import {
+  sortFeaturesByContribAction,
+  setFilterValuesAction,
+  setFilterCategsAction,
+} from '../../model/actions/features';
 import { getIsEntitiesLoading, getCurrentEntityData, getIsEntityContribLoading } from '../../model/selectors/entities';
 
 import {
@@ -17,12 +21,13 @@ import {
   getFeatureCategories,
   getSortingContribDir,
   getSelectedFilterValues,
+  getFilterCategories,
 } from '../../model/selectors/features';
 
 import './Details.scss';
 
 const filterValues = [
-  { value: 'all', label: 'All', isFixed: true, selected: true },
+  { value: 'all', label: 'All Values', isFixed: true },
   { value: 'binary', label: 'True/False', isFixed: true },
   { value: 'numeric', label: 'Numerical', isFixed: true },
 ];
@@ -81,46 +86,59 @@ export class Details extends Component {
 
   renderDashHeader() {
     const { viewMode } = this.state;
-    const { setFilterValues, currentFilterValue } = this.props;
-    return (
-      <header className="dash-header">
-        <ul className="dash-controls">
-          {viewMode === 'unified' && (
-            <React.Fragment>
-              <li>
-                <Search />
-              </li>
-              <li className="sep" />
-            </React.Fragment>
-          )}
+    const {
+      setFilterValues,
+      currentFilterValue,
+      isCategoriesLoading,
+      featureCategories,
+      setFilterCategories,
+      currentFilterCategs,
+    } = this.props;
 
-          <li>
-            <CategorySelect />
-          </li>
-          <li>
-            <Select
-              isSearchable={false}
-              isMulti={false}
-              classNamePrefix="sibyl-select"
-              className="sibyl-select"
-              options={filterValues}
-              placeholder="All Values"
-              value={filterValues.filter((currentValue) => currentValue.value === currentFilterValue)}
-              onChange={(filterValue) => setFilterValues(filterValue.value)}
-            />
-          </li>
-          <li>
-            <Select
-              isSearchable={false}
-              isMulti={false}
-              classNamePrefix="sibyl-select"
-              className="sibyl-select"
-              options={mockContribValues}
-              placeholder="Contribution"
-            />
-          </li>
-        </ul>
-      </header>
+    return (
+      !isCategoriesLoading && (
+        <header className="dash-header">
+          <ul className="dash-controls">
+            {viewMode === 'unified' && (
+              <React.Fragment>
+                <li>
+                  <Search />
+                </li>
+                <li className="sep" />
+              </React.Fragment>
+            )}
+            <li>
+              <CategorySelect
+                options={featureCategories}
+                onChange={(selectedCategories) => setFilterCategories(selectedCategories)}
+                value={currentFilterCategs}
+              />
+            </li>
+            <li>
+              <Select
+                isSearchable={false}
+                isMulti={false}
+                classNamePrefix="sibyl-select"
+                className="sibyl-select"
+                options={filterValues}
+                placeholder="All Values"
+                value={filterValues.filter((currentValue) => currentValue.value === currentFilterValue)}
+                onChange={(filterValue) => setFilterValues(filterValue.value)}
+              />
+            </li>
+            <li>
+              <Select
+                isSearchable={false}
+                isMulti={false}
+                classNamePrefix="sibyl-select"
+                className="sibyl-select"
+                options={mockContribValues}
+                placeholder="Contribution"
+              />
+            </li>
+          </ul>
+        </header>
+      )
     );
   }
 
@@ -140,7 +158,7 @@ export class Details extends Component {
     return type === 'binary' ? (entityData.features[name] > 0 ? 'True' : 'False') : entityData.features[name];
   };
 
-  getFeatureColor = (feature) => {
+  getFeatureCathegoryColor = (feature) => {
     const { featureCategories } = this.props;
     const colorIndex = featureCategories.findIndex((currentCategory) => currentCategory.name === feature);
 
@@ -148,11 +166,7 @@ export class Details extends Component {
       return null;
     }
 
-    if (featureCategories[colorIndex].color !== null) {
-      return <i className="bullet" style={{ background: `#${featureCategories[colorIndex].color}` }}></i>;
-    }
-
-    return <i className="bullet gray"></i>;
+    return <i className="bullet" style={{ background: featureCategories[colorIndex].color }}></i>;
   };
 
   setSortContribDirection() {
@@ -196,7 +210,7 @@ export class Details extends Component {
                   processedFeatures.map((currentFeature, featureIndex) => (
                     <tr key={featureIndex}>
                       <td className="align-center" width="12">
-                        {this.getFeatureColor(currentFeature.category)}
+                        {this.getFeatureCathegoryColor(currentFeature.category)}
                       </td>
                       <td>{currentFeature.description}</td>
                       <td className="align-right">{this.getFeatureType(currentFeature)}</td>
@@ -269,7 +283,7 @@ export class Details extends Component {
                     positiveFeaturesContrib.length > 0 ? (
                       positiveFeaturesContrib.map((currentFeature, featureIndex) => (
                         <tr key={featureIndex}>
-                          <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
+                          <td className="align-center">{this.getFeatureCathegoryColor(currentFeature.category)}</td>
                           <td>{currentFeature.description}</td>
                           <td className="align-right">{this.getFeatureType(currentFeature)}</td>
                           <td className="align-center" width="145">
@@ -335,7 +349,7 @@ export class Details extends Component {
                         (currentFeature, featureIndex) =>
                           currentFeature.contributionValue < 0 && (
                             <tr key={featureIndex}>
-                              <td className="align-center">{this.getFeatureColor(currentFeature.category)}</td>
+                              <td className="align-center">{this.getFeatureCathegoryColor(currentFeature.category)}</td>
                               <td>{currentFeature.description}</td>
                               <td className="align-right">{this.getFeatureType(currentFeature)}</td>
                               <td className="align-center" width="145">
@@ -400,9 +414,11 @@ export default connect(
     featureCategories: getFeatureCategories(state),
     currentSortDir: getSortingContribDir(state),
     currentFilterValue: getSelectedFilterValues(state),
+    currentFilterCategs: getFilterCategories(state),
   }),
   (dispatch) => ({
     setSortContribDir: (direction) => dispatch(sortFeaturesByContribAction(direction)),
     setFilterValues: (filterValue) => dispatch(setFilterValuesAction(filterValue)),
+    setFilterCategories: (filterCategs) => dispatch(setFilterCategsAction(filterCategs)),
   }),
 )(Details);

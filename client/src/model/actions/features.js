@@ -103,3 +103,10 @@ export function setFilterValuesAction(filterValue) {
     dispatch({ type: 'SET_FILTER_VALUE', filterValue });
   };
 }
+
+export function setFilterCategsAction(categs) {
+  return function (dispatch) {
+    const filterCategs = categs !== null ? categs.map((currentCateg) => currentCateg.value) : null;
+    dispatch({ type: 'SET_FILTER_CATEGS', filterCategs });
+  };
+}

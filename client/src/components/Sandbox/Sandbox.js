@@ -4,13 +4,17 @@ import { DashWrapper } from '../common/DashWrapper';
 import { CategorySelect, ValueSelect, DiffSelect } from '../common/Form';
 import Search from '../common/Search';
 import SandboxFilters from './SandboxFilters';
-import { getModelPredictionAction } from '../../model/actions/features';
+import { getModelPredictionAction, setFilterCategsAction } from '../../model/actions/features';
 import { getIsEntitiesLoading } from '../../model/selectors/entities';
 import {
   getIsFeaturesLoading,
   getModelPredictionData,
   getIsModelPredictLoading,
   getFeaturesData,
+  getSelectedFilterValues,
+  getIsCategoriesLoading,
+  getFeatureCategories,
+  getFilterCategories,
 } from '../../model/selectors/features';
 
 import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
@@ -41,24 +45,32 @@ class Sandbox extends Component {
   }
 
   renderDashHeader() {
+    const { featureCategories, setFilterCategories, isCategoriesLoading, currentFilterCategs } = this.props;
+
     return (
-      <header className="dash-header">
-        <ul className="dash-controls">
-          <li>
-            <Search hayStack={hayStack} />
-          </li>
-          <li className="sep" />
-          <li>
-            <CategorySelect />
-          </li>
-          <li>
-            <ValueSelect />
-          </li>
-          <li>
-            <DiffSelect />
-          </li>
-        </ul>
-      </header>
+      !isCategoriesLoading && (
+        <header className="dash-header">
+          <ul className="dash-controls">
+            <li>
+              <Search hayStack={hayStack} />
+            </li>
+            <li className="sep" />
+            <li>
+              <CategorySelect
+                options={featureCategories}
+                onChange={(selectedCategories) => setFilterCategories(selectedCategories)}
+                value={currentFilterCategs}
+              />
+            </li>
+            <li>
+              <ValueSelect />
+            </li>
+            <li>
+              <DiffSelect />
+            </li>
+          </ul>
+        </header>
+      )
     );
   }
 
@@ -77,6 +89,17 @@ class Sandbox extends Component {
     return currentFeature.currentOrder === 0 ? trueRow : falseRow;
   }
 
+  getFeatureCathegoryColor = (feature) => {
+    const { featureCategories } = this.props;
+    const colorIndex = featureCategories.findIndex((currentCategory) => currentCategory.name === feature);
+
+    if (colorIndex === -1) {
+      return null;
+    }
+
+    return <i className="bullet" style={{ background: featureCategories[colorIndex].color }}></i>;
+  };
+
   render() {
     const { modelPredictionData, isModelPredictionLoading, isFeaturesLoading, features } = this.props;
     const { processedFeatures } = features;
@@ -90,6 +113,7 @@ class Sandbox extends Component {
         dir: arrowDir,
       };
     };
+
     return (
       <div className="component-wrapper">
         <SandboxFilters />
@@ -133,13 +157,11 @@ class Sandbox extends Component {
                 {!isDataLoading ? (
                   processedFeatures.length > 0 ? (
                     processedFeatures.map((currentFeature) => {
-                      if (modelPredictionData[currentFeature.name]) {
+                      if (modelPredictionData[currentFeature.name] !== undefined) {
                         const currentData = modelPredictionData[currentFeature.name];
                         return (
                           <tr key={currentFeature.name}>
-                            <td className="align-center">
-                              <i className="bullet gray"></i>
-                            </td>
+                            <td className="align-center">{this.getFeatureCathegoryColor(currentFeature.category)}</td>
                             <td>
                               <span>{currentFeature.description}</span>
                             </td>
@@ -183,8 +205,13 @@ export default connect(
     isModelPredictionLoading: getIsModelPredictLoading(state),
     features: getFeaturesData(state),
     modelPredictionData: getModelPredictionData(state),
+    featureCategories: getFeatureCategories(state),
+    isCategoriesLoading: getIsCategoriesLoading(state),
+    currentFilterValue: getSelectedFilterValues(state),
+    currentFilterCategs: getFilterCategories(state),
   }),
   (dispatch) => ({
     getModelPrediction: () => dispatch(getModelPredictionAction()),
+    setFilterCategories: (filterCategs) => dispatch(setFilterCategsAction(filterCategs)),
   }),
 )(Sandbox);
