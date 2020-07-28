@@ -14,6 +14,16 @@ export const getFeaturesFilterCriteria = (state) => state.features.filterCriteri
 export const getSortingContribDir = (state) => state.features.sortContribDir;
 export const getSelectedFilterValues = (state) => state.features.filterValue;
 export const getFilterCategories = (state) => state.features.filterCategs;
+export const getCurrentContribFilters = (state) => state.features.contribFilters;
+
+const maxNegativeContrib = -0.000000001;
+
+const roundContribValue = (contribValue) => {
+  if (contribValue >= 0) {
+    return contribValue;
+  }
+  return contribValue < maxNegativeContrib ? contribValue : 0;
+};
 
 export const getFeaturesData = createSelector(
   [
@@ -25,6 +35,7 @@ export const getFeaturesData = createSelector(
     getSortingContribDir,
     getSelectedFilterValues,
     getFilterCategories,
+    getCurrentContribFilters,
   ],
   (
     isFeaturesLoading,
@@ -35,6 +46,7 @@ export const getFeaturesData = createSelector(
     sortContribDir,
     filterValues,
     filterCategs,
+    contribFilters,
   ) => {
     const entityFeatures = entityData.features;
     let processedFeatures = [];
@@ -43,7 +55,7 @@ export const getFeaturesData = createSelector(
       processedFeatures.push({
         ...currentFeature,
         [currentFeature.name]: entityFeatures[currentFeature.name],
-        contributionValue: contributions[currentFeature.name],
+        contributionValue: roundContribValue(contributions[currentFeature.name]),
       });
     });
 
@@ -76,6 +88,14 @@ export const getFeaturesData = createSelector(
         ? current.contributionValue - next.contributionValue
         : next.contributionValue - current.contributionValue,
     );
+
+    if (contribFilters === 'risk') {
+      processedFeatures = negativeFeaturesContrib;
+    }
+
+    if (contribFilters === 'protective') {
+      processedFeatures = positiveFeaturesContrib;
+    }
 
     return !isFeaturesLoading ? { processedFeatures, positiveFeaturesContrib, negativeFeaturesContrib } : [];
   },

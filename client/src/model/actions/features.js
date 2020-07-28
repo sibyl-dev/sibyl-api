@@ -110,3 +110,9 @@ export function setFilterCategsAction(categs) {
     dispatch({ type: 'SET_FILTER_CATEGS', filterCategs });
   };
 }
+
+export function setContribFiltersAction(contribFilters) {
+  return function (dispatch) {
+    dispatch({ type: 'SET_CONTRIB_FILTERS', contribFilters });
+  };
+}

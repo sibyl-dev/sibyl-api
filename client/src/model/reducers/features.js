@@ -14,6 +14,7 @@ const initialState = {
   currentFilterValue: 'all',
   filterValue: 'all',
   filterCategs: null,
+  contribFilters: 'all',
 };
 
 function GET_FEATURES_DATA_REQUEST(nextState) {
@@ -94,6 +95,11 @@ function SET_FILTER_CATEGS(nextState, { filterCategs }) {
   nextState.filterCategs = filterCategs;
 }
 
+// ------------------
+function SET_CONTRIB_FILTERS(nextState, { contribFilters }) {
+  nextState.contribFilters = contribFilters;
+}
+
 export default createReducer(initialState, {
   GET_FEATURES_DATA_REQUEST,
   GET_FEATURES_DATA_SUCCESS,
@@ -110,4 +116,5 @@ export default createReducer(initialState, {
   SET_FEATURE_CONTRIB_SORT_DIRECTION,
   SET_FILTER_VALUE,
   SET_FILTER_CATEGS,
+  SET_CONTRIB_FILTERS,
 });
