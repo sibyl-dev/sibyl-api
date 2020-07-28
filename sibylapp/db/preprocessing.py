@@ -12,7 +12,6 @@ import random
 
 def insert_features(filepath):
     features_df = pd.read_csv(filepath)
-    features_df = features_df.drop("importance", axis="columns")
 
     references = [schema.Category.find_one(name=cat) for cat in features_df['category']]
     features_df.drop('category', axis='columns')
@@ -28,7 +27,7 @@ def insert_categories(filepath):
     schema.Category.insert_many(items)
 
 
-def insert_model(model_filepath, features_filepath, explainer_filepath, set_doc):
+def insert_model(model_filepath, importance_filepath, explainer_filepath, set_doc):
     def load_model(model_filepath):
         """
         Load the model
@@ -55,11 +54,9 @@ def insert_model(model_filepath, features_filepath, explainer_filepath, set_doc)
                   "Works by multiplying features by weights"
     performance = "98.7% accurate"
 
-    features_df = pd.read_csv(features_filepath)
-    features_df = features_df.drop(["description","category","type"],
-                                   axis="columns")
-    features_df = features_df.set_index("name")
-    importances = features_df.to_dict(orient='dict')["importance"]
+    importance_df = pd.read_csv(importance_filepath)
+    importance_df = importance_df.set_index("name")
+    importances = importance_df.to_dict(orient='dict')["importance"]
 
     with open(explainer_filepath, "rb") as f:
         explainer = f.read()
@@ -133,17 +130,17 @@ if __name__ == "__main__":
 
     insert_cases(os.path.join(directory, "cases.csv"))
 
-    insert_entities(os.path.join(directory, "entity_features.csv"),
+    eids = insert_entities(os.path.join(directory, "entity_features.csv"),
                     os.path.join(directory, "weights.csv"),
                     include_cases=True)
-    eids = insert_entities(os.path.join(directory, "dataset.csv"),
-                           os.path.join(directory, "weights.csv"),
-                           counter_start=17, num=100000)
+    #eids = insert_entities(os.path.join(directory, "dataset.csv"),
+    #                       os.path.join(directory, "weights.csv"),
+    #                       counter_start=17, num=100000)
     set_doc = insert_training_set(eids)
     insert_categories(os.path.join(directory, "categories.csv"))
     insert_features(os.path.join(directory, "features.csv"))
     insert_model(os.path.join(directory, "weights.csv"),
-                 os.path.join(directory, "features.csv"),
+                 os.path.join(directory, "importances.csv"),
                  os.path.join(directory, "explainer"),
                  set_doc)
     test_validation()

@@ -20,3 +20,7 @@ server_port: 3000 # the port that flask application is running on
 ENV: "production" # development, production, testing
 DEBUG: False
 TESTING: False
+
+# LOGGING
+#===================================
+log_filename: "screening_log.csv"
