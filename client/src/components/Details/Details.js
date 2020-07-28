@@ -11,6 +11,7 @@ import {
   sortFeaturesByContribAction,
   setFilterValuesAction,
   setFilterCategsAction,
+  setContribFiltersAction,
 } from '../../model/actions/features';
 import { getIsEntitiesLoading, getCurrentEntityData, getIsEntityContribLoading } from '../../model/selectors/entities';
 
@@ -22,6 +23,7 @@ import {
   getSortingContribDir,
   getSelectedFilterValues,
   getFilterCategories,
+  getCurrentContribFilters,
 } from '../../model/selectors/features';
 
 import './Details.scss';
@@ -32,10 +34,10 @@ const filterValues = [
   { value: 'numeric', label: 'Numerical', isFixed: true },
 ];
 
-const mockContribValues = [
-  { value: 'All', label: 'All', isFixed: true },
-  { value: 'binary', label: 'Value 1', isFixed: true },
-  { value: 'numeric', label: 'Value 2', isFixed: true },
+const contribFilters = [
+  { value: 'all', label: 'All Contributions', isFixed: true },
+  { value: 'risk', label: 'Risk', isFixed: true },
+  { value: 'protective', label: 'Protective', isFixed: true },
 ];
 
 export class Details extends Component {
@@ -44,6 +46,10 @@ export class Details extends Component {
     this.state = {
       viewMode: 'unified',
     };
+  }
+
+  componentWillUnmount() {
+    this.props.setContribFilters('all');
   }
 
   changeViewMode(viewMode) {
@@ -93,6 +99,8 @@ export class Details extends Component {
       featureCategories,
       setFilterCategories,
       currentFilterCategs,
+      setContribFilters,
+      currentContribFilters,
     } = this.props;
 
     return (
@@ -132,8 +140,10 @@ export class Details extends Component {
                 isMulti={false}
                 classNamePrefix="sibyl-select"
                 className="sibyl-select"
-                options={mockContribValues}
+                options={contribFilters}
                 placeholder="Contribution"
+                onChange={(contribFilters) => setContribFilters(contribFilters.value)}
+                value={contribFilters.filter((currentContrib) => currentContrib.value === currentContribFilters)}
               />
             </li>
           </ul>
@@ -147,7 +157,7 @@ export class Details extends Component {
     let maxRange = 0;
     features.map((currentFeature) => {
       const { contributionValue } = currentFeature;
-      maxRange = maxRange > contributionValue ? maxRange : contributionValue;
+      maxRange = maxRange > Math.abs(contributionValue) ? maxRange : Math.abs(contributionValue);
     });
     return maxRange;
   }
@@ -181,7 +191,6 @@ export class Details extends Component {
 
     const isDataLoading = isEntityLoading || isFeaturesLoading || isCategoriesLoading || isEntityContribLoading;
     const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue(processedFeatures) : 0;
-
     return (
       <div>
         {this.renderDashHeader()}
@@ -415,10 +424,12 @@ export default connect(
     currentSortDir: getSortingContribDir(state),
     currentFilterValue: getSelectedFilterValues(state),
     currentFilterCategs: getFilterCategories(state),
+    currentContribFilters: getCurrentContribFilters(state),
   }),
   (dispatch) => ({
     setSortContribDir: (direction) => dispatch(sortFeaturesByContribAction(direction)),
     setFilterValues: (filterValue) => dispatch(setFilterValuesAction(filterValue)),
     setFilterCategories: (filterCategs) => dispatch(setFilterCategsAction(filterCategs)),
+    setContribFilters: (contribFilters) => dispatch(setContribFiltersAction(contribFilters)),
   }),
 )(Details);
