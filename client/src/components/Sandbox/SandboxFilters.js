@@ -4,7 +4,7 @@ import { TrashIcon, QuestionIcon } from '../../assets/icons/icons';
 import ModalDialog from '../common/ModalDialog';
 import { connect } from 'react-redux';
 import { updateFeaturePredictionScore } from '../../model/actions/features';
-import { getIsFeaturesLoading, getFeaturesData, getUpdatedFeatureScore } from '../../model/selectors/features';
+import { getIsFeaturesLoading, getUpdatedFeatureScore, getCurrentFeatures } from '../../model/selectors/features';
 import { getEntityScore } from '../../model/selectors/entities';
 
 const featureValues = [
@@ -187,8 +187,7 @@ class SandboxFilters extends Component {
 
   renderFeatureComponent() {
     const { features, isFeaturesLoading } = this.props;
-    const { processedFeatures } = features;
-    const { featuresCount, storedFeatures, storedValues } = this.state;
+    const { featuresCount, storedFeatures } = this.state;
 
     if (isFeaturesLoading) {
       return; // loader should be returned here;
@@ -208,7 +207,7 @@ class SandboxFilters extends Component {
               isMulti={false}
               classNamePrefix="sibyl-select"
               className="sibyl-select"
-              options={dropdownFeatures(processedFeatures)}
+              options={dropdownFeatures(features)}
               placeholder="Select / Search a Feature"
               onChange={(value) => this.onFeatureOptionUpdate(currentFeature, value)}
               value={selectedFeature}
@@ -297,7 +296,7 @@ class SandboxFilters extends Component {
 export default connect(
   (state) => ({
     isFeaturesLoading: getIsFeaturesLoading(state),
-    features: getFeaturesData(state),
+    features: getCurrentFeatures(state),
     entityScore: getEntityScore(state),
     updatedScore: getUpdatedFeatureScore(state),
   }),

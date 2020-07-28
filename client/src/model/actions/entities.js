@@ -78,10 +78,10 @@ export function getEntityAction() {
       promise: api.get(`/entities/${entityID}/`),
     };
 
-    dispatch(action)
-      .then(dispatch(getCategoriesAction()))
-      .then(dispatch(getFeaturesAction()))
-      .then(dispatch(getEntityContributionsAction()))
-      .then(dispatch(getEntityPredictionScoreAction()));
+    dispatch(action);
+    dispatch(getCategoriesAction());
+    dispatch(getFeaturesAction());
+    dispatch(getEntityContributionsAction());
+    dispatch(getEntityPredictionScoreAction());
   };
 }

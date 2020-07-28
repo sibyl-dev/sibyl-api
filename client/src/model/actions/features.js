@@ -30,7 +30,9 @@ export function getFeaturesAction() {
       promise: api.get('/features/'),
     };
 
-    dispatch(action).then(dispatch(getFeaturesImportanceAction()));
+    dispatch(action)
+      .then(dispatch(getFeaturesImportanceAction()))
+      .then(() => dispatch(getModelPredictionAction()));
   };
 }
 
@@ -114,5 +116,21 @@ export function setFilterCategsAction(categs) {
 export function setContribFiltersAction(contribFilters) {
   return function (dispatch) {
     dispatch({ type: 'SET_CONTRIB_FILTERS', contribFilters });
+  };
+}
+
+export function setSortPredDirection(direction) {
+  return function (dispatch) {
+    dispatch({ type: 'SET_SORT_DIFF_DIR', sortDiffDirection: null }).then(() =>
+      dispatch({ type: 'SET_SORT_PRED_DIR', sortPredDirection: direction }),
+    );
+  };
+}
+
+export function setSortDiffDirectionAction(direction) {
+  return function (dispatch) {
+    dispatch({ type: 'SET_SORT_PRED_DIR', sortPredDirection: null }).then(() =>
+      dispatch({ type: 'SET_SORT_DIFF_DIR', sortDiffDirection: direction }),
+    );
   };
 }

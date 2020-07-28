@@ -4,17 +4,24 @@ import { DashWrapper } from '../common/DashWrapper';
 import { CategorySelect, ValueSelect, DiffSelect } from '../common/Form';
 import Search from '../common/Search';
 import SandboxFilters from './SandboxFilters';
-import { getModelPredictionAction, setFilterCategsAction } from '../../model/actions/features';
+import {
+  getModelPredictionAction,
+  setFilterCategsAction,
+  setSortPredDirection,
+  setSortDiffDirectionAction,
+  setContribFiltersAction,
+} from '../../model/actions/features';
 import { getIsEntitiesLoading } from '../../model/selectors/entities';
 import {
   getIsFeaturesLoading,
-  getModelPredictionData,
   getIsModelPredictLoading,
-  getFeaturesData,
   getSelectedFilterValues,
   getIsCategoriesLoading,
   getFeatureCategories,
   getFilterCategories,
+  getCurrentPredSortDir,
+  getReversedModelPredFeatures,
+  getCurrentSortDiffDir,
 } from '../../model/selectors/features';
 
 import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
@@ -30,20 +37,6 @@ const hayStack = [
 ];
 
 class Sandbox extends Component {
-  componentDidMount() {
-    const { isFeaturesLoading, getModelPrediction } = this.props;
-    if (!isFeaturesLoading) {
-      getModelPrediction();
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    const { isFeaturesLoading, getModelPrediction } = this.props;
-    if (prevProps.isFeaturesLoading !== isFeaturesLoading && !isFeaturesLoading) {
-      getModelPrediction();
-    }
-  }
-
   renderDashHeader() {
     const { featureCategories, setFilterCategories, isCategoriesLoading, currentFilterCategs } = this.props;
 
@@ -85,8 +78,7 @@ class Sandbox extends Component {
         False -&gt; <b>True</b>
       </span>
     );
-
-    return currentFeature.currentOrder === 0 ? trueRow : falseRow;
+    return currentFeature === 0 ? trueRow : falseRow;
   }
 
   getFeatureCathegoryColor = (feature) => {
@@ -100,9 +92,20 @@ class Sandbox extends Component {
     return <i className="bullet" style={{ background: featureCategories[colorIndex].color }}></i>;
   };
 
+  setSortContribDirection() {
+    const { currentPredSortDir, setSortPrediction } = this.props;
+    const currentDirection = currentPredSortDir === 'asc' ? 'des' : 'asc';
+    setSortPrediction(currentDirection);
+  }
+
+  setSortDiffDirection() {
+    const { currentDiffDirection, setSortDiffDirection } = this.props;
+    const currentDirection = currentDiffDirection === 'asc' ? 'desc' : 'asc';
+    setSortDiffDirection(currentDirection);
+  }
+
   render() {
-    const { modelPredictionData, isModelPredictionLoading, isFeaturesLoading, features } = this.props;
-    const { processedFeatures } = features;
+    const { isModelPredictionLoading, isFeaturesLoading, modelPredFeatures } = this.props;
     const isDataLoading = isFeaturesLoading || isModelPredictionLoading;
 
     const arrowIconProps = (data) => {
@@ -135,7 +138,7 @@ class Sandbox extends Component {
                     <ul className="sort">
                       <li>New Prediction</li>
                       <li>
-                        <button type="button">
+                        <button type="button" onClick={() => this.setSortContribDirection()} disabled={isDataLoading}>
                           <SortIcon />
                         </button>
                       </li>
@@ -145,7 +148,7 @@ class Sandbox extends Component {
                     <ul className="sort">
                       <li>Difference</li>
                       <li>
-                        <button type="button">
+                        <button type="button" onClick={() => this.setSortDiffDirection()} disabled={isDataLoading}>
                           <SortIcon />
                         </button>
                       </li>
@@ -154,26 +157,26 @@ class Sandbox extends Component {
                 </tr>
               </thead>
               <tbody>
-                {!isDataLoading ? (
-                  processedFeatures.length > 0 ? (
-                    processedFeatures.map((currentFeature) => {
-                      if (modelPredictionData[currentFeature.name] !== undefined) {
-                        const currentData = modelPredictionData[currentFeature.name];
-                        return (
-                          <tr key={currentFeature.name}>
-                            <td className="align-center">{this.getFeatureCathegoryColor(currentFeature.category)}</td>
-                            <td>
-                              <span>{currentFeature.description}</span>
-                            </td>
-                            <td className="align-right">{this.renderOrderValues(currentData)}</td>
-                            <td className="align-right">{currentData.reversedScore}</td>
-                            <td className="align-right spaced" valign="middle">
-                              <span>{currentData.currentDifference}</span>
-                              <ArrowIcon {...arrowIconProps(currentData.currentDifference)} />
-                            </td>
-                          </tr>
-                        );
-                      }
+                {!isModelPredictionLoading ? (
+                  modelPredFeatures.length > 0 ? (
+                    modelPredFeatures.map((currentFeature) => {
+                      const { name, description, category, modelPrediction } = currentFeature;
+                      const { reversedScore, currentDifference } = modelPrediction;
+
+                      return (
+                        <tr key={name}>
+                          <td className="align-center">{this.getFeatureCathegoryColor(category)}</td>
+                          <td>
+                            <span>{description}</span>
+                          </td>
+                          <td className="align-right">{this.renderOrderValues(currentFeature[name])}</td>
+                          <td className="align-right">{reversedScore}</td>
+                          <td className="align-right spaced" valign="middle">
+                            <span>{currentDifference}</span>
+                            <ArrowIcon {...arrowIconProps(currentDifference)} />
+                          </td>
+                        </tr>
+                      );
                     })
                   ) : (
                     <tr>
@@ -203,15 +206,19 @@ export default connect(
     isEntityLoading: getIsEntitiesLoading(state),
     isFeaturesLoading: getIsFeaturesLoading(state),
     isModelPredictionLoading: getIsModelPredictLoading(state),
-    features: getFeaturesData(state),
-    modelPredictionData: getModelPredictionData(state),
     featureCategories: getFeatureCategories(state),
     isCategoriesLoading: getIsCategoriesLoading(state),
     currentFilterValue: getSelectedFilterValues(state),
     currentFilterCategs: getFilterCategories(state),
+    currentPredSortDir: getCurrentPredSortDir(state),
+    modelPredFeatures: getReversedModelPredFeatures(state),
+    currentDiffDirection: getCurrentSortDiffDir(state),
   }),
   (dispatch) => ({
     getModelPrediction: () => dispatch(getModelPredictionAction()),
     setFilterCategories: (filterCategs) => dispatch(setFilterCategsAction(filterCategs)),
+    setSortPrediction: (direction) => dispatch(setSortPredDirection(direction)),
+    setSortDiffDirection: (direction) => dispatch(setSortDiffDirectionAction(direction)),
+    setContribFilters: (filters) => dispatch(setContribFiltersAction(filters)),
   }),
 )(Sandbox);
