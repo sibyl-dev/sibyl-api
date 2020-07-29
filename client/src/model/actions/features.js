@@ -140,3 +140,9 @@ export function setModelPredictFilterValueAction(value) {
     dispatch({ type: 'SET_MODEL_PRED_FILTER_VALUE', modelPredFilterValue: value });
   };
 }
+
+export function setModelPredDiffFilterAction(filterValue) {
+  return function (dispatch) {
+    dispatch({ type: 'SET_MODEL_PRED_DIFF_FILTER', diffFilterVal: filterValue });
+  };
+}
