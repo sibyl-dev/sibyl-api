@@ -126,9 +126,7 @@ class Events(Resource):
         if entity is None:
             LOGGER.exception('Error getting entity. '
                              'Entity %s does not exist.', eid)
-            return {
-                       'message': 'Entity {} does not exist'.format(eid)
-                   }, 400
+            return {'message': 'Entity {} does not exist'.format(eid)}, 400
         events = get_events(entity)
         return events, 200
 
