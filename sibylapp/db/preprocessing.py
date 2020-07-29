@@ -6,10 +6,10 @@ import numpy as np
 import pandas as pd
 from mongoengine import connect
 from pymongo import MongoClient
-from sklearn.linear_model import Lasso
 
 from sibylapp.db import schema
 from sibylapp.db.utils import ModelWrapper
+from sklearn.linear_model import Lasso
 
 
 def insert_features(filepath):

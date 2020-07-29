@@ -7,9 +7,9 @@ import pickle
 import pandas as pd
 from flask import request
 from flask_restful import Resource
+
 from sibyl import global_explanation as ge
 from sibyl import local_feature_explanation as lfe
-
 from sibylapp.db import schema
 
 LOGGER = logging.getLogger(__name__)
