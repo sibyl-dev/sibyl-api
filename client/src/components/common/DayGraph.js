@@ -81,7 +81,7 @@ class DayGraph extends Component {
     const { data } = this.props;
     return (
       <svg width={dimensions.width} height={dimensions.height} id={`_${this.props.graphIndex}`}>
-        <g className="axis-x"></g>
+        <g className="axis-x" />
         <g className="data">{this.drawData(data)}</g>
       </svg>
     );

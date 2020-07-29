@@ -26,7 +26,7 @@ const renderLeftPercentage = (xCoord, yCoord, width, height) => {
 };
 
 const drawBar = (percentage, maxRange, width, height, isSingle) => {
-  var xCoord = d3
+  let xCoord = d3
     .scaleLinear()
     .domain([isSingle ? 0 : -maxRange, maxRange])
     .range([0, width]);

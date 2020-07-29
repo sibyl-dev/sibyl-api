@@ -74,7 +74,7 @@ class Sandbox extends Component {
             <tbody>
               <tr>
                 <td className="align-center">
-                  <i className="bullet red"></i>
+                  <i className="bullet red" />
                 </td>
                 <td>
                   <span>Child in focus had a prior court active child welfare case</span>
@@ -90,7 +90,7 @@ class Sandbox extends Component {
 
               <tr>
                 <td className="align-center">
-                  <i className="bullet orange"></i>
+                  <i className="bullet orange" />
                 </td>
                 <td>
                   <span>Child in focus is younger than 1 years old</span>
@@ -106,7 +106,7 @@ class Sandbox extends Component {
 
               <tr>
                 <td className="align-center">
-                  <i className="bullet green"></i>
+                  <i className="bullet green" />
                 </td>
                 <td>
                   <span>Feature #1</span>

@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import DashWrapper from './DashWrapper';
 import { setActivePageAction } from '../../model/actions/sidebar';
-import { connect } from 'react-redux';
 
 class NotFound extends Component {
   componentDidMount() {
     this.props.setActivePage('Not found');
   }
+
   render() {
     return (
       <div className="component-wrapper">

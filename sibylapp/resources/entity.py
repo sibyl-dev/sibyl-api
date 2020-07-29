@@ -1,8 +1,9 @@
 import logging
 
-from flask_restful import Resource
-from sibylapp.db import schema
 from flask import request
+from flask_restful import Resource
+
+from sibylapp.db import schema
 
 LOGGER = logging.getLogger(__name__)
 
@@ -61,13 +62,13 @@ class Entity(Resource):
                 "id": "18",
                 "features": [
                     {"name": "f1", "value": "v1"},
-                    ... 
+                    ...
                     {"name": "fn", "value": "vn"}
                 ],
                 "property": {
                     "name": "Elsa",
                     "case_ids": ["ca19", "ca88", "ca133"]
-                } 
+                }
             }
         """
         entity = schema.Entity.find_one(eid=str(eid))
@@ -75,8 +76,8 @@ class Entity(Resource):
             LOGGER.exception('Error getting entity. '
                              'Entity %s does not exist.', eid)
             return {
-                       'message': 'Entity {} does not exist'.format(eid)
-                   }, 400
+                'message': 'Entity {} does not exist'.format(eid)
+            }, 400
 
         return get_entity(entity, features=True), 200
 
@@ -126,8 +127,8 @@ class Outcome(Resource):
             LOGGER.exception('Error getting entity. '
                              'Entity %s does not exist.', eid)
             return {
-                       'message': 'Entity {} does not exist'.format(eid)
-                   }, 400
+                'message': 'Entity {} does not exist'.format(eid)
+            }, 400
         outcomes = get_outcomes(entity)
         return outcomes, 200
 

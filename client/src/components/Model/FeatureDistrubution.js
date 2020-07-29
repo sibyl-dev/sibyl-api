@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import DashWrapper from '../common/DashWrapper';
 
 import Search from '../common/Search';
 import ScoreInfo from '../common/ScoreInfo';
 import PieChart from '../common/PieChart';
-import { connect } from 'react-redux';
 import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entitites';
 import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';

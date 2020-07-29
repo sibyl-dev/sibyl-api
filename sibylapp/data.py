@@ -14,7 +14,6 @@ https://s3-us-west-2.amazonaws.com/telemanom/data.zip
 import logging
 import os
 
-import pandas as pd
 import requests
 
 LOGGER = logging.getLogger(__name__)
@@ -78,6 +77,6 @@ def download_demo():
 
 
 def load_csv(path, timestamp_column=None, value_column=None):
-    header = None if timestamp_column is not None else 'infer'
-    data = pd.read_csv(path, header=header)
-    # TODO
+    # header = None if timestamp_column is not None else 'infer'
+    # data = pd.read_csv(path, header=header)
+    pass

@@ -1,12 +1,11 @@
 import logging
-
-from flask_restful import Resource
-from flask import request
-from sibylapp.db import schema
-
 import pickle
-import pandas as pd
 
+import pandas as pd
+from flask import request
+from flask_restful import Resource
+
+from sibylapp.db import schema
 
 LOGGER = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ class Model(Resource):
         @apiSuccess {String} name Name of the model.
         @apiSuccess {String} description Short paragraph description of
             model functionality.
-        @apiSuccess {String} performance Short paragraph description of 
+        @apiSuccess {String} performance Short paragraph description of
             model performance
         """
         model = schema.Model.find_one(id=model_id)
@@ -43,8 +42,8 @@ class Model(Resource):
             LOGGER.exception('Error getting model. '
                              'Model %s does not exist.', model_id)
             return {
-                       'message': 'Model {} does not exist'.format(model_id)
-                   }, 400
+                'message': 'Model {} does not exist'.format(model_id)
+            }, 400
 
         return get_model(model, basic=False), 200
 
@@ -92,8 +91,8 @@ class Importance(Resource):
             LOGGER.exception('Error getting model. '
                              'Model %s does not exist.', model_id)
             return {
-                       'message': 'Model {} does not exist'.format(model_id)
-                   }, 400
+                'message': 'Model {} does not exist'.format(model_id)
+            }, 400
 
         importances = model.importances
         return {'importances': importances}
@@ -125,8 +124,8 @@ class Prediction(Resource):
             LOGGER.exception('Error getting model. '
                              'Model %s does not exist.', model_id)
             return {
-                       'message': 'Model {} does not exist'.format(model_id)
-                   }, 400
+                'message': 'Model {} does not exist'.format(model_id)
+            }, 400
         model_bytes = model_doc.model
         try:
             model = pickle.loads(model_bytes)
