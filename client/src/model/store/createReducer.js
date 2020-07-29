@@ -1,4 +1,4 @@
-import produce, { Draft } from 'immer';
+import produce from 'immer';
 
 function DEFAULT(state) {
   return state;
