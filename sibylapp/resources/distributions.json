@@ -3183,6 +3183,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -3692,13 +3702,20 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    3.0
+                    [
+                        0,
+                        1,
+                        2,
+                        3
+                    ],
+                    [
+                        10830,
+                        211,
+                        23,
+                        11
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -4172,6 +4189,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -4590,6 +4617,27 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ],
+                    [
+                        10527,
+                        296,
+                        203,
+                        22,
+                        25,
+                        2
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -4597,6 +4645,16 @@
                     46.0,
                     663.0,
                     5497.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    6.0
                 ],
                 "type": "numeric"
             },
@@ -4940,6 +4998,32 @@
                     [
                         10752,
                         323
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        11055,
+                        20
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        11039,
+                        36
                     ]
                 ],
                 "type": "category"
@@ -8128,6 +8212,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    2.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -8637,13 +8731,20 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    3.0
+                    [
+                        0,
+                        1,
+                        2,
+                        3
+                    ],
+                    [
+                        10989,
+                        70,
+                        15,
+                        1
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -9117,6 +9218,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -9535,6 +9646,27 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ],
+                    [
+                        10646,
+                        236,
+                        166,
+                        19,
+                        7,
+                        1
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -9542,6 +9674,16 @@
                     137.0,
                     917.0,
                     5497.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    5.0
                 ],
                 "type": "numeric"
             },
@@ -9885,6 +10027,32 @@
                     [
                         10807,
                         268
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        11013,
+                        62
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10967,
+                        108
                     ]
                 ],
                 "type": "category"
@@ -13075,6 +13243,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    2.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -13584,13 +13762,18 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    2.0
+                    [
+                        0,
+                        1,
+                        2
+                    ],
+                    [
+                        11010,
+                        61,
+                        5
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -14064,6 +14247,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    4.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -14482,6 +14675,29 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        6,
+                        7
+                    ],
+                    [
+                        10632,
+                        202,
+                        211,
+                        15,
+                        14,
+                        1,
+                        1
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -14489,6 +14705,16 @@
                     102.0,
                     680.25,
                     5677.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    5.0
                 ],
                 "type": "numeric"
             },
@@ -14832,6 +15058,32 @@
                     [
                         10881,
                         195
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10963,
+                        113
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10910,
+                        166
                     ]
                 ],
                 "type": "category"
@@ -18018,6 +18270,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -18527,13 +18789,18 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    2.0
+                    [
+                        0,
+                        1,
+                        2
+                    ],
+                    [
+                        11009,
+                        59,
+                        6
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -19007,6 +19274,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    4.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -19425,6 +19702,27 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ],
+                    [
+                        10587,
+                        233,
+                        207,
+                        25,
+                        17,
+                        5
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -19432,6 +19730,16 @@
                     61.0,
                     559.0,
                     5598.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    4.0
                 ],
                 "type": "numeric"
             },
@@ -19775,6 +20083,32 @@
                     [
                         10893,
                         181
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10942,
+                        132
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10869,
+                        205
                     ]
                 ],
                 "type": "category"
@@ -22965,6 +23299,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -23472,13 +23816,18 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    2.0
+                    [
+                        0,
+                        1,
+                        2
+                    ],
+                    [
+                        11008,
+                        69,
+                        1
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -23952,6 +24301,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -24370,6 +24729,29 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6
+                    ],
+                    [
+                        10612,
+                        238,
+                        191,
+                        26,
+                        9,
+                        1,
+                        1
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -24377,6 +24759,16 @@
                     42.0,
                     508.0,
                     5676.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    4.0
                 ],
                 "type": "numeric"
             },
@@ -24720,6 +25112,32 @@
                     [
                         10910,
                         168
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10937,
+                        141
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10847,
+                        231
                     ]
                 ],
                 "type": "category"
@@ -27904,6 +28322,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    2.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -28411,13 +28839,20 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    4.0
+                    [
+                        0,
+                        1,
+                        2,
+                        4
+                    ],
+                    [
+                        11002,
+                        71,
+                        2,
+                        1
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -28891,6 +29326,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -29309,6 +29754,27 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ],
+                    [
+                        10570,
+                        274,
+                        198,
+                        23,
+                        10,
+                        1
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -29316,6 +29782,16 @@
                     31.0,
                     387.25,
                     5560.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    4.0
                 ],
                 "type": "numeric"
             },
@@ -29659,6 +30135,32 @@
                     [
                         10945,
                         131
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10863,
+                        213
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10769,
+                        307
                     ]
                 ],
                 "type": "category"
@@ -32853,6 +33355,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    2.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -33362,13 +33874,18 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    2.0
+                    [
+                        0,
+                        1,
+                        2
+                    ],
+                    [
+                        10986,
+                        85,
+                        4
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -33842,6 +34359,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -34260,6 +34787,29 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6
+                    ],
+                    [
+                        10518,
+                        322,
+                        201,
+                        19,
+                        13,
+                        1,
+                        1
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -34267,6 +34817,16 @@
                     29.0,
                     350.0,
                     5812.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    4.0
                 ],
                 "type": "numeric"
             },
@@ -34610,6 +35170,32 @@
                     [
                         10929,
                         146
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10837,
+                        238
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10729,
+                        346
                     ]
                 ],
                 "type": "category"
@@ -37798,6 +38384,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    2.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -38305,13 +38901,20 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    4.0
+                    [
+                        0,
+                        1,
+                        2,
+                        4
+                    ],
+                    [
+                        10988,
+                        86,
+                        2,
+                        1
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -38785,6 +39388,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -39203,6 +39816,27 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ],
+                    [
+                        10439,
+                        352,
+                        241,
+                        24,
+                        18,
+                        3
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -39210,6 +39844,16 @@
                     26.0,
                     314.0,
                     5551.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    3.0
                 ],
                 "type": "numeric"
             },
@@ -39553,6 +40197,32 @@
                     [
                         10962,
                         115
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10801,
+                        276
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10645,
+                        432
                     ]
                 ],
                 "type": "category"
@@ -42739,6 +43409,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    2.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -43248,13 +43928,20 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    4.0
+                    [
+                        0,
+                        1,
+                        2,
+                        4
+                    ],
+                    [
+                        10981,
+                        86,
+                        7,
+                        2
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -43728,6 +44415,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    4.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -44146,6 +44843,27 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ],
+                    [
+                        10360,
+                        382,
+                        277,
+                        37,
+                        19,
+                        1
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -44153,6 +44871,16 @@
                     24.0,
                     294.0,
                     5597.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    3.0
                 ],
                 "type": "numeric"
             },
@@ -44496,6 +45224,32 @@
                     [
                         10955,
                         121
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10655,
+                        421
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10519,
+                        557
                     ]
                 ],
                 "type": "category"
@@ -47682,6 +48436,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    2.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -48191,13 +48955,20 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    3.0
+                    [
+                        0,
+                        1,
+                        2,
+                        3
+                    ],
+                    [
+                        10988,
+                        77,
+                        10,
+                        2
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -48671,6 +49442,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -49089,6 +49870,27 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        6
+                    ],
+                    [
+                        10273,
+                        459,
+                        275,
+                        46,
+                        23,
+                        1
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -49096,6 +49898,16 @@
                     26.0,
                     280.0,
                     5628.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    5.0
                 ],
                 "type": "numeric"
             },
@@ -49439,6 +50251,32 @@
                     [
                         10938,
                         139
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10619,
+                        458
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10450,
+                        627
                     ]
                 ],
                 "type": "category"
@@ -52623,6 +53461,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    2.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -53132,13 +53980,20 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    4.0
+                    [
+                        0,
+                        1,
+                        2,
+                        4
+                    ],
+                    [
+                        10982,
+                        86,
+                        5,
+                        1
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -53612,6 +54467,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -54030,6 +54895,31 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        8
+                    ],
+                    [
+                        10250,
+                        466,
+                        298,
+                        37,
+                        16,
+                        1,
+                        3,
+                        3
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -54037,6 +54927,16 @@
                     22.0,
                     241.0,
                     5677.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    3.0
                 ],
                 "type": "numeric"
             },
@@ -54380,6 +55280,32 @@
                     [
                         10954,
                         120
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10569,
+                        505
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10337,
+                        737
                     ]
                 ],
                 "type": "category"
@@ -57568,6 +58494,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -58077,13 +59013,18 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    2.0
+                    [
+                        0,
+                        1,
+                        2
+                    ],
+                    [
+                        10981,
+                        91,
+                        3
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -58557,6 +59498,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -58975,6 +59926,29 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        8
+                    ],
+                    [
+                        10120,
+                        577,
+                        327,
+                        31,
+                        18,
+                        1,
+                        1
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -58982,6 +59956,16 @@
                     21.0,
                     227.0,
                     5421.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    5.0
                 ],
                 "type": "numeric"
             },
@@ -59325,6 +60309,32 @@
                     [
                         10950,
                         125
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10466,
+                        609
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10249,
+                        826
                     ]
                 ],
                 "type": "category"
@@ -62511,6 +63521,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -63016,13 +64036,18 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    2.0
+                    [
+                        0,
+                        1,
+                        2
+                    ],
+                    [
+                        10981,
+                        95,
+                        2
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -63496,6 +64521,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -63914,6 +64949,29 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6
+                    ],
+                    [
+                        10042,
+                        627,
+                        352,
+                        34,
+                        17,
+                        4,
+                        2
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -63921,6 +64979,16 @@
                     20.0,
                     203.0,
                     5628.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    4.0
                 ],
                 "type": "numeric"
             },
@@ -64264,6 +65332,32 @@
                     [
                         10941,
                         137
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10352,
+                        726
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10064,
+                        1014
                     ]
                 ],
                 "type": "category"
@@ -67454,6 +68548,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    2.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -67961,13 +69065,20 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    10.0
+                    [
+                        0,
+                        1,
+                        2,
+                        10
+                    ],
+                    [
+                        10954,
+                        105,
+                        5,
+                        11
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -68441,6 +69552,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    4.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -68859,6 +69980,31 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        8
+                    ],
+                    [
+                        9982,
+                        648,
+                        375,
+                        40,
+                        17,
+                        4,
+                        6,
+                        3
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -68866,6 +70012,16 @@
                     19.0,
                     174.0,
                     5618.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    5.0
                 ],
                 "type": "numeric"
             },
@@ -69209,6 +70365,32 @@
                     [
                         10933,
                         142
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10197,
+                        878
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        9902,
+                        1173
                     ]
                 ],
                 "type": "category"
@@ -72397,6 +73579,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    2.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -72904,13 +74096,22 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    4.0
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4
+                    ],
+                    [
+                        10969,
+                        101,
+                        6,
+                        1,
+                        1
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -73384,6 +74585,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -73802,6 +75013,29 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6
+                    ],
+                    [
+                        9870,
+                        705,
+                        421,
+                        41,
+                        33,
+                        4,
+                        4
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -73809,6 +75043,16 @@
                     15.0,
                     140.0,
                     5253.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    3.0
                 ],
                 "type": "numeric"
             },
@@ -74152,6 +75396,32 @@
                     [
                         10947,
                         131
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        10018,
+                        1060
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        9616,
+                        1462
                     ]
                 ],
                 "type": "category"
@@ -77342,6 +78612,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -77849,13 +79129,18 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    2.0
+                    [
+                        0,
+                        1,
+                        2
+                    ],
+                    [
+                        10977,
+                        90,
+                        9
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -78329,6 +79614,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    5.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -78747,6 +80042,29 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6
+                    ],
+                    [
+                        9653,
+                        841,
+                        489,
+                        56,
+                        24,
+                        10,
+                        3
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -78754,6 +80072,16 @@
                     13.0,
                     127.0,
                     5612.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    5.0
                 ],
                 "type": "numeric"
             },
@@ -79097,6 +80425,32 @@
                     [
                         10963,
                         113
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        9801,
+                        1275
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        9347,
+                        1729
                     ]
                 ],
                 "type": "category"
@@ -82287,6 +83641,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -82794,13 +84158,20 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    3.0
+                    [
+                        0,
+                        1,
+                        2,
+                        3
+                    ],
+                    [
+                        10934,
+                        126,
+                        12,
+                        3
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -83274,6 +84645,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    4.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -83692,6 +85073,31 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        7
+                    ],
+                    [
+                        9477,
+                        978,
+                        493,
+                        78,
+                        30,
+                        7,
+                        11,
+                        1
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -83699,6 +85105,16 @@
                     13.0,
                     112.0,
                     5365.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    6.0
                 ],
                 "type": "numeric"
             },
@@ -84042,6 +85458,32 @@
                     [
                         10949,
                         126
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        9346,
+                        1729
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        8814,
+                        2261
                     ]
                 ],
                 "type": "category"
@@ -87228,6 +88670,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -87737,13 +89189,20 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    3.0
+                    [
+                        0,
+                        1,
+                        2,
+                        3
+                    ],
+                    [
+                        10929,
+                        140,
+                        4,
+                        2
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -88217,6 +89676,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    4.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -88635,6 +90104,31 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        8
+                    ],
+                    [
+                        9031,
+                        1247,
+                        643,
+                        81,
+                        46,
+                        15,
+                        11,
+                        1
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -88642,6 +90136,16 @@
                     11.0,
                     92.0,
                     5612.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    4.0
                 ],
                 "type": "numeric"
             },
@@ -88985,6 +90489,32 @@
                     [
                         10948,
                         127
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        8932,
+                        2143
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        8274,
+                        2801
                     ]
                 ],
                 "type": "category"
@@ -92173,6 +93703,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -92682,13 +94222,18 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    2.0
+                    [
+                        0,
+                        1,
+                        2
+                    ],
+                    [
+                        10938,
+                        134,
+                        6
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -93162,6 +94707,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    3.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -93580,6 +95135,31 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        8
+                    ],
+                    [
+                        8474,
+                        1590,
+                        810,
+                        103,
+                        75,
+                        13,
+                        12,
+                        1
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -93587,6 +95167,16 @@
                     10.0,
                     75.0,
                     5376.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    4.0
                 ],
                 "type": "numeric"
             },
@@ -93930,6 +95520,32 @@
                     [
                         10915,
                         163
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        8144,
+                        2934
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        7340,
+                        3738
                     ]
                 ],
                 "type": "category"
@@ -97114,6 +98730,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_OTHA_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    2.0
+                ],
+                "type": "numeric"
+            },
             "PRI_OTHA_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -97621,13 +99247,18 @@
             },
             "PRI_OTHC_GENDER_MISS_COUNT": {
                 "metrics": [
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    2.0
+                    [
+                        0,
+                        1,
+                        2
+                    ],
+                    [
+                        10919,
+                        134,
+                        23
+                    ]
                 ],
-                "type": "numeric"
+                "type": "category"
             },
             "PRI_OTHC_JUVENILE_JUSTICE": {
                 "metrics": [
@@ -98101,6 +99732,16 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PERP_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    5.0
+                ],
+                "type": "numeric"
+            },
             "PRI_PERP_FNDG_EVER_COUNT": {
                 "metrics": [
                     0.0,
@@ -98519,6 +100160,33 @@
                 ],
                 "type": "numeric"
             },
+            "PRI_PRNT_CYF_ACTIVE": {
+                "metrics": [
+                    [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        7,
+                        8
+                    ],
+                    [
+                        7530,
+                        1928,
+                        1237,
+                        166,
+                        157,
+                        20,
+                        29,
+                        5,
+                        4
+                    ]
+                ],
+                "type": "category"
+            },
             "PRI_PRNT_DAYS_FROM_LASTRFRL": {
                 "metrics": [
                     0.0,
@@ -98526,6 +100194,16 @@
                     9.0,
                     51.0,
                     5612.0
+                ],
+                "type": "numeric"
+            },
+            "PRI_PRNT_FEMALE_COUNT": {
+                "metrics": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    4.0
                 ],
                 "type": "numeric"
             },
@@ -98869,6 +100547,32 @@
                     [
                         10835,
                         241
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT365_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        6666,
+                        4410
+                    ]
+                ],
+                "type": "category"
+            },
+            "PRO_PLSM_NEXT730_DUMMY": {
+                "metrics": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        5681,
+                        5395
                     ]
                 ],
                 "type": "category"

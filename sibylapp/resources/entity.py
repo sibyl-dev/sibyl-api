@@ -7,16 +7,16 @@ from flask import request
 LOGGER = logging.getLogger(__name__)
 
 
-def get_outcomes(entity_doc):
-    outcomes = []
-    for event_doc in entity_doc.outcomes:
-        outcomes.append({
+def get_events(entity_doc):
+    events = []
+    for event_doc in entity_doc.events:
+        events.append({
             'datetime': event_doc.datetime,
             'type': event_doc.type,
             'property': event_doc.property
         })
-    outcomes = {'outcomes': outcomes}
-    return outcomes
+    events = {'events': events}
+    return events
 
 
 def get_entity(entity_doc, features=True):
@@ -107,18 +107,18 @@ class Entities(Resource):
             return {'entities': entities}
 
 
-class Outcome(Resource):
+class Events(Resource):
     def get(self):
         """
-        @api {get} /outcome/ Get the outcome of an entity
-        @apiName GetOutcome
+        @api {get} /events/ Get the events of an entity
+        @apiName GetEvents
         @apiGroup Entity
         @apiVersion 1.0.0
-        @apiDescription Get the history/outcome of a entity.
+        @apiDescription Get the history/events of a entity.
 
         @apiParam {String} [eid] Id of the entity.
 
-        @apiSuccess {Object[]} History/Outcomes List of Outcome Objects. TODO
+        @apiSuccess {Object[]} events List of Event Objects.
         """
         eid = request.args.get('eid', None)
         entity = schema.Entity.find_one(eid=eid)
@@ -128,8 +128,8 @@ class Outcome(Resource):
             return {
                        'message': 'Entity {} does not exist'.format(eid)
                    }, 400
-        outcomes = get_outcomes(entity)
-        return outcomes, 200
+        events = get_events(entity)
+        return events, 200
 
 
 class Case(Resource):
