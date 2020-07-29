@@ -17,6 +17,7 @@ const initialState = {
   contribFilters: 'all',
   sortPredDirection: null,
   sortDiffDirection: null,
+  modelPredFilterValue: 'all',
 };
 
 function GET_FEATURES_DATA_REQUEST(nextState) {
@@ -112,6 +113,11 @@ function SET_SORT_DIFF_DIR(nextState, { sortDiffDirection }) {
   nextState.sortDiffDirection = sortDiffDirection;
 }
 
+// ------------------
+function SET_MODEL_PRED_FILTER_VALUE(nextState, { modelPredFilterValue }) {
+  nextState.modelPredFilterValue = modelPredFilterValue;
+}
+
 export default createReducer(initialState, {
   GET_FEATURES_DATA_REQUEST,
   GET_FEATURES_DATA_SUCCESS,
@@ -131,4 +137,5 @@ export default createReducer(initialState, {
   SET_CONTRIB_FILTERS,
   SET_SORT_PRED_DIR,
   SET_SORT_DIFF_DIR,
+  SET_MODEL_PRED_FILTER_VALUE,
 });

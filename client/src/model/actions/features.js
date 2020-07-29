@@ -134,3 +134,9 @@ export function setSortDiffDirectionAction(direction) {
     );
   };
 }
+
+export function setModelPredictFilterValueAction(value) {
+  return function (dispatch) {
+    dispatch({ type: 'SET_MODEL_PRED_FILTER_VALUE', modelPredFilterValue: value });
+  };
+}

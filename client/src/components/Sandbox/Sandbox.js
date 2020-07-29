@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { DashWrapper } from '../common/DashWrapper';
-import { CategorySelect, ValueSelect, DiffSelect } from '../common/Form';
+import { CategorySelect, DiffSelect } from '../common/Form';
 import Search from '../common/Search';
+import Select from 'react-select';
 import SandboxFilters from './SandboxFilters';
 import {
   getModelPredictionAction,
@@ -10,42 +11,47 @@ import {
   setSortPredDirection,
   setSortDiffDirectionAction,
   setContribFiltersAction,
+  setModelPredictFilterValueAction,
 } from '../../model/actions/features';
 import { getIsEntitiesLoading } from '../../model/selectors/entities';
 import {
   getIsFeaturesLoading,
   getIsModelPredictLoading,
-  getSelectedFilterValues,
   getIsCategoriesLoading,
   getFeatureCategories,
   getFilterCategories,
   getCurrentPredSortDir,
   getReversedModelPredFeatures,
   getCurrentSortDiffDir,
+  getModelPredictFilterValue,
 } from '../../model/selectors/features';
 
 import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
 import './Sandbox.scss';
 
-// mock search result
-const hayStack = [
-  { feature: 'Child in focus had a prior court active child welfare case' },
-  { feature: 'Child in focus is younger than 1 years old' },
-  { feature: 'Feature #1' },
-  { feature: 'Feature #2' },
-  { feature: 'Feature #3' },
+const valueSelect = [
+  { value: 'all', label: 'All Values', isFixed: true },
+  { value: 'false', label: 'True -> False', isFixed: true },
+  { value: 'true', label: 'False -> True', isFixed: true },
 ];
 
 class Sandbox extends Component {
   renderDashHeader() {
-    const { featureCategories, setFilterCategories, isCategoriesLoading, currentFilterCategs } = this.props;
+    const {
+      featureCategories,
+      setFilterCategories,
+      isCategoriesLoading,
+      currentFilterCategs,
+      setFilterValue,
+      currentFilterValue,
+    } = this.props;
 
     return (
       !isCategoriesLoading && (
         <header className="dash-header">
           <ul className="dash-controls">
             <li>
-              <Search hayStack={hayStack} />
+              <Search />
             </li>
             <li className="sep" />
             <li>
@@ -56,7 +62,16 @@ class Sandbox extends Component {
               />
             </li>
             <li>
-              <ValueSelect />
+              <Select
+                isSearchable={false}
+                isMulti={false}
+                classNamePrefix="sibyl-select"
+                className="sibyl-select"
+                options={valueSelect}
+                placeholder="Changed Value"
+                onChange={(filterValue) => setFilterValue(filterValue.value)}
+                value={valueSelect.filter((currentVal) => currentVal.value === currentFilterValue)}
+              />
             </li>
             <li>
               <DiffSelect />
@@ -208,11 +223,11 @@ export default connect(
     isModelPredictionLoading: getIsModelPredictLoading(state),
     featureCategories: getFeatureCategories(state),
     isCategoriesLoading: getIsCategoriesLoading(state),
-    currentFilterValue: getSelectedFilterValues(state),
     currentFilterCategs: getFilterCategories(state),
     currentPredSortDir: getCurrentPredSortDir(state),
     modelPredFeatures: getReversedModelPredFeatures(state),
     currentDiffDirection: getCurrentSortDiffDir(state),
+    currentFilterValue: getModelPredictFilterValue(state),
   }),
   (dispatch) => ({
     getModelPrediction: () => dispatch(getModelPredictionAction()),
@@ -220,5 +235,6 @@ export default connect(
     setSortPrediction: (direction) => dispatch(setSortPredDirection(direction)),
     setSortDiffDirection: (direction) => dispatch(setSortDiffDirectionAction(direction)),
     setContribFilters: (filters) => dispatch(setContribFiltersAction(filters)),
+    setFilterValue: (filterValue) => dispatch(setModelPredictFilterValueAction(filterValue)),
   }),
 )(Sandbox);
