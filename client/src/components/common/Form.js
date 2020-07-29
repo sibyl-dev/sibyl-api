@@ -2,14 +2,6 @@ import React from 'react';
 import Select from 'react-select';
 import './styles/Form.scss';
 
-const valueSelect = [
-  { value: 'All', label: 'All', isFixed: true },
-  { value: 'True -> False', label: 'True -> False', isFixed: true },
-  { value: 'False -> True', label: 'False -> True', isFixed: true },
-  { value: 'Categorycal', label: 'Categorycal', isFixed: true },
-  { value: 'Numerical', label: 'Numerical', isFixed: true },
-];
-
 const diffValues = [
   { value: 'Difference', label: 'Difference', isFixed: true },
   { value: 'Risk', label: 'Risk', isFixed: true },
@@ -55,17 +47,6 @@ export const CategorySelect = (props) => {
     />
   );
 };
-
-export const ValueSelect = () => (
-  <Select
-    isSearchable={false}
-    isMulti={false}
-    classNamePrefix="sibyl-select"
-    className="sibyl-select"
-    options={valueSelect}
-    placeholder="Changed Value"
-  />
-);
 
 export const DiffSelect = () => (
   <Select
