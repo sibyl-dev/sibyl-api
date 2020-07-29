@@ -190,75 +190,82 @@ export class Details extends Component {
     const { processedFeatures } = features;
 
     const isDataLoading = isEntityLoading || isFeaturesLoading || isCategoriesLoading || isEntityContribLoading;
-    const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue(processedFeatures) : 0;
     return (
       <div>
         {this.renderDashHeader()}
-        <div className="sticky-wrapper scroll-style">
-          <table className="dash-table sticky-header">
-            <thead>
-              <tr>
-                <th className="align-center">Category</th>
-                <th>Feature</th>
-                <th className="align-right">Value</th>
-                <th className="align-center" width="15%">
-                  <ul className="sort">
-                    <li>Contribution</li>
-                    <li>
-                      <button type="button" onClick={() => this.setSortContribDirection()}>
-                        <SortIcon />
-                      </button>
-                    </li>
-                  </ul>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {!isDataLoading ? (
-                processedFeatures.length > 0 ? (
-                  processedFeatures.map((currentFeature, featureIndex) => (
-                    <tr key={featureIndex}>
-                      <td className="align-center" width="12">
-                        {this.getFeatureCathegoryColor(currentFeature.category)}
-                      </td>
-                      <td>{currentFeature.description}</td>
-                      <td className="align-right">{this.getFeatureType(currentFeature)}</td>
-                      <td className="align-center" width="145">
-                        <BiProgressBar
-                          percentage={currentFeature.contributionValue}
-                          width="110"
-                          height="8"
-                          maxRange={maxContributionRange}
-                        />
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4" className="align-center">
-                      No Matches found...
+        {this.renderFeatures(processedFeatures, isDataLoading)}
+      </div>
+    );
+  }
+
+  renderFeatures(features, isDataLoading) {
+    const { processedFeatures } = this.props.features;
+    const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue(processedFeatures) : 0;
+    return (
+      <div className="sticky-wrapper scroll-style">
+        <table className="dash-table sticky-header">
+          <thead>
+            <tr>
+              <th className="align-center" width="10%">
+                Category
+              </th>
+              <th>Feature</th>
+              <th className="align-right">Value</th>
+              <th className="align-center" width="15%">
+                <ul className="sort">
+                  <li>Contribution</li>
+                  <li>
+                    <button type="button" onClick={() => this.setSortContribDirection()}>
+                      <SortIcon />
+                    </button>
+                  </li>
+                </ul>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {!isDataLoading ? (
+              features.length > 0 ? (
+                features.map((currentFeature, featureIndex) => (
+                  <tr key={featureIndex}>
+                    <td className="align-center">{this.getFeatureCathegoryColor(currentFeature.category)}</td>
+                    <td>{currentFeature.description}</td>
+                    <td className="align-right">{this.getFeatureType(currentFeature)}</td>
+                    <td className="align-center" width="145">
+                      <BiProgressBar
+                        percentage={currentFeature.contributionValue}
+                        width="110"
+                        height="8"
+                        maxRange={maxContributionRange}
+                        isSingle
+                      />
                     </td>
                   </tr>
-                )
+                ))
               ) : (
                 <tr>
                   <td colSpan="4" className="align-center">
-                    <p>Loading ...</p>
+                    No Matches found...
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              )
+            ) : (
+              <tr>
+                <td colSpan="4" className="align-center">
+                  Loading...
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     );
   }
 
   renderSplitMode() {
     const { features, isFeaturesLoading, isEntityContribLoading } = this.props;
-    const { processedFeatures, positiveFeaturesContrib, negativeFeaturesContrib } = features;
+    const { positiveFeaturesContrib, negativeFeaturesContrib } = features;
     const isDataLoading = isEntityContribLoading || isFeaturesLoading;
-    const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue(processedFeatures) : 0;
 
     return (
       <div className="split-wrapper">
@@ -266,63 +273,7 @@ export class Details extends Component {
           <h4>Risk Factors</h4>
           <div className="split-container">
             {this.renderDashHeader()}
-            <div className="sticky-wrapper scroll-style">
-              <table className="dash-table sticky-header">
-                <thead>
-                  <tr>
-                    <th className="align-center" width="10%">
-                      Category
-                    </th>
-                    <th>Feature</th>
-                    <th className="align-right">Value</th>
-                    <th className="align-center" width="15%">
-                      <ul className="sort">
-                        <li>Contribution</li>
-                        <li>
-                          <button type="button" onClick={() => this.setSortContribDirection()}>
-                            <SortIcon />
-                          </button>
-                        </li>
-                      </ul>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {!isDataLoading ? (
-                    positiveFeaturesContrib.length > 0 ? (
-                      positiveFeaturesContrib.map((currentFeature, featureIndex) => (
-                        <tr key={featureIndex}>
-                          <td className="align-center">{this.getFeatureCathegoryColor(currentFeature.category)}</td>
-                          <td>{currentFeature.description}</td>
-                          <td className="align-right">{this.getFeatureType(currentFeature)}</td>
-                          <td className="align-center" width="145">
-                            <BiProgressBar
-                              percentage={currentFeature.contributionValue}
-                              width="110"
-                              height="8"
-                              maxRange={maxContributionRange}
-                              isSingle
-                            />
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="4" className="align-center">
-                          No Matches found...
-                        </td>
-                      </tr>
-                    )
-                  ) : (
-                    <tr>
-                      <td colSpan="4" className="align-center">
-                        Loading...
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+            {this.renderFeatures(positiveFeaturesContrib, isDataLoading)}
           </div>
         </div>
         <div className="split-separator" />
@@ -330,66 +281,7 @@ export class Details extends Component {
           <h4>Protective Factors</h4>
           <div className="split-container">
             {this.renderDashHeader()}
-            <div className="sticky-wrapper scroll-style">
-              <table className="dash-table sticky-header">
-                <thead>
-                  <tr>
-                    <th className="align-center" width="10%">
-                      Category
-                    </th>
-                    <th>Feature</th>
-                    <th className="align-right">Value</th>
-                    <th className="align-center" width="25%">
-                      <ul className="sort">
-                        <li>Contribution</li>
-                        <li>
-                          <button type="button" onClick={() => this.setSortContribDirection()}>
-                            <SortIcon />
-                          </button>
-                        </li>
-                      </ul>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {!isDataLoading ? (
-                    negativeFeaturesContrib.length > 0 ? (
-                      negativeFeaturesContrib.map(
-                        (currentFeature, featureIndex) =>
-                          currentFeature.contributionValue < 0 && (
-                            <tr key={featureIndex}>
-                              <td className="align-center">{this.getFeatureCathegoryColor(currentFeature.category)}</td>
-                              <td>{currentFeature.description}</td>
-                              <td className="align-right">{this.getFeatureType(currentFeature)}</td>
-                              <td className="align-center" width="145">
-                                <BiProgressBar
-                                  percentage={currentFeature.contributionValue}
-                                  width="110"
-                                  height="8"
-                                  maxRange={maxContributionRange}
-                                  isSingle
-                                />
-                              </td>
-                            </tr>
-                          ),
-                      )
-                    ) : (
-                      <tr>
-                        <td colSpan="4" className="align-center">
-                          No Matches found...
-                        </td>
-                      </tr>
-                    )
-                  ) : (
-                    <tr>
-                      <td colSpan="4" className="align-center">
-                        Loading...
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+            {this.renderFeatures(negativeFeaturesContrib, isDataLoading)}
           </div>
         </div>
       </div>
