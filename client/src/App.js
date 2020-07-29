@@ -38,7 +38,7 @@ class App extends Component {
           <Header />
           <Dashboard location={location} />
         </div>
-        <div className="clear"></div>
+        <div className="clear" />
       </div>
     );
   }

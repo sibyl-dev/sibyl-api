@@ -1,12 +1,6 @@
 import logging
-import pickle
-from calendar import monthrange
-from datetime import datetime, timezone
 
 import numpy as np
-from pymongo import MongoClient
-
-from sibylapp.db import schema
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,7 +11,7 @@ def to_probs(arr):
 
 
 def preds_to_scores(preds, thresholds):
-    return np.digitize(to_probs(preds), thresholds, right=True)+1
+    return np.digitize(to_probs(preds), thresholds, right=True) + 1
 
 
 class ModelWrapper:
@@ -48,13 +42,10 @@ def merge_databases():
 
 
 def delete_datasets():
-    cli = MongoClient('localhost', port=27017)
-    db = cli['mtv']
     pass
 
 
 def prune_dataruns():
-    cli = MongoClient('localhost', port=27017)
     pass
 
 

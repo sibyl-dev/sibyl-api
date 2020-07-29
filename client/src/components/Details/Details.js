@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
+import Select from 'react-select';
+import { connect } from 'react-redux';
 import { TableFullIcon, TableSplitIcon, SortIcon } from '../../assets/icons/icons';
 import DashWrapper from '../common/DashWrapper';
-import Select from 'react-select';
 import Search from '../common/Search';
 import { CategorySelect } from '../common/Form';
 import { BiProgressBar } from '../common/ProgressBars';
-import { connect } from 'react-redux';
 import { getEntityAction } from '../../model/actions/entities';
 import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entitites';
 
@@ -82,12 +82,12 @@ export class Details extends Component {
       <header className="dash-header">
         <ul className="dash-controls">
           {!isViewSplitted && (
-            <React.Fragment>
+            <>
               <li>
                 <Search hayStack={hayStack} />
               </li>
               <li className="sep" />
-            </React.Fragment>
+            </>
           )}
 
           <li>
@@ -162,7 +162,7 @@ export class Details extends Component {
                 featuresData.map((currentFeature, featureIndex) => (
                   <tr key={featureIndex}>
                     <td className="align-center">
-                      <i className="bullet red"></i>
+                      <i className="bullet red" />
                     </td>
                     <td>{currentFeature.description}</td>
                     <td className="align-right">
@@ -228,7 +228,7 @@ export class Details extends Component {
                         contributions[currentFeature.name] > 0 && (
                           <tr key={featureIndex}>
                             <td className="align-center">
-                              <i className="bullet red"></i>
+                              <i className="bullet red" />
                             </td>
                             <td>{currentFeature.description}</td>
                             <td className="align-right">
@@ -284,7 +284,7 @@ export class Details extends Component {
                         contributions[currentFeature.name] < 0 && (
                           <tr key={featureIndex}>
                             <td className="align-center">
-                              <i className="bullet red"></i>
+                              <i className="bullet red" />
                             </td>
                             <td>{currentFeature.description}</td>
                             <td className="align-right">

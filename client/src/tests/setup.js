@@ -16,6 +16,4 @@ export const ConnectedTestWrapper = ({ initialState, ...props }) => (
   </Provider>
 );
 
-export const TestWrapper = ({ children }) => {
-  return <Router>{children}</Router>;
-};
+export const TestWrapper = ({ children }) => <Router>{children}</Router>;

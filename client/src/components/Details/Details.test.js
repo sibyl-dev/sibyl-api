@@ -1,6 +1,7 @@
 import React from 'react';
 import { Details } from './Details';
 import { renderWithStore, TestWrapper } from '../../tests/setup';
+
 describe('Testing Details component -> ', () => {
   const store = {
     isEntityLoading: false,

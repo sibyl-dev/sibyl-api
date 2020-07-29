@@ -1,6 +1,6 @@
 import React from 'react';
-import GrayBoxWrapper from './GrayBoxWrapper';
 import * as d3 from 'd3';
+import GrayBoxWrapper from './GrayBoxWrapper';
 
 import './styles/DonutChart.scss';
 
@@ -53,7 +53,7 @@ const PieChart = () => (
         <ul>
           {childData.map((currentChild, childIndex) => (
             <li key={childIndex}>
-              <i style={{ background: colors[childIndex] }}></i>
+              <i style={{ background: colors[childIndex] }} />
               {currentChild.status}
             </li>
           ))}

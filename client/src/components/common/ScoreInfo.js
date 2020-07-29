@@ -20,8 +20,8 @@ class SoreInfo extends Component {
 
   renderScoreScale() {
     const { activeScore } = this.state;
-    const renderValues = () => {
-      return values.map((currentValue, index) => {
+    const renderValues = () =>
+      values.map((currentValue, index) => {
         const activeIndex = values.indexOf(activeScore);
         const getItemsClassNames = () => {
           if (index === activeIndex) {
@@ -37,7 +37,6 @@ class SoreInfo extends Component {
           </li>
         );
       });
-    };
 
     return (
       <div className="score">

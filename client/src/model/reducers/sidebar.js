@@ -1,4 +1,5 @@
 import createReducer from '../store/createReducer';
+
 const initialState = {
   isSidebarCollapsed: true,
   pageName: 'Score',

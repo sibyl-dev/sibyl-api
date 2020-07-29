@@ -37,19 +37,17 @@ const categoryFormatOptions = ({ label, icon }) => (
   </div>
 );
 
-export const CategorySelect = () => {
-  return (
-    <Select
-      isSearchable={false}
-      isMulti={true}
-      classNamePrefix="sibyl-select"
-      className="sibyl-select"
-      formatOptionLabel={categoryFormatOptions}
-      options={categoryOptions}
-      placeholder="Category"
-    />
-  );
-};
+export const CategorySelect = () => (
+  <Select
+    isSearchable={false}
+    isMulti
+    classNamePrefix="sibyl-select"
+    className="sibyl-select"
+    formatOptionLabel={categoryFormatOptions}
+    options={categoryOptions}
+    placeholder="Category"
+  />
+);
 
 export const ValueSelect = () => (
   <Select

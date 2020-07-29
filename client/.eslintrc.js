@@ -4,15 +4,8 @@ module.exports = {
     es6: true,
     jest: true,
   },
-  plugins: ['react', '@typescript-eslint', 'prettier'],
-  extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'eslint-config-airbnb',
-    'plugin:@typescript-eslint/recommended',
-    'prettier/@typescript-eslint',
-    'plugin:prettier/recommended',
-  ],
+  plugins: ['react', 'prettier'],
+  extends: ['eslint:recommended', 'plugin:react/recommended', 'eslint-config-airbnb', 'plugin:prettier/recommended'],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly',
@@ -26,7 +19,6 @@ module.exports = {
       version: 'detect',
     },
   },
-  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
     sourceType: 'module', // Allows for the use of imports
@@ -38,9 +30,6 @@ module.exports = {
   rules: {
     'no-restricted-globals': 'off',
     'prettier/prettier': ['error'],
-    '@typescript-eslint/camelcase': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/no-use-before-define': 'off',
     'jsx-a11y/label-has-for': 'off',
     'jsx-a11y/label-has-associated-control': 'off',
     'jsx-a11y/click-events-have-key-events': 'off',
@@ -97,7 +86,6 @@ module.exports = {
     'class-methods-use-this': 'off',
     camelcase: 'off',
     'no-useless-constructor': 'off',
-    '@typescript-eslint/no-this-alias': 'off',
     'react/sort-comp': [
       1,
       {
