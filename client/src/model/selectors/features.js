@@ -15,6 +15,8 @@ export const getSortingContribDir = (state) => state.features.sortContribDir;
 export const getSelectedFilterValues = (state) => state.features.filterValue;
 export const getFilterCategories = (state) => state.features.filterCategs;
 export const getCurrentContribFilters = (state) => state.features.contribFilters;
+export const getCurrentPredSortDir = (state) => state.features.sortPredDirection;
+export const getCurrentSortDiffDir = (state) => state.features.sortDiffDirection;
 
 const maxNegativeContrib = -0.000000001;
 
@@ -48,6 +50,10 @@ export const getFeaturesData = createSelector(
     filterCategs,
     contribFilters,
   ) => {
+    if (isFeaturesLoading) {
+      return [];
+    }
+
     const entityFeatures = entityData.features;
     let processedFeatures = [];
 
@@ -97,7 +103,7 @@ export const getFeaturesData = createSelector(
       processedFeatures = positiveFeaturesContrib;
     }
 
-    return !isFeaturesLoading ? { processedFeatures, positiveFeaturesContrib, negativeFeaturesContrib } : [];
+    return { processedFeatures, positiveFeaturesContrib, negativeFeaturesContrib };
   },
 );
 
@@ -124,22 +130,21 @@ export const getModelPredictionPayload = createSelector(
 );
 
 export const getModelPredictionData = createSelector(
-  [getIsModelPredictLoading, getCurrentModelPrediction, getReversedModelPrediction, getCurrentEntityData],
-  (isModelLoading, currentPrediction, reversedPrediction, entityData) => {
+  [getIsModelPredictLoading, getCurrentModelPrediction, getReversedModelPrediction],
+  (isModelLoading, currentPrediction, reversedPrediction) => {
     if (isModelLoading) {
       return;
     }
 
     let currentPredictionData = {};
-    currentPrediction.map((predictItem, predIndex) => {
-      if (predictItem[0] === reversedPrediction[predIndex][0]) {
-        const currentDiff = reversedPrediction[predIndex][1] - predictItem[1];
-        const data = {
-          reversedScore: reversedPrediction[predIndex][1],
-          currentDifference: currentDiff,
-        };
-        Object.assign(currentPredictionData, { ...currentPredictionData, [predictItem[0]]: data });
-      }
+    currentPrediction.map((predictItem) => {
+      const reversedPredIndex = reversedPrediction.findIndex((currentPred) => currentPred[0] === predictItem[0]);
+      const currentDiff = reversedPrediction[reversedPredIndex][1] - predictItem[1];
+      const data = {
+        reversedScore: reversedPrediction[reversedPredIndex][1],
+        currentDifference: currentDiff,
+      };
+      Object.assign(currentPredictionData, { [predictItem[0]]: data });
     });
     return currentPredictionData;
   },
@@ -175,5 +180,97 @@ export const getFeatureCategories = createSelector(
     });
 
     return categories;
+  },
+);
+
+export const getReversedModelPredFeatures = createSelector(
+  [
+    getIsFeaturesLoading,
+    getCurrentFeatures,
+    getIsModelPredictLoading,
+    getModelPredictionData,
+    getCurrentEntityData,
+    getEntityContributions,
+    getCurrentPredSortDir,
+    getCurrentSortDiffDir,
+    getFilterCategories,
+    getFeaturesFilterCriteria,
+    getCurrentContribFilters,
+  ],
+  (
+    isFeaturesLoading,
+    features,
+    isModelLoading,
+    modelPredictData,
+    entityData,
+    contributions,
+    predictSortDir,
+    sortDiffDir,
+    filterCategs,
+    filterCriteria,
+    contribFilters,
+  ) => {
+    const isDataLoading = isFeaturesLoading || isModelLoading;
+    if (isDataLoading) {
+      return [];
+    }
+    const entityFeatures = entityData.features;
+    let processedFeatures = [];
+
+    features.map((currentFeature) => {
+      processedFeatures.push({
+        ...currentFeature,
+        [currentFeature.name]: entityFeatures[currentFeature.name],
+        contributionValue: roundContribValue(contributions[currentFeature.name]),
+        modelPrediction:
+          modelPredictData[currentFeature.name] !== undefined ? modelPredictData[currentFeature.name] : null,
+      });
+    });
+
+    processedFeatures = processedFeatures.filter((currentFeature) => currentFeature.modelPrediction !== null);
+
+    predictSortDir !== null &&
+      processedFeatures.sort((current, next) =>
+        predictSortDir === 'asc'
+          ? current.modelPrediction.reversedScore - next.modelPrediction.reversedScore
+          : next.modelPrediction.reversedScore - current.modelPrediction.reversedScore,
+      );
+
+    sortDiffDir !== null &&
+      processedFeatures.sort((current, next) =>
+        sortDiffDir === 'asc'
+          ? current.modelPrediction.currentDifference - next.modelPrediction.currentDifference
+          : next.modelPrediction.currentDifference - current.modelPrediction.currentDifference,
+      );
+
+    if (filterCategs !== null && filterCategs.length > 0) {
+      processedFeatures = processedFeatures.filter(
+        (currentFeature) => filterCategs.indexOf(currentFeature.category) !== -1,
+      );
+    }
+
+    if (filterCriteria) {
+      const regex = new RegExp(filterCriteria, 'gi');
+      processedFeatures = processedFeatures.filter((currentFeature) => currentFeature.description.match(regex));
+    }
+
+    const positiveFeaturesContrib = processedFeatures.filter(
+      (currentFeature) => currentFeature.modelPrediction.currentDifference > 0,
+    );
+    const negativeFeaturesContrib = processedFeatures.filter(
+      (currentFeature) => currentFeature.modelPrediction.currentDifference < 0,
+    );
+    console.log(contribFilters);
+    if (contribFilters === 'risk') {
+      processedFeatures = negativeFeaturesContrib;
+    }
+
+    if (contribFilters === 'protective') {
+      processedFeatures = positiveFeaturesContrib;
+    }
+
+    console.log(processedFeatures);
+
+    return processedFeatures;
   },
 );
