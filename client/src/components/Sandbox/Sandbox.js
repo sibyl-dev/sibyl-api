@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { DashWrapper } from '../common/DashWrapper';
-import { CategorySelect, DiffSelect } from '../common/Form';
+import { CategorySelect } from '../common/Form';
 import Search from '../common/Search';
 import Select from 'react-select';
 import SandboxFilters from './SandboxFilters';
@@ -12,6 +12,7 @@ import {
   setSortDiffDirectionAction,
   setContribFiltersAction,
   setModelPredictFilterValueAction,
+  setModelPredDiffFilterAction,
 } from '../../model/actions/features';
 import { getIsEntitiesLoading } from '../../model/selectors/entities';
 import {
@@ -24,6 +25,7 @@ import {
   getReversedModelPredFeatures,
   getCurrentSortDiffDir,
   getModelPredictFilterValue,
+  getModelPredDiffFilterValue,
 } from '../../model/selectors/features';
 
 import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
@@ -35,6 +37,12 @@ const valueSelect = [
   { value: 'true', label: 'False -> True', isFixed: true },
 ];
 
+const diffValues = [
+  { value: 'difference', label: 'Difference', isFixed: true },
+  { value: 'risk', label: 'Risk', isFixed: true },
+  { value: 'protective', label: 'Protective', isFixed: true },
+];
+
 class Sandbox extends Component {
   renderDashHeader() {
     const {
@@ -44,6 +52,8 @@ class Sandbox extends Component {
       currentFilterCategs,
       setFilterValue,
       currentFilterValue,
+      currentDiffFilterVal,
+      setDiffFilter,
     } = this.props;
 
     return (
@@ -74,7 +84,16 @@ class Sandbox extends Component {
               />
             </li>
             <li>
-              <DiffSelect />
+              <Select
+                isSearchable={false}
+                isMulti={false}
+                classNamePrefix="sibyl-select"
+                className="sibyl-select"
+                options={diffValues}
+                placeholder="Difference"
+                value={diffValues.filter((currentVal) => currentVal.value === currentDiffFilterVal)}
+                onChange={(filterValue) => setDiffFilter(filterValue.value)}
+              />
             </li>
           </ul>
         </header>
@@ -228,6 +247,7 @@ export default connect(
     modelPredFeatures: getReversedModelPredFeatures(state),
     currentDiffDirection: getCurrentSortDiffDir(state),
     currentFilterValue: getModelPredictFilterValue(state),
+    currentDiffFilterVal: getModelPredDiffFilterValue(state),
   }),
   (dispatch) => ({
     getModelPrediction: () => dispatch(getModelPredictionAction()),
@@ -236,5 +256,6 @@ export default connect(
     setSortDiffDirection: (direction) => dispatch(setSortDiffDirectionAction(direction)),
     setContribFilters: (filters) => dispatch(setContribFiltersAction(filters)),
     setFilterValue: (filterValue) => dispatch(setModelPredictFilterValueAction(filterValue)),
+    setDiffFilter: (filterValue) => dispatch(setModelPredDiffFilterAction(filterValue)),
   }),
 )(Sandbox);

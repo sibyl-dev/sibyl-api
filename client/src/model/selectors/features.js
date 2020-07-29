@@ -18,6 +18,7 @@ export const getCurrentContribFilters = (state) => state.features.contribFilters
 export const getCurrentPredSortDir = (state) => state.features.sortPredDirection;
 export const getCurrentSortDiffDir = (state) => state.features.sortDiffDirection;
 export const getModelPredictFilterValue = (state) => state.features.modelPredFilterValue;
+export const getModelPredDiffFilterValue = (state) => state.features.diffFilterVal;
 
 const maxNegativeContrib = -0.000000001;
 
@@ -196,8 +197,8 @@ export const getReversedModelPredFeatures = createSelector(
     getCurrentSortDiffDir,
     getFilterCategories,
     getFeaturesFilterCriteria,
-    getCurrentContribFilters,
     getModelPredictFilterValue,
+    getModelPredDiffFilterValue,
   ],
   (
     isFeaturesLoading,
@@ -210,8 +211,8 @@ export const getReversedModelPredFeatures = createSelector(
     sortDiffDir,
     filterCategs,
     filterCriteria,
-    contribFilters,
     filterValues,
+    diffFilter,
   ) => {
     const isDataLoading = isFeaturesLoading || isModelLoading;
     if (isDataLoading) {
@@ -265,19 +266,15 @@ export const getReversedModelPredFeatures = createSelector(
       (currentFeature) => currentFeature.modelPrediction.currentDifference < 0,
     );
 
-    if (contribFilters === 'risk') {
-      processedFeatures = negativeFeaturesContrib;
-    }
-
-    if (contribFilters === 'protective') {
-      processedFeatures = positiveFeaturesContrib;
-    }
-
     if (filterValues !== 'all') {
       processedFeatures =
         filterValues === 'true'
           ? processedFeatures.filter((currentFeature) => currentFeature[currentFeature.name] === 0)
           : processedFeatures.filter((currentFeature) => currentFeature[currentFeature.name] !== 0);
+    }
+
+    if (diffFilter !== 'difference') {
+      processedFeatures = diffFilter === 'risk' ? negativeFeaturesContrib : positiveFeaturesContrib;
     }
 
     return processedFeatures;
