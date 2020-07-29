@@ -19,6 +19,9 @@ export const getCurrentPredSortDir = (state) => state.features.sortPredDirection
 export const getCurrentSortDiffDir = (state) => state.features.sortDiffDirection;
 export const getModelPredictFilterValue = (state) => state.features.modelPredFilterValue;
 export const getModelPredDiffFilterValue = (state) => state.features.diffFilterVal;
+export const getFeatureTypeFilters = (state) => state.features.featureTypeFilters;
+export const getFeatureTypeSortContribDir = (state) => state.features.featureTypeSortDir;
+export const getFeatureTypeFilterCategs = (state) => state.features.featureTypeFilterCategs;
 
 const maxNegativeContrib = -0.000000001;
 
@@ -88,14 +91,8 @@ export const getFeaturesData = createSelector(
       );
     }
 
-    const positiveFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue > 0);
-    const negativeFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue < 0);
-
-    negativeFeaturesContrib.sort((current, next) =>
-      sortContribDir === 'asc'
-        ? current.contributionValue - next.contributionValue
-        : next.contributionValue - current.contributionValue,
-    );
+    let positiveFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue > 0);
+    let negativeFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue < 0);
 
     if (contribFilters === 'risk') {
       processedFeatures = negativeFeaturesContrib;
@@ -105,7 +102,94 @@ export const getFeaturesData = createSelector(
       processedFeatures = positiveFeaturesContrib;
     }
 
-    return { processedFeatures, positiveFeaturesContrib, negativeFeaturesContrib };
+    return { processedFeatures };
+  },
+);
+
+export const getGrouppedFeatures = createSelector(
+  [
+    getIsFeaturesLoading,
+    getCurrentFeatures,
+    getCurrentEntityData,
+    getEntityContributions,
+    getFeatureTypeFilters,
+    getFeatureTypeSortContribDir,
+    getFeaturesFilterCriteria,
+    getFeatureTypeFilterCategs,
+  ],
+  (
+    isFeaturesLoading,
+    currentFeatures,
+    entityData,
+    contributions,
+    featureTypeFilters,
+    featureSortDir,
+    filterCriteria,
+    filterCategs,
+  ) => {
+    if (isFeaturesLoading) {
+      return [];
+    }
+
+    const entityFeatures = entityData.features;
+    let processedFeatures = [];
+
+    currentFeatures.map((currentFeature) => {
+      processedFeatures.push({
+        ...currentFeature,
+        [currentFeature.name]: entityFeatures[currentFeature.name],
+        contributionValue: roundContribValue(contributions[currentFeature.name]),
+      });
+    });
+
+    if (filterCriteria) {
+      const regex = new RegExp(filterCriteria, 'gi');
+      processedFeatures = processedFeatures.filter((currentFeature) => currentFeature.description.match(regex));
+    }
+
+    let positiveFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue > 0);
+    let negativeFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue < 0);
+
+    positiveFeaturesContrib.sort((current, next) => next.contributionValue - current.contributionValue);
+    negativeFeaturesContrib.sort((current, next) => current.contributionValue - next.contributionValue);
+
+    if (featureTypeFilters.negativeFeatures !== 'all') {
+      negativeFeaturesContrib = negativeFeaturesContrib.filter(
+        (currentFeature) => currentFeature.type === featureTypeFilters.negativeFeatures,
+      );
+    }
+
+    if (featureTypeFilters.positiveFeatures !== 'all') {
+      positiveFeaturesContrib = positiveFeaturesContrib.filter(
+        (currentFeature) => currentFeature.type === featureTypeFilters.positiveFeatures,
+      );
+    }
+
+    positiveFeaturesContrib.sort((current, next) =>
+      featureSortDir.positiveFeatures === 'asc'
+        ? next.contributionValue - current.contribValue
+        : current.contributionValue - next.contributionValue,
+    );
+
+    negativeFeaturesContrib.sort((current, next) =>
+      featureSortDir.negativeFeatures !== 'asc'
+        ? current.contributionValue - next.contribValue
+        : next.contributionValue - current.contributionValue,
+    );
+
+    if (filterCategs.positiveFeatures !== null && filterCategs.positiveFeatures.length > 0) {
+      positiveFeaturesContrib = positiveFeaturesContrib.filter(
+        (currentFeature) => filterCategs.positiveFeatures.indexOf(currentFeature.category) !== -1,
+      );
+    }
+
+    if (filterCategs.negativeFeatures !== null && filterCategs.negativeFeatures.length > 0) {
+      negativeFeaturesContrib = negativeFeaturesContrib.filter(
+        (currentFeature) => filterCategs.negativeFeatures.indexOf(currentFeature.category) !== -1,
+      );
+    }
+
+    return { positiveFeaturesContrib, negativeFeaturesContrib };
   },
 );
 

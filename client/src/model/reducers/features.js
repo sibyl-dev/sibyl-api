@@ -19,6 +19,18 @@ const initialState = {
   sortDiffDirection: null,
   modelPredFilterValue: 'all',
   diffFilterVal: 'difference',
+  featureTypeFilters: {
+    positiveFeatures: 'all',
+    negativeFeatures: 'all',
+  },
+  featureTypeSortDir: {
+    positiveFeatures: 'asc',
+    negativeFeatures: 'desc',
+  },
+  featureTypeFilterCategs: {
+    positiveFeatures: null,
+    negativeFeatures: null,
+  },
 };
 
 function GET_FEATURES_DATA_REQUEST(nextState) {
@@ -124,6 +136,24 @@ function SET_MODEL_PRED_DIFF_FILTER(nextState, { diffFilterVal }) {
   nextState.diffFilterVal = diffFilterVal;
 }
 
+// ------------------
+function SET_FEATURE_TYPE_FILTERS(nextState, { featureFilters }) {
+  const { filters, featureType } = featureFilters;
+  nextState.featureTypeFilters[featureType] = filters;
+}
+
+// ------------------
+function SET_FEATURE_TYPE_SORT_CONTRIB_DIR(nextState, { featureSortDir }) {
+  const { featureType, direction } = featureSortDir;
+  nextState.featureTypeSortDir[featureType] = direction;
+}
+
+// ------------------
+function SET_FEATURE_TYPE_FILTER_CATEGS(nextState, { featureTypeFilterCategs }) {
+  const { featureType, filterCategs } = featureTypeFilterCategs;
+  nextState.featureTypeFilterCategs[featureType] = filterCategs;
+}
+
 export default createReducer(initialState, {
   GET_FEATURES_DATA_REQUEST,
   GET_FEATURES_DATA_SUCCESS,
@@ -145,4 +175,7 @@ export default createReducer(initialState, {
   SET_SORT_DIFF_DIR,
   SET_MODEL_PRED_FILTER_VALUE,
   SET_MODEL_PRED_DIFF_FILTER,
+  SET_FEATURE_TYPE_FILTERS,
+  SET_FEATURE_TYPE_SORT_CONTRIB_DIR,
+  SET_FEATURE_TYPE_FILTER_CATEGS,
 });

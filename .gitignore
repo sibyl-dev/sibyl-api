@@ -133,3 +133,4 @@ ENV/
 
 .idea/*
 db/
+sibyl/*

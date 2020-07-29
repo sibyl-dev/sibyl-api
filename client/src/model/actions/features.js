@@ -146,3 +146,22 @@ export function setModelPredDiffFilterAction(filterValue) {
     dispatch({ type: 'SET_MODEL_PRED_DIFF_FILTER', diffFilterVal: filterValue });
   };
 }
+
+export function setFeatureTypeFilterAction(featureType, filters) {
+  return function (dispatch) {
+    dispatch({ type: 'SET_FEATURE_TYPE_FILTERS', featureFilters: { featureType, filters } });
+  };
+}
+
+export function setFeatureTypeSortContribDirAction(featureType, direction) {
+  return function (dispatch) {
+    dispatch({ type: 'SET_FEATURE_TYPE_SORT_CONTRIB_DIR', featureSortDir: { featureType, direction } });
+  };
+}
+
+export function setFeatureTypeFilterCategsAction(featureType, categs) {
+  return function (dispatch) {
+    const filterCategs = categs !== null ? categs.map((currentCateg) => currentCateg.value) : null;
+    dispatch({ type: 'SET_FEATURE_TYPE_FILTER_CATEGS', featureTypeFilterCategs: { featureType, filterCategs } });
+  };
+}
