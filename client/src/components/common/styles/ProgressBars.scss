@@ -1,0 +1,99 @@
+@import "../../../assets/sass/colors.scss";
+.bidi-progress-bar {
+    .bar-positive {
+        fill: $dark-red;
+    }
+    .bar-negative {
+        fill: $light-blue;
+    }
+}
+
+.percentage-background {
+    fill: rgba($light-gray, 0.5);
+    width: 100%;
+    height: 8px;
+    transform: translate(0px, 4px);
+}
+
+.separator {
+    width: 1px;
+    height: 16px;
+    fill: $light-gray;
+}
+
+.percentage-indicator {
+    $border-radius: 4px;
+    width: 100%;
+    height: 8px;
+    border-radius: $border-radius;
+    background: rgba($light-gray, 0.5);
+    position: relative;
+    z-index: 0;
+    height: 8px;
+    overflow: hidden;
+
+    .progress {
+        left: 0;
+        height: 8px;
+        background: $dark-mauve;
+        border-radius: $border-radius;
+    }
+}
+
+.percentage-progress-bar {
+    font-size: 14px;
+    min-width: 280px;
+
+    li {
+        display: inline-block;
+        padding: 18px 5px 0 5px;
+        vertical-align: bottom;
+
+        &:first-child {
+            padding-left: 0;
+        }
+
+        &:last-child {
+            padding-right: 0;
+        }
+
+        &.progress-info {
+            width: 200px;
+            align-items: baseline;
+            vertical-align: top;
+            padding-top: 0;
+
+            span {
+                width: 48%;
+                margin-bottom: 8px;
+                text-align: center;
+                display: inline-block;
+            }
+        }
+    }
+
+    .percentage-indicator {
+        .progress {
+            border-radius: 0;
+        }
+    }
+}
+
+.bidi-wrapper {
+    min-width: 165px;
+    li {
+        display: inline-block;
+        margin: 0 7px;
+        vertical-align: top;
+        &:first-child {
+            margin-left: 0;
+        }
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+
+    .arrow {
+        width: 12px;
+    }
+}

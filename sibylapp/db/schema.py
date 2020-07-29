@@ -12,13 +12,10 @@ This module contains the classes that define the SibylApp Database Schema:
 
 import logging
 
-from mongoengine import fields
-from mongoengine import ValidationError
-from mongoengine import NULLIFY, CASCADE, PULL, DENY
-from pip._internal.operations import freeze
+import pandas as pd
+from mongoengine import DENY, NULLIFY, PULL, ValidationError, fields
 
 from sibylapp.db.base import SibylAppDocument
-import pandas as pd
 
 LOGGER = logging.getLogger(__name__)
 

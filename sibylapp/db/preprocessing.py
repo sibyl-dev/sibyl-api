@@ -1,13 +1,15 @@
-from sibylapp.db import schema
-import pandas as pd
-from pymongo import MongoClient
-from mongoengine import connect
-from sklearn.linear_model import Lasso
-import numpy as np
-import pickle
-from sibylapp.db.utils import ModelWrapper
 import os
+import pickle
 import random
+
+import numpy as np
+import pandas as pd
+from mongoengine import connect
+from pymongo import MongoClient
+
+from sibylapp.db import schema
+from sibylapp.db.utils import ModelWrapper
+from sklearn.linear_model import Lasso
 
 
 def insert_features(filepath):
@@ -62,13 +64,13 @@ def insert_model(model_filepath, importance_filepath,
     with open(explainer_filepath, "rb") as f:
         explainer = f.read()
     items = {
-        "model":model_serial,
-        "name":name,
-        "description":description,
-        "performance":performance,
-        "importances":importances,
-        "explainer":explainer,
-        "training_set":set_doc
+        "model": model_serial,
+        "name": name,
+        "description": description,
+        "performance": performance,
+        "importances": importances,
+        "explainer": explainer,
+        "training_set": set_doc
     }
     schema.Model.insert(**items)
 
@@ -80,7 +82,7 @@ def insert_entities(values_filepath, weights_filepath,
 
     feature_df = pd.read_csv(values_filepath)[features + ["eid"]]
     if num > 0:
-        feature_df = feature_df.iloc[counter_start:num+counter_start]
+        feature_df = feature_df.iloc[counter_start:num + counter_start]
     eids = feature_df["eid"]
 
     cases = schema.Case.find()
@@ -131,9 +133,9 @@ if __name__ == "__main__":
     insert_cases(os.path.join(directory, "cases.csv"))
 
     eids = insert_entities(os.path.join(directory, "entity_features.csv"),
-                    os.path.join(directory, "weights.csv"),
-                    include_cases=True)
-    #eids = insert_entities(os.path.join(directory, "dataset.csv"),
+                           os.path.join(directory, "weights.csv"),
+                           include_cases=True)
+    # eids = insert_entities(os.path.join(directory, "dataset.csv"),
     #                       os.path.join(directory, "weights.csv"),
     #                       counter_start=17, num=100000)
     set_doc = insert_training_set(eids)

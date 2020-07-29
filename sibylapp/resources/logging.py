@@ -2,8 +2,7 @@ import logging
 
 from flask import request
 from flask_restful import Resource
-import time
-import json
+
 from sibylapp.utils import read_config
 
 LOGGER = logging.getLogger(__name__)
