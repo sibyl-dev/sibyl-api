@@ -20,7 +20,7 @@ const Dashboard = (props) => {
         <Route path="/model" component={Model} />
         <Route path="/global-feature-importance" component={FeatureImportance} />
         <Route path="/feature-distribution" component={FeatureDistrubution} />
-        <Route path="/score" exact component={Score} />
+        <Route path="/" exact component={Score} />
         <Route path="*" component={NotFound} />
       </Switch>
     </div>
