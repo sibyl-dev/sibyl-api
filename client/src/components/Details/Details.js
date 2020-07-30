@@ -187,6 +187,7 @@ export class Details extends Component {
     processedFeatures.map((currentFeature) => {
       const { contributionValue } = currentFeature;
       maxRange = maxRange > Math.abs(contributionValue) ? maxRange : Math.abs(contributionValue);
+      return null;
     });
     return maxRange;
   }

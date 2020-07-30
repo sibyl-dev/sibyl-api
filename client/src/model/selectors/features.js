@@ -198,11 +198,12 @@ export const getModelPredictionPayload = createSelector(
   [getIsFeaturesLoading, getCurrentFeatures, getCurrentEntityData],
   (isFeaturesLoading, features, entityData) => {
     if (isFeaturesLoading) {
-      return;
+      return [];
     }
 
     const currentFeatures = [];
     const reversedFeatures = [];
+
     features.map((currentFeature) => {
       const currentValue = entityData.features[currentFeature.name];
 
@@ -210,6 +211,7 @@ export const getModelPredictionPayload = createSelector(
         currentFeatures.push([currentFeature.name, currentValue]);
         reversedFeatures.push([currentFeature.name, currentValue === 1 ? 0 : 1]);
       }
+      return null;
     });
 
     return { currentFeatures, reversedFeatures };
@@ -220,7 +222,7 @@ export const getModelPredictionData = createSelector(
   [getIsModelPredictLoading, getCurrentModelPrediction, getReversedModelPrediction],
   (isModelLoading, currentPrediction, reversedPrediction) => {
     if (isModelLoading) {
-      return;
+      return [];
     }
 
     let currentPredictionData = {};
@@ -232,6 +234,7 @@ export const getModelPredictionData = createSelector(
         currentDifference: currentDiff,
       };
       Object.assign(currentPredictionData, { [predictItem[0]]: data });
+      return null;
     });
     return currentPredictionData;
   },

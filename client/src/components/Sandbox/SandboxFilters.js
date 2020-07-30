@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import Select from 'react-select';
+import { connect } from 'react-redux';
 import { TrashIcon, QuestionIcon } from '../../assets/icons/icons';
 import ModalDialog from '../common/ModalDialog';
-import { connect } from 'react-redux';
 import { updateFeaturePredictionScore } from '../../model/actions/features';
 import { getIsFeaturesLoading, getUpdatedFeatureScore, getCurrentFeatures } from '../../model/selectors/features';
 import { getEntityScore } from '../../model/selectors/entities';
@@ -17,6 +17,7 @@ const dropdownFeatures = (currentFeatures) => {
   currentFeatures.map((feature) => {
     const { description, name, type } = feature;
     enhancedFeatures.push({ value: name, label: description, type });
+    return null;
   });
   return enhancedFeatures;
 };
@@ -41,14 +42,15 @@ class SandboxFilters extends Component {
   }
 
   onResetFeature(featureIndex) {
+    const { storedFeatures, storedValues } = this.state;
     this.setState(
       {
         storedFeatures: {
-          ...this.state.storedFeatures,
+          ...storedFeatures,
           [featureIndex]: { value: null },
         },
         storedValues: {
-          ...this.state.storedValues,
+          ...storedValues,
           [featureIndex]: { value: null },
         },
       },
@@ -57,10 +59,11 @@ class SandboxFilters extends Component {
   }
 
   onFeatureOptionUpdate(featureIndex, featureValue) {
+    const { storedFeatures } = this.state;
     this.setState(
       {
         storedFeatures: {
-          ...this.state.storedFeatures,
+          ...storedFeatures,
           [featureIndex]: featureValue,
         },
       },
@@ -72,10 +75,11 @@ class SandboxFilters extends Component {
   }
 
   onFeatureValueUpdate(valueIndex, value) {
+    const { storedValues } = this.state;
     this.setState(
       {
         storedValues: {
-          ...this.state.storedValues,
+          ...storedValues,
           [valueIndex]: value,
         },
       },
@@ -91,6 +95,7 @@ class SandboxFilters extends Component {
       return null;
     }
     this.setState({ featuresCount: [...featuresCount, featuresCount[featuresCount.length - 1] + 1] });
+    return null;
   }
 
   onRemoveFeature(feature) {
@@ -114,7 +119,7 @@ class SandboxFilters extends Component {
     }
 
     let storedData = [];
-    Object.keys(storedFeatures).map((feature) => {
+    Object.keys(storedFeatures).forEach((feature) => {
       const isPayloadCompleted =
         storedFeatures[feature] !== null &&
         storedFeatures[feature].value !== null &&
@@ -144,13 +149,13 @@ class SandboxFilters extends Component {
         <p className="note">
           Press on the &quot;
           <QuestionIcon width="10" height="10" color="#6B9AD1" />
-          &quot; icon near "Experiment with changes" title to re-visit this message.
+          &quot; icon near &quot;Experiment with changes&quot; title to re-visit this message.
         </p>
         <p>
           <input type="checkbox" id="remind" />
           <label htmlFor="remind">
             <span />
-            Don't remind me again
+            Don&apos;t remind me again
           </label>
         </p>
       </ModalDialog>
@@ -190,14 +195,14 @@ class SandboxFilters extends Component {
     const { featuresCount, storedFeatures } = this.state;
 
     if (isFeaturesLoading) {
-      return; // loader should be returned here;
+      return false; // loader should be returned here;
     }
 
     return featuresCount.map((currentFeature, featureIndex) => {
       const selectedFeature = Object.keys(storedFeatures).length ? storedFeatures[currentFeature] : null;
 
       return (
-        <tr key={`${currentFeature}_${featureIndex}`}>
+        <tr key={`${currentFeature.name}`}>
           <td width="3%" className="counter">
             {featureIndex + 1}
           </td>
