@@ -52,6 +52,7 @@ class FeatureDistribution extends Component {
 
       return <PercentageProgressBar negativeProgress={negativeProgress} />;
     }
+    return <p>No data to display</p>;
   }
 
   render() {

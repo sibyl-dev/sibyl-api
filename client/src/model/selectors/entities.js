@@ -22,30 +22,7 @@ export const getCurrentEntityID = createSelector([currentEntityID], (entityID) =
   return entityID;
 });
 
-// @TODO - finish and use this selector for entityData,
-// this sorts contributions in descendat order
-export const getCurrentEntityDataSorted = createSelector(
-  [getIsEntitiesLoading, getCurrentEntityData],
-  (isEntitiesLoading, currentEntities) => {
-    if (isEntitiesLoading) {
-      return [];
-    }
-
-    const { contributions } = currentEntities;
-    let sortedContrib = [];
-    for (let currentContrib in contributions) {
-      sortedContrib.push([currentContrib, Number(contributions[currentContrib])]);
-    }
-
-    sortedContrib.sort((a, b) => b[1] - a[1]);
-
-    return currentEntities;
-  },
-);
-
 export const getActivePredictionScore = createSelector(
   [getPredictionScore, getEntityScore],
-  (predictionScore, entityScore) => {
-    return predictionScore !== null ? predictionScore : entityScore;
-  },
+  (predictionScore, entityScore) => (predictionScore !== null ? predictionScore : entityScore),
 );

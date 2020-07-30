@@ -43,7 +43,7 @@ export const BiProgressBar = (props) => {
   let isSingle = props.isSingle || false;
   percentage = Number(percentage);
 
-  const getProgressBarClassName = (percentage) => (percentage >= 0 ? 'bar-positive' : 'bar-negative');
+  const getProgressBarClassName = (currPercentage) => (currPercentage >= 0 ? 'bar-positive' : 'bar-negative');
 
   return (
     <ul className="bidi-wrapper">

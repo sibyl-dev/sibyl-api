@@ -1,5 +1,5 @@
 import { api } from '../api/api';
-import { modelID } from './entities';
+import { modelID } from './constants';
 import { getCurrentEntityID } from '../selectors/entities';
 import { getModelPredictionPayload } from '../selectors/features';
 

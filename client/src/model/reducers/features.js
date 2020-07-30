@@ -1,4 +1,5 @@
 import createReducer from '../store/createReducer';
+
 const initialState = {
   isFeaturesLoading: true,
   featuresData: [],

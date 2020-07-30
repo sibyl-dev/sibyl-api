@@ -28,6 +28,9 @@ module.exports = {
   },
   plugins: ['react', 'react-hooks'],
   rules: {
+    'jsx-a11y/no-noninteractive-element-interactions': 0,
+    'react/jsx-curly-newline': 0,
+    'import/no-named-as-default': 0,
     'array-callback-return': 'warn',
     'consistent-return': 'warn',
     'no-restricted-globals': 'off',

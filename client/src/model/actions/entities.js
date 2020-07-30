@@ -1,9 +1,8 @@
 import Cookies from 'universal-cookie';
 import { api } from '../api/api';
+import { modelID } from './constants';
 import { getFeaturesAction, getCategoriesAction } from './features';
 import { getCurrentEntityID, getActivePredictionScore } from '../selectors/entities';
-
-export const modelID = '5f0dc12ea69e913b28b44292';
 
 export function setEntityIdAction(entityID) {
   return function (dispatch) {
@@ -12,7 +11,7 @@ export function setEntityIdAction(entityID) {
     cookies.set('entityID', entityID, { path: '/' });
     const action = {
       type: 'SET_ENTITY_ID',
-      entityID: parseInt(entityID),
+      entityID: parseInt(entityID, 10),
     };
     dispatch(action);
   };

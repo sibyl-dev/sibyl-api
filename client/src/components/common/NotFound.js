@@ -13,7 +13,7 @@ class NotFound extends Component {
       <div className="component-wrapper">
         <DashWrapper>
           <div className="info">
-            <p>Sorry. We didn't found what you're looking for</p>
+            <p>Sorry. We didn&apos;t found what you&apos;re looking for</p>
           </div>
         </DashWrapper>
       </div>
