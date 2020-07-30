@@ -54,7 +54,7 @@ development_requirements = [
     'bumpversion>=0.5.3',
     'pip>=9.0.1',
     'watchdog>=0.8.3',
-    'scikit-learn>=0.24'
+    'scikit-learn>=0.23.0'
 
     # docs
     'm2r>=0.2.0',
