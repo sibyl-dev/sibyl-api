@@ -200,9 +200,8 @@ class SandboxFilters extends Component {
 
     return featuresCount.map((currentFeature, featureIndex) => {
       const selectedFeature = Object.keys(storedFeatures).length ? storedFeatures[currentFeature] : null;
-
       return (
-        <tr key={`${currentFeature.name}`}>
+        <tr key={`${currentFeature}`}>
           <td width="3%" className="counter">
             {featureIndex + 1}
           </td>

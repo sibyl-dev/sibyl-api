@@ -268,7 +268,6 @@ export const getFeatureCategories = createSelector(
         color: currentCategory.color === null ? categoryColors[catIndex] : currentCategory.color,
       }),
     );
-
     return categories;
   },
 );
@@ -308,7 +307,6 @@ export const getReversedModelPredFeatures = createSelector(
     }
     const entityFeatures = entityData.features;
     let processedFeatures = [];
-
     features.map((currentFeature) =>
       processedFeatures.push({
         ...currentFeature,
