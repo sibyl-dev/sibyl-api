@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import DashWrapper from '../common/DashWrapper';
 
 import Search from '../common/Search';
 import ScoreInfo from '../common/ScoreInfo';
 import PieChart from '../common/PieChart';
-import { connect } from 'react-redux';
 import {
   getIsEntitiesLoading,
   getIsEntityDistributionsLoading,
@@ -15,22 +15,13 @@ import DayGraph from '../common/DayGraph';
 import { getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
 import './Model.scss';
 
-// mock search result
-const hayStack = [
-  { feature: 'Child in focus had a prior court active child welfare case' },
-  { feature: 'Child in focus is younger than 1 years old' },
-  { feature: 'Feature #1' },
-  { feature: 'Feature #2' },
-  { feature: 'Feature #3' },
-];
-
 class FeatureDistribution extends Component {
   renderDashHeader() {
     return (
       <header className="dash-header">
         <ul className="dash-controls">
           <li>
-            <Search hayStack={hayStack} />
+            <Search />
           </li>
           <li>&nbsp;</li>
         </ul>
@@ -97,8 +88,8 @@ class FeatureDistribution extends Component {
               <tbody>
                 {!isDataLoading ? (
                   processedFeatures.length > 0 ? (
-                    processedFeatures.map((currentFeature, featureIndex) => (
-                      <tr key={featureIndex}>
+                    processedFeatures.map((currentFeature) => (
+                      <tr key={currentFeature.name}>
                         <td>{currentFeature.description}</td>
                         <td className="align-right">{this.drawDistribution(currentFeature.name)}</td>
                       </tr>

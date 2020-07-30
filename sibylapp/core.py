@@ -5,8 +5,8 @@ import sys
 from flask import Flask
 from flask_cors import CORS
 from gevent.pywsgi import WSGIServer
-from termcolor import colored
 from mongoengine import connect
+from termcolor import colored
 
 from sibylapp import g
 from sibylapp.routes import add_routes

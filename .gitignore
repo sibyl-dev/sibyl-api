@@ -133,4 +133,6 @@ ENV/
 
 .idea/*
 db/
-sibyl/*
+dbdata/
+sibylapp/db/data
+sibyl/

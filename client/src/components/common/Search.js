@@ -1,8 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import parse from 'autosuggest-highlight/parse';
-import match from 'autosuggest-highlight/match';
+// import Autocomplete from '@material-ui/lab/Autocomplete';
+// import parse from 'autosuggest-highlight/parse';
+// import match from 'autosuggest-highlight/match';
 import { CloseIncon } from '../../assets/icons/icons';
 
 import './styles/Search.scss';

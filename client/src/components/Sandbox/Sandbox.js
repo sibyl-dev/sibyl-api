@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { DashWrapper } from '../common/DashWrapper';
+import Select from 'react-select';
+import DashWrapper from '../common/DashWrapper';
 import { CategorySelect } from '../common/Form';
 import Search from '../common/Search';
-import Select from 'react-select';
 import SandboxFilters from './SandboxFilters';
 import {
   getModelPredictionAction,
@@ -115,7 +115,7 @@ class Sandbox extends Component {
     return currentFeature === 0 ? trueRow : falseRow;
   }
 
-  getFeatureCathegoryColor = (feature) => {
+  getFeatureCathegoryColor(feature) {
     const { featureCategories } = this.props;
     const colorIndex = featureCategories.findIndex((currentCategory) => currentCategory.name === feature);
 
@@ -123,8 +123,8 @@ class Sandbox extends Component {
       return null;
     }
 
-    return <i className="bullet" style={{ background: featureCategories[colorIndex].color }}></i>;
-  };
+    return <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />;
+  }
 
   setSortContribDirection() {
     const { currentPredSortDir, setSortPrediction } = this.props;

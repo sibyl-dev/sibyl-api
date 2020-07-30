@@ -5,11 +5,9 @@ a simple programatic access to creating and reading objects in the MTV Database.
 """
 import json
 import logging
-import os
 
 from gridfs import GridFS
 from mongoengine import connect
-from mongoengine.errors import NotUniqueError
 from pymongo.database import Database
 
 from sibylapp.db import schema

@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import Select from 'react-select';
 import { TableFullIcon, TableSplitIcon, SortIcon } from '../../assets/icons/icons';
 import DashWrapper from '../common/DashWrapper';
-import Select from 'react-select';
 import Search from '../common/Search';
 import { CategorySelect } from '../common/Form';
 import MetTooltip from '../common/MetTooltip';
@@ -114,9 +114,8 @@ export class Details extends Component {
       currentFeatureTypeCategs,
     } = this.props;
 
-    const setFeatureFilterValues = (filterValue) => {
-      return featureType !== 'all' ? setFeatureFilters(featureType, filterValue) : setFilterValues(filterValue);
-    };
+    const setFeatureFilterValues = (filterValue) =>
+      featureType !== 'all' ? setFeatureFilters(featureType, filterValue) : setFilterValues(filterValue);
 
     const getFilterValue = () =>
       featureType !== 'all'
@@ -134,12 +133,12 @@ export class Details extends Component {
         <header className="dash-header">
           <ul className="dash-controls">
             {viewMode === 'unified' && (
-              <React.Fragment>
+              <>
                 <li>
                   <Search />
                 </li>
                 <li className="sep" />
-              </React.Fragment>
+              </>
             )}
             <li>
               <CategorySelect
@@ -169,7 +168,7 @@ export class Details extends Component {
                   className="sibyl-select"
                   options={contribFilters}
                   placeholder="Contribution"
-                  onChange={(contribFilters) => setContribFilters(contribFilters.value)}
+                  onChange={(currentFilters) => setContribFilters(currentFilters.value)}
                   value={contribFilters.filter((currentContrib) => currentContrib.value === currentContribFilters)}
                 />
               </li>
@@ -192,13 +191,13 @@ export class Details extends Component {
     return maxRange;
   }
 
-  getFeatureType = (feature) => {
+  getFeatureType(feature) {
     const { entityData } = this.props;
     const { name, type } = feature;
     return type === 'binary' ? (entityData.features[name] > 0 ? 'True' : 'False') : entityData.features[name];
-  };
+  }
 
-  getFeatureCathegoryColor = (feature) => {
+  getFeatureCathegoryColor(feature) {
     const { featureCategories } = this.props;
     const colorIndex = featureCategories.findIndex((currentCategory) => currentCategory.name === feature);
 
@@ -206,8 +205,8 @@ export class Details extends Component {
       return null;
     }
 
-    return <i className="bullet" style={{ background: featureCategories[colorIndex].color }}></i>;
-  };
+    return <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />;
+  }
 
   setSortContribDirection() {
     const { setSortContribDir, currentSortDir } = this.props;
@@ -269,8 +268,8 @@ export class Details extends Component {
           <tbody>
             {!isDataLoading ? (
               features.length > 0 ? (
-                features.map((currentFeature, featureIndex) => (
-                  <tr key={featureIndex}>
+                features.map((currentFeature) => (
+                  <tr key={currentFeature.name}>
                     <td className="align-center">{this.getFeatureCathegoryColor(currentFeature.category)}</td>
                     <td>{currentFeature.description}</td>
                     <td className="align-right">{this.getFeatureType(currentFeature)}</td>
@@ -306,7 +305,7 @@ export class Details extends Component {
   }
 
   renderSplitMode() {
-    const { features, isFeaturesLoading, isEntityContribLoading, grouppedFeatures } = this.props;
+    const { isFeaturesLoading, isEntityContribLoading, grouppedFeatures } = this.props;
     const { positiveFeaturesContrib, negativeFeaturesContrib } = grouppedFeatures;
     const isDataLoading = isEntityContribLoading || isFeaturesLoading;
 
@@ -369,7 +368,7 @@ export default connect(
     setSortContribDir: (direction) => dispatch(sortFeaturesByContribAction(direction)),
     setFilterValues: (filterValue) => dispatch(setFilterValuesAction(filterValue)),
     setFilterCategories: (filterCategs) => dispatch(setFilterCategsAction(filterCategs)),
-    setContribFilters: (contribFilters) => dispatch(setContribFiltersAction(contribFilters)),
+    setContribFilters: (currentContribFilters) => dispatch(setContribFiltersAction(currentContribFilters)),
     setFeatureFilters: (featureType, filter) => dispatch(setFeatureTypeFilterAction(featureType, filter)),
     setFeatureSortDir: (featureType, direction) => dispatch(setFeatureTypeSortContribDirAction(featureType, direction)),
     setFeatureTypeFilterCategs: (featureType, categs) =>

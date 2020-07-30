@@ -1,6 +1,6 @@
 import React from 'react';
-import { ExcamationIcon } from '../../assets/icons/icons';
 import { connect } from 'react-redux';
+import { ExcamationIcon } from '../../assets/icons/icons';
 import { getPageName } from '../../model/selectors/sidebar';
 import { getIsEntityScoreLoading, getEntityScore } from '../../model/selectors/entities';
 import './Header.scss';

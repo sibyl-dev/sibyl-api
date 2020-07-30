@@ -5,15 +5,6 @@ import Search from '../common/Search';
 import { ProgressIndicator } from '../common/ProgressBars';
 import { getFeaturesImportances, getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
 
-// mock search result
-const hayStack = [
-  { feature: 'Child in focus had a prior court active child welfare case' },
-  { feature: 'Child in focus is younger than 1 years old' },
-  { feature: 'Feature #1' },
-  { feature: 'Feature #2' },
-  { feature: 'Feature #3' },
-];
-
 const BoxNote = () => (
   <div className="blue-box">
     <h4>How the Model works</h4>
@@ -41,9 +32,7 @@ const BoxNote = () => (
   </div>
 );
 
-const getFeatureImportanceMax = (importances) => {
-  return Math.max.apply(null, Object.values(importances));
-};
+const getFeatureImportanceMax = (importances) => Math.max.apply(null, Object.values(importances));
 
 const FeatureImportance = (props) => {
   const { featuresImportances, features, isFeaturesLoading } = props;
@@ -57,7 +46,7 @@ const FeatureImportance = (props) => {
         <header className="dash-header">
           <ul className="dash-controls">
             <li>
-              <Search hayStack={hayStack} />
+              <Search />
             </li>
             <li>&nbsp;</li>
           </ul>
@@ -74,19 +63,17 @@ const FeatureImportance = (props) => {
             </thead>
             <tbody>
               {!isFeaturesLoading &&
-                processedFeatures.map((currentFeature) => {
-                  return (
-                    <tr key={currentFeature.name}>
-                      <td>{currentFeature.description}</td>
-                      <td>
-                        <ProgressIndicator
-                          maxValue={importanceMax}
-                          progressWidth={featuresImportances[currentFeature.name]}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
+                processedFeatures.map((currentFeature) => (
+                  <tr key={currentFeature.name}>
+                    <td>{currentFeature.description}</td>
+                    <td>
+                      <ProgressIndicator
+                        maxValue={importanceMax}
+                        progressWidth={featuresImportances[currentFeature.name]}
+                      />
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

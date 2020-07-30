@@ -203,7 +203,7 @@ class SandboxFilters extends Component {
           </td>
           <td width="50%">
             <Select
-              isSearchable={true}
+              isSearchable
               isMulti={false}
               classNamePrefix="sibyl-select"
               className="sibyl-select"

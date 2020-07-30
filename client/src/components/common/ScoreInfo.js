@@ -1,20 +1,13 @@
 import React, { Component } from 'react';
-import './styles/ScoreInfo.scss';
-import GrayBoxWrapper from './GrayBoxWrapper';
 import { connect } from 'react-redux';
+import GrayBoxWrapper from './GrayBoxWrapper';
 import { setPredictionScoreAction } from '../../model/actions/entities';
 import { getActivePredictionScore, getIsEntitiesLoading } from '../../model/selectors/entities';
+import './styles/ScoreInfo.scss';
 
 const scoreValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
 class ScoreInfo extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      activeScore: 10,
-    };
-  }
-
   componentDidMount() {
     const { activeScore, setActiveScore } = this.props;
 
@@ -31,8 +24,8 @@ class ScoreInfo extends Component {
 
   renderScoreScale() {
     const { activeScore, setActiveScore } = this.props;
-    const renderValues = () => {
-      return scoreValues.map((currentValue, index) => {
+    const renderValues = () =>
+      scoreValues.map((currentValue, index) => {
         const activeIndex = scoreValues.indexOf(activeScore);
         const getItemsClassNames = () => {
           if (index === activeIndex) {
@@ -41,6 +34,7 @@ class ScoreInfo extends Component {
           if (index === activeIndex - 1 || index === activeIndex + 1) {
             return 'active-neighbor';
           }
+          return null;
         };
         return (
           <li key={currentValue} className={getItemsClassNames()} onClick={() => setActiveScore(currentValue)}>
@@ -48,7 +42,6 @@ class ScoreInfo extends Component {
           </li>
         );
       });
-    };
 
     return (
       <div className="score">

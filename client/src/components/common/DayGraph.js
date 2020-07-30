@@ -52,14 +52,7 @@ class DayGraph extends Component {
 
     xAxis
       .selectAll(`#_${graphIndex} .tick line`)
-      .attr('stroke', (currentTick) => {
-        if (maxData === 0) {
-          return null;
-        }
-        if (currentTick === 0 || currentTick === maxData) {
-          return '#828282';
-        }
-      })
+      .attr('stroke', (currentTick) => (currentTick === 0 || currentTick === maxData ? '#828282' : null))
       .attr('stroke-width', 2)
       .attr('transform', 'translate(0,-6)');
   }
@@ -89,7 +82,7 @@ class DayGraph extends Component {
     return (
       (data[4] !== 0 && (
         <svg width={dimensions.width + 15} height={dimensions.height} id={`_${this.props.graphIndex}`}>
-          <g className="axis-x"></g>
+          <g className="axis-x" />
           <g className="data">{this.drawData(data)}</g>
         </svg>
       )) || <p>No data to display.</p>

@@ -24,19 +24,19 @@ export const CategorySelect = (props) => {
   const { options, onChange, value } = props;
   const catOptions = [];
 
-  options.map((currentOption) => {
+  options.map((currentOption) =>
     catOptions.push({
       value: currentOption.name,
       label: currentOption.name,
       icon: currentOption.color,
       isFixed: true,
-    });
-  });
+    }),
+  );
 
   return (
     <Select
       isSearchable={false}
-      isMulti={true}
+      isMulti
       classNamePrefix="sibyl-select"
       className="sibyl-select"
       formatOptionLabel={categoryFormatOptions}

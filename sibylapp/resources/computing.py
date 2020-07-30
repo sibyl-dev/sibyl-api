@@ -1,16 +1,16 @@
-import logging
-
-from flask_restful import Resource
-from flask import request
-from sibyl import local_feature_explanation as lfe
-from sibyl import global_explanation as ge
-from sibylapp.db import schema
-import pandas as pd
 import json
-import pathlib
+import logging
 import os
-
+import pathlib
 import pickle
+
+import pandas as pd
+from flask import request
+from flask_restful import Resource
+
+from sibyl import global_explanation as ge
+from sibyl import local_feature_explanation as lfe
+from sibylapp.db import schema
 
 LOGGER = logging.getLogger(__name__)
 
@@ -31,7 +31,6 @@ class Similarities(Resource):
 
         @apiSuccess {String[]} entities List of entity IDs.
         """
-        pass
 
 
 class SingleChangePredictions(Resource):
@@ -77,11 +76,12 @@ class SingleChangePredictions(Resource):
                     LOGGER.exception('Invalid feature %s' % change[0])
                     return {'message': 'Invalid feature {}'.format(change[0])
                             }, 400
-                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [0, 1]:
+                if schema.Feature.find_one(
+                        name=change[0]).type == "binary" and change[1] not in [0, 1]:
                     LOGGER.exception('Feature %s is binary, change value of %s is invalid.'
                                      % (change[0], change[1]))
-                    return {'message': 'Feature {} is binary, invalid change value'.format(change[0])
-                            }, 400
+                    return {'message': 'Feature {} is binary, invalid change value'.format(
+                            change[0])}, 400
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 400
@@ -157,11 +157,12 @@ class ModifiedPrediction(Resource):
                     LOGGER.exception('Invalid feature %s' % change[0])
                     return {'message': 'Invalid feature {}'.format(change[0])
                             }, 400
-                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [0, 1]:
+                if schema.Feature.find_one(
+                        name=change[0]).type == "binary" and change[1] not in [0, 1]:
                     LOGGER.exception('Feature %s is binary, change value of %s is invalid.'
                                      % (change[0], change[1]))
-                    return {'message': 'Feature {} is binary, invalid change value'.format(change[0])
-                            }, 400
+                    return {'message': 'Feature {} is binary, invalid change value'.format(
+                        change[0])}, 400
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 400
@@ -211,8 +212,9 @@ class FeatureDistributions(Resource):
             feature for each feature.
         @apiSuccess {String} distributions.key Feature name
         @apiSuccess {String="numeric","category"} distributions.type Feature type
-        @apiSuccess {5-tuple} distributions.metrics If type is "numeric":[min, 1st quartile, median, 3rd quartile, max] <br>
-                                                    If type is "categorical" or "binary": [[values],[counts]]
+        @apiSuccess {5-tuple} distributions.metrics If type is "numeric":[min, 1st quartile,
+            median, 3rd quartile, max] <br>. If type is "categorical" or "binary":
+            [[values],[counts]]
         """
         attrs = ['prediction', 'model_id']
         attrs_type = [int, str]
@@ -311,7 +313,8 @@ class PredictionCount(Resource):
         @apiParam {Number} prediction Prediction Prediction to look at counts for
         @apiParam {String} model_id ID of model to use for predictions.
 
-        @apiSuccess {Number} count Number of entities who are predicted as prediction in the training set
+        @apiSuccess {Number} count Number of entities who are predicted as prediction in
+            the training set
         """
         attrs = ['prediction', 'model_id']
         attrs_type = [int, str]

@@ -68,6 +68,7 @@ export const getFeaturesData = createSelector(
         [currentFeature.name]: entityFeatures[currentFeature.name],
         contributionValue: roundContribValue(contributions[currentFeature.name]),
       });
+      return processedFeatures;
     });
 
     processedFeatures.sort((current, next) =>
@@ -134,13 +135,13 @@ export const getGrouppedFeatures = createSelector(
     const entityFeatures = entityData.features;
     let processedFeatures = [];
 
-    currentFeatures.map((currentFeature) => {
+    currentFeatures.map((currentFeature) =>
       processedFeatures.push({
         ...currentFeature,
         [currentFeature.name]: entityFeatures[currentFeature.name],
         contributionValue: roundContribValue(contributions[currentFeature.name]),
-      });
-    });
+      }),
+    );
 
     if (filterCriteria) {
       const regex = new RegExp(filterCriteria, 'gi');
@@ -258,12 +259,12 @@ export const getFeatureCategories = createSelector(
     ];
     let categories = [];
 
-    featureCategories.map((currentCategory, catIndex) => {
+    featureCategories.map((currentCategory, catIndex) =>
       categories.push({
         name: currentCategory.name,
         color: currentCategory.color === null ? categoryColors[catIndex] : currentCategory.color,
-      });
-    });
+      }),
+    );
 
     return categories;
   },
@@ -305,15 +306,15 @@ export const getReversedModelPredFeatures = createSelector(
     const entityFeatures = entityData.features;
     let processedFeatures = [];
 
-    features.map((currentFeature) => {
+    features.map((currentFeature) =>
       processedFeatures.push({
         ...currentFeature,
         [currentFeature.name]: entityFeatures[currentFeature.name],
         contributionValue: roundContribValue(contributions[currentFeature.name]),
         modelPrediction:
           modelPredictData[currentFeature.name] !== undefined ? modelPredictData[currentFeature.name] : null,
-      });
-    });
+      }),
+    );
 
     processedFeatures = processedFeatures.filter((currentFeature) => currentFeature.modelPrediction !== null);
 
