@@ -9,7 +9,7 @@ import {
   ScoreIcon,
   DetailsIcon,
   SandboxIcon,
-  SimilarChildrenIcon,
+  // SimilarChildrenIcon,
   ModelIcon,
   MetLogo,
 } from '../../assets/icons/icons';

@@ -1,4 +1,4 @@
-@import '../../assets/sass/colors.scss';
+@import "../../assets/sass/colors.scss";
 .dash-controls {
     display: flex;
     li {
@@ -64,7 +64,9 @@
 
     .separator {
         border-top: 1px dashed $light-gray;
-        margin: 0 10px;
+        margin: 0;
+        height: 1px;
+        width: auto;
     }
 
     button {
@@ -98,6 +100,20 @@
         .max-count {
             font-size: 14px;
             color: $light-gray;
+        }
+    }
+}
+
+.dash-table {
+    &.sandbox {
+        tbody {
+            td.spaced {
+                &,
+                span,
+                svg {
+                    vertical-align: middle;
+                }
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const Model = () => (
+const Model = () => (
   <div className="component-wrapper">
     <p>Model here</p>
   </div>

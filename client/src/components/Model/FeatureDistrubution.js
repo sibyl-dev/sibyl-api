@@ -5,19 +5,15 @@ import DashWrapper from '../common/DashWrapper';
 import Search from '../common/Search';
 import ScoreInfo from '../common/ScoreInfo';
 import PieChart from '../common/PieChart';
-import { getIsEntitiesLoading, getCurrentEntityData } from '../../model/selectors/entitites';
+import {
+  getIsEntitiesLoading,
+  getIsEntityDistributionsLoading,
+  getEntityDistributions,
+} from '../../model/selectors/entities';
 import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';
+import { getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
 import './Model.scss';
-
-// mock search result
-const hayStack = [
-  { feature: 'Child in focus had a prior court active child welfare case' },
-  { feature: 'Child in focus is younger than 1 years old' },
-  { feature: 'Feature #1' },
-  { feature: 'Feature #2' },
-  { feature: 'Feature #3' },
-];
 
 class FeatureDistribution extends Component {
   renderDashHeader() {
@@ -25,7 +21,7 @@ class FeatureDistribution extends Component {
       <header className="dash-header">
         <ul className="dash-controls">
           <li>
-            <Search hayStack={hayStack} />
+            <Search />
           </li>
           <li>&nbsp;</li>
         </ul>
@@ -33,9 +29,37 @@ class FeatureDistribution extends Component {
     );
   }
 
+  drawDistribution(currentFeature) {
+    const { distributions } = this.props;
+    if (distributions[currentFeature] === undefined) {
+      return <p>No data to display</p>;
+    }
+
+    if (distributions[currentFeature] !== undefined && distributions[currentFeature].type === 'numeric') {
+      const data = distributions[currentFeature].metrics;
+      return <DayGraph data={data} graphIndex={currentFeature} />;
+    }
+
+    if (distributions[currentFeature].type === 'category') {
+      const data = distributions[currentFeature].metrics;
+
+      if (data[0].length === 1) {
+        return <PercentageProgressBar negativeProgress={0} />;
+      }
+
+      const maxPercentage = data[1][0] + data[1][1];
+      const negativeProgress = Math.floor((data[1][1] / maxPercentage) * 100);
+
+      return <PercentageProgressBar negativeProgress={negativeProgress} />;
+    }
+    return <p>No data to display</p>;
+  }
+
   render() {
-    const { entityData, isEntityLoading } = this.props;
-    const { featuresData } = entityData;
+    const { isDistributionsLoading, isEntityLoading, features, isFeaturesLoading } = this.props;
+    const { processedFeatures } = features;
+    const isDataLoading = isDistributionsLoading || isEntityLoading || isFeaturesLoading;
+
     return (
       <div className="component-wrapper">
         <table className="distrib-info">
@@ -63,16 +87,28 @@ class FeatureDistribution extends Component {
                 </tr>
               </thead>
               <tbody>
-                {!isEntityLoading &&
-                  featuresData.map((currentFeature, featureIndex) => (
-                    <tr key={featureIndex}>
-                      <td>{currentFeature.description}</td>
-                      <td className="align-right">
-                        <DayGraph data={[24, 40]} maxData={42} graphIndex={featureIndex} />
-                        <PercentageProgressBar negativeProgress="20" />
+                {!isDataLoading ? (
+                  processedFeatures.length > 0 ? (
+                    processedFeatures.map((currentFeature) => (
+                      <tr key={currentFeature.name}>
+                        <td>{currentFeature.description}</td>
+                        <td className="align-right">{this.drawDistribution(currentFeature.name)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="2" className="align-center">
+                        <p>No matches found...</p>
                       </td>
                     </tr>
-                  ))}
+                  )
+                ) : (
+                  <tr>
+                    <td colSpan="2" className="align-center">
+                      <p>Loading...</p>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -83,6 +119,9 @@ class FeatureDistribution extends Component {
 }
 
 export default connect((state) => ({
+  isFeaturesLoading: getIsFeaturesLoading(state),
   isEntityLoading: getIsEntitiesLoading(state),
-  entityData: getCurrentEntityData(state),
+  isDistributionsLoading: getIsEntityDistributionsLoading(state),
+  distributions: getEntityDistributions(state),
+  features: getFeaturesData(state),
 }))(FeatureDistribution);
