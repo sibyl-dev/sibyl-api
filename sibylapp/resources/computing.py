@@ -419,7 +419,7 @@ class OutcomeCount(Resource):
 
         prediction = d["prediction"]
 
-        if use_dummy_functions:
+        if g['config']['use_dummy_functions']:
             directory = pathlib.Path(__file__).parent.absolute()
             with open(os.path.join(directory, 'distributions.json'), 'r') as f:
                 all_distributions = json.load(f)
