@@ -10,11 +10,10 @@ from flask_restful import Resource
 
 from sibyl import global_explanation as ge
 from sibyl import local_feature_explanation as lfe
+from sibylapp import g
 from sibylapp.db import schema
 
 LOGGER = logging.getLogger(__name__)
-
-use_dummy_functions = True
 
 
 class Similarities(Resource):
@@ -252,7 +251,7 @@ class FeatureDistributions(Resource):
             LOGGER.exception(e)
             return {'message': str(e)}, 500
 
-        if use_dummy_functions:
+        if g['config']['use_dummy_functions']:
             directory = pathlib.Path(__file__).parent.absolute()
             with open(os.path.join(directory, 'distributions.json'), 'r') as f:
                 all_distributions = json.load(f)
@@ -310,7 +309,7 @@ class PredictionCount(Resource):
         @apiVersion 1.0.0
         @apiDescription Get the number of entities that were predicted as a certain value
 
-        @apiParam {Number} prediction Prediction Prediction to look at counts for
+        @apiParam {Number} prediction Prediction to look at counts for
         @apiParam {String} model_id ID of model to use for predictions.
 
         @apiSuccess {Number} count Number of entities who are predicted as prediction in
@@ -339,7 +338,7 @@ class PredictionCount(Resource):
         prediction = d["prediction"]
         model_id = d["model_id"]
 
-        if use_dummy_functions:
+        if g['config']['use_dummy_functions']:
             directory = pathlib.Path(__file__).parent.absolute()
             with open(os.path.join(directory, 'distributions.json'), 'r') as f:
                 all_distributions = json.load(f)
