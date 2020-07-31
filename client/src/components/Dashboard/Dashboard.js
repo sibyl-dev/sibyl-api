@@ -1,6 +1,6 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import Score from '../Score/Score';
+// import Score from '../Score/Score';
 import Details from '../Details/Details';
 import './Dashboard.scss';
 import Sandbox from '../Sandbox/Sandbox';
@@ -20,7 +20,7 @@ const Dashboard = (props) => {
         <Route path="/model" component={Model} />
         <Route path="/global-feature-importance" component={FeatureImportance} />
         <Route path="/feature-distribution" component={FeatureDistrubution} />
-        <Route path="/" exact component={Score} />
+        {/* <Route path="/" exact component={Score} /> */}
         <Route path="*" component={NotFound} />
       </Switch>
     </div>

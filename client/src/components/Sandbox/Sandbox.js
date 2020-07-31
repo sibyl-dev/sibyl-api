@@ -29,6 +29,7 @@ import {
 } from '../../model/selectors/features';
 
 import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
+import { setUserActionRecording } from '../../model/actions/userActions';
 import './Sandbox.scss';
 
 const valueSelect = [
@@ -44,6 +45,14 @@ const diffValues = [
 ];
 
 class Sandbox extends Component {
+  componentDidMount() {
+    const userData = {
+      element: 'sandbox_page',
+      action: 'click',
+    };
+    this.props.setUserActions(userData);
+  }
+
   renderDashHeader() {
     const {
       featureCategories,
@@ -257,5 +266,6 @@ export default connect(
     setContribFilters: (filters) => dispatch(setContribFiltersAction(filters)),
     setFilterValue: (filterValue) => dispatch(setModelPredictFilterValueAction(filterValue)),
     setDiffFilter: (filterValue) => dispatch(setModelPredDiffFilterAction(filterValue)),
+    setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
   }),
 )(Sandbox);

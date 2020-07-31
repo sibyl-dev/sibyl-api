@@ -2,7 +2,8 @@ import Cookies from 'universal-cookie';
 import { api } from '../api/api';
 import { modelID } from './constants';
 import { getFeaturesAction, getCategoriesAction } from './features';
-import { getCurrentEntityID, getActivePredictionScore } from '../selectors/entities';
+import { getCurrentEntityID, getActivePredictionScore, getPredictionScore } from '../selectors/entities';
+import { setUserActionRecording } from './userActions';
 
 export function setEntityIdAction(entityID) {
   return function (dispatch) {
@@ -58,13 +59,27 @@ export function getEntityFeatureDistributionAction() {
 }
 
 export function setPredictionScoreAction(predictionScore) {
-  return function (dispatch) {
+  return function (dispatch, getState) {
+    const currentPredictionScore = getPredictionScore(getState());
+
+    if (predictionScore === currentPredictionScore) {
+      return;
+    }
+
     const setActiveScoreAction = {
       type: 'SET_PREDICTION_SCORE',
       predictionScore,
     };
 
     dispatch(setActiveScoreAction).then(dispatch(getEntityFeatureDistributionAction()));
+
+    const userRecordPayload = {
+      element: 'score_bar',
+      action: 'filter',
+      details: predictionScore,
+    };
+
+    dispatch(setUserActionRecording(userRecordPayload));
   };
 }
 

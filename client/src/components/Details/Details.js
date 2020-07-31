@@ -32,6 +32,7 @@ import {
   getGrouppedFeatures,
   getFeatureTypeFilterCategs,
 } from '../../model/selectors/features';
+import { setUserActionRecording } from '../../model/actions/userActions';
 
 import './Details.scss';
 
@@ -55,14 +56,25 @@ export class Details extends Component {
     };
   }
 
+  componentDidMount() {
+    const userData = {
+      element: 'details_page',
+      action: 'click',
+    };
+    this.props.setUserActions(userData);
+  }
+
   componentWillUnmount() {
     this.props.setContribFilters('all');
   }
 
   changeViewMode(viewMode) {
-    this.setState({
-      viewMode,
-    });
+    this.setState(
+      {
+        viewMode,
+      },
+      () => this.recordUserAction(),
+    );
   }
 
   renderSubheader() {
@@ -331,6 +343,15 @@ export class Details extends Component {
     );
   }
 
+  recordUserAction() {
+    const { viewMode } = this.state;
+    const userData = {
+      element: viewMode === 'split' ? 'split_view' : 'unified_view',
+      action: 'click',
+    };
+    this.props.setUserActions(userData);
+  }
+
   render() {
     const { viewMode } = this.state;
 
@@ -374,5 +395,6 @@ export default connect(
     setFeatureSortDir: (featureType, direction) => dispatch(setFeatureTypeSortContribDirAction(featureType, direction)),
     setFeatureTypeFilterCategs: (featureType, categs) =>
       dispatch(setFeatureTypeFilterCategsAction(featureType, categs)),
+    setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
   }),
 )(Details);
