@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import DashWrapper from '../common/DashWrapper';
 import Search from '../common/Search';
 import { ProgressIndicator } from '../common/ProgressBars';
 import { getFeaturesImportances, getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
+import { setUserActionRecording } from '../../model/actions/userActions';
 
 const BoxNote = () => (
   <div className="blue-box">
@@ -34,56 +35,70 @@ const BoxNote = () => (
 
 const getFeatureImportanceMax = (importances) => Math.max.apply(null, Object.values(importances));
 
-const FeatureImportance = (props) => {
-  const { featuresImportances, features, isFeaturesLoading } = props;
-  const { processedFeatures } = features;
-  const importanceMax = getFeatureImportanceMax(featuresImportances);
+class FeatureImportance extends Component {
+  componentDidMount() {
+    const userData = {
+      element: 'feature_importance',
+      action: 'click',
+    };
+    this.props.setUserActions(userData);
+  }
 
-  return (
-    <div className="component-wrapper">
-      <BoxNote />
-      <DashWrapper>
-        <header className="dash-header">
-          <ul className="dash-controls">
-            <li>
-              <Search />
-            </li>
-            <li>&nbsp;</li>
-          </ul>
-        </header>
-        <div className="sticky-wrapper scroll-style">
-          <table className="dash-table sticky-header">
-            <thead>
-              <tr>
-                <th>Feature</th>
-                <th width="20%" className="align-right">
-                  Importance
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {!isFeaturesLoading &&
-                processedFeatures.map((currentFeature) => (
-                  <tr key={currentFeature.name}>
-                    <td>{currentFeature.description}</td>
-                    <td>
-                      <ProgressIndicator
-                        maxValue={importanceMax}
-                        progressWidth={featuresImportances[currentFeature.name]}
-                      />
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      </DashWrapper>
-    </div>
-  );
-};
+  render() {
+    const { featuresImportances, features, isFeaturesLoading } = this.props;
+    const { processedFeatures } = features;
+    const importanceMax = getFeatureImportanceMax(featuresImportances);
+    return (
+      <div className="component-wrapper">
+        <BoxNote />
+        <DashWrapper>
+          <header className="dash-header">
+            <ul className="dash-controls">
+              <li>
+                <Search />
+              </li>
+              <li>&nbsp;</li>
+            </ul>
+          </header>
+          <div className="sticky-wrapper scroll-style">
+            <table className="dash-table sticky-header">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th width="20%" className="align-right">
+                    Importance
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {!isFeaturesLoading &&
+                  processedFeatures.map((currentFeature) => (
+                    <tr key={currentFeature.name}>
+                      <td>{currentFeature.description}</td>
+                      <td>
+                        <ProgressIndicator
+                          maxValue={importanceMax}
+                          progressWidth={featuresImportances[currentFeature.name]}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </DashWrapper>
+      </div>
+    );
+  }
+}
 
-export default connect((state) => ({
-  isFeaturesLoading: getIsFeaturesLoading(state),
-  features: getFeaturesData(state),
-  featuresImportances: getFeaturesImportances(state),
-}))(FeatureImportance);
+export default connect(
+  (state) => ({
+    isFeaturesLoading: getIsFeaturesLoading(state),
+    features: getFeaturesData(state),
+    featuresImportances: getFeaturesImportances(state),
+  }),
+  (dispatch) => ({
+    setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
+  }),
+)(FeatureImportance);

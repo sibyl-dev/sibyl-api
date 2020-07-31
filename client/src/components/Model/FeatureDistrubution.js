@@ -14,8 +14,17 @@ import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';
 import { getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
 import './Model.scss';
+import { setUserActionRecording } from '../../model/actions/userActions';
 
 class FeatureDistribution extends Component {
+  componentDidMount() {
+    const userData = {
+      element: 'feature_distribution',
+      action: 'click',
+    };
+    this.props.setUserActions(userData);
+  }
+
   renderDashHeader() {
     return (
       <header className="dash-header">
@@ -118,10 +127,15 @@ class FeatureDistribution extends Component {
   }
 }
 
-export default connect((state) => ({
-  isFeaturesLoading: getIsFeaturesLoading(state),
-  isEntityLoading: getIsEntitiesLoading(state),
-  isDistributionsLoading: getIsEntityDistributionsLoading(state),
-  distributions: getEntityDistributions(state),
-  features: getFeaturesData(state),
-}))(FeatureDistribution);
+export default connect(
+  (state) => ({
+    isFeaturesLoading: getIsFeaturesLoading(state),
+    isEntityLoading: getIsEntitiesLoading(state),
+    isDistributionsLoading: getIsEntityDistributionsLoading(state),
+    distributions: getEntityDistributions(state),
+    features: getFeaturesData(state),
+  }),
+  (dispatch) => ({
+    setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
+  }),
+)(FeatureDistribution);

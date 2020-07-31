@@ -2,6 +2,7 @@ import { api } from '../api/api';
 import { modelID } from './constants';
 import { getCurrentEntityID } from '../selectors/entities';
 import { getModelPredictionPayload } from '../selectors/features';
+import { setUserActionRecording } from './userActions';
 
 export function getCategoriesAction() {
   return function (dispatch) {
@@ -49,6 +50,13 @@ export function updateFeaturePredictionScore(featuresData) {
       .post('/modified_prediction/', payLoad)
       .then((response) => response.json())
       .then((score) => dispatch({ type: 'UPDATE_FEATURE_PREDICTION_SUCCESS', newFeatureScore: score.prediction }));
+
+    const userRecordPayload = {
+      element: 'experiment_with_changes',
+      action: 'text',
+      details: featuresData,
+    };
+    dispatch(setUserActionRecording(userRecordPayload));
   };
 }
 
@@ -91,12 +99,24 @@ export function getModelPredictionAction() {
 export function setFilterCriteriaAction(filterValue) {
   return function (dispatch) {
     dispatch({ type: 'SET_FILTER_CRITERIA', filterCriteria: filterValue });
+    const userRecordPayload = {
+      element: 'details_search_bar',
+      action: 'type',
+      details: filterValue,
+    };
+    dispatch(setUserActionRecording(userRecordPayload));
   };
 }
 
 export function sortFeaturesByContribAction(direction) {
   return function (dispatch) {
     dispatch({ type: 'SET_FEATURE_CONTRIB_SORT_DIRECTION', sortContribDir: direction });
+
+    const userRecordPayload = {
+      element: direction === 'asc' ? 'details_contrib_sorted_ascending' : 'details_contrib_sorted_descending',
+      action: 'click',
+    };
+    dispatch(setUserActionRecording(userRecordPayload));
   };
 }
 
@@ -110,6 +130,12 @@ export function setFilterCategsAction(categs) {
   return function (dispatch) {
     const filterCategs = categs !== null ? categs.map((currentCateg) => currentCateg.value) : null;
     dispatch({ type: 'SET_FILTER_CATEGS', filterCategs });
+    const userRecordPayload = {
+      element: 'category_filter',
+      action: 'filter',
+      details: filterCategs,
+    };
+    dispatch(setUserActionRecording(userRecordPayload));
   };
 }
 
@@ -124,6 +150,11 @@ export function setSortPredDirection(direction) {
     dispatch({ type: 'SET_SORT_DIFF_DIR', sortDiffDirection: null }).then(() =>
       dispatch({ type: 'SET_SORT_PRED_DIR', sortPredDirection: direction }),
     );
+    const userRecordPayload = {
+      element: direction === 'asc' ? 'sandbox_pred_sorted_ascending' : 'sandbox_pred_sorted_descending',
+      action: 'click',
+    };
+    dispatch(setUserActionRecording(userRecordPayload));
   };
 }
 
@@ -132,6 +163,11 @@ export function setSortDiffDirectionAction(direction) {
     dispatch({ type: 'SET_SORT_PRED_DIR', sortPredDirection: null }).then(() =>
       dispatch({ type: 'SET_SORT_DIFF_DIR', sortDiffDirection: direction }),
     );
+    const userRecordPayload = {
+      element: direction === 'asc' ? 'sandbox_diff_sorted_ascending' : 'sandbox_diff_sorted_descending',
+      action: 'click',
+    };
+    dispatch(setUserActionRecording(userRecordPayload));
   };
 }
 
@@ -156,6 +192,11 @@ export function setFeatureTypeFilterAction(featureType, filters) {
 export function setFeatureTypeSortContribDirAction(featureType, direction) {
   return function (dispatch) {
     dispatch({ type: 'SET_FEATURE_TYPE_SORT_CONTRIB_DIR', featureSortDir: { featureType, direction } });
+    const userRecordPayload = {
+      element: direction === 'asc' ? 'details_contrib_sorted_ascending' : 'details_contrib_sorted_descending',
+      action: 'click',
+    };
+    dispatch(setUserActionRecording(userRecordPayload));
   };
 }
 
@@ -163,5 +204,11 @@ export function setFeatureTypeFilterCategsAction(featureType, categs) {
   return function (dispatch) {
     const filterCategs = categs !== null ? categs.map((currentCateg) => currentCateg.value) : null;
     dispatch({ type: 'SET_FEATURE_TYPE_FILTER_CATEGS', featureTypeFilterCategs: { featureType, filterCategs } });
+    const userRecordPayload = {
+      element: 'category_filter',
+      action: 'filter',
+      details: filterCategs,
+    };
+    dispatch(setUserActionRecording(userRecordPayload));
   };
 }
