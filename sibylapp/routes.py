@@ -14,7 +14,7 @@ def add_routes(app):
 
     api.add_resource(ctrl.entity.Entity, API_VERSION + 'entities/<string:eid>/')
     api.add_resource(ctrl.entity.Entities, API_VERSION + 'entities/')
-    api.add_resource(ctrl.entity.Outcome, API_VERSION + 'outcome/')
+    api.add_resource(ctrl.entity.Events, API_VERSION + 'events/')
 
     api.add_resource(ctrl.entity.Cases, API_VERSION + 'cases/')
     api.add_resource(ctrl.entity.Case, API_VERSION + 'case/<string:case_id>/')
@@ -34,9 +34,9 @@ def add_routes(app):
     api.add_resource(ctrl.computing.FeatureContributions, API_VERSION + 'contributions/')
     api.add_resource(ctrl.computing.FeatureDistributions, API_VERSION + 'feature_distributions/')
     api.add_resource(ctrl.computing.PredictionCount, API_VERSION + 'prediction_count/')
-    api.add_resource(
-        ctrl.computing.SingleChangePredictions,
-        API_VERSION + 'single_change_predictions/')
+    api.add_resource(ctrl.computing.OutcomeCount, API_VERSION + 'outcome_count/')
+    api.add_resource(ctrl.computing.SingleChangePredictions,
+                     API_VERSION + 'single_change_predictions/')
     api.add_resource(ctrl.computing.ModifiedPrediction, API_VERSION + 'modified_prediction/')
 
     api.add_resource(ctrl.logging.Logging, API_VERSION + 'logging/')

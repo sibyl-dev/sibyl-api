@@ -6,10 +6,10 @@ import numpy as np
 import pandas as pd
 from mongoengine import connect
 from pymongo import MongoClient
+from sklearn.linear_model import Lasso
 
 from sibylapp.db import schema
 from sibylapp.db.utils import ModelWrapper
-from sklearn.linear_model import Lasso
 
 
 def insert_features(filepath):
@@ -29,7 +29,8 @@ def insert_categories(filepath):
     schema.Category.insert_many(items)
 
 
-def insert_model(model_filepath, importance_filepath, explainer_filepath, set_doc):
+def insert_model(model_filepath, importance_filepath,
+                 explainer_filepath, set_doc):
     def load_model(model_filepath):
         """
         Load the model
@@ -80,7 +81,6 @@ def insert_entities(values_filepath, weights_filepath,
     features = model_weights["name"][model_weights["name"] != "(Intercept)"].tolist()
 
     feature_df = pd.read_csv(values_filepath)[features + ["eid"]]
-    eids = None
     if num > 0:
         feature_df = feature_df.iloc[counter_start:num + counter_start]
     eids = feature_df["eid"]
@@ -141,8 +141,8 @@ if __name__ == "__main__":
     set_doc = insert_training_set(eids)
     insert_categories(os.path.join(directory, "categories.csv"))
     insert_features(os.path.join(directory, "features.csv"))
-    insert_model(os.path.join(directory, "weights.csv"),
-                 os.path.join(directory, "importances.csv"),
-                 os.path.join(directory, "explainer"),
-                 set_doc)
+    insert_model(model_filepath=os.path.join(directory, "weights.csv"),
+                 importance_filepath=os.path.join(directory, "importances.csv"),
+                 explainer_filepath=os.path.join(directory, "explainer"),
+                 set_doc=set_doc)
     test_validation()

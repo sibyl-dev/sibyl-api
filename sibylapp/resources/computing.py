@@ -10,11 +10,10 @@ from flask_restful import Resource
 
 from sibyl import global_explanation as ge
 from sibyl import local_feature_explanation as lfe
+from sibylapp import g
 from sibylapp.db import schema
 
 LOGGER = logging.getLogger(__name__)
-
-use_dummy_functions = True
 
 
 class Similarities(Resource):
@@ -252,7 +251,7 @@ class FeatureDistributions(Resource):
             LOGGER.exception(e)
             return {'message': str(e)}, 500
 
-        if use_dummy_functions:
+        if g['config']['use_dummy_functions']:
             directory = pathlib.Path(__file__).parent.absolute()
             with open(os.path.join(directory, 'distributions.json'), 'r') as f:
                 all_distributions = json.load(f)
@@ -310,7 +309,7 @@ class PredictionCount(Resource):
         @apiVersion 1.0.0
         @apiDescription Get the number of entities that were predicted as a certain value
 
-        @apiParam {Number} prediction Prediction Prediction to look at counts for
+        @apiParam {Number} prediction Prediction to look at counts for
         @apiParam {String} model_id ID of model to use for predictions.
 
         @apiSuccess {Number} count Number of entities who are predicted as prediction in
@@ -339,7 +338,7 @@ class PredictionCount(Resource):
         prediction = d["prediction"]
         model_id = d["model_id"]
 
-        if use_dummy_functions:
+        if g['config']['use_dummy_functions']:
             directory = pathlib.Path(__file__).parent.absolute()
             with open(os.path.join(directory, 'distributions.json'), 'r') as f:
                 all_distributions = json.load(f)
@@ -373,6 +372,60 @@ class PredictionCount(Resource):
         count = len(rows)
 
         return {"count": count}
+
+
+class OutcomeCount(Resource):
+    def post(self):
+        """
+        @api {post} /outcome_count/ Get outcome count
+        @apiName PostOutcomeCount
+        @apiGroup Computing
+        @apiVersion 1.0.0
+        @apiDescription Get the distributions of entity outcomes
+                        that were predicted as a certain value
+
+        @apiParam {Number} prediction Prediction Prediction to look at counts for
+        @apiParam {String} model_id ID of model to use for predictions.
+
+        @apiSuccess {Object} distributions Information about the distributions of each
+                                           outcome.
+        @apiSuccess {String} distributions.key Outcome name
+        @apiSuccess {String="numeric","category"} distributions.type Outcome type
+        @apiSuccess {5-tuple} distributions.metrics If type is "numeric":
+                                                        [min, 1st quartile, median,
+                                                        3rd quartile, max] <br>
+                                                    If type is "categorical" or "binary":
+                                                        [[values],[counts]]
+        """
+        attrs = ['prediction', 'model_id']
+        attrs_type = [int, str]
+        d = dict()
+        body = request.json
+        for attr in attrs:
+            d[attr] = None
+            if body is not None:
+                d[attr] = body.get(attr)
+            else:
+                if attr in request.form:
+                    d[attr] = request.form[attr]
+
+        # validate data type
+        try:
+            for i, attr in enumerate(attrs):
+                d[attr] = attrs_type[i](d[attr])
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 400
+
+        prediction = d["prediction"]
+
+        if g['config']['use_dummy_functions']:
+            directory = pathlib.Path(__file__).parent.absolute()
+            with open(os.path.join(directory, 'distributions.json'), 'r') as f:
+                all_distributions = json.load(f)
+            outcome_metrics = all_distributions[
+                str(prediction)]["distributions"]["PRO_PLSM_NEXT730_DUMMY"]
+            return {"distributions:": {"PRO_PLSM_NEXT730_DUMMY": outcome_metrics}}
 
 
 class FeatureContributions(Resource):

@@ -52,7 +52,7 @@ class Entity(SibylAppDocument):
     features = fields.DictField()  # {feature:value}
     property = fields.DictField()  # {property:value}
 
-    outcomes = fields.ListField(
+    events = fields.ListField(
         fields.ReferenceField(Event, reverse_delete_rule=PULL))
 
     unique_key_fields = ['eid']
