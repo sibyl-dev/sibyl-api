@@ -218,4 +218,4 @@ clean-docs: ## remove previously built docs
 
 .PHONY: load-db
 load-db:
-	mongorestore --db sibylapp ./db/
+	mongorestore --db sibylapp ./db/dump/sibylapp/
