@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { Component } from 'react';
 import * as d3 from 'd3';
+import { connect } from 'react-redux';
 import GrayBoxWrapper from './GrayBoxWrapper';
 
+import { getCurrentOutcomeData, getIsOutcomeDataLoading } from '../../model/selectors/entities';
+import { getOutcomeCountAction } from '../../model/actions/entities';
 import './styles/DonutChart.scss';
 
 const childData = [
   { status: 'Removed from home', child: 'child', value: '200' },
   { status: 'Value #1', child: 'child', value: '200' },
-  { status: 'Value #2', child: 'child', value: '200' },
-  { status: 'Value #3', child: 'child', value: '200' },
-  { status: 'Value #4', child: 'child', value: '200' },
+  // { status: 'Value #2', child: 'child', value: '200' },
+  // { status: 'Value #3', child: 'child', value: '200' },
+  // { status: 'Value #4', child: 'child', value: '200' },
 ];
 
 const colors = [
@@ -22,7 +25,7 @@ const colors = [
 
 const pie = d3
   .pie()
-  .value((d) => d.value)
+  .value((data) => data)
   .sort(null);
 
 const chartSize = 112;
@@ -32,35 +35,59 @@ const arc = d3
   .innerRadius(radius - 8)
   .outerRadius(radius - 2);
 
-const drawArc = (index) => {
-  const arcData = pie(childData);
-  return arc(arcData[index]);
-};
+class PieChart extends Component {
+  componentDidMount() {
+    this.props.getOutcomeData();
+  }
 
-const PieChart = () => (
-  <GrayBoxWrapper>
-    <div className="donut-chart">
-      <div className="chart">
-        <svg id="piechart" width={chartSize} height={chartSize}>
-          <g transform={`translate(${chartSize / 2}, ${chartSize / 2})`}>
-            {childData.map((currentChild, childIndex) => (
-              <path key={currentChild.status} d={drawArc(childIndex)} fill={colors[childIndex]} />
-            ))}
-          </g>
-        </svg>
-      </div>
-      <div className="legend">
-        <ul>
-          {childData.map((currentChild, childIndex) => (
-            <li key={currentChild.status}>
-              <i style={{ background: colors[childIndex] }} />
-              {currentChild.status}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  </GrayBoxWrapper>
-);
+  drawChart() {
+    const { currentOutcomeData } = this.props;
+    const data = Object.values(currentOutcomeData)[0].metrics;
+    const maxRadius = data[1][0];
+    const drawing = data[1][1];
+    const arcData = pie([drawing, maxRadius]);
 
-export default PieChart;
+    return (
+      <svg width={chartSize} height={chartSize}>
+        <g transform={`translate(${chartSize / 2}, ${chartSize / 2})`}>
+          {arcData.map((currentData, index) => {
+            console.log(currentData.data);
+            return <path d={arc(currentData)} fill={index === 0 ? '#27AE60' : '#E0E0E0'} key={currentData.data} />;
+          })}
+        </g>
+      </svg>
+    );
+  }
+
+  render() {
+    const { isOutcomeDataLoading } = this.props;
+    return (
+      <GrayBoxWrapper>
+        <div className="donut-chart">
+          <div className="chart">{!isOutcomeDataLoading && this.drawChart()}</div>
+          <div className="legend">
+            {/* @TODO - to be implemented, currently there's one single cathegory: PRO_PLSM_NEXT730_DUMMY */}
+            {/* <ul>
+              {childData.map((currentChild, childIndex) => (
+                <li key={currentChild.status}>
+                  <i style={{ background: colors[childIndex] }} />
+                  {currentChild.status}
+                </li>
+              ))}
+            </ul> */}
+          </div>
+        </div>
+      </GrayBoxWrapper>
+    );
+  }
+}
+
+export default connect(
+  (state) => ({
+    isOutcomeDataLoading: getIsOutcomeDataLoading(state),
+    currentOutcomeData: getCurrentOutcomeData(state),
+  }),
+  (dispatch) => ({
+    getOutcomeData: () => dispatch(getOutcomeCountAction()),
+  }),
+)(PieChart);

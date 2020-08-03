@@ -425,7 +425,7 @@ class OutcomeCount(Resource):
                 all_distributions = json.load(f)
             outcome_metrics = all_distributions[
                 str(prediction)]["distributions"]["PRO_PLSM_NEXT730_DUMMY"]
-            return {"distributions:": {"PRO_PLSM_NEXT730_DUMMY": outcome_metrics}}
+            return {"distributions": {"PRO_PLSM_NEXT730_DUMMY": outcome_metrics}}
 
 
 class FeatureContributions(Resource):
