@@ -218,6 +218,17 @@ exports[`Testing Details component ->  Should render without crashing 1`] = `
                   </div>
                 </div>
               </li>
+              <li
+                class="sep"
+              />
+              <li
+                class="results-counter"
+              >
+                <span>
+                  2
+                </span>
+                 results
+              </li>
             </ul>
           </header>
           <div

@@ -42,6 +42,24 @@ describe('Testing Details component -> ', () => {
         },
       ],
     },
+    grouppedFeatures: {
+      negativeFeaturesContrib: {
+        PRI_PRNT_AGE_2024_COUNT: 2,
+        category: 'demographics',
+        contributionValue: -0.43298241559380907,
+        description: 'Counts of the number of parents that are 20<=age<25',
+        name: 'PRI_PRNT_AGE_2024_COUNT',
+        type: 'numeric',
+      },
+      positiveFeaturesContrib: {
+        PRI_FOCUS_AGE_TOD: 1,
+        category: 'demographics',
+        contributionValue: 0.17053285540215513,
+        description: 'Child in focus is between the ages of 1 and 3 at time of referral',
+        name: 'PRI_FOCUS_AGE_TOD',
+        type: 'binary',
+      },
+    },
   };
   it('Should render without crashing', () => {
     const detailsComponent = renderWithStore(
