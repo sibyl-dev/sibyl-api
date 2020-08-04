@@ -18,6 +18,20 @@ export function setEntityIdAction(entityID) {
   };
 }
 
+export function setUserIdAction(userID) {
+  return function (dispatch) {
+    const cookies = new Cookies();
+    cookies.remove('entityID');
+    cookies.set('userID', userID, { path: '/' });
+    const action = {
+      type: 'SET_USER_ID',
+      userID,
+    };
+
+    dispatch(action);
+  };
+}
+
 export function getEntityContributionsAction() {
   return function (dispatch, getState) {
     const entityID = getCurrentEntityID(getState());
