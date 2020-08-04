@@ -7,20 +7,14 @@ import { getCurrentOutcomeData, getIsOutcomeDataLoading } from '../../model/sele
 import { getOutcomeCountAction } from '../../model/actions/entities';
 import './styles/DonutChart.scss';
 
-const childData = [
-  { status: 'Removed from home', child: 'child', value: '200' },
-  // { status: 'Value #1', child: 'child', value: '200' },
-  // { status: 'Value #2', child: 'child', value: '200' },
-  // { status: 'Value #3', child: 'child', value: '200' },
-  // { status: 'Value #4', child: 'child', value: '200' },
-];
+const childData = [{ status: 'Taken from Home' }, { status: ' Not taken from home' }];
 
 const colors = [
   '#EB5757', // red
+  '#E0E0E0', // gray
   // '#F2C94C', // yellow
   // '#F2994A', // orange
   // '#27AE60', // green
-  // '#E0E0E0', // gray
 ];
 
 const pie = d3
@@ -32,7 +26,7 @@ const chartSize = 112;
 const radius = chartSize / 2;
 const arc = d3
   .arc()
-  .innerRadius(radius - 8)
+  .innerRadius(radius - 10)
   .outerRadius(radius - 2);
 
 class PieChart extends Component {
@@ -65,18 +59,13 @@ class PieChart extends Component {
         <div className="donut-chart">
           <div className="chart">{!isOutcomeDataLoading && this.drawChart()}</div>
           <div className="legend">
-            {/* @TODO - to be implemented, currently there's one single cathegory: PRO_PLSM_NEXT730_DUMMY */}
             <ul>
               {childData.map((currentChild, childIndex) => (
                 <li key={currentChild.status}>
                   <i style={{ background: colors[childIndex] }} />
-                  Taken from Home
+                  {currentChild.status}
                 </li>
               ))}
-              <li>
-                <i style={{ backgroundColor: '#E0E0E0' }} />
-                No removed from home
-              </li>
             </ul>
           </div>
         </div>
