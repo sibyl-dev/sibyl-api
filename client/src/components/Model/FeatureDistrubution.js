@@ -26,11 +26,19 @@ class FeatureDistribution extends Component {
   }
 
   renderDashHeader() {
+    const { features, isFeaturesLoading } = this.props;
+    const { processedFeatures } = features;
+    const resultsCount = isFeaturesLoading ? 0 : processedFeatures.length;
+
     return (
       <header className="dash-header">
         <ul className="dash-controls">
           <li>
             <Search />
+          </li>
+          <li className="sep" />
+          <li className="results-counter">
+            <span>{resultsCount}</span> results
           </li>
           <li>&nbsp;</li>
         </ul>

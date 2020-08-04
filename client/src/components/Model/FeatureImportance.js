@@ -48,6 +48,8 @@ class FeatureImportance extends Component {
     const { featuresImportances, features, isFeaturesLoading } = this.props;
     const { processedFeatures } = features;
     const importanceMax = getFeatureImportanceMax(featuresImportances);
+    const resultsCount = isFeaturesLoading ? 0 : processedFeatures.length;
+
     return (
       <div className="component-wrapper">
         <BoxNote />
@@ -56,6 +58,10 @@ class FeatureImportance extends Component {
             <ul className="dash-controls">
               <li>
                 <Search />
+              </li>
+              <li className="sep" />
+              <li className="results-counter">
+                <span>{resultsCount} results</span>
               </li>
               <li>&nbsp;</li>
             </ul>

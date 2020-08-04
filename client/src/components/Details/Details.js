@@ -109,7 +109,7 @@ export class Details extends Component {
     );
   }
 
-  renderDashHeader(featureType) {
+  renderDashHeader(featureType, isDataLoading) {
     const { viewMode } = this.state;
     const {
       setFilterValues,
@@ -124,7 +124,11 @@ export class Details extends Component {
       featureTypeFilters,
       setFeatureTypeFilterCategs,
       currentFeatureTypeCategs,
+      grouppedFeatures,
+      features,
     } = this.props;
+    const { positiveFeaturesContrib, negativeFeaturesContrib } = grouppedFeatures;
+    const { processedFeatures } = features;
 
     const setFeatureFilterValues = (filterValue) =>
       featureType !== 'all' ? setFeatureFilters(featureType, filterValue) : setFilterValues(filterValue);
@@ -139,6 +143,17 @@ export class Details extends Component {
 
     const getCurrentCategs = () =>
       featureType !== 'all' ? currentFeatureTypeCategs[featureType] : currentFilterCategs;
+
+    const getResultsCount = () => {
+      if (isDataLoading) {
+        return 0;
+      }
+      return featureType !== 'all'
+        ? featureType === 'positiveFeatures'
+          ? positiveFeaturesContrib.length
+          : negativeFeaturesContrib.length
+        : processedFeatures.length;
+    };
 
     return (
       !isCategoriesLoading && (
@@ -185,6 +200,10 @@ export class Details extends Component {
                 />
               </li>
             )}
+            <li className="sep" />
+            <li className="results-counter">
+              <span>{getResultsCount()}</span> results
+            </li>
           </ul>
         </header>
       )
@@ -240,7 +259,7 @@ export class Details extends Component {
     const isDataLoading = isEntityLoading || isFeaturesLoading || isCategoriesLoading || isEntityContribLoading;
     return (
       <div>
-        {this.renderDashHeader('all')}
+        {this.renderDashHeader('all', isDataLoading)}
         {this.renderFeatures(processedFeatures, isDataLoading)}
       </div>
     );
@@ -327,7 +346,7 @@ export class Details extends Component {
         <div className="split-side">
           <h4>Risk Factors</h4>
           <div className="split-container">
-            {this.renderDashHeader('positiveFeatures')}
+            {this.renderDashHeader('positiveFeatures', isDataLoading)}
             {this.renderFeatures(positiveFeaturesContrib, isDataLoading, 'positiveFeatures')}
           </div>
         </div>
@@ -335,7 +354,7 @@ export class Details extends Component {
         <div className="split-side">
           <h4>Protective Factors</h4>
           <div className="split-container">
-            {this.renderDashHeader('negativeFeatures')}
+            {this.renderDashHeader('negativeFeatures', isDataLoading)}
             {this.renderFeatures(negativeFeaturesContrib, isDataLoading, 'negativeFeatures')}
           </div>
         </div>

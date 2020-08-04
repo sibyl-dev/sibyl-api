@@ -63,6 +63,7 @@ class Sandbox extends Component {
       currentFilterValue,
       currentDiffFilterVal,
       setDiffFilter,
+      modelPredFeatures,
     } = this.props;
 
     return (
@@ -103,6 +104,10 @@ class Sandbox extends Component {
                 value={diffValues.filter((currentVal) => currentVal.value === currentDiffFilterVal)}
                 onChange={(filterValue) => setDiffFilter(filterValue.value)}
               />
+            </li>
+            <li className="sep" />
+            <li className="results-counter">
+              <span>{modelPredFeatures.length}</span> results
             </li>
           </ul>
         </header>
