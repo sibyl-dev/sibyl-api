@@ -9,7 +9,7 @@ import './styles/DonutChart.scss';
 
 const childData = [
   { status: 'Removed from home', child: 'child', value: '200' },
-  { status: 'Value #1', child: 'child', value: '200' },
+  // { status: 'Value #1', child: 'child', value: '200' },
   // { status: 'Value #2', child: 'child', value: '200' },
   // { status: 'Value #3', child: 'child', value: '200' },
   // { status: 'Value #4', child: 'child', value: '200' },
@@ -17,10 +17,10 @@ const childData = [
 
 const colors = [
   '#EB5757', // red
-  '#F2C94C', // yellow
-  '#F2994A', // orange
-  '#27AE60', // green
-  '#E0E0E0', // gray
+  // '#F2C94C', // yellow
+  // '#F2994A', // orange
+  // '#27AE60', // green
+  // '#E0E0E0', // gray
 ];
 
 const pie = d3
@@ -50,10 +50,9 @@ class PieChart extends Component {
     return (
       <svg width={chartSize} height={chartSize}>
         <g transform={`translate(${chartSize / 2}, ${chartSize / 2})`}>
-          {arcData.map((currentData, index) => {
-            console.log(currentData.data);
-            return <path d={arc(currentData)} fill={index === 0 ? '#27AE60' : '#E0E0E0'} key={currentData.data} />;
-          })}
+          {arcData.map((currentData, index) => (
+            <path d={arc(currentData)} fill={index === 0 ? '#EB5757' : '#E0E0E0'} key={currentData.data} />
+          ))}
         </g>
       </svg>
     );
@@ -67,14 +66,18 @@ class PieChart extends Component {
           <div className="chart">{!isOutcomeDataLoading && this.drawChart()}</div>
           <div className="legend">
             {/* @TODO - to be implemented, currently there's one single cathegory: PRO_PLSM_NEXT730_DUMMY */}
-            {/* <ul>
+            <ul>
               {childData.map((currentChild, childIndex) => (
                 <li key={currentChild.status}>
                   <i style={{ background: colors[childIndex] }} />
-                  {currentChild.status}
+                  Taken from Home
                 </li>
               ))}
-            </ul> */}
+              <li>
+                <i style={{ backgroundColor: '#E0E0E0' }} />
+                No removed from home
+              </li>
+            </ul>
           </div>
         </div>
       </GrayBoxWrapper>
