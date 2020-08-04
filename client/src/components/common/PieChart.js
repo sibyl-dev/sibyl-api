@@ -29,6 +29,8 @@ const arc = d3
   .innerRadius(radius - 10)
   .outerRadius(radius - 2);
 
+const getPercentage = (total, value) => ((value / total) * 100).toFixed(2);
+
 class PieChart extends Component {
   componentDidMount() {
     this.props.getOutcomeData();
@@ -40,15 +42,21 @@ class PieChart extends Component {
     const maxRadius = data[1][0];
     const drawing = data[1][1];
     const arcData = pie([drawing, maxRadius]);
+    const percentage = getPercentage(maxRadius + drawing, drawing);
 
     return (
-      <svg width={chartSize} height={chartSize}>
-        <g transform={`translate(${chartSize / 2}, ${chartSize / 2})`}>
-          {arcData.map((currentData, index) => (
-            <path d={arc(currentData)} fill={index === 0 ? '#EB5757' : '#E0E0E0'} key={currentData.data} />
-          ))}
-        </g>
-      </svg>
+      <div className="donut">
+        <svg width={chartSize} height={chartSize}>
+          <g transform={`translate(${chartSize / 2}, ${chartSize / 2})`}>
+            {arcData.map((currentData, index) => (
+              <g key={currentData.data}>
+                <path d={arc(currentData)} fill={index === 0 ? '#EB5757' : '#E0E0E0'} key={currentData.data} />
+              </g>
+            ))}
+          </g>
+        </svg>
+        <span className="percentage">{percentage}%</span>
+      </div>
     );
   }
 
