@@ -12,6 +12,8 @@ const initialState = {
   entityID: null,
   userID: null,
   predictionScore: null,
+  outcomeData: null,
+  isOutcomeDataLoading: true,
 };
 
 function GET_ENTITY_DATA_REQUEST(nextState) {
@@ -86,6 +88,17 @@ function SET_PREDICTION_SCORE(nextState, { predictionScore }) {
   nextState.predictionScore = predictionScore;
 }
 
+// ------------------
+function GET_OUTCOME_COUNT_REQUEST(nextState) {
+  nextState.isOutcomeDataLoading = true;
+}
+
+// ------------------
+function GET_OUTCOME_COUNT_SUCCESS(nextState, { outcomeData }) {
+  nextState.outcomeData = outcomeData.distributions;
+  nextState.isOutcomeDataLoading = false;
+}
+
 export default createReducer(initialState, {
   GET_ENTITY_DATA_REQUEST,
   GET_ENTITY_DATA_SUCCESS,
@@ -101,5 +114,7 @@ export default createReducer(initialState, {
   GET_ENTITY_DISTRIBUTIONS_SUCCESS,
   GET_ENTITY_DISTRIBUTIONS_FAILURE,
   SET_PREDICTION_SCORE,
+  GET_OUTCOME_COUNT_REQUEST,
+  GET_OUTCOME_COUNT_SUCCESS,
   SET_USER_ID,
 });
