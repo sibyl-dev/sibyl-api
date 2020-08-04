@@ -5,7 +5,7 @@ import { TrashIcon, QuestionIcon } from '../../assets/icons/icons';
 import ModalDialog from '../common/ModalDialog';
 import { updateFeaturePredictionScore } from '../../model/actions/features';
 import { getIsFeaturesLoading, getUpdatedFeatureScore, getCurrentFeatures } from '../../model/selectors/features';
-import { getEntityScore } from '../../model/selectors/entities';
+import { getEntityScore, getCurrentEntityData, getIsEntitiesLoading } from '../../model/selectors/entities';
 
 const featureValues = [
   { value: '0', label: 'True -> False' },
@@ -60,6 +60,20 @@ class SandboxFilters extends Component {
 
   onFeatureOptionUpdate(featureIndex, featureValue) {
     const { storedFeatures } = this.state;
+    const { storedValues } = this.state;
+    const { entities } = this.props;
+
+    const getCurrentFeatureValue = () => {
+      const featureType = this.state.storedFeatures[featureIndex].type;
+
+      if (featureType === 'binary') {
+        return entities.features[this.state.storedFeatures[featureIndex].value] === 1
+          ? { value: 1, label: 'True' }
+          : { value: 0, label: 'False' };
+      }
+
+      return { value: entities.features[this.state.storedFeatures[featureIndex].value] };
+    };
     this.setState(
       {
         storedFeatures: {
@@ -70,6 +84,12 @@ class SandboxFilters extends Component {
       () => {
         this.onFeatureScoreUpdate();
         this.renderFeatureValues(featureIndex);
+        this.setState({
+          storedValues: {
+            ...storedValues,
+            [featureIndex]: getCurrentFeatureValue(),
+          },
+        });
       },
     );
   }
@@ -165,13 +185,18 @@ class SandboxFilters extends Component {
   renderFeatureValues(currentFeature) {
     const { storedFeatures, storedValues } = this.state;
     const featureType = storedFeatures[currentFeature] ? storedFeatures[currentFeature].type : null;
-    const selectedValue = Object.keys(storedValues).length ? storedValues[currentFeature] : null;
+    const selectedValue = Object.keys(storedValues).length !== 0 ? storedValues[currentFeature] : null;
 
     if (featureType === 'numeric') {
+      const inputValue =
+        Object.keys(storedValues).length !== 0 && storedValues[currentFeature]
+          ? storedValues[currentFeature].value
+          : '';
       return (
         <input
           type="number"
-          onKeyUp={(event) => this.onFeatureValueUpdate(currentFeature, { value: event.target.value })}
+          onChange={(event) => this.onFeatureValueUpdate(currentFeature, { value: event.target.value })}
+          value={inputValue}
         />
       );
     }
@@ -191,10 +216,10 @@ class SandboxFilters extends Component {
   }
 
   renderFeatureComponent() {
-    const { features, isFeaturesLoading } = this.props;
+    const { features, isFeaturesLoading, isEntitiesLoading } = this.props;
     const { featuresCount, storedFeatures } = this.state;
 
-    if (isFeaturesLoading) {
+    if (isFeaturesLoading || isEntitiesLoading) {
       return false; // loader should be returned here;
     }
 
@@ -300,6 +325,8 @@ class SandboxFilters extends Component {
 export default connect(
   (state) => ({
     isFeaturesLoading: getIsFeaturesLoading(state),
+    isEntitiesLoading: getIsEntitiesLoading(state),
+    entities: getCurrentEntityData(state),
     features: getCurrentFeatures(state),
     entityScore: getEntityScore(state),
     updatedScore: getUpdatedFeatureScore(state),
