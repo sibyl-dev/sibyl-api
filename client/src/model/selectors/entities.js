@@ -13,6 +13,7 @@ export const getPredictionScore = (state) => state.entities.predictionScore;
 export const getIsOutcomeDataLoading = (state) => state.entities.isOutcomeDataLoading;
 export const getCurrentOutcomeData = (state) => state.entities.outcomeData;
 
+export const currentUserID = (state) => state.entities.userID;
 export const currentEntityID = (state) => state.entities.entityID;
 
 export const getCurrentEntityID = createSelector([currentEntityID], (entityID) => {
@@ -22,6 +23,15 @@ export const getCurrentEntityID = createSelector([currentEntityID], (entityID) =
     entityID = cookies.get('entityID');
   }
   return entityID;
+});
+
+export const getCurrentUserID = createSelector([currentUserID], (userID) => {
+  const cookies = new Cookies();
+  if (userID === null || userID === undefined) {
+    userID = cookies.get('userID');
+  }
+
+  return userID || 'null';
 });
 
 export const getActivePredictionScore = createSelector(

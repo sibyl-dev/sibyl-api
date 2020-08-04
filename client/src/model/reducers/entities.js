@@ -10,6 +10,7 @@ const initialState = {
   entityContributions: {},
   entityDistributions: {},
   entityID: null,
+  userID: null,
   predictionScore: null,
   outcomeData: null,
   isOutcomeDataLoading: true,
@@ -28,6 +29,12 @@ function GET_ENTITY_DATA_FAILURE(nextState) {
   nextState.isEntityDataLoading = false;
 }
 
+// -------
+function SET_USER_ID(nextState, { userID }) {
+  nextState.userID = userID;
+}
+
+// -------
 function SET_ENTITY_ID(nextState, { entityID }) {
   nextState.entityID = entityID;
 }
@@ -47,7 +54,7 @@ function GET_ENTITY_CONTRIBUTIONS_FAILURE(nextState) {
   nextState.entityContributions = {};
 }
 
-// -----
+// -------
 function GET_ENTITY_SCORE_REQUEST(nextState) {
   nextState.isEntityScoreLoading = true;
 }
@@ -62,7 +69,7 @@ function GET_ENTITY_SCORE_FAILURE(nextState) {
   nextState.entityScore = null;
 }
 
-// -----
+// -------
 function GET_ENTITY_DISTRIBUTIONS_REQUEST(nextState) {
   nextState.isEntityDistributionsLoading = true;
 }
@@ -76,7 +83,7 @@ function GET_ENTITY_DISTRIBUTIONS_FAILURE(nextState) {
   nextState.isEntityDistributionsLoading = false;
 }
 
-// -----
+// -------
 function SET_PREDICTION_SCORE(nextState, { predictionScore }) {
   nextState.predictionScore = predictionScore;
 }
@@ -109,4 +116,5 @@ export default createReducer(initialState, {
   SET_PREDICTION_SCORE,
   GET_OUTCOME_COUNT_REQUEST,
   GET_OUTCOME_COUNT_SUCCESS,
+  SET_USER_ID,
 });
