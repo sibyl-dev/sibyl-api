@@ -237,7 +237,11 @@ export class Details extends Component {
       return null;
     }
 
-    return <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />;
+    return (
+      <MetTooltip title={featureCategories[colorIndex].name} placement="top">
+        <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />
+      </MetTooltip>
+    );
   }
 
   setSortContribDirection() {

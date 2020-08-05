@@ -31,6 +31,7 @@ import {
 import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
 import { setUserActionRecording } from '../../model/actions/userActions';
 import './Sandbox.scss';
+import MetTooltip from '../common/MetTooltip';
 
 const valueSelect = [
   { value: 'all', label: 'All Values', isFixed: true },
@@ -137,7 +138,11 @@ class Sandbox extends Component {
       return null;
     }
 
-    return <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />;
+    return (
+      <MetTooltip title={featureCategories[colorIndex].name} placement="top">
+        <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />
+      </MetTooltip>
+    );
   }
 
   setSortContribDirection() {
