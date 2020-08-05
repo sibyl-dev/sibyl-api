@@ -32,6 +32,8 @@ import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
 import { setUserActionRecording } from '../../model/actions/userActions';
 import './Sandbox.scss';
 import MetTooltip from '../common/MetTooltip';
+import Loader from '../common/Loader';
+import { setActivePageAction } from '../../model/actions/sidebar';
 
 const valueSelect = [
   { value: 'all', label: 'All Values', isFixed: true },
@@ -52,6 +54,7 @@ class Sandbox extends Component {
       action: 'click',
     };
     this.props.setUserActions(userData);
+    this.props.setPageName('Sandbox');
   }
 
   renderDashHeader() {
@@ -210,8 +213,8 @@ class Sandbox extends Component {
                 </tr>
               </thead>
               <tbody>
-                {!isModelPredictionLoading ? (
-                  modelPredFeatures.length > 0 ? (
+                <Loader isLoading={isModelPredictionLoading} colSpan="5" minHeight="480">
+                  {modelPredFeatures && modelPredFeatures.length > 0 ? (
                     modelPredFeatures.map((currentFeature) => {
                       const { name, description, category, modelPrediction } = currentFeature;
                       const { reversedScore, currentDifference } = modelPrediction;
@@ -237,14 +240,8 @@ class Sandbox extends Component {
                         <p>No Matches found....</p>
                       </td>
                     </tr>
-                  )
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="align-center">
-                      <p>Loading....</p>
-                    </td>
-                  </tr>
-                )}
+                  )}
+                </Loader>
               </tbody>
             </table>
           </div>
@@ -277,5 +274,6 @@ export default connect(
     setFilterValue: (filterValue) => dispatch(setModelPredictFilterValueAction(filterValue)),
     setDiffFilter: (filterValue) => dispatch(setModelPredDiffFilterAction(filterValue)),
     setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
+    setPageName: (pageName) => dispatch(setActivePageAction(pageName)),
   }),
 )(Sandbox);

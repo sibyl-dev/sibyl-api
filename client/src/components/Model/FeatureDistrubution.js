@@ -13,8 +13,10 @@ import {
 import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';
 import { getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
-import './Model.scss';
 import { setUserActionRecording } from '../../model/actions/userActions';
+import Loader from '../common/Loader';
+import { setActivePageAction } from '../../model/actions/sidebar';
+import './Model.scss';
 
 class FeatureDistribution extends Component {
   componentDidMount() {
@@ -23,6 +25,7 @@ class FeatureDistribution extends Component {
       action: 'click',
     };
     this.props.setUserActions(userData);
+    this.props.setActivePage('Feature Distribution');
   }
 
   renderDashHeader() {
@@ -104,8 +107,8 @@ class FeatureDistribution extends Component {
                 </tr>
               </thead>
               <tbody>
-                {!isDataLoading ? (
-                  processedFeatures.length > 0 ? (
+                <Loader isLoading={isDataLoading} colSpan="2">
+                  {processedFeatures && processedFeatures.length > 0 ? (
                     processedFeatures.map((currentFeature) => (
                       <tr key={currentFeature.name}>
                         <td>{currentFeature.description}</td>
@@ -118,14 +121,8 @@ class FeatureDistribution extends Component {
                         <p>No matches found...</p>
                       </td>
                     </tr>
-                  )
-                ) : (
-                  <tr>
-                    <td colSpan="2" className="align-center">
-                      <p>Loading...</p>
-                    </td>
-                  </tr>
-                )}
+                  )}
+                </Loader>
               </tbody>
             </table>
           </div>
@@ -145,5 +142,6 @@ export default connect(
   }),
   (dispatch) => ({
     setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
+    setActivePage: (pageName) => dispatch(setActivePageAction(pageName)),
   }),
 )(FeatureDistribution);

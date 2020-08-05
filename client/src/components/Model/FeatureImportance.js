@@ -5,6 +5,8 @@ import Search from '../common/Search';
 import { ProgressIndicator } from '../common/ProgressBars';
 import { getFeaturesImportances, getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
 import { setUserActionRecording } from '../../model/actions/userActions';
+import Loader from '../common/Loader';
+import { setActivePageAction } from '../../model/actions/sidebar';
 
 const BoxNote = () => (
   <div className="blue-box">
@@ -42,6 +44,7 @@ class FeatureImportance extends Component {
       action: 'click',
     };
     this.props.setUserActions(userData);
+    this.props.setActivePage('Global Feature Importance');
   }
 
   render() {
@@ -77,18 +80,20 @@ class FeatureImportance extends Component {
                 </tr>
               </thead>
               <tbody>
-                {!isFeaturesLoading &&
-                  processedFeatures.map((currentFeature) => (
-                    <tr key={currentFeature.name}>
-                      <td>{currentFeature.description}</td>
-                      <td>
-                        <ProgressIndicator
-                          maxValue={importanceMax}
-                          progressWidth={featuresImportances[currentFeature.name]}
-                        />
-                      </td>
-                    </tr>
-                  ))}
+                <Loader isLoading={isFeaturesLoading} colSpan="2">
+                  {processedFeatures &&
+                    processedFeatures.map((currentFeature) => (
+                      <tr key={currentFeature.name}>
+                        <td>{currentFeature.description}</td>
+                        <td>
+                          <ProgressIndicator
+                            maxValue={importanceMax}
+                            progressWidth={featuresImportances[currentFeature.name]}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                </Loader>
               </tbody>
             </table>
           </div>
@@ -106,5 +111,6 @@ export default connect(
   }),
   (dispatch) => ({
     setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
+    setActivePage: (pageName) => dispatch(setActivePageAction(pageName)),
   }),
 )(FeatureImportance);
