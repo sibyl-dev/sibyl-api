@@ -26,7 +26,7 @@
 
         &:before {
             position: absolute;
-            content: "";
+            content: '';
             border-color: transparent;
             border-style: solid;
         }
@@ -38,12 +38,12 @@
     padding: 6px 10px;
     color: #fff;
     text-align: center;
-    background-color: #4f4f4f;
+    background-color: rgba(#4f4f4f, 0.9);
     border-radius: 0.25rem;
     font-size: 14px;
 }
 
-.bs-tooltip-auto[x-placement^="top"],
+.bs-tooltip-auto[x-placement^='top'],
 .bs-tooltip-top {
     padding: 0.4rem 0;
     .arrow {
@@ -51,7 +51,7 @@
         &::before {
             top: 0;
             border-width: 0.4rem 0.4rem 0;
-            border-top-color: #4f4f4f;
+            border-top-color: rgba(#4f4f4f, 0.9);
         }
     }
 }

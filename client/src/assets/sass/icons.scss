@@ -1,4 +1,4 @@
-@import "./colors.scss";
+@import './colors.scss';
 .arrow {
     &.red {
         path {
@@ -19,6 +19,7 @@ i {
         width: 10px;
         height: 10px;
         display: inline-block;
+        cursor: pointer;
         &.red {
             background: #eb5757;
         }
