@@ -5,6 +5,7 @@ import { TableFullIcon, TableSplitIcon, SortIcon } from '../../assets/icons/icon
 import DashWrapper from '../common/DashWrapper';
 import Search from '../common/Search';
 import { CategorySelect } from '../common/Form';
+import Loader from '../common/Loader';
 import MetTooltip from '../common/MetTooltip';
 import { BiProgressBar } from '../common/ProgressBars';
 import {
@@ -34,6 +35,7 @@ import {
 } from '../../model/selectors/features';
 import { setUserActionRecording } from '../../model/actions/userActions';
 
+import { setActivePageAction } from '../../model/actions/sidebar';
 import './Details.scss';
 
 const filterValues = [
@@ -62,6 +64,7 @@ export class Details extends Component {
       action: 'click',
     };
     this.props.setUserActions(userData);
+    this.props.setPageName('Details');
   }
 
   componentWillUnmount() {
@@ -272,6 +275,7 @@ export class Details extends Component {
   renderFeatures(features, isDataLoading, featuresType = 'all') {
     const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue() : 0;
     const { viewMode } = this.state;
+
     return (
       <div className="sticky-wrapper scroll-style">
         <table className="dash-table sticky-header">
@@ -302,8 +306,8 @@ export class Details extends Component {
             </tr>
           </thead>
           <tbody>
-            {!isDataLoading ? (
-              features.length > 0 ? (
+            <Loader isLoading={isDataLoading}>
+              {features && features.length > 0 ? (
                 features.map((currentFeature) => (
                   <tr key={currentFeature.name}>
                     <td className="align-center">{this.getFeatureCathegoryColor(currentFeature.category)}</td>
@@ -326,14 +330,8 @@ export class Details extends Component {
                     No Matches found...
                   </td>
                 </tr>
-              )
-            ) : (
-              <tr>
-                <td colSpan="4" className="align-center">
-                  Loading...
-                </td>
-              </tr>
-            )}
+              )}
+            </Loader>
           </tbody>
         </table>
       </div>
@@ -419,5 +417,6 @@ export default connect(
     setFeatureTypeFilterCategs: (featureType, categs) =>
       dispatch(setFeatureTypeFilterCategsAction(featureType, categs)),
     setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
+    setPageName: (pageName) => dispatch(setActivePageAction(pageName)),
   }),
 )(Details);
