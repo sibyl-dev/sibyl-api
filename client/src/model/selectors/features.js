@@ -96,11 +96,11 @@ export const getFeaturesData = createSelector(
     let negativeFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue < 0);
 
     if (contribFilters === 'risk') {
-      processedFeatures = negativeFeaturesContrib;
+      processedFeatures = positiveFeaturesContrib;
     }
 
     if (contribFilters === 'protective') {
-      processedFeatures = positiveFeaturesContrib;
+      processedFeatures = negativeFeaturesContrib;
     }
 
     return { processedFeatures };
