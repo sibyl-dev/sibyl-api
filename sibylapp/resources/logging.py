@@ -7,7 +7,7 @@ from sibylapp.utils import read_config
 
 LOGGER = logging.getLogger(__name__)
 
-log_headers = ["timestamp", "user_id", "entity_id", "event_element",
+log_headers = ["timestamp", "user_id", "eid", "event_element",
                "event_action", "event_details"]
 
 
@@ -45,7 +45,7 @@ class Logging(Resource):
         @apiParam {Float} timestamp Timestamp of the event in seconds since
                                     Epoch
         @apiParam {String} user_id Id of user using the app
-        @apiParam {String} entity_id Id of entity involved
+        @apiParam {String} eid Id of entity involved
         """
         body = request.json
 
@@ -58,11 +58,11 @@ class Logging(Resource):
             LOGGER.exception(e)
             return {'message': str(e)}, 400
 
-        entity_id = body.get("entity_id")
-        if entity_id is None:
-            entity_id = ""
+        eid = body.get("eid")
+        if eid is None:
+            eid = ""
         try:
-            entity_id = str(entity_id)
+            eid = str(eid)
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 400
@@ -96,7 +96,7 @@ class Logging(Resource):
             event_details = ""
 
         full_message = {"user_id": user_id,
-                        "entity_id": entity_id,
+                        "eid": eid,
                         "timestamp": timestamp,
                         "event_element": event_element,
                         "event_action": event_action,
