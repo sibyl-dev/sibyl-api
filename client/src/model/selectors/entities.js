@@ -22,7 +22,7 @@ export const getCurrentEntityID = createSelector([currentEntityID], (entityID) =
   if (entityID === null) {
     entityID = cookies.get('entityID');
   }
-  return entityID;
+  return entityID || 0;
 });
 
 export const getCurrentUserID = createSelector([currentUserID], (userID) => {
