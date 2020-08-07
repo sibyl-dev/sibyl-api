@@ -32,6 +32,7 @@ const initialState = {
     positiveFeatures: null,
     negativeFeatures: null,
   },
+  featureImpSortDir: 'asc',
 };
 
 function GET_FEATURES_DATA_REQUEST(nextState) {
@@ -155,6 +156,11 @@ function SET_FEATURE_TYPE_FILTER_CATEGS(nextState, { featureTypeFilterCategs }) 
   nextState.featureTypeFilterCategs[featureType] = filterCategs;
 }
 
+// ------------------
+function SET_FEATURE_IMPORTANCE_SORT_DIR(nextState, { sortDir }) {
+  nextState.featureImpSortDir = sortDir;
+}
+
 export default createReducer(initialState, {
   GET_FEATURES_DATA_REQUEST,
   GET_FEATURES_DATA_SUCCESS,
@@ -179,4 +185,5 @@ export default createReducer(initialState, {
   SET_FEATURE_TYPE_FILTERS,
   SET_FEATURE_TYPE_SORT_CONTRIB_DIR,
   SET_FEATURE_TYPE_FILTER_CATEGS,
+  SET_FEATURE_IMPORTANCE_SORT_DIR,
 });

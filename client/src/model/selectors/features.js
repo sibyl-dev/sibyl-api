@@ -22,6 +22,7 @@ export const getModelPredDiffFilterValue = (state) => state.features.diffFilterV
 export const getFeatureTypeFilters = (state) => state.features.featureTypeFilters;
 export const getFeatureTypeSortContribDir = (state) => state.features.featureTypeSortDir;
 export const getFeatureTypeFilterCategs = (state) => state.features.featureTypeFilterCategs;
+export const getFeatureImpSortDir = (state) => state.features.featureImpSortDir;
 
 const maxNegativeContrib = -0.000000001;
 
@@ -43,6 +44,7 @@ export const getFeaturesData = createSelector(
     getSelectedFilterValues,
     getFilterCategories,
     getCurrentContribFilters,
+    getFeaturesImportances,
   ],
   (
     isFeaturesLoading,
@@ -54,6 +56,7 @@ export const getFeaturesData = createSelector(
     filterValues,
     filterCategs,
     contribFilters,
+    featureImportance,
   ) => {
     if (isFeaturesLoading) {
       return [];
@@ -67,6 +70,7 @@ export const getFeaturesData = createSelector(
         ...currentFeature,
         [currentFeature.name]: entityFeatures[currentFeature.name],
         contributionValue: roundContribValue(contributions[currentFeature.name]),
+        featureImportance: featureImportance[currentFeature.name],
       });
       return processedFeatures;
     });
@@ -364,5 +368,24 @@ export const getReversedModelPredFeatures = createSelector(
     }
 
     return processedFeatures;
+  },
+);
+
+export const getSortedByImportanceFeatures = createSelector(
+  [getIsFeaturesLoading, getFeaturesData, getFeatureImpSortDir],
+  (isFeaturesLoading, featuresData, sortDir) => {
+    if (isFeaturesLoading) {
+      return [];
+    }
+
+    const { processedFeatures } = featuresData;
+
+    const sortedFeatures = processedFeatures.sort((prevFeature, nextFeature) =>
+      sortDir === 'asc'
+        ? nextFeature.featureImportance - prevFeature.featureImportance
+        : prevFeature.featureImportance - nextFeature.featureImportance,
+    );
+
+    return sortedFeatures;
   },
 );

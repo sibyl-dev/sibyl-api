@@ -212,3 +212,14 @@ export function setFeatureTypeFilterCategsAction(featureType, categs) {
     dispatch(setUserActionRecording(userRecordPayload));
   };
 }
+
+export function setFeatureImpSortDirAction(direction) {
+  return function (dispatch) {
+    const action = {
+      type: 'SET_FEATURE_IMPORTANCE_SORT_DIR',
+      sortDir: direction,
+    };
+
+    dispatch(action);
+  };
+}

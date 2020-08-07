@@ -3,10 +3,19 @@ import { connect } from 'react-redux';
 import DashWrapper from '../common/DashWrapper';
 import Search from '../common/Search';
 import { ProgressIndicator } from '../common/ProgressBars';
-import { getFeaturesImportances, getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
+import {
+  getFeaturesImportances,
+  getFeaturesData,
+  getIsFeaturesLoading,
+  getSortedByImportanceFeatures,
+  getFeatureImpSortDir,
+} from '../../model/selectors/features';
+
 import { setUserActionRecording } from '../../model/actions/userActions';
 import Loader from '../common/Loader';
 import { setActivePageAction } from '../../model/actions/sidebar';
+import { setFeatureImpSortDirAction } from '../../model/actions/features';
+import { SortIcon } from '../../assets/icons/icons';
 
 const BoxNote = () => (
   <div className="blue-box">
@@ -47,8 +56,14 @@ class FeatureImportance extends Component {
     this.props.setActivePage('Global Feature Importance');
   }
 
+  setSortFeaturesDirection() {
+    const { setSortDir, currentSortDir } = this.props;
+    setSortDir(currentSortDir === 'asc' ? 'desc' : 'asc');
+  }
+
   render() {
-    const { featuresImportances, features, isFeaturesLoading } = this.props;
+    const { sortedImpFeatures, features, isFeaturesLoading, featuresImportances } = this.props;
+
     const { processedFeatures } = features;
     const importanceMax = getFeatureImportanceMax(featuresImportances);
     const resultsCount = isFeaturesLoading ? 0 : processedFeatures.length;
@@ -75,20 +90,27 @@ class FeatureImportance extends Component {
                 <tr>
                   <th>Feature</th>
                   <th width="20%" className="align-right">
-                    Importance
+                    <ul className="sort">
+                      <li>Importance</li>
+                      <li>
+                        <button type="button" onClick={() => this.setSortFeaturesDirection()}>
+                          <SortIcon />
+                        </button>
+                      </li>
+                    </ul>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <Loader isLoading={isFeaturesLoading} colSpan="2">
-                  {processedFeatures &&
-                    processedFeatures.map((currentFeature) => (
+                  {sortedImpFeatures &&
+                    sortedImpFeatures.map((currentFeature) => (
                       <tr key={currentFeature.name}>
                         <td>{currentFeature.description}</td>
                         <td>
                           <ProgressIndicator
                             maxValue={importanceMax}
-                            progressWidth={featuresImportances[currentFeature.name]}
+                            progressWidth={currentFeature.featureImportance}
                           />
                         </td>
                       </tr>
@@ -108,9 +130,12 @@ export default connect(
     isFeaturesLoading: getIsFeaturesLoading(state),
     features: getFeaturesData(state),
     featuresImportances: getFeaturesImportances(state),
+    sortedImpFeatures: getSortedByImportanceFeatures(state),
+    currentSortDir: getFeatureImpSortDir(state),
   }),
   (dispatch) => ({
     setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
     setActivePage: (pageName) => dispatch(setActivePageAction(pageName)),
+    setSortDir: (direction) => dispatch(setFeatureImpSortDirAction(direction)),
   }),
 )(FeatureImportance);
