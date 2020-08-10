@@ -31,9 +31,19 @@ def _eid_exists(val):
 
 
 class Event(SibylAppDocument):
-    """Event object.
+    """
+    An **Event** holds information about an event an entity was involved with
 
-    A **Event** represents ...
+    Attributes
+    ----------
+    eid : str
+        ID of the entity involved
+    datetime : DateTime
+        Date and time of the event
+    type : str
+        Type of event
+    property : dict {property : value}
+        Domain specific properties of the event
     """
     eid = fields.StringField(required=True, validation=_eid_exists)
     datetime = fields.DateTimeField(required=True)
@@ -43,9 +53,19 @@ class Event(SibylAppDocument):
 
 
 class Entity(SibylAppDocument):
-    """Entity object.
+    """
+    An **Entity** holds the feature values and details for one model input
 
-    A **Entity** represents ...
+    Attributes
+    ----------
+    eid : str
+        Unique ID of the entity
+    features : dict {feature_name : feature_value}
+        Feature values for the entity
+    property : dict {property : value}
+        Domain-specific properties
+    events : list [Event object]
+        List of events this entity was involved in
     """
     eid = fields.StringField(validation=_valid_id)
 
@@ -59,17 +79,40 @@ class Entity(SibylAppDocument):
 
 
 class Category(SibylAppDocument):
+    """
+    A **Category** holds information about a feature category
+
+    Attributes
+    ----------
+    name : str
+        Name of the category
+    color : str
+        Hexidecimal color that should be used for the category
+    """
     name = fields.StringField(required=True)
     color = fields.StringField()
 
 
 class Feature(SibylAppDocument):
-    """Feature object.
+    """
+    A **Feature** hold information about a model input feature
 
-    A **Feature** represents ...
+    Attributes
+    ----------
+    name : str
+        Name of the feature
+    description : str
+        Readable description of the feature
+    negated_description : str
+        Readable description of the feature in negated form
+    category : Category object
+        Category the feature belongs to
+    type : str
+        Feature type (one of binary, categorical, and numeric)
     """
     name = fields.StringField(required=True)
     description = fields.StringField()
+    negated_description = fields.StringField()
     category = fields.ReferenceField(Category, reverse_delete_rule=NULLIFY)
     type = fields.StringField(choices=['binary', 'categorical', 'numeric'])
 
@@ -77,24 +120,50 @@ class Feature(SibylAppDocument):
 
 
 class TrainingSet(SibylAppDocument):
-    """Dataset object.
+    """
+    A **TrainingSet** is a set of entities that can be used to explain a given model
 
-    A **Dataset** represents ...
+    Attributes
+    ----------
+    entities : list [Entity object[
+        List of entities in the dataset
+    neighbors : trained NN classifier
+        Trained nearest neighbors classifier for the dataset
     """
     entities = fields.ListField(
         fields.ReferenceField(Entity, reverse_delete_rule=PULL))
     neighbors = fields.BinaryField()  # trained NN classifier
 
     def to_dataframe(self):
+        """
+        Returns this dataset as a Pandas dataframe
+        :return: dataframe
+        """
         features = [entity.features for entity in self.entities]
         training_set_df = pd.DataFrame(features)
         return training_set_df
 
 
 class Model(SibylAppDocument):
-    """Model object.
+    """
+    A **Model** holds information about a model
 
-    A **Model** represents ...
+    Attributes
+    ----------
+    model : pickle-saved model
+        The model object. Must have a model.predict() function
+    name : str
+        Name of the model
+    description : str
+        Description of the model
+    performance : str
+        Description of performance
+    importances : dict {feature_name : importance}
+        Importances of all features to the model
+    explainer : contribution explainer
+        Trained contribution explainer
+    training_set : TrainingSet
+        Training set for the model
     """
     model = fields.BinaryField(required=True)  # the model (must have model.predict())
 
@@ -108,9 +177,15 @@ class Model(SibylAppDocument):
 
 
 class Case(SibylAppDocument):
-    """Case object.
+    """
+    A **Case** contains information about a case
 
-    A **Case** represents ...
+    Attributes
+    ----------
+    case_id : str
+        ID of the case
+    property : dict {property : value}
+        Domain specific properties
     """
     case_id = fields.StringField(required=True, validation=_valid_id)
     property = fields.DictField()
