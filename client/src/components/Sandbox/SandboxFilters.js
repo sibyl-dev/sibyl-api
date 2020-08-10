@@ -309,7 +309,7 @@ class SandboxFilters extends Component {
                     + Add Feature
                   </button>
                   <span className="max-count">
-                    {maxFeaturesCount - featuresCount.length}/{maxFeaturesCount - 1} Remaining
+                    {maxFeaturesCount - featuresCount.length}/{maxFeaturesCount} Remaining
                   </span>
                 </td>
               </tr>

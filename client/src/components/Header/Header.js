@@ -18,7 +18,7 @@ const Header = (props) => {
           <li>
             {!isEntityScoreLoading && (
               <span>
-                Prediction Score: <strong>{entityScore}</strong>
+                Risk Score: <strong>{entityScore}</strong>
                 <button type="button" className="clean">
                   <ExcamationIcon />
                 </button>

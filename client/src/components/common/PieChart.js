@@ -7,7 +7,7 @@ import { getCurrentOutcomeData, getIsOutcomeDataLoading } from '../../model/sele
 import { getOutcomeCountAction } from '../../model/actions/entities';
 import './styles/DonutChart.scss';
 
-const childData = [{ status: 'Taken from Home' }, { status: ' Not taken from home' }];
+const childData = [{ status: 'Removed from Home' }, { status: 'Not removed from home' }];
 
 const colors = [
   '#EB5757', // red

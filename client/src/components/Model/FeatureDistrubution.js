@@ -41,7 +41,7 @@ class FeatureDistribution extends Component {
           </li>
           <li className="sep" />
           <li className="results-counter">
-            <span>{resultsCount}</span> results
+            <span>{resultsCount}</span> factors
           </li>
           <li>&nbsp;</li>
         </ul>
