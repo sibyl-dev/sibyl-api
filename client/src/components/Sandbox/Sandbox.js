@@ -111,7 +111,7 @@ class Sandbox extends Component {
             </li>
             <li className="sep" />
             <li className="results-counter">
-              <span>{modelPredFeatures.length}</span> results
+              <span>{modelPredFeatures.length}</span> factors
             </li>
           </ul>
         </header>

@@ -86,7 +86,7 @@ export class Details extends Component {
     return (
       <div className="sub-header">
         <ul>
-          <li>{viewMode === 'split' ? <Search /> : <h4>Risk Factors List</h4>}</li>
+          <li>{viewMode === 'split' ? <Search /> : <h4>Factor Contributions</h4>}</li>
           <li>
             <MetTooltip title="Single Table View" placement="top">
               <button
@@ -205,7 +205,7 @@ export class Details extends Component {
             )}
             <li className="sep" />
             <li className="results-counter">
-              <span>{getResultsCount()}</span> results
+              <span>{getResultsCount()}</span> factors
             </li>
           </ul>
         </header>
@@ -284,7 +284,7 @@ export class Details extends Component {
               <th className="align-center" width="10%">
                 Category
               </th>
-              <th>Feature</th>
+              <th>Factor</th>
               <th className="align-right">Value</th>
               <th className="align-center" width="15%">
                 <ul className="sort">
