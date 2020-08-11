@@ -100,7 +100,7 @@ class FeatureDistribution extends Component {
             <table className="dash-table sticky-header">
               <thead>
                 <tr>
-                  <th>Feature</th>
+                  <th>Factor</th>
                   <th width="25%" className="align-right">
                     Distribution of Values
                   </th>
