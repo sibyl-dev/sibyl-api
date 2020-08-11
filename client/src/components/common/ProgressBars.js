@@ -42,17 +42,17 @@ export const BiProgressBar = (props) => {
   let { percentage, maxRange, width, height } = props;
   let isSingle = props.isSingle || false;
   percentage = Number(percentage);
-
+  const svgHeight = Math.abs(height) + 10;
   const getProgressBarClassName = (currPercentage) => (currPercentage >= 0 ? 'bar-positive' : 'bar-negative');
 
   return (
     <ul className="bidi-wrapper">
       <li>{!isSingle && <ArrowIcon dir="down" />}</li>
       <li>
-        <svg width={width} height="18" className="bidi-progress-bar">
+        <svg width={width} height={svgHeight} className="bidi-progress-bar">
           <defs>
             <clipPath id="focusClip">
-              <rect width={width} height="8" rx="4" y="4" />
+              <rect width={width} height={height} rx={height / 2} y={height / 2} />
             </clipPath>
           </defs>
           <rect width={width} height={height} rx={height / 2} fill="rgba(189, 189, 189, 0.5)" y={height / 2} />
@@ -62,9 +62,7 @@ export const BiProgressBar = (props) => {
               className={getProgressBarClassName(percentage)}
             />
           </g>
-          {!isSingle && (
-            <rect className="separator" fill="#BDBDBD" x={width / 2} rx="1" ry="1" width="2" height={height} />
-          )}
+          {!isSingle && <rect className="separator" fill="#BDBDBD" x={width / 2} width="2" height={svgHeight} />}
         </svg>
       </li>
       <li>
