@@ -1,12 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { ExcamationIcon } from '../../assets/icons/icons';
 import { getPageName } from '../../model/selectors/sidebar';
 import { getIsEntityScoreLoading, getEntityScore } from '../../model/selectors/entities';
+import ModalDialog from '../common/ModalDialog';
 import './Header.scss';
+
+const toggleModalDialog = (modalState, onClose) => (
+  <ModalDialog isOpen={modalState} onClose={onClose} title="Risk Score">
+    <p>
+      This is the risk score prediction for this child. The scores range from 1 to 20. The higher the risk score, the
+      higher the chance of placement. A score of **1** therefore represents the bottom 5% of risk among referred
+      children, and a **20** represents the top 5%.
+    </p>
+  </ModalDialog>
+);
 
 const Header = (props) => {
   const { isEntityScoreLoading, entityScore } = props;
+  const [isModalOpen, toggleModal] = useState(false);
 
   return (
     <div className="header">
@@ -19,7 +31,7 @@ const Header = (props) => {
             {!isEntityScoreLoading && (
               <span>
                 Risk Score: <strong>{entityScore}</strong>
-                <button type="button" className="clean">
+                <button type="button" className="clean" onClick={() => toggleModal(true)}>
                   <ExcamationIcon />
                 </button>
               </span>
@@ -27,6 +39,7 @@ const Header = (props) => {
           </li>
         </ul>
       </div>
+      {toggleModalDialog(isModalOpen, toggleModal)}
     </div>
   );
 };
