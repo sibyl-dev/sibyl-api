@@ -88,7 +88,7 @@ class FeatureImportance extends Component {
             <table className="dash-table sticky-header">
               <thead>
                 <tr>
-                  <th>Feature</th>
+                  <th>Factor</th>
                   <th width="20%" className="align-right">
                     <ul className="sort">
                       <li>Importance</li>

@@ -186,7 +186,7 @@ class Sandbox extends Component {
               <thead>
                 <tr>
                   <th className="align-center">Category</th>
-                  <th>Feature</th>
+                  <th>Factor</th>
                   <th className="align-right" width="15%">
                     Changed Value
                   </th>
