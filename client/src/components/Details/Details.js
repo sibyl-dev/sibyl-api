@@ -317,7 +317,7 @@ export class Details extends Component {
                       <BiProgressBar
                         percentage={currentFeature.contributionValue}
                         width="110"
-                        height="8"
+                        height="10"
                         maxRange={maxContributionRange}
                         isSingle={viewMode === 'split'}
                       />

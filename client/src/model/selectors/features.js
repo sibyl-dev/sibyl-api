@@ -250,16 +250,31 @@ export const getFeatureCategories = createSelector(
     if (isCategoriesLoading) {
       return [];
     }
+    // const categoryColors = [
+    //   '#eb5757',
+    //   '#f2994a',
+    //   '#21b0b0',
+    //   '#27ae60',
+    //   '#9B51E0',
+    //   '#2D9CDB',
+    //   '#FF5146',
+    //   '#219653',
+    //   '#2F80ED',
+    //   '#9e09b8',
+    //   '#b8096e',
+    //   '#2e6ccb',
+    // ];
+
     const categoryColors = [
-      '#eb5757',
+      '#B30202',
       '#f2994a',
       '#21b0b0',
       '#27ae60',
       '#9B51E0',
-      '#2D9CDB',
-      '#FF5146',
+      '#B32D90', //
+      '#C93655', //
       '#219653',
-      '#2F80ED',
+      '#024EB3', //
       '#9e09b8',
       '#b8096e',
       '#2e6ccb',

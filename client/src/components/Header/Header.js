@@ -17,8 +17,10 @@ const toggleModalDialog = (modalState, onClose) => (
 );
 
 const Header = (props) => {
-  const { isEntityScoreLoading, entityScore } = props;
+  const { isEntityScoreLoading, entityScore, currentPage } = props;
   const [isModalOpen, toggleModal] = useState(false);
+  const excludedPages = ['Global Feature Importance', 'Feature Distribution'];
+  let isRiskScoreVisible = !excludedPages.includes(currentPage);
 
   return (
     <div className="header">
@@ -28,7 +30,7 @@ const Header = (props) => {
             <h2>{props.pageName}</h2>
           </li>
           <li>
-            {!isEntityScoreLoading && (
+            {!isEntityScoreLoading && isRiskScoreVisible && (
               <span>
                 Risk Score: <strong>{entityScore}</strong>
                 <button type="button" className="clean" onClick={() => toggleModal(true)}>
@@ -47,4 +49,5 @@ export default connect((state) => ({
   pageName: getPageName(state),
   isEntityScoreLoading: getIsEntityScoreLoading(state),
   entityScore: getEntityScore(state),
+  currentPage: getPageName(state),
 }))(Header);
