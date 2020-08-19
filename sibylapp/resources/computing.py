@@ -226,11 +226,12 @@ class FeatureDistributions(Resource):
         @apiSuccess {Object} distributions Information about the distributions of each
             feature for each feature.
         @apiSuccess {String} distributions.key Feature name
-        @apiSuccess {String="numeric","category"} distributions.type Feature type
+        @apiSuccess {String="numeric","categorical"} distributions.type Feature type
         @apiSuccess {5-tuple} distributions.metrics If type is "numeric":[min, 1st quartile,
-            median, 3rd quartile, max] <br>. If type is "categorical" or "binary":
+            median, 3rd quartile, max] <br>. If type is "categorical":
             [[values],[counts]]
         """
+        # LOAD IN PARAMETERS
         attrs = ['prediction', 'model_id']
         attrs_type = [int, str]
         d = dict()
@@ -243,7 +244,7 @@ class FeatureDistributions(Resource):
                 if attr in request.form:
                     d[attr] = request.form[attr]
 
-        # validate data type
+        # VALIDATE DATA TYPES
         try:
             for i, attr in enumerate(attrs):
                 d[attr] = attrs_type[i](d[attr])
@@ -267,26 +268,41 @@ class FeatureDistributions(Resource):
             LOGGER.exception(e)
             return {'message': str(e)}, 500
 
-        if g['config']['use_dummy_functions']:
-            directory = pathlib.Path(__file__).parent.absolute()
-            with open(os.path.join(directory, 'agg_distributions.json'), 'r') as f:
+        # LOAD IN TRANSFORMER
+        transformer_bytes = model_doc.transformer
+        transformer = None
+        if transformer_bytes is not None:
+            try:
+                transformer = pickle.loads(transformer_bytes)
+            except Exception as e:
+                LOGGER.exception(e)
+                return {'message': str(e)}, 500
+
+
+        # CHECK FOR PRECOMPUTED VALUES
+        distribution_filepath = g['config']['feature_distribution_location']
+        if distribution_filepath is not None:
+            distribution_filepath = os.path.normpath(distribution_filepath)
+            with open(distribution_filepath, 'r') as f:
                 all_distributions = json.load(f)
             return {"distributions":
                     all_distributions[str(prediction)]['distributions']}
 
+        # LOAD IN DATASET
         dataset_doc = model_doc.training_set
         if dataset_doc is None:
             LOGGER.exception('Error getting dataset. '
                              'Model %s does not have a dataset.', model_id)
             return {'message': 'Model {} does have a dataset'.format(model_id)}, 400
-
         dataset = dataset_doc.to_dataframe()
 
+        # LOAD IN FEATURES
         feature_docs = schema.Feature.find()
         features = [{"name": feature_doc.name, "type": feature_doc.type}
                     for feature_doc in feature_docs]
         features = pd.DataFrame(features)
 
+        # FIND CATEGORICAL FEATURES
         boolean_features = features[
             features['type'].isin(['binary', 'categorical'])]["name"]
         categorical_dataset = dataset[boolean_features]
@@ -297,7 +313,7 @@ class FeatureDistributions(Resource):
 
         distributions = {}
         rows = ge.get_rows_by_output(prediction, model.predict, dataset,
-                                     row_labels=None)
+                                     row_labels=None, transformer=transformer)
         if len(rows) == 0:
             LOGGER.exception('No data with that prediction: %s', prediction)
             return {'message': 'No data with that prediction: {}'.format(prediction)}, 400
@@ -306,7 +322,7 @@ class FeatureDistributions(Resource):
         num_summary = ge.summary_numeric(numeric_dataset.iloc[rows])
 
         for (i, name) in enumerate(boolean_features):
-            distributions[name] = {"type": "category",
+            distributions[name] = {"type": "categorical",
                                    "metrics": [cat_summary[0][i].tolist(),
                                                cat_summary[1][i].tolist()]}
         for (i, name) in enumerate(numeric_features):
@@ -354,9 +370,10 @@ class PredictionCount(Resource):
         prediction = d["prediction"]
         model_id = d["model_id"]
 
-        if g['config']['use_dummy_functions']:
-            directory = pathlib.Path(__file__).parent.absolute()
-            with open(os.path.join(directory, 'agg_distributions.json'), 'r') as f:
+        distribution_filepath = g['config']['feature_distribution_location']
+        if distribution_filepath is not None:
+            distribution_filepath = os.path.normpath(distribution_filepath)
+            with open(distribution_filepath, 'r') as f:
                 all_distributions = json.load(f)
             return {"count:":
                     all_distributions[str(prediction)]["total cases"]}
@@ -374,6 +391,16 @@ class PredictionCount(Resource):
             LOGGER.exception(e)
             return {'message': str(e)}, 500
 
+        # LOAD IN TRANSFORMER
+        transformer_bytes = model_doc.transformer
+        transformer = None
+        if transformer_bytes is not None:
+            try:
+                transformer = pickle.loads(transformer_bytes)
+            except Exception as e:
+                LOGGER.exception(e)
+                return {'message': str(e)}, 500
+
         dataset_doc = model_doc.training_set
         if dataset_doc is None:
             LOGGER.exception('Error getting dataset. '
@@ -383,7 +410,7 @@ class PredictionCount(Resource):
         dataset = dataset_doc.to_dataframe()
 
         rows = ge.get_rows_by_output(prediction, model.predict, dataset,
-                                     row_labels=None)
+                                     row_labels=None, transformer=transformer)
 
         count = len(rows)
 
@@ -435,13 +462,17 @@ class OutcomeCount(Resource):
 
         prediction = d["prediction"]
 
-        if g['config']['use_dummy_functions']:
-            directory = pathlib.Path(__file__).parent.absolute()
-            with open(os.path.join(directory, 'agg_distributions.json'), 'r') as f:
+        distribution_filepath = g['config']['feature_distribution_location']
+        if distribution_filepath is not None:
+            distribution_filepath = os.path.normpath(distribution_filepath)
+            with open(distribution_filepath, 'r') as f:
                 all_distributions = json.load(f)
             outcome_metrics = all_distributions[
                 str(prediction)]["distributions"]["PRO_PLSM_NEXT730_DUMMY"]
             return {"distributions:": {"PRO_PLSM_NEXT730_DUMMY": outcome_metrics}}
+        else:
+            LOGGER.exception("Not implemented - Please provide precomputed document")
+            return {'message': "Not implemented - Please provide precomputed document"}, 501
 
 
 class FeatureContributions(Resource):

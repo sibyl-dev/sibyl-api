@@ -47,23 +47,21 @@ class Transformer(ABC):
         """
         pass
 
-    @abstractmethod
     def transform_contributions_shap(self, contributions):
         """
         Combine contribution values, assuming the SHAP algorithm
         :param contributions: DataFrame of shape (n_samples, n_features_original)
         :return: DataFrame of shape (n_samples, n_features_transformed)
         """
-        pass
+        return contributions
 
-    @abstractmethod
     def transform_importances_pfi(self, importances):
         """
         Combine importance values, assuming Permutation Feature Importance algorithm
         :param importances: DataFrame of shape (n_samples, n_features_original)
         :return: DataFrame of shape (n_samples, n_features_transformed)
         """
-        pass
+        return importances
 
 
 '''=====================================
@@ -142,10 +140,6 @@ def combine_contributions_from_mappings(contributions, mappings):
     return working_contributions
 
 
-def combine_importances_from_mappings(importances, mappings):
-    return importances
-
-
 class MappingsTransformer(ABC):
     def __init__(self, mappings):
         self.mappings = mappings
@@ -155,9 +149,6 @@ class MappingsTransformer(ABC):
 
     def transform_contributions_shap(self, contributions):
         return combine_contributions_from_mappings(contributions, self.mappings)
-
-    def transform_importances_pfi(self, importances):
-        return combine_importances_from_mappings(importances, self.mappings)
 
 
 def merge_databases():

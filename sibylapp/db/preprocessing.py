@@ -191,9 +191,9 @@ def generate_feature_distribution_doc(save_path, model, transformer, dataset_fil
                                                        "PRO_PLSM_NEXT730_DUMMY"]))
     dataset, targets = load_data(feature_names, dataset_filepath)
 
-    boolean_features = features[features['type'].isin(['binary', 'category'])]["name"]
+    boolean_features = features[features['type'].isin(['binary', 'categorical'])]["name"]
     boolean_features = boolean_features.append(pd.Series(["PRO_PLSM_NEXT365_DUMMY",
-                                                       "PRO_PLSM_NEXT730_DUMMY"]))
+                                                          "PRO_PLSM_NEXT730_DUMMY"]))
     dataset_cat = dataset[boolean_features]
 
     numeric_features = features[features['type'] == 'numeric']["name"]
@@ -202,7 +202,8 @@ def generate_feature_distribution_doc(save_path, model, transformer, dataset_fil
     summary_dict = {}
     for output in range(1, 21):
         row_details = {}
-        rows = ge.get_rows_by_output(output, model.predict, dataset, row_labels=None, transformer=transformer)
+        rows = ge.get_rows_by_output(output, model.predict, dataset, row_labels=None,
+                                     transformer=transformer)
 
         count_total = len(rows)
         count_removed = sum(targets.iloc[rows])
@@ -214,8 +215,8 @@ def generate_feature_distribution_doc(save_path, model, transformer, dataset_fil
 
         distributions = {}
         for (i, name) in enumerate(boolean_features):
-            distributions[name] = {"type": "category", "metrics": [cat_summary[0][i].tolist(),
-                                                                   cat_summary[1][i].tolist()]}
+            distributions[name] = {"type": "categorical", "metrics": [cat_summary[0][i].tolist(),
+                                                                      cat_summary[1][i].tolist()]}
         for (i, name) in enumerate(numeric_features):
             distributions[name] = {"type": "numeric", "metrics": num_summary[i]}
         row_details["distributions"] = distributions
@@ -231,30 +232,33 @@ def test_validation():
 
 
 if __name__ == "__main__":
-
+    # CONFIGURATIONS
     include_database = False
     client = MongoClient("localhost", 27017)
     connect('sibylapp_agg', host='localhost', port=27017)
-
     directory = "data"
-    agg_directory = "../../../sibyl_applications/family_screening/database_files_combined"
 
+    # INSERT CATEGORIES
     insert_categories(os.path.join(directory, "categories.csv"))
 
-    feature_names = insert_features(os.path.join(agg_directory, "features.csv")).tolist()
+    # INSERT FEATURES
+    feature_names = insert_features(os.path.join(directory, "agg_features.csv")).tolist()
 
+    # INSERT CASES
     insert_cases(os.path.join(directory, "cases.csv"))
 
-    eids = insert_entities(os.path.join(agg_directory, "entities.csv"), feature_names,
-                           mappings_filepath=os.path.join(agg_directory,
-                                                          "interpretable_features.csv"),
+    # INSERT ENTITIES
+    eids = insert_entities(os.path.join(directory, "agg_entities.csv"), feature_names,
+                           mappings_filepath=os.path.join(directory, "mappings.csv"),
                            include_cases=True)
+
+    # INSERT FULL DATASET
     if include_database:
-        eids = insert_entities(os.path.join(agg_directory, "dataset.csv"), feature_names,
+        eids = insert_entities(os.path.join(directory, "agg_dataset.csv"), feature_names,
                                counter_start=17, num=100000)
     set_doc = insert_training_set(eids)
 
-    # INSERT MODEL ---------------------------------------------------
+    # INSERT MODEL
     thresholds = [0.01174609, 0.01857239, 0.0241622, 0.0293587,
                   0.03448975, 0.0396932, 0.04531139, 0.051446,
                   0.05834176, 0.06616039, 0.07549515, 0.08624243,
@@ -263,9 +267,8 @@ if __name__ == "__main__":
     base_model, model_features = load_model_from_weights_sklearn(
         os.path.join(directory, "weights.csv"), Lasso())
     model = ModelWrapperThresholds(base_model, thresholds, features=model_features)
+    transformer = load_mappings_transformer(os.path.join(directory, "mappings.csv"))
 
-    transformer = load_mappings_transformer(os.path.join(agg_directory,
-                                                         "interpretable_features.csv"))
     with open(os.path.join(directory, "description.txt"), 'r') as file:
         description = file.read()
     with open(os.path.join(directory, "performance.txt"), 'r') as file:
@@ -275,12 +278,13 @@ if __name__ == "__main__":
         "description": description,
         "performance": performance
     }
+
     insert_model(model, transformer, set_doc, texts,
-                 dataset_filepath=os.path.join(agg_directory, "dataset.csv"),
+                 dataset_filepath=os.path.join(directory, "agg_dataset.csv"),
                  base_model=base_model, features=feature_names)
 
-    # TODO: Move distributions file somewhere more sensible
-    #generate_feature_distribution_doc("../resources/agg_distributions.json", model, transformer,
-    #                                  os.path.join(agg_directory, "dataset.csv"),
-    #                                  os.path.join(agg_directory, "features.csv"))
+    # PRE-COMPUTE DISTRIBUTION INFORMATION
+    generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
+                                      os.path.join(directory, "agg_dataset.csv"),
+                                      os.path.join(directory, "agg_features.csv"))
     test_validation()

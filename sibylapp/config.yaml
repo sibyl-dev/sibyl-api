@@ -25,5 +25,9 @@ TESTING: False
 #===================================
 log_filename: "screening_log.csv"
 
-# DUMMY FUNCTION USEAGE
-use_dummy_functions: True
+# PRE-SAVED INFORMATION
+#===================================
+feature_distribution_location: "sibylapp/db/precomputed/agg_distributions.json"
+                    # Location of pre-computed feature distribution information
+                    # Useful in cases where the dataset cannot be shared
+                    # null if this information should be calculated at runtime

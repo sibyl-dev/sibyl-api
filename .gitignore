@@ -135,7 +135,6 @@ ENV/
 
 .vscode/
 
-db/
 dbdata/
 sibylapp/db/data
 sibyl/
