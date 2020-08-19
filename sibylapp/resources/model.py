@@ -132,5 +132,14 @@ class Prediction(Resource):
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 500
-        prediction = model.predict(entity_features)[0]
+
+        transformer_bytes = model_doc.transformer
+        if transformer_bytes is not None:
+            try:
+                transformer = pickle.loads(transformer_bytes)
+                entity_features = transformer.transform(entity_features)
+            except Exception as e:
+                LOGGER.exception(e)
+                return {'message': str(e)}, 500
+        prediction = model.predict(entity_features)[0].tolist()
         return {"output": prediction}, 200

@@ -104,6 +104,14 @@ class SingleChangePredictions(Resource):
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 500
+        transformer_bytes = model_doc.transformer
+        if transformer_bytes is not None:
+            try:
+                transformer = pickle.loads(transformer_bytes)
+                entity_features = transformer.transform(entity_features)
+            except Exception as e:
+                LOGGER.exception(e)
+                return {'message': str(e)}, 500
 
         predictions = []
         for change in changes:
@@ -111,7 +119,7 @@ class SingleChangePredictions(Resource):
             value = change[1]
             modified = entity_features.copy()
             modified[feature] = value
-            prediction = model.predict(modified)[0]
+            prediction = model.predict(modified)[0].tolist()
             predictions.append([feature, prediction])
         return {"changes": predictions}
 
@@ -185,13 +193,21 @@ class ModifiedPrediction(Resource):
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 500
+        transformer_bytes = model_doc.transformer
+        if transformer_bytes is not None:
+            try:
+                transformer = pickle.loads(transformer_bytes)
+                entity_features = transformer.transform(entity_features)
+            except Exception as e:
+                LOGGER.exception(e)
+                return {'message': str(e)}, 500
 
         modified = entity_features.copy()
         for change in changes:
             feature = change[0]
             value = change[1]
             modified[feature] = value
-        prediction = model.predict(modified)[0]
+        prediction = model.predict(modified)[0].tolist()
         return {"prediction": prediction}
 
 
@@ -253,7 +269,7 @@ class FeatureDistributions(Resource):
 
         if g['config']['use_dummy_functions']:
             directory = pathlib.Path(__file__).parent.absolute()
-            with open(os.path.join(directory, 'distributions.json'), 'r') as f:
+            with open(os.path.join(directory, 'agg_distributions.json'), 'r') as f:
                 all_distributions = json.load(f)
             return {"distributions":
                     all_distributions[str(prediction)]['distributions']}
@@ -340,7 +356,7 @@ class PredictionCount(Resource):
 
         if g['config']['use_dummy_functions']:
             directory = pathlib.Path(__file__).parent.absolute()
-            with open(os.path.join(directory, 'distributions.json'), 'r') as f:
+            with open(os.path.join(directory, 'agg_distributions.json'), 'r') as f:
                 all_distributions = json.load(f)
             return {"count:":
                     all_distributions[str(prediction)]["total cases"]}
@@ -421,7 +437,7 @@ class OutcomeCount(Resource):
 
         if g['config']['use_dummy_functions']:
             directory = pathlib.Path(__file__).parent.absolute()
-            with open(os.path.join(directory, 'distributions.json'), 'r') as f:
+            with open(os.path.join(directory, 'agg_distributions.json'), 'r') as f:
                 all_distributions = json.load(f)
             outcome_metrics = all_distributions[
                 str(prediction)]["distributions"]["PRO_PLSM_NEXT730_DUMMY"]
@@ -486,13 +502,22 @@ class FeatureContributions(Resource):
             }, 400
 
         # LOAD IN AND VALIDATE MODEL
-        model = schema.Model.find_one(id=model_id)
-        if model is None:
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
             LOGGER.exception('Error getting model. '
                              'Model %s does not exist.', model_id)
             return {'message': 'Model {} does not exist'.format(model_id)}, 400
 
-        explainer_bytes = model.explainer
+        transformer_bytes = model_doc.transformer
+        transformer = None
+        if transformer_bytes is not None:
+            try:
+                transformer = pickle.loads(transformer_bytes)
+            except Exception as e:
+                LOGGER.exception(e)
+                return {'message': str(e)}, 500
+
+        explainer_bytes = model_doc.explainer
         if explainer_bytes is None:
             LOGGER.exception('Model %s explainer has not been trained. ',
                              model_id)
@@ -500,14 +525,14 @@ class FeatureContributions(Resource):
                 'message': 'Model {} does not have trained explainer'
                 .format(model_id)
             }, 400
-
         try:
             explainer = pickle.loads(explainer_bytes)
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 500
         else:
-            contributions = lfe.get_contributions(entity_features, explainer)[0].tolist()
+            contributions = lfe.get_contributions(
+                entity_features, explainer, transformer).iloc[0].tolist()
             keys = list(entity_features.keys())
             contribution_dict = dict(zip(keys, contributions))
             return {"contributions": contribution_dict}, 200
