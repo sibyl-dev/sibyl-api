@@ -5,6 +5,7 @@ import { TableFullIcon, TableSplitIcon, SortIcon } from '../../assets/icons/icon
 import DashWrapper from '../common/DashWrapper';
 import Search from '../common/Search';
 import { CategorySelect } from '../common/Form';
+import Loader from '../common/Loader';
 import MetTooltip from '../common/MetTooltip';
 import { BiProgressBar } from '../common/ProgressBars';
 import {
@@ -32,7 +33,9 @@ import {
   getGrouppedFeatures,
   getFeatureTypeFilterCategs,
 } from '../../model/selectors/features';
+import { setUserActionRecording } from '../../model/actions/userActions';
 
+import { setActivePageAction } from '../../model/actions/sidebar';
 import './Details.scss';
 
 const filterValues = [
@@ -55,14 +58,26 @@ export class Details extends Component {
     };
   }
 
+  componentDidMount() {
+    const userData = {
+      element: 'details_page',
+      action: 'click',
+    };
+    this.props.setUserActions(userData);
+    this.props.setPageName('Details');
+  }
+
   componentWillUnmount() {
     this.props.setContribFilters('all');
   }
 
   changeViewMode(viewMode) {
-    this.setState({
-      viewMode,
-    });
+    this.setState(
+      {
+        viewMode,
+      },
+      () => this.recordUserAction(),
+    );
   }
 
   renderSubheader() {
@@ -71,7 +86,7 @@ export class Details extends Component {
     return (
       <div className="sub-header">
         <ul>
-          <li>{viewMode === 'split' ? <Search /> : <h4>Risk Factors List</h4>}</li>
+          <li>{viewMode === 'split' ? <Search /> : <h4>Factor Contributions</h4>}</li>
           <li>
             <MetTooltip title="Single Table View" placement="top">
               <button
@@ -97,7 +112,7 @@ export class Details extends Component {
     );
   }
 
-  renderDashHeader(featureType) {
+  renderDashHeader(featureType, isDataLoading) {
     const { viewMode } = this.state;
     const {
       setFilterValues,
@@ -112,7 +127,11 @@ export class Details extends Component {
       featureTypeFilters,
       setFeatureTypeFilterCategs,
       currentFeatureTypeCategs,
+      grouppedFeatures,
+      features,
     } = this.props;
+    const { positiveFeaturesContrib, negativeFeaturesContrib } = grouppedFeatures;
+    const { processedFeatures } = features;
 
     const setFeatureFilterValues = (filterValue) =>
       featureType !== 'all' ? setFeatureFilters(featureType, filterValue) : setFilterValues(filterValue);
@@ -127,6 +146,17 @@ export class Details extends Component {
 
     const getCurrentCategs = () =>
       featureType !== 'all' ? currentFeatureTypeCategs[featureType] : currentFilterCategs;
+
+    const getResultsCount = () => {
+      if (isDataLoading) {
+        return 0;
+      }
+      return featureType !== 'all'
+        ? featureType === 'positiveFeatures'
+          ? positiveFeaturesContrib.length
+          : negativeFeaturesContrib.length
+        : processedFeatures.length;
+    };
 
     return (
       !isCategoriesLoading && (
@@ -173,6 +203,10 @@ export class Details extends Component {
                 />
               </li>
             )}
+            <li className="sep" />
+            <li className="results-counter">
+              <span>{getResultsCount()}</span> factors
+            </li>
           </ul>
         </header>
       )
@@ -206,7 +240,11 @@ export class Details extends Component {
       return null;
     }
 
-    return <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />;
+    return (
+      <MetTooltip title={featureCategories[colorIndex].name} placement="top">
+        <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />
+      </MetTooltip>
+    );
   }
 
   setSortContribDirection() {
@@ -228,7 +266,7 @@ export class Details extends Component {
     const isDataLoading = isEntityLoading || isFeaturesLoading || isCategoriesLoading || isEntityContribLoading;
     return (
       <div>
-        {this.renderDashHeader('all')}
+        {this.renderDashHeader('all', isDataLoading)}
         {this.renderFeatures(processedFeatures, isDataLoading)}
       </div>
     );
@@ -237,6 +275,7 @@ export class Details extends Component {
   renderFeatures(features, isDataLoading, featuresType = 'all') {
     const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue() : 0;
     const { viewMode } = this.state;
+
     return (
       <div className="sticky-wrapper scroll-style">
         <table className="dash-table sticky-header">
@@ -245,7 +284,7 @@ export class Details extends Component {
               <th className="align-center" width="10%">
                 Category
               </th>
-              <th>Feature</th>
+              <th>Factor</th>
               <th className="align-right">Value</th>
               <th className="align-center" width="15%">
                 <ul className="sort">
@@ -267,8 +306,8 @@ export class Details extends Component {
             </tr>
           </thead>
           <tbody>
-            {!isDataLoading ? (
-              features.length > 0 ? (
+            <Loader isLoading={isDataLoading}>
+              {features && features.length > 0 ? (
                 features.map((currentFeature) => (
                   <tr key={currentFeature.name}>
                     <td className="align-center">{this.getFeatureCathegoryColor(currentFeature.category)}</td>
@@ -278,7 +317,7 @@ export class Details extends Component {
                       <BiProgressBar
                         percentage={currentFeature.contributionValue}
                         width="110"
-                        height="8"
+                        height="10"
                         maxRange={maxContributionRange}
                         isSingle={viewMode === 'split'}
                       />
@@ -291,14 +330,8 @@ export class Details extends Component {
                     No Matches found...
                   </td>
                 </tr>
-              )
-            ) : (
-              <tr>
-                <td colSpan="4" className="align-center">
-                  Loading...
-                </td>
-              </tr>
-            )}
+              )}
+            </Loader>
           </tbody>
         </table>
       </div>
@@ -315,7 +348,7 @@ export class Details extends Component {
         <div className="split-side">
           <h4>Risk Factors</h4>
           <div className="split-container">
-            {this.renderDashHeader('positiveFeatures')}
+            {this.renderDashHeader('positiveFeatures', isDataLoading)}
             {this.renderFeatures(positiveFeaturesContrib, isDataLoading, 'positiveFeatures')}
           </div>
         </div>
@@ -323,12 +356,21 @@ export class Details extends Component {
         <div className="split-side">
           <h4>Protective Factors</h4>
           <div className="split-container">
-            {this.renderDashHeader('negativeFeatures')}
+            {this.renderDashHeader('negativeFeatures', isDataLoading)}
             {this.renderFeatures(negativeFeaturesContrib, isDataLoading, 'negativeFeatures')}
           </div>
         </div>
       </div>
     );
+  }
+
+  recordUserAction() {
+    const { viewMode } = this.state;
+    const userData = {
+      element: viewMode === 'split' ? 'split_view' : 'unified_view',
+      action: 'click',
+    };
+    this.props.setUserActions(userData);
   }
 
   render() {
@@ -374,5 +416,7 @@ export default connect(
     setFeatureSortDir: (featureType, direction) => dispatch(setFeatureTypeSortContribDirAction(featureType, direction)),
     setFeatureTypeFilterCategs: (featureType, categs) =>
       dispatch(setFeatureTypeFilterCategsAction(featureType, categs)),
+    setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
+    setPageName: (pageName) => dispatch(setActivePageAction(pageName)),
   }),
 )(Details);

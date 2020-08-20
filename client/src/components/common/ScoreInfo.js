@@ -66,7 +66,7 @@ class ScoreInfo extends Component {
               </li>
               <li>
                 <span>
-                  Score <strong>{activeScore}</strong>
+                  Risk Score <strong>{activeScore}</strong>
                 </span>
               </li>
             </ul>

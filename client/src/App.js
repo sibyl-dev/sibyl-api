@@ -4,8 +4,8 @@ import { getIsSidebarCollapsed } from './model/selectors/sidebar';
 import Sidebar from './components/Sidebar/Sidebar';
 import Header from './components/Header/Header';
 import Dashboard from './components/Dashboard/Dashboard';
-import { setEntityIdAction, getEntityAction } from './model/actions/entities';
-import { getCurrentEntityID } from './model/selectors/entities';
+import { setEntityIdAction, getEntityAction, setUserIdAction } from './model/actions/entities';
+import { getCurrentEntityID, getCurrentUserID } from './model/selectors/entities';
 import './assets/sass/main.scss';
 
 class App extends Component {
@@ -14,13 +14,20 @@ class App extends Component {
   }
 
   getEntityDetails() {
-    let { currentEntityID } = this.props;
+    const { currentEntityID, setUserID, currentUserID } = this.props;
     const { location } = this.props;
     if (location.pathname.includes('entity')) {
-      let entityID = this.props.location.pathname.split('/')[2];
+      const entityID = this.props.location.pathname.split('/')[2];
 
       if (currentEntityID !== entityID) {
         this.props.setEntityID(entityID);
+      }
+    }
+
+    if (location.search.includes('user_id')) {
+      const userID = location.search.split('=')[1];
+      if (currentUserID !== userID) {
+        setUserID(userID);
       }
     }
 
@@ -48,9 +55,11 @@ export default connect(
   (state) => ({
     isSidebarCollapsed: getIsSidebarCollapsed(state),
     currentEntityID: getCurrentEntityID(state),
+    currentUserID: getCurrentUserID(state),
   }),
   (dispatch) => ({
     setEntityID: (entityID) => dispatch(setEntityIdAction(entityID)),
+    setUserID: (userID) => dispatch(setUserIdAction(userID)),
     getFeaturesList: () => dispatch(getEntityAction()),
   }),
 )(App);

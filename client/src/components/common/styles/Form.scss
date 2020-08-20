@@ -25,6 +25,8 @@
 
     .sibyl-select__menu {
         z-index: 8;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
     }
 
     .sibyl-select__menu-list {
@@ -33,10 +35,13 @@
             background: $mid-gray;
             color: #4f4f4f;
             font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease-in-out;
         }
 
         .sibyl-select__option {
             padding-left: 15px;
+            cursor: pointer;
         }
     }
 

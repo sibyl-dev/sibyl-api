@@ -29,7 +29,11 @@ import {
 } from '../../model/selectors/features';
 
 import { ArrowIcon, SortIcon } from '../../assets/icons/icons';
+import { setUserActionRecording } from '../../model/actions/userActions';
 import './Sandbox.scss';
+import MetTooltip from '../common/MetTooltip';
+import Loader from '../common/Loader';
+import { setActivePageAction } from '../../model/actions/sidebar';
 
 const valueSelect = [
   { value: 'all', label: 'All Values', isFixed: true },
@@ -44,6 +48,15 @@ const diffValues = [
 ];
 
 class Sandbox extends Component {
+  componentDidMount() {
+    const userData = {
+      element: 'sandbox_page',
+      action: 'click',
+    };
+    this.props.setUserActions(userData);
+    this.props.setPageName('Sandbox');
+  }
+
   renderDashHeader() {
     const {
       featureCategories,
@@ -54,6 +67,7 @@ class Sandbox extends Component {
       currentFilterValue,
       currentDiffFilterVal,
       setDiffFilter,
+      modelPredFeatures,
     } = this.props;
 
     return (
@@ -95,6 +109,10 @@ class Sandbox extends Component {
                 onChange={(filterValue) => setDiffFilter(filterValue.value)}
               />
             </li>
+            <li className="sep" />
+            <li className="results-counter">
+              <span>{modelPredFeatures.length}</span> factors
+            </li>
           </ul>
         </header>
       )
@@ -123,7 +141,11 @@ class Sandbox extends Component {
       return null;
     }
 
-    return <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />;
+    return (
+      <MetTooltip title={featureCategories[colorIndex].name} placement="top">
+        <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />
+      </MetTooltip>
+    );
   }
 
   setSortContribDirection() {
@@ -164,7 +186,7 @@ class Sandbox extends Component {
               <thead>
                 <tr>
                   <th className="align-center">Category</th>
-                  <th>Feature</th>
+                  <th>Factor</th>
                   <th className="align-right" width="15%">
                     Changed Value
                   </th>
@@ -191,8 +213,8 @@ class Sandbox extends Component {
                 </tr>
               </thead>
               <tbody>
-                {!isModelPredictionLoading ? (
-                  modelPredFeatures.length > 0 ? (
+                <Loader isLoading={isModelPredictionLoading} colSpan="5" minHeight="480">
+                  {modelPredFeatures && modelPredFeatures.length > 0 ? (
                     modelPredFeatures.map((currentFeature) => {
                       const { name, description, category, modelPrediction } = currentFeature;
                       const { reversedScore, currentDifference } = modelPrediction;
@@ -218,14 +240,8 @@ class Sandbox extends Component {
                         <p>No Matches found....</p>
                       </td>
                     </tr>
-                  )
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="align-center">
-                      <p>Loading....</p>
-                    </td>
-                  </tr>
-                )}
+                  )}
+                </Loader>
               </tbody>
             </table>
           </div>
@@ -257,5 +273,7 @@ export default connect(
     setContribFilters: (filters) => dispatch(setContribFiltersAction(filters)),
     setFilterValue: (filterValue) => dispatch(setModelPredictFilterValueAction(filterValue)),
     setDiffFilter: (filterValue) => dispatch(setModelPredDiffFilterAction(filterValue)),
+    setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
+    setPageName: (pageName) => dispatch(setActivePageAction(pageName)),
   }),
 )(Sandbox);

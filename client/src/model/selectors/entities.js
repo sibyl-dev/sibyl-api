@@ -10,7 +10,10 @@ export const getEntityScore = (state) => state.entities.entityScore;
 export const getIsEntityDistributionsLoading = (state) => state.entities.isEntityDistributionsLoading;
 export const getEntityDistributions = (state) => state.entities.entityDistributions;
 export const getPredictionScore = (state) => state.entities.predictionScore;
+export const getIsOutcomeDataLoading = (state) => state.entities.isOutcomeDataLoading;
+export const getCurrentOutcomeData = (state) => state.entities.outcomeData;
 
+export const currentUserID = (state) => state.entities.userID;
 export const currentEntityID = (state) => state.entities.entityID;
 
 export const getCurrentEntityID = createSelector([currentEntityID], (entityID) => {
@@ -19,7 +22,16 @@ export const getCurrentEntityID = createSelector([currentEntityID], (entityID) =
   if (entityID === null) {
     entityID = cookies.get('entityID');
   }
-  return entityID;
+  return entityID || 0;
+});
+
+export const getCurrentUserID = createSelector([currentUserID], (userID) => {
+  const cookies = new Cookies();
+  if (userID === null || userID === undefined) {
+    userID = cookies.get('userID');
+  }
+
+  return userID || 'null';
 });
 
 export const getActivePredictionScore = createSelector(

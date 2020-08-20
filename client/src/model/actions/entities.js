@@ -2,7 +2,8 @@ import Cookies from 'universal-cookie';
 import { api } from '../api/api';
 import { modelID } from './constants';
 import { getFeaturesAction, getCategoriesAction } from './features';
-import { getCurrentEntityID, getActivePredictionScore } from '../selectors/entities';
+import { getCurrentEntityID, getActivePredictionScore, getPredictionScore } from '../selectors/entities';
+import { setUserActionRecording } from './userActions';
 
 export function setEntityIdAction(entityID) {
   return function (dispatch) {
@@ -13,6 +14,20 @@ export function setEntityIdAction(entityID) {
       type: 'SET_ENTITY_ID',
       entityID: parseInt(entityID, 10),
     };
+    dispatch(action);
+  };
+}
+
+export function setUserIdAction(userID) {
+  return function (dispatch) {
+    const cookies = new Cookies();
+    cookies.remove('entityID');
+    cookies.set('userID', userID, { path: '/' });
+    const action = {
+      type: 'SET_USER_ID',
+      userID,
+    };
+
     dispatch(action);
   };
 }
@@ -58,13 +73,29 @@ export function getEntityFeatureDistributionAction() {
 }
 
 export function setPredictionScoreAction(predictionScore) {
-  return function (dispatch) {
+  return function (dispatch, getState) {
+    const currentPredictionScore = getPredictionScore(getState());
+
+    if (predictionScore === currentPredictionScore) {
+      return;
+    }
+
     const setActiveScoreAction = {
       type: 'SET_PREDICTION_SCORE',
       predictionScore,
     };
 
-    dispatch(setActiveScoreAction).then(dispatch(getEntityFeatureDistributionAction()));
+    dispatch(setActiveScoreAction)
+      .then(dispatch(getEntityFeatureDistributionAction()))
+      .then(dispatch(getOutcomeCountAction()));
+
+    const userRecordPayload = {
+      element: 'score_bar',
+      action: 'filter',
+      details: predictionScore,
+    };
+
+    dispatch(setUserActionRecording(userRecordPayload));
   };
 }
 
@@ -82,5 +113,20 @@ export function getEntityAction() {
     dispatch(getFeaturesAction());
     dispatch(getEntityContributionsAction());
     dispatch(getEntityPredictionScoreAction());
+  };
+}
+
+export function getOutcomeCountAction() {
+  return function (dispatch, getState) {
+    const predictionScore = getPredictionScore(getState());
+
+    if (predictionScore === null) {
+      return;
+    }
+
+    return api
+      .post('/outcome_count/', { prediction: predictionScore, model_id: modelID })
+      .then((data) => data.json())
+      .then((outcomeData) => dispatch({ type: 'GET_OUTCOME_COUNT_SUCCESS', outcomeData }));
   };
 }

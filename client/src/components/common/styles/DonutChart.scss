@@ -1,12 +1,16 @@
 .donut-chart {
-    display: flex;
-
+    .chart,
+    .legend {
+        display: inline-block;
+        vertical-align: middle;
+    }
     .chart {
-        flex: 1.5;
+        margin-right: 25px;
+        width: 112px;
+        height: 112px;
     }
 
     .legend {
-        flex: 2;
         i {
             width: 8px;
             height: 8px;
@@ -17,6 +21,23 @@
         }
         li {
             margin-bottom: 8px;
+        }
+    }
+
+    .donut {
+        position: relative;
+        span {
+            &.percentage {
+                color: #000;
+                font-weight: bold;
+                position: absolute;
+                left: 10px;
+                top: 39%;
+                margin-top: 0;
+                width: 92px;
+                text-align: center;
+                font-size: 21px;
+            }
         }
     }
 }

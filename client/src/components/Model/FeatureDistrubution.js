@@ -13,15 +13,35 @@ import {
 import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';
 import { getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
+import { setUserActionRecording } from '../../model/actions/userActions';
+import Loader from '../common/Loader';
+import { setActivePageAction } from '../../model/actions/sidebar';
 import './Model.scss';
 
 class FeatureDistribution extends Component {
+  componentDidMount() {
+    const userData = {
+      element: 'feature_distribution',
+      action: 'click',
+    };
+    this.props.setUserActions(userData);
+    this.props.setActivePage('Feature Distribution');
+  }
+
   renderDashHeader() {
+    const { features, isFeaturesLoading } = this.props;
+    const { processedFeatures } = features;
+    const resultsCount = isFeaturesLoading ? 0 : processedFeatures.length;
+
     return (
       <header className="dash-header">
         <ul className="dash-controls">
           <li>
             <Search />
+          </li>
+          <li className="sep" />
+          <li className="results-counter">
+            <span>{resultsCount}</span> factors
           </li>
           <li>&nbsp;</li>
         </ul>
@@ -80,15 +100,15 @@ class FeatureDistribution extends Component {
             <table className="dash-table sticky-header">
               <thead>
                 <tr>
-                  <th>Feature</th>
+                  <th>Factor</th>
                   <th width="25%" className="align-right">
                     Distribution of Values
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {!isDataLoading ? (
-                  processedFeatures.length > 0 ? (
+                <Loader isLoading={isDataLoading} colSpan="2">
+                  {processedFeatures && processedFeatures.length > 0 ? (
                     processedFeatures.map((currentFeature) => (
                       <tr key={currentFeature.name}>
                         <td>{currentFeature.description}</td>
@@ -101,14 +121,8 @@ class FeatureDistribution extends Component {
                         <p>No matches found...</p>
                       </td>
                     </tr>
-                  )
-                ) : (
-                  <tr>
-                    <td colSpan="2" className="align-center">
-                      <p>Loading...</p>
-                    </td>
-                  </tr>
-                )}
+                  )}
+                </Loader>
               </tbody>
             </table>
           </div>
@@ -118,10 +132,16 @@ class FeatureDistribution extends Component {
   }
 }
 
-export default connect((state) => ({
-  isFeaturesLoading: getIsFeaturesLoading(state),
-  isEntityLoading: getIsEntitiesLoading(state),
-  isDistributionsLoading: getIsEntityDistributionsLoading(state),
-  distributions: getEntityDistributions(state),
-  features: getFeaturesData(state),
-}))(FeatureDistribution);
+export default connect(
+  (state) => ({
+    isFeaturesLoading: getIsFeaturesLoading(state),
+    isEntityLoading: getIsEntitiesLoading(state),
+    isDistributionsLoading: getIsEntityDistributionsLoading(state),
+    distributions: getEntityDistributions(state),
+    features: getFeaturesData(state),
+  }),
+  (dispatch) => ({
+    setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
+    setActivePage: (pageName) => dispatch(setActivePageAction(pageName)),
+  }),
+)(FeatureDistribution);
