@@ -1,8 +1,6 @@
 import json
 import logging
 import os
-import pathlib
-import pickle
 
 import pandas as pd
 from flask import request
@@ -12,6 +10,7 @@ from sibyl import global_explanation as ge
 from sibyl import local_feature_explanation as lfe
 from sibylapp import g
 from sibylapp.db import schema
+from sibylapp.resources import helpers
 
 LOGGER = logging.getLogger(__name__)
 
@@ -89,29 +88,18 @@ class SingleChangePredictions(Resource):
         model_id = d["model_id"]
         changes = d["changes"]
         entity = schema.Entity.find_one(eid=eid)
+        if entity is None:
+            LOGGER.exception('Error getting entity. Entity %s does not exist.', eid)
+            return {'message': 'Entity {} does not exist'.format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        model_doc = schema.Model.find_one(id=model_id)
-        if model_doc is None:
-            LOGGER.exception('Error getting model. '
-                             'Model %s does not exist.', model_id)
-            return {
-                'message': 'Model {} does not exist'.format(model_id)
-            }, 400
-        model_bytes = model_doc.model
-        try:
-            model = pickle.loads(model_bytes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {'message': str(e)}, 500
-        transformer_bytes = model_doc.transformer
-        if transformer_bytes is not None:
-            try:
-                transformer = pickle.loads(transformer_bytes)
-                entity_features = transformer.transform(entity_features)
-            except Exception as e:
-                LOGGER.exception(e)
-                return {'message': str(e)}, 500
+        success, payload = helpers.load_model(model_id)
+        if success:
+            model, transformer = payload
+        else:
+            message, error_code = payload
+            return message, error_code
+        entity_features = transformer.transform(entity_features)
 
         predictions = []
         for change in changes:
@@ -178,29 +166,19 @@ class ModifiedPrediction(Resource):
         model_id = d["model_id"]
         changes = d["changes"]
         entity = schema.Entity.find_one(eid=eid)
+        if entity is None:
+            LOGGER.exception('Error getting entity. Entity %s does not exist.', eid)
+            return {'message': 'Entity {} does not exist'.format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        model_doc = schema.Model.find_one(id=model_id)
-        if model_doc is None:
-            LOGGER.exception('Error getting model. '
-                             'Model %s does not exist.', model_id)
-            return {
-                'message': 'Model {} does not exist'.format(model_id)
-            }, 400
-        model_bytes = model_doc.model
-        try:
-            model = pickle.loads(model_bytes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {'message': str(e)}, 500
-        transformer_bytes = model_doc.transformer
-        if transformer_bytes is not None:
-            try:
-                transformer = pickle.loads(transformer_bytes)
-                entity_features = transformer.transform(entity_features)
-            except Exception as e:
-                LOGGER.exception(e)
-                return {'message': str(e)}, 500
+        success, payload = helpers.load_model(model_id)
+        if success:
+            model, transformer = payload
+        else:
+            message, error_code = payload
+            return message, error_code
+
+        entity_features = transformer.transform(entity_features)
 
         modified = entity_features.copy()
         for change in changes:
@@ -255,46 +233,21 @@ class FeatureDistributions(Resource):
         prediction = d["prediction"]
         model_id = d["model_id"]
 
-        # LOAD IN AND VALIDATE MODEL
-        model_doc = schema.Model.find_one(id=model_id)
-        if model_doc is None:
-            LOGGER.exception('Error getting model. '
-                             'Model %s does not exist.', model_id)
-            return {'message': 'Model {} does not exist'.format(model_id)}, 400
-        model_bytes = model_doc.model
-        try:
-            model = pickle.loads(model_bytes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {'message': str(e)}, 500
-
-        # LOAD IN TRANSFORMER
-        transformer_bytes = model_doc.transformer
-        transformer = None
-        if transformer_bytes is not None:
-            try:
-                transformer = pickle.loads(transformer_bytes)
-            except Exception as e:
-                LOGGER.exception(e)
-                return {'message': str(e)}, 500
-
-
         # CHECK FOR PRECOMPUTED VALUES
         distribution_filepath = g['config']['feature_distribution_location']
         if distribution_filepath is not None:
             distribution_filepath = os.path.normpath(distribution_filepath)
             with open(distribution_filepath, 'r') as f:
                 all_distributions = json.load(f)
-            return {"distributions":
-                    all_distributions[str(prediction)]['distributions']}
+            return {"distributions": all_distributions[str(prediction)]['distributions']}
 
-        # LOAD IN DATASET
-        dataset_doc = model_doc.training_set
-        if dataset_doc is None:
-            LOGGER.exception('Error getting dataset. '
-                             'Model %s does not have a dataset.', model_id)
-            return {'message': 'Model {} does have a dataset'.format(model_id)}, 400
-        dataset = dataset_doc.to_dataframe()
+        # LOAD IN AND VALIDATE MODEL DATA
+        success, payload = helpers.load_model(model_id, include_dataset=True)
+        if success:
+            model, transformer, dataset = payload
+        else:
+            message, error_code = payload
+            return message, error_code
 
         # LOAD IN FEATURES
         feature_docs = schema.Feature.find()
@@ -378,36 +331,13 @@ class PredictionCount(Resource):
             return {"count:":
                     all_distributions[str(prediction)]["total cases"]}
 
-        # LOAD IN AND VALIDATE MODEL
-        model_doc = schema.Model.find_one(id=model_id)
-        if model_doc is None:
-            LOGGER.exception('Error getting model. '
-                             'Model %s does not exist.', model_id)
-            return {'message': 'Model {} does not exist'.format(model_id)}, 400
-        model_bytes = model_doc.model
-        try:
-            model = pickle.loads(model_bytes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {'message': str(e)}, 500
-
-        # LOAD IN TRANSFORMER
-        transformer_bytes = model_doc.transformer
-        transformer = None
-        if transformer_bytes is not None:
-            try:
-                transformer = pickle.loads(transformer_bytes)
-            except Exception as e:
-                LOGGER.exception(e)
-                return {'message': str(e)}, 500
-
-        dataset_doc = model_doc.training_set
-        if dataset_doc is None:
-            LOGGER.exception('Error getting dataset. '
-                             'Model %s does not have a dataset.', model_id)
-            return {'message': 'Model {} does have a dataset'.format(model_id)}, 400
-
-        dataset = dataset_doc.to_dataframe()
+        # LOAD IN AND VALIDATE MODEL DATA
+        success, payload = helpers.load_model(model_id, include_dataset=True)
+        if success:
+            model, transformer, dataset = payload
+        else:
+            message, error_code = payload
+            return message, error_code
 
         rows = ge.get_rows_by_output(prediction, model.predict, dataset,
                                      row_labels=None, transformer=transformer)
@@ -518,52 +448,23 @@ class FeatureContributions(Resource):
         # LOAD IN AND VALIDATE ENTITY
         entity = schema.Entity.find_one(eid=str(eid))
         if entity is None:
-            LOGGER.exception('Error getting entity. '
-                             'Entity %s does not exist.', eid)
-            return {
-                'message': 'Entity {} does not exist'.format(eid)
-            }, 400
+            LOGGER.exception('Error getting entity. Entity %s does not exist.', eid)
+            return {'message': 'Entity {} does not exist'.format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
         if entity_features is None:
-            LOGGER.exception('Entity %s has no features. ',
-                             eid)
-            return {
-                'message': 'Entity {} does not have features.'
-                .format(eid)
-            }, 400
+            LOGGER.exception('Entity %s has no features. ', eid)
+            return {'message': 'Entity {} does not have features.'.format(eid)}, 400
 
-        # LOAD IN AND VALIDATE MODEL
-        model_doc = schema.Model.find_one(id=model_id)
-        if model_doc is None:
-            LOGGER.exception('Error getting model. '
-                             'Model %s does not exist.', model_id)
-            return {'message': 'Model {} does not exist'.format(model_id)}, 400
-
-        transformer_bytes = model_doc.transformer
-        transformer = None
-        if transformer_bytes is not None:
-            try:
-                transformer = pickle.loads(transformer_bytes)
-            except Exception as e:
-                LOGGER.exception(e)
-                return {'message': str(e)}, 500
-
-        explainer_bytes = model_doc.explainer
-        if explainer_bytes is None:
-            LOGGER.exception('Model %s explainer has not been trained. ',
-                             model_id)
-            return {
-                'message': 'Model {} does not have trained explainer'
-                .format(model_id)
-            }, 400
-        try:
-            explainer = pickle.loads(explainer_bytes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {'message': str(e)}, 500
+        # LOAD IN AND VALIDATE MODEL DATA
+        success, payload = helpers.load_model(model_id, include_explainer=True)
+        if success:
+            model, transformer, explainer = payload
         else:
-            contributions = lfe.get_contributions(
-                entity_features, explainer, transformer).iloc[0].tolist()
-            keys = list(entity_features.keys())
-            contribution_dict = dict(zip(keys, contributions))
-            return {"contributions": contribution_dict}, 200
+            message, error_code = payload
+            return message, error_code
+
+        contributions = lfe.get_contributions(
+            entity_features, explainer, transformer).iloc[0].tolist()
+        keys = list(entity_features.keys())
+        contribution_dict = dict(zip(keys, contributions))
+        return {"contributions": contribution_dict}, 200

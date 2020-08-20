@@ -1,5 +1,5 @@
 {
-    "2": {
+    "1": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -4715,7 +4715,7 @@
         "total cases": 10314,
         "total removed": 29
     },
-    "3": {
+    "2": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -9425,7 +9425,7 @@
         "total cases": 10030,
         "total removed": 100
     },
-    "4": {
+    "3": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -14137,7 +14137,7 @@
         "total cases": 10521,
         "total removed": 146
     },
-    "5": {
+    "4": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -18847,7 +18847,7 @@
         "total cases": 10583,
         "total removed": 173
     },
-    "6": {
+    "5": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -23557,7 +23557,7 @@
         "total cases": 10860,
         "total removed": 231
     },
-    "7": {
+    "6": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -28265,7 +28265,7 @@
         "total cases": 10670,
         "total removed": 265
     },
-    "8": {
+    "7": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -32983,7 +32983,7 @@
         "total cases": 10817,
         "total removed": 345
     },
-    "9": {
+    "8": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -37695,7 +37695,7 @@
         "total cases": 11037,
         "total removed": 411
     },
-    "10": {
+    "9": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -42405,7 +42405,7 @@
         "total cases": 11121,
         "total removed": 509
     },
-    "11": {
+    "10": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -47111,7 +47111,7 @@
         "total cases": 11246,
         "total removed": 605
     },
-    "12": {
+    "11": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -51825,7 +51825,7 @@
         "total cases": 11183,
         "total removed": 725
     },
-    "13": {
+    "12": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -56533,7 +56533,7 @@
         "total cases": 11327,
         "total removed": 831
     },
-    "14": {
+    "13": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -61241,7 +61241,7 @@
         "total cases": 11240,
         "total removed": 966
     },
-    "15": {
+    "14": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -65955,7 +65955,7 @@
         "total cases": 11164,
         "total removed": 1120
     },
-    "16": {
+    "15": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -70667,7 +70667,7 @@
         "total cases": 11482,
         "total removed": 1442
     },
-    "17": {
+    "16": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -75377,7 +75377,7 @@
         "total cases": 11521,
         "total removed": 1727
     },
-    "18": {
+    "17": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -80095,7 +80095,7 @@
         "total cases": 11610,
         "total removed": 2267
     },
-    "19": {
+    "18": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -84813,7 +84813,7 @@
         "total cases": 11500,
         "total removed": 2791
     },
-    "20": {
+    "19": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [
@@ -89529,7 +89529,7 @@
         "total cases": 11586,
         "total removed": 3848
     },
-    "21": {
+    "20": {
         "distributions": {
             "PRI_CBMS_ADULT_AF_1": {
                 "metrics": [

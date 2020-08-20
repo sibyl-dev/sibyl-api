@@ -98,8 +98,7 @@ class Entities(Resource):
         """
         documents = schema.Entity.find()
         try:
-            entities = \
-                [get_entity(document, features=False) for document in documents]
+            entities = [get_entity(document, features=False) for document in documents]
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 500
@@ -124,8 +123,7 @@ class Events(Resource):
         eid = request.args.get('eid', None)
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
-            LOGGER.exception('Error getting entity. '
-                             'Entity %s does not exist.', eid)
+            LOGGER.exception('Error getting entity. Entity %s does not exist.', eid)
             return {'message': 'Entity {} does not exist'.format(eid)}, 400
         events = get_events(entity)
         return events, 200
@@ -140,18 +138,14 @@ class Case(Resource):
         @apiVersion 1.0.0
         @apiDescription Get details of a specific case.
 
-        @apiParam {String} [case_id] Id of the case.
-
         @apiSuccess {String} id ID of the case.
         @apiSuccess {String} property properties of the case
         @apiSuccess {String} [property.team] Team that handled the case.
         """
         case = schema.Case.find_one(case_id=case_id)
         if case is None:
-            LOGGER.exception('Error getting feature. '
-                             'Feature %s does not exist.', case_id)
-            return {'message':
-                    'Feature {} does not exist'.format(case_id)}, 400
+            LOGGER.exception('Error getting case. Case %s does not exist.', case_id)
+            return {'message': 'Case {} does not exist'.format(case_id)}, 400
 
         return get_case(case), 200
 

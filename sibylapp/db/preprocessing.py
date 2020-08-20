@@ -1,3 +1,4 @@
+import json
 import os
 import pickle
 import random
@@ -8,11 +9,10 @@ from mongoengine import connect
 from pymongo import MongoClient
 from sklearn.linear_model import Lasso
 
-from sibyl import local_feature_explanation as lfe
 from sibyl import global_explanation as ge
+from sibyl import local_feature_explanation as lfe
 from sibylapp.db import schema
-from sibylapp.db.utils import ModelWrapperThresholds, MappingsTransformer
-import json
+from sibylapp.db.utils import MappingsTransformer, ModelWrapperThresholds
 
 
 def load_data(features, dataset_filepath):
@@ -34,14 +34,15 @@ def convert_to_categorical(X, mappings):
             cat_data[col] = X[col]
         if col in cat_cols:
             new_name = mappings[mappings['original_name'] == col]["name"].values[0]
-            if new_name not in cat_data:# and new_name not in default_cats:
+            if new_name not in cat_data:
                 cat_data[new_name] = np.empty(num_rows, dtype='object')
                 # Handle a few specific cases
                 if new_name == "PRI_FOCUS_GENDER":
                     cat_data[new_name] = np.full(num_rows, "Male", dtype='object')
                 if new_name == "PRI_VICTIM_COUNT":
                     cat_data[new_name] = np.full(num_rows, "0")
-            cat_data[new_name][np.where(X[col]==1)] = mappings[mappings['original_name'] == col]["value"].values[0]
+            cat_data[new_name][np.where(X[col] == 1)] = \
+                mappings[mappings['original_name'] == col]["value"].values[0]
     return pd.DataFrame(cat_data)
 
 
@@ -98,7 +99,7 @@ def insert_model(model, transformer, set_doc, texts, importance_filepath=None, b
     def get_importances(model, transformer, dataset, targets):
         importance_df = ge.get_global_importance(model, dataset[0:1000], targets[0:1000],
                                                  transformer=transformer)
-        importance_df[importance_df<0] = 0
+        importance_df[importance_df < 0] = 0
         return importance_df
 
     model_serial = pickle.dumps(model)
@@ -185,7 +186,8 @@ def insert_cases(filepath):
     schema.Case.insert_many(items)
 
 
-def generate_feature_distribution_doc(save_path, model, transformer, dataset_filepath, features_filepath):
+def generate_feature_distribution_doc(save_path, model, transformer,
+                                      dataset_filepath, features_filepath):
     features = pd.read_csv(features_filepath)
     feature_names = features["name"].append(pd.Series(["PRO_PLSM_NEXT365_DUMMY",
                                                        "PRO_PLSM_NEXT730_DUMMY"]))
@@ -221,7 +223,7 @@ def generate_feature_distribution_doc(save_path, model, transformer, dataset_fil
             distributions[name] = {"type": "numeric", "metrics": num_summary[i]}
         row_details["distributions"] = distributions
 
-        summary_dict[output + 1] = row_details
+        summary_dict[output] = row_details
 
     with open(save_path, 'w') as f:
         json.dump(summary_dict, f, indent=4, sort_keys=True)

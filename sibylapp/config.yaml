@@ -3,7 +3,7 @@
 
 host: "localhost" # mongodb server address
 port: 27017 # mongodb server port
-db: "sibylapp" # database name
+db: "sibylapp_agg" # database name
 username: # for auth
 password: # for auth
 

@@ -1,9 +1,8 @@
 import logging
-
 from abc import ABC, abstractmethod
+
 import numpy as np
 import pandas as pd
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -45,7 +44,6 @@ class Transformer(ABC):
         :return: DataFrame of shape (n_samples, n_features_transformed)
                  Transformed output
         """
-        pass
 
     def transform_contributions_shap(self, contributions):
         """
