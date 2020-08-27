@@ -88,9 +88,14 @@ class Category(SibylAppDocument):
         Name of the category
     color : str
         Hexidecimal color that should be used for the category
+    abbreviation : str
+        Two or three character abbreviation of the category
     """
     name = fields.StringField(required=True)
     color = fields.StringField()
+    abbreviation = fields.StringField(max_length=3)
+
+    unique_key_fields = ['name', 'abbreviation']
 
 
 class Feature(SibylAppDocument):
