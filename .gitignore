@@ -132,6 +132,11 @@ ENV/
 .mypy_cache/
 
 .idea/*
+
+.vscode/
+
+db/
 dbdata/
-sibyl/
 sibylapp/db/data
+sibyl/
+screening_log.csv

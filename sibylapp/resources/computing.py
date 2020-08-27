@@ -1,20 +1,19 @@
-import logging
-
-from flask_restful import Resource
-from flask import request
-from sibyl import local_feature_explanation as lfe
-from sibyl import global_explanation as ge
-from sibylapp.db import schema
-import pandas as pd
 import json
-import pathlib
+import logging
 import os
-
+import pathlib
 import pickle
 
-LOGGER = logging.getLogger(__name__)
+import pandas as pd
+from flask import request
+from flask_restful import Resource
 
-use_dummy_functions = True
+from sibyl import global_explanation as ge
+from sibyl import local_feature_explanation as lfe
+from sibylapp import g
+from sibylapp.db import schema
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Similarities(Resource):
@@ -31,27 +30,26 @@ class Similarities(Resource):
 
         @apiSuccess {String[]} entities List of entity IDs.
         """
-        pass
 
 
 class SingleChangePredictions(Resource):
     def post(self):
         """
-        @api {post} /single_change_predictions/ Post single prediction 
+        @api {post} /single_change_predictions/ Post single prediction
         @apiName PostSinglePrediction
         @apiGroup Computing
         @apiVersion 1.0.0
-        @apiDescription Get the list of updated predictions after making 
+        @apiDescription Get the list of updated predictions after making
         single changes.
 
         @apiParam {String} eid ID of entity to predict on.
         @apiParam {String} model_id ID of model to use for predictions.
-        @apiParam {2-Tuple[]} changes List of features to change and 
+        @apiParam {2-Tuple[]} changes List of features to change and
             their new values.
         @apiParam {String} changes.item1 Name of the feature to change.
         @apiParam {String} changes.item2 Changed Value of the feature.
 
-        @apiSuccess {2-Tuple[]} changes List of features to change and 
+        @apiSuccess {2-Tuple[]} changes List of features to change and
             their new values.
         @apiSuccess {String} changes.item1 Name of the feature to change.
         @apiSuccess {String} changes.item2 New prediction of the feature.
@@ -76,12 +74,13 @@ class SingleChangePredictions(Resource):
                 if schema.Feature.find_one(name=change[0]) is None:
                     LOGGER.exception('Invalid feature %s' % change[0])
                     return {'message': 'Invalid feature {}'.format(change[0])
-                               }, 400
-                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [0,1]:
+                            }, 400
+                if schema.Feature.find_one(
+                        name=change[0]).type == "binary" and change[1] not in [0, 1]:
                     LOGGER.exception('Feature %s is binary, change value of %s is invalid.'
                                      % (change[0], change[1]))
-                    return {'message': 'Feature {} is binary, invalid change value'.format(change[0])
-                           }, 400
+                    return {'message': 'Feature {} is binary, invalid change value'.format(
+                            change[0])}, 400
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 400
@@ -97,8 +96,8 @@ class SingleChangePredictions(Resource):
             LOGGER.exception('Error getting model. '
                              'Model %s does not exist.', model_id)
             return {
-                       'message': 'Model {} does not exist'.format(model_id)
-                   }, 400
+                'message': 'Model {} does not exist'.format(model_id)
+            }, 400
         model_bytes = model_doc.model
         try:
             model = pickle.loads(model_bytes)
@@ -112,7 +111,7 @@ class SingleChangePredictions(Resource):
             value = change[1]
             modified = entity_features.copy()
             modified[feature] = value
-            prediction = model.predict(entity_features)[0]
+            prediction = model.predict(modified)[0]
             predictions.append([feature, prediction])
         return {"changes": predictions}
 
@@ -120,7 +119,7 @@ class SingleChangePredictions(Resource):
 class ModifiedPrediction(Resource):
     def post(self):
         """
-        @api {post} /modified_prediction/ Post multiple prediction 
+        @api {post} /modified_prediction/ Post multiple prediction
         @apiName PostMultiplePrediction
         @apiGroup Computing
         @apiVersion 1.0.0
@@ -128,7 +127,7 @@ class ModifiedPrediction(Resource):
 
         @apiParam {String} eid ID of entity to predict on.
         @apiParam {String} model_id ID of model to use for predictions.
-        @apiParam {2-Tuple[]} changes List of features to change and 
+        @apiParam {2-Tuple[]} changes List of features to change and
             their new values.
         @apiParam {String} changes.item1 Name of the feature to change.
         @apiParam {String} changes.item2 Changed Value of the feature.
@@ -156,12 +155,13 @@ class ModifiedPrediction(Resource):
                 if schema.Feature.find_one(name=change[0]) is None:
                     LOGGER.exception('Invalid feature %s' % change[0])
                     return {'message': 'Invalid feature {}'.format(change[0])
-                               }, 400
-                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [0,1]:
+                            }, 400
+                if schema.Feature.find_one(
+                        name=change[0]).type == "binary" and change[1] not in [0, 1]:
                     LOGGER.exception('Feature %s is binary, change value of %s is invalid.'
                                      % (change[0], change[1]))
-                    return {'message': 'Feature {} is binary, invalid change value'.format(change[0])
-                           }, 400
+                    return {'message': 'Feature {} is binary, invalid change value'.format(
+                        change[0])}, 400
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 400
@@ -177,8 +177,8 @@ class ModifiedPrediction(Resource):
             LOGGER.exception('Error getting model. '
                              'Model %s does not exist.', model_id)
             return {
-                       'message': 'Model {} does not exist'.format(model_id)
-                   }, 400
+                'message': 'Model {} does not exist'.format(model_id)
+            }, 400
         model_bytes = model_doc.model
         try:
             model = pickle.loads(model_bytes)
@@ -191,7 +191,7 @@ class ModifiedPrediction(Resource):
             feature = change[0]
             value = change[1]
             modified[feature] = value
-        prediction = model.predict(entity_features)[0]
+        prediction = model.predict(modified)[0]
         return {"prediction": prediction}
 
 
@@ -211,8 +211,9 @@ class FeatureDistributions(Resource):
             feature for each feature.
         @apiSuccess {String} distributions.key Feature name
         @apiSuccess {String="numeric","category"} distributions.type Feature type
-        @apiSuccess {5-tuple} distributions.metrics If type is "numeric":[min, 1st quartile, median, 3rd quartile, max] <br>
-                                                    If type is "categorical" or "binary": [[values],[counts]]
+        @apiSuccess {5-tuple} distributions.metrics If type is "numeric":[min, 1st quartile,
+            median, 3rd quartile, max] <br>. If type is "categorical" or "binary":
+            [[values],[counts]]
         """
         attrs = ['prediction', 'model_id']
         attrs_type = [int, str]
@@ -250,9 +251,9 @@ class FeatureDistributions(Resource):
             LOGGER.exception(e)
             return {'message': str(e)}, 500
 
-        if use_dummy_functions:
+        if g['config']['use_dummy_functions']:
             directory = pathlib.Path(__file__).parent.absolute()
-            with open(os.path.join(directory,'distributions.json'), 'r') as f:
+            with open(os.path.join(directory, 'distributions.json'), 'r') as f:
                 all_distributions = json.load(f)
             return {"distributions":
                     all_distributions[str(prediction)]['distributions']}
@@ -266,7 +267,7 @@ class FeatureDistributions(Resource):
         dataset = dataset_doc.to_dataframe()
 
         feature_docs = schema.Feature.find()
-        features = [{"name":feature_doc.name, "type":feature_doc.type}
+        features = [{"name": feature_doc.name, "type": feature_doc.type}
                     for feature_doc in feature_docs]
         features = pd.DataFrame(features)
 
@@ -308,10 +309,11 @@ class PredictionCount(Resource):
         @apiVersion 1.0.0
         @apiDescription Get the number of entities that were predicted as a certain value
 
-        @apiParam {Number} prediction Prediction Prediction to look at counts for
+        @apiParam {Number} prediction Prediction to look at counts for
         @apiParam {String} model_id ID of model to use for predictions.
 
-        @apiSuccess {Number} count Number of entities who are predicted as prediction in the training set
+        @apiSuccess {Number} count Number of entities who are predicted as prediction in
+            the training set
         """
         attrs = ['prediction', 'model_id']
         attrs_type = [int, str]
@@ -336,9 +338,9 @@ class PredictionCount(Resource):
         prediction = d["prediction"]
         model_id = d["model_id"]
 
-        if use_dummy_functions:
+        if g['config']['use_dummy_functions']:
             directory = pathlib.Path(__file__).parent.absolute()
-            with open(os.path.join(directory,'distributions.json'), 'r') as f:
+            with open(os.path.join(directory, 'distributions.json'), 'r') as f:
                 all_distributions = json.load(f)
             return {"count:":
                     all_distributions[str(prediction)]["total cases"]}
@@ -370,6 +372,60 @@ class PredictionCount(Resource):
         count = len(rows)
 
         return {"count": count}
+
+
+class OutcomeCount(Resource):
+    def post(self):
+        """
+        @api {post} /outcome_count/ Get outcome count
+        @apiName PostOutcomeCount
+        @apiGroup Computing
+        @apiVersion 1.0.0
+        @apiDescription Get the distributions of entity outcomes
+                        that were predicted as a certain value
+
+        @apiParam {Number} prediction Prediction Prediction to look at counts for
+        @apiParam {String} model_id ID of model to use for predictions.
+
+        @apiSuccess {Object} distributions Information about the distributions of each
+                                           outcome.
+        @apiSuccess {String} distributions.key Outcome name
+        @apiSuccess {String="numeric","category"} distributions.type Outcome type
+        @apiSuccess {5-tuple} distributions.metrics If type is "numeric":
+                                                        [min, 1st quartile, median,
+                                                        3rd quartile, max] <br>
+                                                    If type is "categorical" or "binary":
+                                                        [[values],[counts]]
+        """
+        attrs = ['prediction', 'model_id']
+        attrs_type = [int, str]
+        d = dict()
+        body = request.json
+        for attr in attrs:
+            d[attr] = None
+            if body is not None:
+                d[attr] = body.get(attr)
+            else:
+                if attr in request.form:
+                    d[attr] = request.form[attr]
+
+        # validate data type
+        try:
+            for i, attr in enumerate(attrs):
+                d[attr] = attrs_type[i](d[attr])
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 400
+
+        prediction = d["prediction"]
+
+        if g['config']['use_dummy_functions']:
+            directory = pathlib.Path(__file__).parent.absolute()
+            with open(os.path.join(directory, 'distributions.json'), 'r') as f:
+                all_distributions = json.load(f)
+            outcome_metrics = all_distributions[
+                str(prediction)]["distributions"]["PRO_PLSM_NEXT730_DUMMY"]
+            return {"distributions": {"PRO_PLSM_NEXT730_DUMMY": outcome_metrics}}
 
 
 class FeatureContributions(Resource):
@@ -418,16 +474,16 @@ class FeatureContributions(Resource):
             LOGGER.exception('Error getting entity. '
                              'Entity %s does not exist.', eid)
             return {
-                       'message': 'Entity {} does not exist'.format(eid)
-                   }, 400
+                'message': 'Entity {} does not exist'.format(eid)
+            }, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
         if entity_features is None:
             LOGGER.exception('Entity %s has no features. ',
                              eid)
             return {
-                       'message': 'Entity {} does not have features.'
-                           .format(eid)
-                   }, 400
+                'message': 'Entity {} does not have features.'
+                .format(eid)
+            }, 400
 
         # LOAD IN AND VALIDATE MODEL
         model = schema.Model.find_one(id=model_id)
@@ -441,9 +497,9 @@ class FeatureContributions(Resource):
             LOGGER.exception('Model %s explainer has not been trained. ',
                              model_id)
             return {
-                       'message': 'Model {} does not have trained explainer'
-                           .format(model_id)
-                   }, 400
+                'message': 'Model {} does not have trained explainer'
+                .format(model_id)
+            }, 400
 
         try:
             explainer = pickle.loads(explainer_bytes)
@@ -454,5 +510,4 @@ class FeatureContributions(Resource):
             contributions = lfe.get_contributions(entity_features, explainer)[0].tolist()
             keys = list(entity_features.keys())
             contribution_dict = dict(zip(keys, contributions))
-            return {"contributions":contribution_dict}, 200
-
+            return {"contributions": contribution_dict}, 200

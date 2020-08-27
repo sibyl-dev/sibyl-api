@@ -12,13 +12,10 @@ This module contains the classes that define the SibylApp Database Schema:
 
 import logging
 
-from mongoengine import fields
-from mongoengine import ValidationError
-from mongoengine import NULLIFY, CASCADE, PULL, DENY
-from pip._internal.operations import freeze
+import pandas as pd
+from mongoengine import DENY, NULLIFY, PULL, ValidationError, fields
 
 from sibylapp.db.base import SibylAppDocument
-import pandas as pd
 
 LOGGER = logging.getLogger(__name__)
 
@@ -55,7 +52,7 @@ class Entity(SibylAppDocument):
     features = fields.DictField()  # {feature:value}
     property = fields.DictField()  # {property:value}
 
-    outcomes = fields.ListField(
+    events = fields.ListField(
         fields.ReferenceField(Event, reverse_delete_rule=PULL))
 
     unique_key_fields = ['eid']

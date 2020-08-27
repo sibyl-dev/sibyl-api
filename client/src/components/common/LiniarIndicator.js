@@ -1,12 +1,11 @@
 import React from 'react';
-import * as d3 from 'd3';
 import './styles/LiniarIndicator.scss';
 
-export const LiniarIndicator = ({ percentageLeft, percentageRight, percentage }) => (
+export const LiniarIndicator = ({ percentageLeft, percentageRight }) => (
   <div className="percentage-indicator">
-    <div className="left-percentage" style={{ width: `${percentageLeft}%` }}></div>
-    <div className="separator"></div>
-    <div className="right-percentage" style={{ width: `${percentageRight}%` }}></div>
+    <div className="left-percentage" style={{ width: `${percentageLeft}%` }} />
+    <div className="separator" />
+    <div className="right-percentage" style={{ width: `${percentageRight}%` }} />
   </div>
 );
 

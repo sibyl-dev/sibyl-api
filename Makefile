@@ -60,12 +60,19 @@ fix-lint: ## fix lint issues using autoflake, autopep8, and isort
 	isort --apply --atomic --recursive sibylapp tests
 
 .PHONY: test
-test: ## run tests quickly with the default Python
-	python -m pytest --basetemp=${ENVTMPDIR} --cov=sibylapp --cov-report xml
+test: test-server test-client ## run tests on both server and client
 
-.PHONY: test-all
-test-all: ## run tests on every Python version with tox
-	tox -r -p auto
+.PHONY: test-server
+test-server: ## run tests on server
+	py.test -n 2 ./tests
+
+.PHONY: test-server-flask
+test-server-flask: ## run tests on server
+	py.test ./tests/test_flask.py
+
+.PHONY: test-client
+test-client: ## run tests on client
+	npm -C client run test:karma
 
 .PHONY: coverage
 coverage: ## check code coverage quickly with the default Python
@@ -207,3 +214,8 @@ clean-test: ## remove test artifacts
 clean-docs: ## remove previously built docs
 	rm -f docs/api/*.rst
 	-$(MAKE) -C docs clean 2>/dev/null  # this fails if sphinx is not yet installed
+
+
+.PHONY: load-db
+load-db:
+	mongorestore --db sibylapp ./db/dump/sibylapp/

@@ -1,66 +1,93 @@
-import React from 'react';
-import GrayBoxWrapper from './GrayBoxWrapper';
+import React, { Component } from 'react';
 import * as d3 from 'd3';
+import { connect } from 'react-redux';
+import GrayBoxWrapper from './GrayBoxWrapper';
 
+import { getCurrentOutcomeData, getIsOutcomeDataLoading } from '../../model/selectors/entities';
+import { getOutcomeCountAction } from '../../model/actions/entities';
 import './styles/DonutChart.scss';
 
-const childData = [
-  { status: 'Removed from home', child: 'child', value: '200' },
-  { status: 'Value #1', child: 'child', value: '200' },
-  { status: 'Value #2', child: 'child', value: '200' },
-  { status: 'Value #3', child: 'child', value: '200' },
-  { status: 'Value #4', child: 'child', value: '200' },
-];
+const childData = [{ status: 'Removed from Home' }, { status: 'Not removed from home' }];
 
 const colors = [
   '#EB5757', // red
-  '#F2C94C', // yellow
-  '#F2994A', // orange
-  '#27AE60', // green
   '#E0E0E0', // gray
+  // '#F2C94C', // yellow
+  // '#F2994A', // orange
+  // '#27AE60', // green
 ];
 
 const pie = d3
   .pie()
-  .value((d) => d.value)
+  .value((data) => data)
   .sort(null);
 
 const chartSize = 112;
 const radius = chartSize / 2;
 const arc = d3
   .arc()
-  .innerRadius(radius - 8)
+  .innerRadius(radius - 10)
   .outerRadius(radius - 2);
 
-const drawArc = (index) => {
-  const arcData = pie(childData);
-  return arc(arcData[index]);
-};
+const getPercentage = (total, value) => ((value / total) * 100).toFixed(2);
 
-const PieChart = () => (
-  <GrayBoxWrapper>
-    <div className="donut-chart">
-      <div className="chart">
-        <svg id="piechart" width={chartSize} height={chartSize}>
+class PieChart extends Component {
+  componentDidMount() {
+    this.props.getOutcomeData();
+  }
+
+  drawChart() {
+    const { currentOutcomeData } = this.props;
+    const data = Object.values(currentOutcomeData)[0].metrics;
+    const maxRadius = data[1][0];
+    const drawing = data[1][1];
+    const arcData = pie([drawing, maxRadius]);
+    const percentage = getPercentage(maxRadius + drawing, drawing);
+
+    return (
+      <div className="donut">
+        <svg width={chartSize} height={chartSize}>
           <g transform={`translate(${chartSize / 2}, ${chartSize / 2})`}>
-            {childData.map((currentChild, childIndex) => (
-              <path key={childIndex} d={drawArc(childIndex)} fill={colors[childIndex]} />
+            {arcData.map((currentData, index) => (
+              <g key={currentData.data}>
+                <path d={arc(currentData)} fill={index === 0 ? '#EB5757' : '#E0E0E0'} key={currentData.data} />
+              </g>
             ))}
           </g>
         </svg>
+        <span className="percentage">{percentage}%</span>
       </div>
-      <div className="legend">
-        <ul>
-          {childData.map((currentChild, childIndex) => (
-            <li key={childIndex}>
-              <i style={{ background: colors[childIndex] }}></i>
-              {currentChild.status}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  </GrayBoxWrapper>
-);
+    );
+  }
 
-export default PieChart;
+  render() {
+    const { isOutcomeDataLoading } = this.props;
+    return (
+      <GrayBoxWrapper>
+        <div className="donut-chart">
+          <div className="chart">{!isOutcomeDataLoading && this.drawChart()}</div>
+          <div className="legend">
+            <ul>
+              {childData.map((currentChild, childIndex) => (
+                <li key={currentChild.status}>
+                  <i style={{ background: colors[childIndex] }} />
+                  {currentChild.status}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </GrayBoxWrapper>
+    );
+  }
+}
+
+export default connect(
+  (state) => ({
+    isOutcomeDataLoading: getIsOutcomeDataLoading(state),
+    currentOutcomeData: getCurrentOutcomeData(state),
+  }),
+  (dispatch) => ({
+    getOutcomeData: () => dispatch(getOutcomeCountAction()),
+  }),
+)(PieChart);

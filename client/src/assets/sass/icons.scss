@@ -19,6 +19,7 @@ i {
         width: 10px;
         height: 10px;
         display: inline-block;
+        cursor: pointer;
         &.red {
             background: #eb5757;
         }
@@ -30,6 +31,9 @@ i {
         }
         &.green {
             background: #27ae60;
+        }
+        &.gray {
+            background: #ccc;
         }
     }
 }

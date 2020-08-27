@@ -91,8 +91,8 @@ export const ModelIcon = () => (
   </svg>
 );
 
-export const IndicatorIcon = ({ dir }) => {
-  return dir === 'left' ? (
+export const IndicatorIcon = ({ dir }) =>
+  dir === 'left' ? (
     <svg width="8" height="12" viewBox="0 0 8 12" fill="none" className="indicator">
       <path
         d="M6.70994 2.11997L2.82994 5.99997L6.70994 9.87997C7.09994 10.27 7.09994 10.9 6.70994 11.29C6.31994 11.68 5.68994 11.68 5.29994 11.29L0.709941 6.69997C0.319942 6.30997 0.319942 5.67997 0.709941 5.28997L5.29994 0.699971C5.68994 0.309971 6.31994 0.309971 6.70994 0.699971C7.08994 1.08997 7.09994 1.72997 6.70994 2.11997Z"
@@ -107,10 +107,9 @@ export const IndicatorIcon = ({ dir }) => {
       />
     </svg>
   );
-};
 
-export const MetLogo = ({ state }) => {
-  return state === 'full' ? (
+export const MetLogo = ({ state }) =>
+  state === 'full' ? (
     <svg width="121" height="40" viewBox="0 0 150 40" fill="none">
       <path
         d="M4.27093 9.11844C4.08027 9.14386 3.91504 9.25826 3.82606 9.42349L1.02975 14.0882C0.851802 14.3806 0.953486 14.7619 1.24583 14.9399C1.25854 14.9399 1.25854 14.9526 1.27125 14.9526L9.4314 19.3631C9.71103 19.5665 10.1051 19.4902 10.2957 19.2106C10.4991 18.931 10.4228 18.5369 10.1432 18.3463C10.1051 18.3209 10.0542 18.2954 10.0034 18.27L5.37675 15.766L7.41043 12.3723L24.5951 22.9856L23.0698 25.3752L13.7276 20.3164C13.4225 20.1512 13.0539 20.2656 12.8887 20.5579L12.876 20.5706L6.8893 32.4422C6.71135 32.7346 6.80032 33.1159 7.09267 33.2939C7.38501 33.4718 7.76632 33.3828 7.94427 33.0905C7.96969 33.0523 7.9824 33.0269 7.99511 32.9888L13.7021 21.7019L16.2188 23.0619L21.1759 32.9888C21.303 33.3066 21.6589 33.4718 21.9767 33.3447C22.2944 33.2176 22.4597 32.8617 22.3326 32.5439C22.3199 32.5058 22.3072 32.4677 22.2817 32.4422L18.1127 24.1041L22.9808 26.7479C23.2732 26.9005 23.6291 26.8115 23.807 26.5318L23.9341 26.3285L26.0568 27.6631C26.3491 27.8537 26.7304 27.7648 26.9211 27.4724C26.9211 27.4597 26.9338 27.4597 26.9338 27.447L28.1794 25.2735C28.3447 24.9812 28.2557 24.6126 27.9633 24.4346L25.9424 23.1763L25.9805 23.1127C26.1712 22.8204 26.0822 22.4391 25.7898 22.2484C25.7898 22.2484 25.7898 22.2484 25.7771 22.2484L4.69038 9.20742C4.56327 9.13116 4.42346 9.09302 4.27093 9.11844ZM4.57598 10.5929L6.36817 11.6987L4.29635 15.1686L2.44062 14.1645L4.57598 10.5929ZM25.3068 24.2185L26.8194 25.1591L26.1839 26.2522L24.6205 25.2862L25.3068 24.2185Z"
@@ -253,7 +252,6 @@ export const MetLogo = ({ state }) => {
       </defs>
     </svg>
   );
-};
 
 export const TableFullIcon = () => (
   <svg width="24" height="16" viewBox="0 0 24 16" fill="none">
@@ -283,14 +281,15 @@ export const TableSplitIcon = () => (
 );
 
 export const ArrowIcon = ({ dir, className }) => {
-  return dir !== 'up' ? (
+  const arrowDown = (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={`arrow ${className}`}>
       <path
         d="M6.99997 1V12.17L2.11997 7.29C1.72997 6.9 1.08997 6.9 0.699971 7.29C0.309971 7.68 0.309971 8.31 0.699971 8.7L7.28997 15.29C7.67997 15.68 8.30997 15.68 8.69997 15.29L15.29 8.7C15.68 8.31 15.68 7.68 15.29 7.29C14.9 6.9 14.27 6.9 13.88 7.29L8.99997 12.17V1C8.99997 0.45 8.54997 0 7.99997 0C7.44997 0 6.99997 0.45 6.99997 1Z"
         fill="#BDBDBD"
       />
     </svg>
-  ) : (
+  );
+  const arrowUp = (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={`arrow ${className}`}>
       <path
         d="M6.99997 15V3.83L2.11997 8.71C1.72997 9.1 1.08997 9.1 0.699971 8.71C0.309971 8.32 0.309971 7.69 0.699971 7.3L7.28997 0.709999C7.67997 0.319999 8.30997 0.319999 8.69997 0.709999L15.29 7.3C15.68 7.69 15.68 8.32 15.29 8.71C14.9 9.1 14.27 9.1 13.88 8.71L8.99997 3.83V15C8.99997 15.55 8.54997 16 7.99997 16C7.44997 16 6.99997 15.55 6.99997 15Z"
@@ -298,6 +297,22 @@ export const ArrowIcon = ({ dir, className }) => {
       />
     </svg>
   );
+
+  const equal = (
+    <svg width="16" height="6" viewBox="0 0 16 6" fill="none">
+      <path d="M1 5H15" stroke="#BDBDBD" strokeWidth="2" strokeLinecap="round" />
+      <path d="M1 1H15" stroke="#BDBDBD" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+
+  switch (dir) {
+    case 'up':
+      return arrowUp;
+    case 'down':
+      return arrowDown;
+    default:
+      return equal;
+  }
 };
 
 export const SortIcon = () => (
@@ -335,10 +350,96 @@ export const ExcamationIcon = () => (
 );
 
 export const QuestionIcon = ({ width, height, color }) => (
-  <svg width={width ? width : '16'} height={height ? height : '16'} viewBox="0 0 16 16" fill="none">
+  <svg width={width || '16'} height={height || '16'} viewBox="0 0 16 16" fill="none">
     <path
       d="M8 0C3.584 0 0 3.584 0 8C0 12.416 3.584 16 8 16C12.416 16 16 12.416 16 8C16 3.584 12.416 0 8 0ZM8 14.4C4.472 14.4 1.6 11.528 1.6 8C1.6 4.472 4.472 1.6 8 1.6C11.528 1.6 14.4 4.472 14.4 8C14.4 11.528 11.528 14.4 8 14.4ZM7.2 11.2H8.8V12.8H7.2V11.2ZM8.488 3.232C6.84 2.992 5.384 4.008 4.944 5.464C4.8 5.928 5.152 6.4 5.64 6.4H5.8C6.128 6.4 6.392 6.168 6.504 5.864C6.76 5.152 7.52 4.664 8.344 4.84C9.104 5 9.664 5.744 9.6 6.52C9.52 7.592 8.304 7.824 7.64 8.824C7.64 8.832 7.632 8.832 7.632 8.84C7.624 8.856 7.616 8.864 7.608 8.88C7.536 9 7.464 9.136 7.408 9.28C7.4 9.304 7.384 9.32 7.376 9.344C7.368 9.36 7.368 9.376 7.36 9.4C7.264 9.672 7.2 10 7.2 10.4H8.8C8.8 10.064 8.888 9.784 9.024 9.544C9.04 9.52 9.048 9.496 9.064 9.472C9.128 9.36 9.208 9.256 9.288 9.16C9.296 9.152 9.304 9.136 9.312 9.128C9.392 9.032 9.48 8.944 9.576 8.856C10.344 8.128 11.384 7.536 11.168 6.008C10.976 4.616 9.88 3.44 8.488 3.232Z"
-      fill={color ? color : '#255292'}
+      fill={color || '#255292'}
     />
+  </svg>
+);
+
+export const CloseIncon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24">
+    <path
+      d="M7.7125 6.2925L11.5925 10.1725L15.4725 6.2925C15.8625 5.9025 16.4925 5.9025 16.8825 6.2925C17.2725 6.6825 17.2725 7.3125 16.8825 7.7025L12.2925 12.2925C11.9025 12.6825 11.2725 12.6825 10.8825 12.2925L6.2925 7.7025C5.9025 7.3125 5.9025 6.6825 6.2925 6.2925C6.6825 5.9125 7.3225 5.9025 7.7125 6.2925Z"
+      fill="#828282"
+    />
+    <path
+      d="M7.7125 17.2925L11.5925 13.4125L15.4725 17.2925C15.8625 17.6825 16.4925 17.6825 16.8825 17.2925C17.2725 16.9025 17.2725 16.2725 16.8825 15.8825L12.2925 11.2925C11.9025 10.9025 11.2725 10.9025 10.8825 11.2925L6.2925 15.8825C5.9025 16.2725 5.9025 16.9025 6.2925 17.2925C6.6825 17.6725 7.3225 17.6825 7.7125 17.2925Z"
+      fill="#828282"
+    />
+  </svg>
+);
+
+export const LoaderIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+    <g transform="rotate(0 50 50)">
+      <rect x="46" y="26" rx="4" ry="4" width="8" height="8" fill="#000000">
+        <animate
+          attributeName="opacity"
+          values="1;0"
+          keyTimes="0;1"
+          dur="1s"
+          begin="-0.875s"
+          repeatCount="indefinite"
+        />
+      </rect>
+    </g>
+    <g transform="rotate(45 50 50)">
+      <rect x="46" y="26" rx="4" ry="4" width="8" height="8" fill="#000000">
+        <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.75s" repeatCount="indefinite" />
+      </rect>
+    </g>
+    <g transform="rotate(90 50 50)">
+      <rect x="46" y="26" rx="4" ry="4" width="8" height="8" fill="#000000">
+        <animate
+          attributeName="opacity"
+          values="1;0"
+          keyTimes="0;1"
+          dur="1s"
+          begin="-0.625s"
+          repeatCount="indefinite"
+        />
+      </rect>
+    </g>
+    <g transform="rotate(135 50 50)">
+      <rect x="46" y="26" rx="4" ry="4" width="8" height="8" fill="#000000">
+        <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.5s" repeatCount="indefinite" />
+      </rect>
+    </g>
+    <g transform="rotate(180 50 50)">
+      <rect x="46" y="26" rx="4" ry="4" width="8" height="8" fill="#000000">
+        <animate
+          attributeName="opacity"
+          values="1;0"
+          keyTimes="0;1"
+          dur="1s"
+          begin="-0.375s"
+          repeatCount="indefinite"
+        />
+      </rect>
+    </g>
+    <g transform="rotate(225 50 50)">
+      <rect x="46" y="26" rx="4" ry="4" width="8" height="8" fill="#000000">
+        <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.25s" repeatCount="indefinite" />
+      </rect>
+    </g>
+    <g transform="rotate(270 50 50)">
+      <rect x="46" y="26" rx="4" ry="4" width="8" height="8" fill="#000000">
+        <animate
+          attributeName="opacity"
+          values="1;0"
+          keyTimes="0;1"
+          dur="1s"
+          begin="-0.125s"
+          repeatCount="indefinite"
+        />
+      </rect>
+    </g>
+    <g transform="rotate(315 50 50)">
+      <rect x="46" y="26" rx="4" ry="4" width="8" height="8" fill="#000000">
+        <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite" />
+      </rect>
+    </g>
   </svg>
 );

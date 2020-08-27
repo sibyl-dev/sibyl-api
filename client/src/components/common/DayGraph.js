@@ -13,7 +13,8 @@ class DayGraph extends Component {
   }
 
   getCoords() {
-    const { maxData } = this.props;
+    const { data } = this.props;
+    const maxData = data[data.length - 1];
     const { width, margin } = dimensions;
     const xCoord = d3
       .scaleLinear()
@@ -23,12 +24,12 @@ class DayGraph extends Component {
   }
 
   renderAxis() {
-    const { data, maxData, graphIndex } = this.props;
+    const { data, graphIndex } = this.props;
+    const maxData = data[data.length - 1];
+
     const { xCoord } = this.getCoords();
-
-    const axisGenerator = d3.axisBottom(xCoord).tickValues([0, data[0], data[1], maxData]);
-
-    const xAxis = d3.select(`#_${graphIndex} .axis-x`).attr('transform', 'translate(20,35)').call(axisGenerator);
+    let axisGenerator = d3.axisBottom(xCoord).tickValues([0, data[1], data[3], maxData]);
+    const xAxis = d3.select(`#_${graphIndex} .axis-x`).attr('transform', 'translate(25,35)').call(axisGenerator);
 
     xAxis
       .selectAll(`#_${graphIndex} .tick text`)
@@ -40,7 +41,7 @@ class DayGraph extends Component {
         }
 
         if (currentTick === maxData) {
-          return 'translate(15, -15)';
+          return 'translate(20, -15)';
         }
 
         return 'translate(0,-35)';
@@ -51,28 +52,27 @@ class DayGraph extends Component {
 
     xAxis
       .selectAll(`#_${graphIndex} .tick line`)
-      .attr('stroke', (currentTick) => {
-        if (currentTick === 0 || currentTick === maxData) {
-          return '#828282';
-        }
-      })
+      .attr('stroke', (currentTick) => (currentTick === 0 || currentTick === maxData ? '#828282' : null))
       .attr('stroke-width', 2)
       .attr('transform', 'translate(0,-6)');
   }
 
   drawData(value) {
     const { xCoord } = this.getCoords();
-    const width = xCoord(value[1]) - xCoord(value[0]);
+    const width = xCoord(value[3]) - xCoord(value[1]);
+    if (value[3] === 0) {
+      return null;
+    }
 
     return (
       <rect
         width={width}
         height="20"
         fill="rgba(129, 104, 231, 0.5)"
-        x={xCoord([value[0]])}
+        x={xCoord([value[1]])}
         rx="2"
         ry="2"
-        transform="translate(20, 25)"
+        transform="translate(25, 25)"
       />
     );
   }
@@ -80,10 +80,12 @@ class DayGraph extends Component {
   render() {
     const { data } = this.props;
     return (
-      <svg width={dimensions.width} height={dimensions.height} id={`_${this.props.graphIndex}`}>
-        <g className="axis-x"></g>
-        <g className="data">{this.drawData(data)}</g>
-      </svg>
+      (data[4] !== 0 && (
+        <svg width={dimensions.width + 15} height={dimensions.height} id={`_${this.props.graphIndex}`}>
+          <g className="axis-x" />
+          <g className="data">{this.drawData(data)}</g>
+        </svg>
+      )) || <p>No data to display.</p>
     );
   }
 }

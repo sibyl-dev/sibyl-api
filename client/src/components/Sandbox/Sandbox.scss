@@ -1,6 +1,7 @@
 @import '../../assets/sass/colors.scss';
 .dash-controls {
     display: flex;
+
     li {
         flex: 1;
         margin-right: 10px;
@@ -12,6 +13,17 @@
 
         &:last-child {
             margin-right: 0;
+        }
+
+        &.results-counter {
+            font-size: 14px;
+            line-height: 40px;
+            flex: 0 1;
+            white-space: nowrap;
+            margin-right: 10px;
+            span {
+                font-weight: bold;
+            }
         }
     }
 }
@@ -64,7 +76,9 @@
 
     .separator {
         border-top: 1px dashed $light-gray;
-        margin: 0 10px;
+        margin: 0;
+        height: 1px;
+        width: auto;
     }
 
     button {
@@ -98,6 +112,20 @@
         .max-count {
             font-size: 14px;
             color: $light-gray;
+        }
+    }
+}
+
+.dash-table {
+    &.sandbox {
+        tbody {
+            td.spaced {
+                &,
+                span,
+                svg {
+                    vertical-align: middle;
+                }
+            }
         }
     }
 }

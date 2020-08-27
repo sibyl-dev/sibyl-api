@@ -54,6 +54,7 @@ development_requirements = [
     'bumpversion>=0.5.3',
     'pip>=9.0.1',
     'watchdog>=0.8.3',
+    'scikit-learn>=0.23.0'
 
     # docs
     'm2r>=0.2.0',
@@ -62,7 +63,7 @@ development_requirements = [
 
     # style check
     'flake8>=3.5.0',
-    'isort>=4.3.4',
+    'isort>=4.3.4,<5.0.0',
 
     # fix style issues
     'autoflake>=1.1',

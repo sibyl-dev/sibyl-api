@@ -6,10 +6,10 @@ import { toggleSidebarStateAction, setActivePageAction } from '../../model/actio
 import { getIsSidebarCollapsed } from '../../model/selectors/sidebar';
 import {
   IndicatorIcon,
-  ScoreIcon,
+  // ScoreIcon,
   DetailsIcon,
   SandboxIcon,
-  SimilarChildrenIcon,
+  // SimilarChildrenIcon,
   ModelIcon,
   MetLogo,
 } from '../../assets/icons/icons';
@@ -33,12 +33,12 @@ class Sidebar extends Component {
           <li onClick={() => toggleSidebarState(!isSidebarCollapsed)} className="sidebar-trigger">
             <IndicatorIcon dir={!isSidebarCollapsed && 'left'} />
           </li>
-          <li>
+          {/* <li>
             <NavLink exact to="/" activeClassName="active" onClick={() => setActivePage('Score')}>
               <ScoreIcon />
               <span>Score</span>
             </NavLink>
-          </li>
+          </li> */}
           <li>
             <NavLink exact to={`/entity/${entityID}`} activeClassName="active" onClick={() => setActivePage('Details')}>
               <DetailsIcon />
