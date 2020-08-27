@@ -26,8 +26,8 @@ def app():
 
 @pytest.fixture(scope="module")
 def categories():
-    categories = [{"name": "cat1", "color": "#000000"},
-                  {"name": "cat2"}]
+    categories = [{"name": "cat1", "color": "#000000", "abbreviation": "c1"},
+                  {"name": "cat2", "abbreviation": "c2"}]
     return categories
 
 
@@ -45,10 +45,12 @@ def testdb(categories, features):
     connect(test_database_name, host=test_host, port=test_port)
 
     schema.Category.insert_many(categories)
+
     for item in features:
+        item_with_ref = item.copy()
         reference = schema.Category.find_one(name=item["category"])
-
-
+        item_with_ref["category"] = reference
+        schema.Feature.insert(**item_with_ref)
 
     yield
 

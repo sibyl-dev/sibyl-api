@@ -7,19 +7,31 @@
 def test_categories(client, categories):
     response = client.get('/api/v1/categories/').json
 
-    expected_categories = {}
+    expected_items = {}
     for item in categories:
         name = item.pop('name')
-        expected_categories[name] = item
-    for cat in response["categories"]:
-        assert cat['name'] in expected_categories
-        if 'color' in expected_categories[cat['name']]:
-            assert cat['color'] == expected_categories[cat['name']]['color']
-        else:
-            assert cat['color'] is None
+        expected_items[name] = item
+    for item in response["categories"]:
+        assert item['name'] in expected_items
+        for key in ["color", "abbreviation"]:
+            if key in expected_items[item['name']]:
+                assert item[key] == expected_items[item['name']][key]
+            else:
+                assert item[key] is None
 
 
 def test_feature(client, features):
     response = client.get('/api/v1/features/').json
+    expected_items = {}
+    for item in features:
+        name = item.pop('name')
+        expected_items[name] = item
+    for item in response["features"]:
+        assert item['name'] in expected_items
+        for key in ["description", "category", "type"]:
+            if key in expected_items[item['name']]:
+                assert item[key] == expected_items[item['name']][key]
+            else:
+                assert item[key] is None
 
 
