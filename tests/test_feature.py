@@ -4,34 +4,44 @@
 """Tests for `sibylapp` package."""
 
 
-def test_categories(client, categories):
+def test_get_categories(client, categories):
     response = client.get('/api/v1/categories/').json
 
-    expected_items = {}
-    for item in categories:
-        name = item.pop('name')
-        expected_items[name] = item
-    for item in response["categories"]:
-        assert item['name'] in expected_items
-        for key in ["color", "abbreviation"]:
-            if key in expected_items[item['name']]:
-                assert item[key] == expected_items[item['name']][key]
-            else:
-                assert item[key] is None
+    for expected_item in categories:
+        found = False
+        for response_item in response["categories"]:
+            if response_item["name"] == expected_item["name"]:
+                found = True
+                for key in ["color", "abbreviation"]:
+                    if key in expected_item:
+                        assert response_item[key] == expected_item[key]
+                    else:
+                        assert response_item[key] is None
+        assert found
 
 
-def test_feature(client, features):
+def test_get_features(client, features):
     response = client.get('/api/v1/features/').json
-    expected_items = {}
-    for item in features:
-        name = item.pop('name')
-        expected_items[name] = item
-    for item in response["features"]:
-        assert item['name'] in expected_items
-        for key in ["description", "category", "type"]:
-            if key in expected_items[item['name']]:
-                assert item[key] == expected_items[item['name']][key]
-            else:
-                assert item[key] is None
+
+    for expected_item in features:
+        found = False
+        for response_item in response["features"]:
+            if response_item["name"] == expected_item["name"]:
+                found = True
+                for key in ["description", "category", "type"]:
+                    if key in expected_item:
+                        assert response_item[key] == expected_item[key]
+                    else:
+                        assert response_item[key] is None
+        assert found
+
+
+def test_get_feature(client, features):
+    feature = features[0]
+    response = client.get('/api/v1/features/' + feature['name'] + "/").json
+    assert response['name'] == feature['name']
+    assert response['description'] == feature['description']
+    assert response['category'] == feature['category']
+    assert response['type'] == response['type']
 
 

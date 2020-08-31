@@ -17,7 +17,7 @@ def add_routes(app):
     api.add_resource(ctrl.entity.Events, API_VERSION + 'events/')
 
     api.add_resource(ctrl.entity.Cases, API_VERSION + 'cases/')
-    api.add_resource(ctrl.entity.Case, API_VERSION + 'case/<string:case_id>/')
+    api.add_resource(ctrl.entity.Case, API_VERSION + 'cases/<string:case_id>/')
     api.add_resource(
         ctrl.entity.EntitiesInCase,
         API_VERSION + 'entities_in_case/<string:case_id>/')
