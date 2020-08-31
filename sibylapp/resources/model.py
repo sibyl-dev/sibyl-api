@@ -1,11 +1,11 @@
 import logging
-import pickle
 
 import pandas as pd
 from flask import request
 from flask_restful import Resource
 
 from sibylapp.db import schema
+from sibylapp.resources import helpers
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,8 +39,7 @@ class Model(Resource):
         """
         model = schema.Model.find_one(id=model_id)
         if model is None:
-            LOGGER.exception('Error getting model. '
-                             'Model %s does not exist.', model_id)
+            LOGGER.exception('Error getting model. Model %s does not exist.', model_id)
             return {
                 'message': 'Model {} does not exist'.format(model_id)
             }, 400
@@ -88,8 +87,7 @@ class Importance(Resource):
         model_id = request.args.get('model_id', None)
         model = schema.Model.find_one(id=model_id)
         if model is None:
-            LOGGER.exception('Error getting model. '
-                             'Model %s does not exist.', model_id)
+            LOGGER.exception('Error getting model. Model %s does not exist.', model_id)
             return {
                 'message': 'Model {} does not exist'.format(model_id)
             }, 400
@@ -117,20 +115,19 @@ class Prediction(Resource):
         eid = request.args.get('eid', None)
 
         entity = schema.Entity.find_one(eid=eid)
+        if entity is None:
+            LOGGER.exception('Error getting entity. Entity %s does not exist.', eid)
+            return {'message': 'Entity {} does not exist'.format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        model_doc = schema.Model.find_one(id=model_id)
-        if model_doc is None:
-            LOGGER.exception('Error getting model. '
-                             'Model %s does not exist.', model_id)
-            return {
-                'message': 'Model {} does not exist'.format(model_id)
-            }, 400
-        model_bytes = model_doc.model
-        try:
-            model = pickle.loads(model_bytes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {'message': str(e)}, 500
-        prediction = model.predict(entity_features)[0]
+        success, payload = helpers.load_model(model_id)
+        if success:
+            model, transformer = payload
+        else:
+            message, error_code = payload
+            return message, error_code
+
+        entity_features = transformer.transform(entity_features)
+
+        prediction = model.predict(entity_features)[0].tolist()
         return {"output": prediction}, 200

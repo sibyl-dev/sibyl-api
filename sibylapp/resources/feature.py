@@ -23,7 +23,8 @@ def get_feature(feature_doc):
 def get_category(category_doc):
     category = {
         'name': category_doc.name,
-        'color': category_doc.color
+        'color': category_doc.color,
+        'abbreviation': category_doc.abbreviation
     }
     return category
 
@@ -92,6 +93,7 @@ class Categories(Resource):
         @apiSuccess {Object[]} categories List of Category Objects.
         @apiSuccess {String} categories.name Name of category.
         @apiSuccess {String} categories.color Color of category.
+        @apiSuccess {String} categories.abbreviation Abbreviation of category
         """
         documents = schema.Category.find()
         try:
