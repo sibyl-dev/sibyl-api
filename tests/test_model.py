@@ -37,7 +37,7 @@ def test_get_importance(client, models):
 def test_get_prediction(client, models, entities):
     model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
     entity = entities[0]
-    expected_output = entity["features"]["A"]
+    expected_output = entity["features"]["A"] - entity["features"]["B"]
 
     response = client.get('/api/v1/prediction/?model_id=' +
                           model_id + "&?eid=" + entity["eid"]).json

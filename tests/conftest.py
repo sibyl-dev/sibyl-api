@@ -67,15 +67,17 @@ def entities():
          "type": "type1", "property": {"prop1": "x"}},
     ]
 
-    features1 = {"A": 10, "B": 5, "C": 4, "num_feat": 10, "cat_feat": "value1", "bin_feat": True}
-    features2 = {"A": 10, "B": 1, "C": 4, "num_feat": 10,"cat_feat": "value2", "bin_feat": False}
+    features1 = {"A": 14, "B": 5, "C": 4, "num_feat": 10, "cat_feat": "value1", "bin_feat": True}
+    features1_b = {"A": 14, "B": 5, "C": 3, "num_feat": 10, "cat_feat": "value1", "bin_feat": True}
+    features2 = {"A": 10, "B": 1, "C": 2, "num_feat": 10,"cat_feat": "value2", "bin_feat": False}
+    features2_b = {"A": 10, "B": 1, "C": 1, "num_feat": 10,"cat_feat": "value2", "bin_feat": False}
     features3 = {"A": 2, "B": 5, "C": 4, "num_feat": 5, "cat_feat": "something", "bin_feat": False}
 
     entities = [{"eid": "ent1", "property": {"case_ids": ["101", "102"]}, "features": features1,
                  "events": [events[0], events[1]]},
-                {"eid": "ent2", "property": {"case_ids": ["101"]}, "features": features1},
+                {"eid": "ent2", "property": {"case_ids": ["101"]}, "features": features1_b},
                 {"eid": "ent3", "property": {"name": "First Last"}, "features": features2},
-                {"eid": "ent4", "property": {"name": "First Last"}, "features": features2},
+                {"eid": "ent4", "property": {"name": "First Last"}, "features": features2_b},
                 {"eid": "ent5", "features": features3, "events": [events[2]]}]
     return entities
 
@@ -92,7 +94,7 @@ class TestModel:
 
     def predict(self, X):
         assert (X.columns == ["A", "B", "C"]).all()
-        return X["A"]
+        return X["A"] - X["B"]
 
 
 class TestTransformer:
