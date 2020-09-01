@@ -43,5 +43,3 @@ def test_get_feature(client, features):
     assert response['description'] == feature['description']
     assert response['category'] == feature['category']
     assert response['type'] == response['type']
-
-

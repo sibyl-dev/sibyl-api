@@ -72,4 +72,3 @@ def test_entities_in_case(client):
     entities_involved = ["ent1", "ent2"]
     response = client.get('/api/v1/entities_in_case/' + case_id + "/").json
     assert response == entities_involved
-

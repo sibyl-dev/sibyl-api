@@ -35,9 +35,9 @@ def test_post_feature_distributions(client, models):
                               "C": {"type": "numeric", "metrics": [1, 1.75, 2.5, 3.25, 4]},
                               "num_feat": {"type": "numeric", "metrics": [10, 10, 10, 10, 10]},
                               "cat_feat": {"type": "categorical", "metrics":
-                                  [["value1", "value2"], [2, 2]]},
+                                           [["value1", "value2"], [2, 2]]},
                               "bin_feat": {"type": "categorical", "metrics":
-                                  [[False, True], [2, 2]]}}
+                                           [[False, True], [2, 2]]}}
     assert response["distributions"] == expected_distributions
 
 
@@ -89,7 +89,3 @@ def test_single_change_predictions(client, models, entities):
 
     entity_in_db = client.get('/api/v1/entities/' + entity["eid"] + "/").json
     assert entity_in_db["features"] == entity["features"]
-
-
-
-

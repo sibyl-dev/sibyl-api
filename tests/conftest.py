@@ -69,8 +69,9 @@ def entities():
 
     features1 = {"A": 14, "B": 5, "C": 4, "num_feat": 10, "cat_feat": "value1", "bin_feat": True}
     features1_b = {"A": 14, "B": 5, "C": 3, "num_feat": 10, "cat_feat": "value1", "bin_feat": True}
-    features2 = {"A": 10, "B": 1, "C": 2, "num_feat": 10,"cat_feat": "value2", "bin_feat": False}
-    features2_b = {"A": 10, "B": 1, "C": 1, "num_feat": 10,"cat_feat": "value2", "bin_feat": False}
+    features2 = {"A": 10, "B": 1, "C": 2, "num_feat": 10, "cat_feat": "value2", "bin_feat": False}
+    features2_b = {"A": 10, "B": 1, "C": 1, "num_feat": 10, "cat_feat": "value2",
+                   "bin_feat": False}
     features3 = {"A": 2, "B": 5, "C": 4, "num_feat": 5, "cat_feat": "something", "bin_feat": False}
 
     entities = [{"eid": "ent1", "property": {"case_ids": ["101", "102"]}, "features": features1,

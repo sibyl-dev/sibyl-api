@@ -1,5 +1,4 @@
 import os
-from sibylapp.resources import logging
 
 
 def test_post_logging(client):

@@ -39,7 +39,7 @@ def test_get_prediction(client, models, entities):
     entity = entities[0]
     expected_output = entity["features"]["A"] - entity["features"]["B"]
 
-    response = client.get('/api/v1/prediction/?model_id=' +
-                          model_id + "&?eid=" + entity["eid"]).json
+    response = client.get('/api/v1/prediction/?model_id='
+                          + model_id + "&?eid=" + entity["eid"]).json
 
     assert response["output"] == expected_output
