@@ -1,12 +1,12 @@
 import datetime
 import pickle
 
-from mongoengine import connect
-from mongoengine.connection import disconnect
 import numpy as np
 import pandas as pd
-from pymongo import MongoClient
 import pytest
+from mongoengine import connect
+from mongoengine.connection import disconnect
+from pymongo import MongoClient
 
 from sibyl.local_feature_explanation import fit_contribution_explainer
 from sibylapp.core import SibylApp
