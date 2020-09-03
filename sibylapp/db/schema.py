@@ -36,8 +36,8 @@ class Event(SibylAppDocument):
 
     Attributes
     ----------
-    eid : str
-        ID of the entity involved
+    event_id : str
+        Reference ID for the event
     datetime : DateTime
         Date and time of the event
     type : str
@@ -45,11 +45,13 @@ class Event(SibylAppDocument):
     property : dict {property : value}
         Domain specific properties of the event
     """
-    eid = fields.StringField(required=True, validation=_eid_exists)
+    event_id = fields.StringField()
     datetime = fields.DateTimeField(required=True)
     # TODO: choices from config
     type = fields.StringField(required=True)
     property = fields.DictField()  # {property:value}
+
+    unique_key_fields = ['event_id']
 
 
 class Entity(SibylAppDocument):

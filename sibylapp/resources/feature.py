@@ -39,7 +39,7 @@ class Feature(Resource):
         @apiDescription Get details of a specific feature.
 
         @apiSuccess {String} name Name of the feature.
-        @apiSuccess {String} description Short paragraph description of
+        @apiSuccess {String} description Short sentence description of
             the feature.
         @apiSuccess {String} category Category of the feature.
         @apiSuccess {String="numeric","binary","category"} type Value type.

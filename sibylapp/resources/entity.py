@@ -12,7 +12,8 @@ def get_events(entity_doc):
     events = []
     for event_doc in entity_doc.events:
         events.append({
-            'datetime': event_doc.datetime,
+            'event_id': event_doc.event_id,
+            'datetime': str(event_doc.datetime),
             'type': event_doc.type,
             'property': event_doc.property
         })
@@ -32,7 +33,7 @@ def get_entity(entity_doc, features=True):
 
 def get_case(case_doc):
     case = {
-        'id': case_doc.case_id,
+        'case_id': case_doc.case_id,
         'property': case_doc.property
     }
     return case
@@ -52,14 +53,13 @@ class Entity(Resource):
         @apiSuccess {String} features.name  Feature name.
         @apiSuccess {Number|String} features.value Feature value.
         @apiSuccess {Object} [property] Special property of this entity.
-        @apiSuccess {String} [property.name] Name of the entity.
         @apiSuccess {String[]} [property.case_ids] IDs of cases the entity
                                          is involved in.
 
         @apiSuccessExample {json} Success-Response:
             HTTP/1.1 200 OK
             {
-                "id": "18",
+                "eid": "18",
                 "features": [
                     {"name": "f1", "value": "v1"},
                     ...
@@ -91,10 +91,9 @@ class Entities(Resource):
         @apiVersion 1.0.0
         @apiDescription Get meta information of all the entities.
 
-        @apiSuccess {String} id Case id.
-        @apiSuccess {Object[]} entities.id ID of the entity.
-        @apiSuccess {Object} [entities.property] ID of the entity.
-        @apiSuccess {String} [entities.property.name] Name of the entity.
+        @apiSuccess {Object[]} entities List of entity objects
+        @apiSuccess {Object} [entities.eid] ID of the entity.
+        @apiSuccess {String} [entities.property] Properties of the entity.
         """
         documents = schema.Entity.find()
         try:
@@ -116,7 +115,7 @@ class Events(Resource):
         @apiVersion 1.0.0
         @apiDescription Get the history/events of a entity.
 
-        @apiParam {String} [eid] Id of the entity.
+        @apiParam {String} eid EID of the entity.
 
         @apiSuccess {Object[]} events List of Event Objects.
         """
@@ -132,15 +131,14 @@ class Events(Resource):
 class Case(Resource):
     def get(self, case_id):
         """
-        @api {get} /case/:case_id/ Get details of a case
+        @api {get} /cases/:case_id/ Get details of a case
         @apiName GetCase
         @apiGroup Case
         @apiVersion 1.0.0
         @apiDescription Get details of a specific case.
 
-        @apiSuccess {String} id ID of the case.
+        @apiSuccess {String} case_id ID of the case.
         @apiSuccess {String} property properties of the case
-        @apiSuccess {String} [property.team] Team that handled the case.
         """
         case = schema.Case.find_one(case_id=case_id)
         if case is None:
@@ -182,7 +180,7 @@ class EntitiesInCase(Resource):
 
         @apiSuccess {String[]} eids EIDs of entities involved in the case.
         """
-        entities = schema.Entity.find(property__case_id__contains=case_id)
+        entities = schema.Entity.find(property__case_ids__contains=case_id)
         if entities is None:
             LOGGER.log('Case %s has no entities', case_id)
             return []
