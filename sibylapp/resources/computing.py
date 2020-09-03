@@ -6,8 +6,8 @@ import pandas as pd
 from flask import request
 from flask_restful import Resource
 
-from sibyl import global_explanation as ge
-from sibyl import local_feature_explanation as lfe
+from sibyl.sibyl import global_explanation as ge
+from sibyl.sibyl import local_feature_explanation as lfe
 from sibylapp import g
 from sibylapp.db import schema
 from sibylapp.resources import helpers

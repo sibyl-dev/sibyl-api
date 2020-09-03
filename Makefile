@@ -219,3 +219,9 @@ clean-docs: ## remove previously built docs
 .PHONY: load-db
 load-db:
 	mongorestore --db sibylapp ./db/dump/sibylapp/
+
+.PHONY: install-sibyl
+install-sibyl:
+	git clone https://github.com/DAI-Lab/sibyl.git sibyl
+	cd sibyl
+	pip install .
