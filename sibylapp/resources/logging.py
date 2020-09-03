@@ -3,7 +3,7 @@ import logging
 from flask import request
 from flask_restful import Resource
 
-from sibylapp.utils import read_config
+from sibylapp import g
 
 LOGGER = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class Logging(Resource):
             LOGGER.exception('Must provide timestamp to log')
             return {'Must provide timestamp to log'}, 400
         try:
-            timestamp = float(timestamp)
+            timestamp = int(timestamp)
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 400
@@ -103,8 +103,7 @@ class Logging(Resource):
                         "event_details": event_details
                         }
 
-        config = read_config('./sibylapp/config.yaml')
-        log_file = config["log_filename"]
+        log_file = g['config']["log_filename"]
         try:
             with open(log_file, "a+") as f:
                 if f.tell() == 0:

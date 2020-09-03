@@ -161,7 +161,7 @@ def insert_entities(values_filepath, features_names, mappings_filepath=None,
         del raw_entity["eid"]
         entity["features"] = raw_entity
         if include_cases:
-            entity["property"] = {"case_id": [random.choice(cases).case_id]}
+            entity["property"] = {"case_ids": [random.choice(cases).case_id]}
         entities.append(entity)
     schema.Entity.insert_many(entities)
     return eids
