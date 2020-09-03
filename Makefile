@@ -232,3 +232,10 @@ load-db: init-db
 	unzip sibyl.zip -d ./db/ && rm sibyl.zip
 	mongo sibylapp --eval "db.dropDatabase()"
 	mongorestore --db sibylapp ./db/dump/sibylapp/
+
+.PHONY: install-sibyl
+install-sibyl:
+	git clone https://github.com/DAI-Lab/sibyl.git sibyl
+	cd sibyl
+	pip install .
+
