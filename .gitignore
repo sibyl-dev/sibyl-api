@@ -47,7 +47,7 @@ logs/
 
 # Data
 client/public/data/
-db-instance/
+db/
 mtv/data/raw
 mtv/db/data
 
