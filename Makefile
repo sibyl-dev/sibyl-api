@@ -226,8 +226,7 @@ init-db: clean-db
 	mkdir -p db/history_version/
 
 .PHONY: load-db
-load-db:
-	load-db: init-db
+load-db: init-db
 	rm -f -r db/dump/sibylapp/
 	curl -o sibyl.zip "https://d3-ai-sibyl.s3.amazonaws.com/sibyl.zip"
 	unzip sibyl.zip -d ./db/ && rm sibyl.zip
