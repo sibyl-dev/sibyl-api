@@ -216,6 +216,19 @@ clean-docs: ## remove previously built docs
 	-$(MAKE) -C docs clean 2>/dev/null  # this fails if sphinx is not yet installed
 
 
+.PHONY: clean-db
+clean-db:
+	rm -f -r ./db/dump
+
+.PHONY: init-db
+init-db: clean-db
+	mkdir -p db
+	mkdir -p db/history_version/
+
 .PHONY: load-db
-load-db:
+load-db: init-db
+	rm -f -r db/dump/sibylapp/
+	curl -o sibyl.zip "https://d3-ai-sibyl.s3.amazonaws.com/sibyl.zip"
+	unzip sibyl.zip -d ./db/ && rm sibyl.zip
+	mongo sibylapp --eval "db.dropDatabase()"
 	mongorestore --db sibylapp ./db/dump/sibylapp/

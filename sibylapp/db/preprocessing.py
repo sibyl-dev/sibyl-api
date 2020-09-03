@@ -212,7 +212,7 @@ def generate_feature_distribution_doc(save_path, model, transformer,
         row_details["total cases"] = count_total
         row_details["total removed"] = count_removed
 
-        cat_summary = ge.summary_categorical(dataset_cat.iloc[rows])
+        cat_summary = ge.summary_categorical(dataset_cat.iloc[rows].applymap(str))
         num_summary = ge.summary_numeric(dataset_num.iloc[rows])
 
         distributions = {}
@@ -237,7 +237,7 @@ if __name__ == "__main__":
     # CONFIGURATIONS
     include_database = False
     client = MongoClient("localhost", 27017)
-    connect('sibylapp_agg', host='localhost', port=27017)
+    connect('sibylapp', host='localhost', port=27017)
     directory = "data"
 
     # INSERT CATEGORIES
