@@ -250,7 +250,7 @@ if __name__ == "__main__":
     insert_cases(os.path.join(directory, "cases.csv"))
 
     # INSERT ENTITIES
-    eids = insert_entities(os.path.join(directory, "agg_entities.csv"), feature_names,
+    eids = insert_entities(os.path.join(directory, "agg_true_entities.csv"), feature_names,
                            mappings_filepath=os.path.join(directory, "mappings.csv"),
                            include_cases=True)
 
