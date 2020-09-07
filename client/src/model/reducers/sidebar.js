@@ -1,7 +1,7 @@
 import createReducer from '../store/createReducer';
 
 const initialState = {
-  isSidebarCollapsed: true,
+  isSidebarCollapsed: false,
   pageName: 'Score',
 };
 
