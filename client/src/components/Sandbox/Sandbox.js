@@ -133,7 +133,7 @@ class Sandbox extends Component {
     return currentFeature === 0 ? trueRow : falseRow;
   }
 
-  getFeatureCathegoryColor(feature) {
+  getFeatureCategoryColor(feature) {
     const { featureCategories } = this.props;
     const colorIndex = featureCategories.findIndex((currentCategory) => currentCategory.name === feature);
 
@@ -142,9 +142,12 @@ class Sandbox extends Component {
     }
 
     return (
-      <MetTooltip title={featureCategories[colorIndex].name} placement="top">
-        <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />
-      </MetTooltip>
+      <>
+        <MetTooltip title={featureCategories[colorIndex].name} placement="top">
+          <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />
+        </MetTooltip>
+        <span className="feature-category-label">{featureCategories[colorIndex].abbreviation}</span>
+      </>
     );
   }
 
@@ -221,7 +224,7 @@ class Sandbox extends Component {
 
                       return (
                         <tr key={name}>
-                          <td className="align-center">{this.getFeatureCathegoryColor(category)}</td>
+                          <td className="align-center">{this.getFeatureCategoryColor(category)}</td>
                           <td>
                             <span>{description}</span>
                           </td>

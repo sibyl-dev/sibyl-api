@@ -285,8 +285,10 @@ export const getFeatureCategories = createSelector(
       categories.push({
         name: currentCategory.name,
         color: currentCategory.color === null ? categoryColors[catIndex] : currentCategory.color,
+        abbreviation: currentCategory.abbreviation,
       }),
     );
+
     return categories;
   },
 );
