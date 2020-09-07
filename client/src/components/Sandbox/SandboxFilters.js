@@ -139,6 +139,7 @@ class SandboxFilters extends Component {
     }
 
     let storedData = [];
+    let actionString = '';
     Object.keys(storedFeatures).forEach((feature) => {
       const isPayloadCompleted =
         storedFeatures[feature] !== null &&
@@ -153,8 +154,10 @@ class SandboxFilters extends Component {
       }
       storedData.push([storedFeatures[feature].value, storedValues[feature].value]);
     });
+    actionString = JSON.stringify(storedData);
+    actionString = actionString.replaceAll(',', ';');
 
-    storedData.length !== 0 && updateScore(storedData);
+    storedData.length !== 0 && updateScore(`'${actionString}'`);
   }
 
   renderModal() {
