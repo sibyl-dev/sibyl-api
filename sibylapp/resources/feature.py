@@ -11,7 +11,8 @@ def get_feature(feature_doc):
     feature = {
         'name': feature_doc.name,
         'description': feature_doc.description,
-        'type': feature_doc.type
+        'type': feature_doc.type,
+        'negated_description': feature_doc.negated_description
     }
     if feature_doc.category is not None:
         feature['category'] = feature_doc.category.name
