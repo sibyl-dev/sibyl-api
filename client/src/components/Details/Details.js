@@ -10,10 +10,10 @@ import MetTooltip from '../common/MetTooltip';
 import { BiProgressBar } from '../common/ProgressBars';
 import {
   sortFeaturesByContribAction,
-  setFilterValuesAction,
+  // setFilterValuesAction,
   setFilterCategsAction,
   setContribFiltersAction,
-  setFeatureTypeFilterAction,
+  // setFeatureTypeFilterAction,
   setFeatureTypeSortContribDirAction,
   setFeatureTypeFilterCategsAction,
 } from '../../model/actions/features';
@@ -25,10 +25,10 @@ import {
   getIsCategoriesLoading,
   getFeatureCategories,
   getSortingContribDir,
-  getSelectedFilterValues,
+  // getSelectedFilterValues,
   getFilterCategories,
   getCurrentContribFilters,
-  getFeatureTypeFilters,
+  // getFeatureTypeFilters,
   getFeatureTypeSortContribDir,
   getGrouppedFeatures,
   getFeatureTypeFilterCategs,
@@ -38,11 +38,11 @@ import { setUserActionRecording } from '../../model/actions/userActions';
 import { setActivePageAction } from '../../model/actions/sidebar';
 import './Details.scss';
 
-const filterValues = [
-  { value: 'all', label: 'All Values', isFixed: true },
-  { value: 'binary', label: 'True/False', isFixed: true },
-  { value: 'numeric', label: 'Numerical', isFixed: true },
-];
+// const filterValues = [
+//   { value: 'all', label: 'All Values', isFixed: true },
+//   { value: 'binary', label: 'True/False', isFixed: true },
+//   { value: 'numeric', label: 'Numerical', isFixed: true },
+// ];
 
 const contribFilters = [
   { value: 'all', label: 'All Contributions', isFixed: true },
@@ -115,16 +115,16 @@ export class Details extends Component {
   renderDashHeader(featureType, isDataLoading) {
     const { viewMode } = this.state;
     const {
-      setFilterValues,
-      currentFilterValue,
+      // setFilterValues,
+      // currentFilterValue,
       isCategoriesLoading,
       featureCategories,
       setFilterCategories,
       currentFilterCategs,
       setContribFilters,
       currentContribFilters,
-      setFeatureFilters,
-      featureTypeFilters,
+      // setFeatureFilters,
+      // featureTypeFilters,
       setFeatureTypeFilterCategs,
       currentFeatureTypeCategs,
       grouppedFeatures,
@@ -133,13 +133,13 @@ export class Details extends Component {
     const { positiveFeaturesContrib, negativeFeaturesContrib } = grouppedFeatures;
     const { processedFeatures } = features;
 
-    const setFeatureFilterValues = (filterValue) =>
-      featureType !== 'all' ? setFeatureFilters(featureType, filterValue) : setFilterValues(filterValue);
+    // const setFeatureFilterValues = (filterValue) =>
+    //   featureType !== 'all' ? setFeatureFilters(featureType, filterValue) : setFilterValues(filterValue);
 
-    const getFilterValue = () =>
-      featureType !== 'all'
-        ? filterValues.filter((currentValue) => currentValue.value === featureTypeFilters[featureType])
-        : filterValues.filter((currentValue) => currentValue.value === currentFilterValue);
+    // const getFilterValue = () =>
+    //   featureType !== 'all'
+    //     ? filterValues.filter((currentValue) => currentValue.value === featureTypeFilters[featureType])
+    //     : filterValues.filter((currentValue) => currentValue.value === currentFilterValue);
 
     const setFeatureCategsFilter = (categs) =>
       featureType !== 'all' ? setFeatureTypeFilterCategs(featureType, categs) : setFilterCategories(categs);
@@ -177,7 +177,7 @@ export class Details extends Component {
                 value={getCurrentCategs()}
               />
             </li>
-            <li>
+            {/* <li>
               <Select
                 isSearchable={false}
                 isMulti={false}
@@ -188,7 +188,7 @@ export class Details extends Component {
                 value={getFilterValue()}
                 onChange={(filterValue) => setFeatureFilterValues(filterValue.value)}
               />
-            </li>
+            </li> */}
             {viewMode === 'unified' && (
               <li>
                 <Select
@@ -402,20 +402,20 @@ export default connect(
     features: getFeaturesData(state),
     featureCategories: getFeatureCategories(state),
     currentSortDir: getSortingContribDir(state),
-    currentFilterValue: getSelectedFilterValues(state),
+    // currentFilterValue: getSelectedFilterValues(state),
     currentFilterCategs: getFilterCategories(state),
     currentContribFilters: getCurrentContribFilters(state),
-    featureTypeFilters: getFeatureTypeFilters(state),
+    // featureTypeFilters: getFeatureTypeFilters(state),
     currentFeatureTypeSortDir: getFeatureTypeSortContribDir(state),
     grouppedFeatures: getGrouppedFeatures(state),
     currentFeatureTypeCategs: getFeatureTypeFilterCategs(state),
   }),
   (dispatch) => ({
     setSortContribDir: (direction) => dispatch(sortFeaturesByContribAction(direction)),
-    setFilterValues: (filterValue) => dispatch(setFilterValuesAction(filterValue)),
+    // setFilterValues: (filterValue) => dispatch(setFilterValuesAction(filterValue)),
     setFilterCategories: (filterCategs) => dispatch(setFilterCategsAction(filterCategs)),
     setContribFilters: (currentContribFilters) => dispatch(setContribFiltersAction(currentContribFilters)),
-    setFeatureFilters: (featureType, filter) => dispatch(setFeatureTypeFilterAction(featureType, filter)),
+    // setFeatureFilters: (featureType, filter) => dispatch(setFeatureTypeFilterAction(featureType, filter)),
     setFeatureSortDir: (featureType, direction) => dispatch(setFeatureTypeSortContribDirAction(featureType, direction)),
     setFeatureTypeFilterCategs: (featureType, categs) =>
       dispatch(setFeatureTypeFilterCategsAction(featureType, categs)),
