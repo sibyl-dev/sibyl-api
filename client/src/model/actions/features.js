@@ -51,10 +51,12 @@ export function updateFeaturePredictionScore(featuresData) {
       .then((response) => response.json())
       .then((score) => dispatch({ type: 'UPDATE_FEATURE_PREDICTION_SUCCESS', newFeatureScore: score.prediction }));
 
+    let actionString = JSON.stringify(featuresData).replaceAll(',', ';');
+
     const userRecordPayload = {
       element: 'experiment_with_changes',
       action: 'text',
-      details: featuresData,
+      details: actionString,
     };
     dispatch(setUserActionRecording(userRecordPayload));
   };
@@ -130,10 +132,12 @@ export function setFilterCategsAction(categs) {
   return function (dispatch) {
     const filterCategs = categs !== null ? categs.map((currentCateg) => currentCateg.value) : null;
     dispatch({ type: 'SET_FILTER_CATEGS', filterCategs });
+    const updatedFiltes = JSON.stringify(filterCategs).replaceAll(',', ';');
+
     const userRecordPayload = {
       element: 'category_filter',
       action: 'filter',
-      details: filterCategs,
+      details: updatedFiltes,
     };
     dispatch(setUserActionRecording(userRecordPayload));
   };
