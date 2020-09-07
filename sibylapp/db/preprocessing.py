@@ -51,7 +51,6 @@ def insert_features(filepath):
 
     references = [schema.Category.find_one(name=cat) for cat in features_df['category']]
     features_df = features_df.drop('category', axis='columns')
-    features_df = features_df.drop('negated_description', axis='columns')
     features_df['category'] = references
 
     items = features_df.to_dict(orient='records')

@@ -40,7 +40,7 @@ def categories():
 
 @pytest.fixture(scope="module")
 def features():
-    features = [{"name": "num_feat", "description": "xyz",
+    features = [{"name": "num_feat", "description": "xyz", "negated_description": "not xyz",
                  "category": "cat1", "type": "numeric"},
                 {"name": "cat_feat", "description": "jki",
                  "category": "cat2", "type": "categorical"},

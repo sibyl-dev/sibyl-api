@@ -41,5 +41,6 @@ def test_get_feature(client, features):
     response = client.get('/api/v1/features/' + feature['name'] + "/").json
     assert response['name'] == feature['name']
     assert response['description'] == feature['description']
+    assert response['negated_description'] == feature['negated_description']
     assert response['category'] == feature['category']
     assert response['type'] == response['type']
