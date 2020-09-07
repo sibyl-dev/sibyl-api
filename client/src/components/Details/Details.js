@@ -232,7 +232,7 @@ export class Details extends Component {
     return type === 'binary' ? (entityData.features[name] > 0 ? 'True' : 'False') : entityData.features[name];
   }
 
-  getFeatureCathegoryColor(feature) {
+  getFeatureCategoryColor(feature) {
     const { featureCategories } = this.props;
     const colorIndex = featureCategories.findIndex((currentCategory) => currentCategory.name === feature);
 
@@ -241,9 +241,12 @@ export class Details extends Component {
     }
 
     return (
-      <MetTooltip title={featureCategories[colorIndex].name} placement="top">
-        <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />
-      </MetTooltip>
+      <>
+        <MetTooltip title={featureCategories[colorIndex].name} placement="top">
+          <i className="bullet" style={{ background: featureCategories[colorIndex].color }} />
+        </MetTooltip>
+        <span className="feature-category-label">{featureCategories[colorIndex].abbreviation}</span>
+      </>
     );
   }
 
@@ -310,7 +313,7 @@ export class Details extends Component {
               {features && features.length > 0 ? (
                 features.map((currentFeature) => (
                   <tr key={currentFeature.name}>
-                    <td className="align-center">{this.getFeatureCathegoryColor(currentFeature.category)}</td>
+                    <td className="align-center">{this.getFeatureCategoryColor(currentFeature.category)}</td>
                     <td>{currentFeature.description}</td>
                     <td className="align-right">{this.getFeatureType(currentFeature)}</td>
                     <td className="align-center" width="145">
