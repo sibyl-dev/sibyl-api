@@ -130,10 +130,12 @@ export function setFilterCategsAction(categs) {
   return function (dispatch) {
     const filterCategs = categs !== null ? categs.map((currentCateg) => currentCateg.value) : null;
     dispatch({ type: 'SET_FILTER_CATEGS', filterCategs });
+    const updatedFiltes = JSON.stringify(filterCategs).replaceAll(',', ';');
+
     const userRecordPayload = {
       element: 'category_filter',
       action: 'filter',
-      details: filterCategs,
+      details: updatedFiltes,
     };
     dispatch(setUserActionRecording(userRecordPayload));
   };
