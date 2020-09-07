@@ -152,12 +152,11 @@ class SandboxFilters extends Component {
       if (!isPayloadCompleted) {
         return;
       }
+
       storedData.push([storedFeatures[feature].value, storedValues[feature].value]);
     });
-    actionString = JSON.stringify(storedData);
-    actionString = actionString.replaceAll(',', ';');
 
-    storedData.length !== 0 && updateScore(`'${actionString}'`);
+    storedData.length !== 0 && updateScore(storedData);
   }
 
   renderModal() {
