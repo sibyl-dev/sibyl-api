@@ -139,7 +139,6 @@ class SandboxFilters extends Component {
     }
 
     let storedData = [];
-    let actionString = '';
     Object.keys(storedFeatures).forEach((feature) => {
       const isPayloadCompleted =
         storedFeatures[feature] !== null &&
@@ -152,7 +151,6 @@ class SandboxFilters extends Component {
       if (!isPayloadCompleted) {
         return;
       }
-
       storedData.push([storedFeatures[feature].value, storedValues[feature].value]);
     });
 
