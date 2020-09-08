@@ -39,6 +39,18 @@
                 opacity: 0;
             }
         }
+
+        &.results-counter {
+            font-size: 14px;
+            line-height: 40px;
+            flex: 0 1;
+            white-space: nowrap;
+            margin-right: 10px;
+
+            span {
+                font-weight: bold;
+            }
+        }
     }
 }
 
