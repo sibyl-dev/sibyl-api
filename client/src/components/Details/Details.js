@@ -101,25 +101,20 @@ export class Details extends Component {
 
   renderSubheader() {
     const { viewMode, featureContribView } = this.state;
+    const { isNegativeViewExpanded, isPositiveViewExpanded } = featureContribView;
 
     return (
       <div className="sub-header">
         <ul>
           <li className="search-field-holder">
             {viewMode === 'split' ? (
-              <Search
-                disabled={!featureContribView.isNegativeViewExpanded || !featureContribView.isPositiveViewExpanded}
-              />
+              <Search disabled={!isNegativeViewExpanded || !isPositiveViewExpanded} />
             ) : (
               <h4>Factor Contributions</h4>
             )}
           </li>
           {viewMode === 'split' ? (
-            <li
-              className={`expand-tip ${
-                featureContribView.isNegativeViewExpanded && featureContribView.isPositiveViewExpanded ? 'hide' : ''
-              }`}
-            >
+            <li className={`expand-tip ${isNegativeViewExpanded && isPositiveViewExpanded ? 'hide' : ''}`}>
               <span>Click &ldquo;Show All Factors&ldquo; to enable Search and Filter in both tables</span>
             </li>
           ) : null}
@@ -150,6 +145,7 @@ export class Details extends Component {
 
   renderDashHeader(featureType) {
     const { viewMode, featureContribView } = this.state;
+    const { isCombinedExpanded } = featureContribView;
     const {
       // setFilterValues,
       // currentFilterValue,
@@ -186,7 +182,7 @@ export class Details extends Component {
             {viewMode === 'unified' && (
               <>
                 <li>
-                  <Search disabled={!featureContribView.isCombinedExpanded} />
+                  <Search disabled={!isCombinedExpanded} />
                 </li>
                 <li className="sep" />
               </>
@@ -226,7 +222,7 @@ export class Details extends Component {
                     value={contribFilters.filter((currentContrib) => currentContrib.value === currentContribFilters)}
                   />
                 </li>
-                <li className={`expand-tip ${featureContribView.isCombinedExpanded ? 'hide' : ''}`}>
+                <li className={`expand-tip ${isCombinedExpanded ? 'hide' : ''}`}>
                   <span>Click &ldquo;Show All Factors&ldquo; to enable Search and Filter</span>
                 </li>
               </>
@@ -238,37 +234,39 @@ export class Details extends Component {
   }
 
   toggleDash(featureContribView, viewMode, featureType) {
+    const { setContribFilters, setFilterCriteria, setFeatureTypeFilterCategs, setFilterCategories } = this.props;
+    const { isCombinedExpanded, isPositiveViewExpanded, isNegativeViewExpanded } = featureContribView;
+
     // reset filters
     if (featureContribView) {
-      this.props.setContribFilters('all');
-      this.props.setFilterCriteria('');
+      setContribFilters('all');
+      setFilterCriteria('');
 
       if (featureType !== 'all') {
-        this.props.setFeatureTypeFilterCategs(featureType, null);
+        setFeatureTypeFilterCategs(featureType, null);
       } else {
-        this.props.setFilterCategories(null);
+        setFilterCategories(null);
       }
     }
 
     // create new state for featureContribView
-    const newExpandedState = {
+    const updatedFeatureContribView = {
       ...featureContribView,
-      isCombinedExpanded:
-        viewMode === 'unified' ? !featureContribView.isCombinedExpanded : featureContribView.isCombinedExpanded,
+      isCombinedExpanded: viewMode === 'unified' ? !isCombinedExpanded : isCombinedExpanded,
     };
 
     if (viewMode !== 'unified') {
       if (featureType === 'positiveFeatures') {
-        newExpandedState.isPositiveViewExpanded = !featureContribView.isPositiveViewExpanded;
+        updatedFeatureContribView.isPositiveViewExpanded = !isPositiveViewExpanded;
       } else {
-        newExpandedState.isNegativeViewExpanded = !featureContribView.isNegativeViewExpanded;
+        updatedFeatureContribView.isNegativeViewExpanded = !isNegativeViewExpanded;
       }
     }
 
     this.setState(
       {
         viewMode,
-        featureContribView: newExpandedState,
+        featureContribView: updatedFeatureContribView,
       },
       () => this.recordUserAction,
     );
