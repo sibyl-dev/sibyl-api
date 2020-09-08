@@ -15,14 +15,28 @@
             margin-right: 0;
         }
 
-        &.results-counter {
+        &.category-select{
+            &-negativeFeatures, &-positiveFeatures{
+                max-width: 190px;
+            }
+        }
+
+        &.expand-tip {
             font-size: 14px;
-            line-height: 40px;
-            flex: 0 1;
+            line-height: 16px;
             white-space: nowrap;
             margin-right: 10px;
-            span {
-                font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: transparentize($light-blue, 0.95);
+            color: $darkish-blue;
+            padding: 0 24px;
+            border-radius: 8px;
+            transition: 0.15s all ease-in;
+
+            &.hide {
+                opacity: 0;
             }
         }
     }
@@ -127,6 +141,28 @@
                 }
             }
         }
+    }
+}
+
+.dash-footer {
+    background-color: $light-blue;
+    color: white;
+    padding: 6px 24px;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    span{
+        font-weight: 700;
+    }
+
+    .expand-button {
+        color: white;
+        span{
+            font-weight: normal;
+        }
+        padding-left: 10px;
     }
 }
 
