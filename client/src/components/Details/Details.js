@@ -276,7 +276,7 @@ export class Details extends Component {
   }
 
   getFeatureDescription(feature) {
-    return feature.type === 'binary' && this.getFeatureType(feature) === 'False' && feature.negated_description
+    return feature.type === 'binary' && this.getFeatureType(feature) === 'False'
       ? feature.negated_description
       : feature.description;
   }
