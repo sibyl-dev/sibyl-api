@@ -390,6 +390,12 @@ export class Details extends Component {
     );
   }
 
+  getFeatureDescription(feature) {
+    return feature.type === 'binary' && this.getFeatureType(feature) === 'False'
+      ? feature.negated_description
+      : feature.description;
+  }
+
   renderFeatures(features, isDataLoading, featuresType = 'all') {
     const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue() : 0;
     const { viewMode, featureContribView } = this.state;
@@ -432,8 +438,10 @@ export class Details extends Component {
                 featuresToShow.map((currentFeature) => (
                   <tr key={currentFeature.name}>
                     <td className="align-center">{this.getFeatureCategoryColor(currentFeature.category)}</td>
-                    <td>{currentFeature.description}</td>
-                    <td className="align-right">{this.getFeatureType(currentFeature)}</td>
+                    <td>{this.getFeatureDescription(currentFeature)}</td>
+                    <td className="align-right">
+                      {currentFeature.type !== 'binary' ? this.getFeatureType(currentFeature) : '-'}
+                    </td>
                     <td className="align-center" width="145">
                       <BiProgressBar
                         percentage={currentFeature.contributionValue}
