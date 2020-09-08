@@ -1,4 +1,5 @@
 import logging
+import math
 
 from flask_restful import Resource
 
@@ -12,8 +13,12 @@ def get_feature(feature_doc):
         'name': feature_doc.name,
         'description': feature_doc.description,
         'type': feature_doc.type,
-        'negated_description': feature_doc.negated_description
     }
+    # TODO: Prevent this from ever happening from database side
+    if str(feature_doc.negated_description) == 'nan':
+        feature['negated_description'] = None
+    else:
+        feature['negated_description'] = feature_doc.negated_description
     if feature_doc.category is not None:
         feature['category'] = feature_doc.category.name
     else:

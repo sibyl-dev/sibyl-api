@@ -45,14 +45,14 @@ import { setFilterCriteriaAction } from '../../model/actions/features';
 // };
 
 const SearchComponent = (props) => {
-  const { isFeaturesLoading, placeholder, currentFilterCriteria, setFilterCriteria } = props;
+  const { isFeaturesLoading, placeholder, currentFilterCriteria, setFilterCriteria, disabled } = props;
   return (
-    <div className="search-field">
+    <div className={`search-field disabled-${disabled}`}>
       <ul>
         <li>
           <input
             type="text"
-            disabled={isFeaturesLoading}
+            disabled={isFeaturesLoading || disabled}
             placeholder={placeholder}
             value={currentFilterCriteria}
             onChange={(event) => setFilterCriteria(event.target.value)}
