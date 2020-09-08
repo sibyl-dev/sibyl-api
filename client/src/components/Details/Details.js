@@ -285,8 +285,6 @@ export class Details extends Component {
     const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue() : 0;
     const { viewMode } = this.state;
 
-    console.log(features);
-
     return (
       <div className="sticky-wrapper scroll-style">
         <table className="dash-table sticky-header">
