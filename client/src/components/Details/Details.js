@@ -63,7 +63,7 @@ export class Details extends Component {
     super(props);
     this.state = {
       viewMode: 'unified',
-      expanded: initialContributionView,
+      featureContribView: initialContributionView,
     };
   }
 
@@ -80,14 +80,14 @@ export class Details extends Component {
     this.props.setContribFilters('all');
   }
 
-  getExpanded(expanded, viewMode, featureType = null) {
+  getExpanded(featureContribView, viewMode, featureType = null) {
     if (viewMode === 'unified') {
-      return expanded.isCombinedExpanded;
+      return featureContribView.isCombinedExpanded;
     }
 
-    if (featureType === 'positiveFeatures') return expanded.isPositiveViewExpanded;
+    if (featureType === 'positiveFeatures') return featureContribView.isPositiveViewExpanded;
 
-    return expanded.isNegativeViewExpanded;
+    return featureContribView.isNegativeViewExpanded;
   }
 
   changeViewMode(viewMode) {
@@ -100,14 +100,16 @@ export class Details extends Component {
   }
 
   renderSubheader() {
-    const { viewMode, expanded } = this.state;
+    const { viewMode, featureContribView } = this.state;
 
     return (
       <div className="sub-header">
         <ul>
           <li className="search-field-holder">
             {viewMode === 'split' ? (
-              <Search disabled={!expanded.isNegativeViewExpanded || !expanded.isPositiveViewExpanded} />
+              <Search
+                disabled={!featureContribView.isNegativeViewExpanded || !featureContribView.isPositiveViewExpanded}
+              />
             ) : (
               <h4>Factor Contributions</h4>
             )}
@@ -115,7 +117,7 @@ export class Details extends Component {
           {viewMode === 'split' ? (
             <li
               className={`expand-tip ${
-                expanded.isNegativeViewExpanded && expanded.isPositiveViewExpanded ? 'hide' : ''
+                featureContribView.isNegativeViewExpanded && featureContribView.isPositiveViewExpanded ? 'hide' : ''
               }`}
             >
               <span>Click &ldquo;Show All Factors&ldquo; to enable Search and Filter in both tables</span>
@@ -147,7 +149,7 @@ export class Details extends Component {
   }
 
   renderDashHeader(featureType) {
-    const { viewMode, expanded } = this.state;
+    const { viewMode, featureContribView } = this.state;
     const {
       // setFilterValues,
       // currentFilterValue,
@@ -184,7 +186,7 @@ export class Details extends Component {
             {viewMode === 'unified' && (
               <>
                 <li>
-                  <Search disabled={!expanded.isCombinedExpanded} />
+                  <Search disabled={!featureContribView.isCombinedExpanded} />
                 </li>
                 <li className="sep" />
               </>
@@ -194,7 +196,7 @@ export class Details extends Component {
                 options={featureCategories}
                 onChange={(selectedCategories) => setFeatureCategsFilter(selectedCategories)}
                 value={getCurrentCategs()}
-                disabled={!this.getExpanded(expanded, viewMode, featureType)}
+                disabled={!this.getExpanded(featureContribView, viewMode, featureType)}
               />
             </li>
             {/* <li>
@@ -218,13 +220,13 @@ export class Details extends Component {
                     classNamePrefix="sibyl-select"
                     className="sibyl-select"
                     options={contribFilters}
-                    isDisabled={!this.getExpanded(expanded, viewMode)}
+                    isDisabled={!this.getExpanded(featureContribView, viewMode)}
                     placeholder="Contribution"
                     onChange={(currentFilters) => setContribFilters(currentFilters.value)}
                     value={contribFilters.filter((currentContrib) => currentContrib.value === currentContribFilters)}
                   />
                 </li>
-                <li className={`expand-tip ${expanded.isCombinedExpanded ? 'hide' : ''}`}>
+                <li className={`expand-tip ${featureContribView.isCombinedExpanded ? 'hide' : ''}`}>
                   <span>Click &ldquo;Show All Factors&ldquo; to enable Search and Filter</span>
                 </li>
               </>
@@ -235,9 +237,9 @@ export class Details extends Component {
     );
   }
 
-  toggleDash(expanded, viewMode, featureType) {
+  toggleDash(featureContribView, viewMode, featureType) {
     // reset filters
-    if (expanded) {
+    if (featureContribView) {
       this.props.setContribFilters('all');
       this.props.setFilterCriteria('');
 
@@ -248,24 +250,25 @@ export class Details extends Component {
       }
     }
 
-    // create new state for expanded view
+    // create new state for featureContribView
     const newExpandedState = {
-      ...expanded,
-      isCombinedExpanded: viewMode === 'unified' ? !expanded.isCombinedExpanded : expanded.isCombinedExpanded,
+      ...featureContribView,
+      isCombinedExpanded:
+        viewMode === 'unified' ? !featureContribView.isCombinedExpanded : featureContribView.isCombinedExpanded,
     };
 
     if (viewMode !== 'unified') {
       if (featureType === 'positiveFeatures') {
-        newExpandedState.isPositiveViewExpanded = !expanded.isPositiveViewExpanded;
+        newExpandedState.isPositiveViewExpanded = !featureContribView.isPositiveViewExpanded;
       } else {
-        newExpandedState.isNegativeViewExpanded = !expanded.isNegativeViewExpanded;
+        newExpandedState.isNegativeViewExpanded = !featureContribView.isNegativeViewExpanded;
       }
     }
 
     this.setState(
       {
         viewMode,
-        expanded: newExpandedState,
+        featureContribView: newExpandedState,
       },
       () => this.recordUserAction,
     );
@@ -276,8 +279,8 @@ export class Details extends Component {
     const { positiveFeaturesContrib, negativeFeaturesContrib } = grouppedFeatures;
     const { processedFeatures } = features;
 
-    const { expanded, viewMode } = this.state;
-    const expandedValue = this.getExpanded(expanded, viewMode, featureType);
+    const { featureContribView, viewMode } = this.state;
+    const featureContribViewValue = this.getExpanded(featureContribView, viewMode, featureType);
 
     const getResultsCount = () => {
       if (isDataLoading) {
@@ -286,11 +289,15 @@ export class Details extends Component {
 
       const limitNumber = viewMode === 'unified' ? 10 : 5;
       const positiveLength =
-        positiveFeaturesContrib.length > limitNumber && !expandedValue ? limitNumber : positiveFeaturesContrib.length;
+        positiveFeaturesContrib.length > limitNumber && !featureContribViewValue
+          ? limitNumber
+          : positiveFeaturesContrib.length;
       const negativeLength =
-        negativeFeaturesContrib.length > limitNumber && !expandedValue ? limitNumber : negativeFeaturesContrib.length;
+        negativeFeaturesContrib.length > limitNumber && !featureContribViewValue
+          ? limitNumber
+          : negativeFeaturesContrib.length;
       const processedLength =
-        processedFeatures.length > limitNumber && !expandedValue ? limitNumber : processedFeatures.length;
+        processedFeatures.length > limitNumber && !featureContribViewValue ? limitNumber : processedFeatures.length;
 
       return featureType !== 'all'
         ? featureType === 'positiveFeatures'
@@ -302,11 +309,11 @@ export class Details extends Component {
     const toggleButton = () => (
       <Button
         className="expand-button"
-        onClick={() => this.toggleDash(expanded, viewMode, featureType)}
-        startIcon={expandedValue ? <ChevronUpIcon /> : <ChevronDownIcon />}
+        onClick={() => this.toggleDash(featureContribView, viewMode, featureType)}
+        startIcon={featureContribViewValue ? <ChevronUpIcon /> : <ChevronDownIcon />}
       >
         {' '}
-        {expandedValue ? 'HIDE EXTRA FACTORS' : 'SHOW ALL FACTORS'}
+        {featureContribViewValue ? 'HIDE EXTRA FACTORS' : 'SHOW ALL FACTORS'}
       </Button>
     );
 
@@ -387,10 +394,10 @@ export class Details extends Component {
 
   renderFeatures(features, isDataLoading, featuresType = 'all') {
     const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue() : 0;
-    const { viewMode, expanded } = this.state;
-    const expandedValue = this.getExpanded(expanded, viewMode, featuresType);
+    const { viewMode, featureContribView } = this.state;
+    const featureContribViewValue = this.getExpanded(featureContribView, viewMode, featuresType);
 
-    const featuresToShow = !expandedValue && features ? features.slice(0, 10) : features;
+    const featuresToShow = !featureContribViewValue && features ? features.slice(0, 10) : features;
 
     return (
       <div className="sticky-wrapper scroll-style">
