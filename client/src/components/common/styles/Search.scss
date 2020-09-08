@@ -45,6 +45,7 @@
     background-color: #fff;
     border: 1px solid #bdbdbd;
     border-radius: 8px;
+    max-width: 490px;
 
     input[type="text"] {
         border: none;
@@ -82,5 +83,9 @@
                 opacity: 1;
             }
         }
+    }
+
+    &.disabled-true {
+        background-color: transparent;
     }
 }

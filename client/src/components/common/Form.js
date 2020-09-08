@@ -21,7 +21,7 @@ const categoryFormatOptions = ({ label, icon }) => (
 );
 
 export const CategorySelect = (props) => {
-  const { options, onChange, value } = props;
+  const { options, onChange, value, disabled = false } = props;
   const catOptions = [];
 
   options.map((currentOption) =>
@@ -41,6 +41,7 @@ export const CategorySelect = (props) => {
       className="sibyl-select"
       formatOptionLabel={categoryFormatOptions}
       options={catOptions}
+      isDisabled={disabled}
       placeholder="Category"
       onChange={onChange}
       value={value !== null && catOptions.filter((currentOpts) => value.indexOf(currentOpts.value) !== -1)}

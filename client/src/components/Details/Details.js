@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Select from 'react-select';
-import { TableFullIcon, TableSplitIcon, SortIcon } from '../../assets/icons/icons';
+import Button from '@material-ui/core/Button';
+import { TableFullIcon, TableSplitIcon, SortIcon, ChevronDownIcon, ChevronUpIcon } from '../../assets/icons/icons';
 import DashWrapper from '../common/DashWrapper';
 import Search from '../common/Search';
 import { CategorySelect } from '../common/Form';
@@ -16,6 +17,7 @@ import {
   // setFeatureTypeFilterAction,
   setFeatureTypeSortContribDirAction,
   setFeatureTypeFilterCategsAction,
+  setFilterCriteriaAction,
 } from '../../model/actions/features';
 import { getIsEntitiesLoading, getCurrentEntityData, getIsEntityContribLoading } from '../../model/selectors/entities';
 
@@ -50,11 +52,18 @@ const contribFilters = [
   { value: 'protective', label: 'Protective', isFixed: true },
 ];
 
+const initialExpandedState = {
+  unified: false,
+  left: false,
+  right: false,
+};
+
 export class Details extends Component {
   constructor(props) {
     super(props);
     this.state = {
       viewMode: 'unified',
+      expanded: initialExpandedState,
     };
   }
 
@@ -71,6 +80,16 @@ export class Details extends Component {
     this.props.setContribFilters('all');
   }
 
+  getExpanded(expanded, viewMode, featureType = null) {
+    if (viewMode === 'unified') {
+      return expanded.unified;
+    }
+
+    if (featureType === 'positiveFeatures') return expanded.left;
+
+    return expanded.right;
+  }
+
   changeViewMode(viewMode) {
     this.setState(
       {
@@ -81,12 +100,25 @@ export class Details extends Component {
   }
 
   renderSubheader() {
-    const { viewMode } = this.state;
+    const { viewMode, expanded } = this.state;
 
     return (
       <div className="sub-header">
         <ul>
-          <li>{viewMode === 'split' ? <Search /> : <h4>Factor Contributions</h4>}</li>
+          <li className="search-field-holder">
+            {viewMode === 'split' ? (
+              <Search disabled={!expanded.right || !expanded.left} />
+            ) : (
+              <h4>Factor Contributions</h4>
+            )}
+          </li>
+          {viewMode === 'split' ? (
+            <li className={`expand-tip ${expanded.right && expanded.left ? 'hide' : ''}`}>
+              <span>Click “Show All Factors” to enable Search and Filter in both tables</span>
+            </li>
+          ) : (
+            <></>
+          )}
           <li>
             <MetTooltip title="Single Table View" placement="top">
               <button
@@ -112,8 +144,8 @@ export class Details extends Component {
     );
   }
 
-  renderDashHeader(featureType, isDataLoading) {
-    const { viewMode } = this.state;
+  renderDashHeader(featureType) {
+    const { viewMode, expanded } = this.state;
     const {
       // setFilterValues,
       // currentFilterValue,
@@ -127,11 +159,7 @@ export class Details extends Component {
       // featureTypeFilters,
       setFeatureTypeFilterCategs,
       currentFeatureTypeCategs,
-      grouppedFeatures,
-      features,
     } = this.props;
-    const { positiveFeaturesContrib, negativeFeaturesContrib } = grouppedFeatures;
-    const { processedFeatures } = features;
 
     // const setFeatureFilterValues = (filterValue) =>
     //   featureType !== 'all' ? setFeatureFilters(featureType, filterValue) : setFilterValues(filterValue);
@@ -147,17 +175,6 @@ export class Details extends Component {
     const getCurrentCategs = () =>
       featureType !== 'all' ? currentFeatureTypeCategs[featureType] : currentFilterCategs;
 
-    const getResultsCount = () => {
-      if (isDataLoading) {
-        return 0;
-      }
-      return featureType !== 'all'
-        ? featureType === 'positiveFeatures'
-          ? positiveFeaturesContrib.length
-          : negativeFeaturesContrib.length
-        : processedFeatures.length;
-    };
-
     return (
       !isCategoriesLoading && (
         <header className="dash-header">
@@ -165,16 +182,17 @@ export class Details extends Component {
             {viewMode === 'unified' && (
               <>
                 <li>
-                  <Search />
+                  <Search disabled={!expanded.unified} />
                 </li>
                 <li className="sep" />
               </>
             )}
-            <li>
+            <li className={`category-select-${featureType}`}>
               <CategorySelect
                 options={featureCategories}
                 onChange={(selectedCategories) => setFeatureCategsFilter(selectedCategories)}
                 value={getCurrentCategs()}
+                disabled={!this.getExpanded(expanded, viewMode, featureType)}
               />
             </li>
             {/* <li>
@@ -190,25 +208,124 @@ export class Details extends Component {
               />
             </li> */}
             {viewMode === 'unified' && (
-              <li>
-                <Select
-                  isSearchable={false}
-                  isMulti={false}
-                  classNamePrefix="sibyl-select"
-                  className="sibyl-select"
-                  options={contribFilters}
-                  placeholder="Contribution"
-                  onChange={(currentFilters) => setContribFilters(currentFilters.value)}
-                  value={contribFilters.filter((currentContrib) => currentContrib.value === currentContribFilters)}
-                />
-              </li>
+              <>
+                <li>
+                  <Select
+                    isSearchable={false}
+                    isMulti={false}
+                    classNamePrefix="sibyl-select"
+                    className="sibyl-select"
+                    options={contribFilters}
+                    isDisabled={!this.getExpanded(expanded, viewMode)}
+                    placeholder="Contribution"
+                    onChange={(currentFilters) => setContribFilters(currentFilters.value)}
+                    value={contribFilters.filter((currentContrib) => currentContrib.value === currentContribFilters)}
+                  />
+                </li>
+                <li className={`expand-tip ${expanded.unified ? 'hide' : ''}`}>
+                  <span>Click “Show All Factors” to enable Search and Filter</span>
+                </li>
+              </>
             )}
-            <li className="sep" />
-            <li className="results-counter">
-              <span>{getResultsCount()}</span> factors
-            </li>
           </ul>
         </header>
+      )
+    );
+  }
+
+  toggleDash(expanded, viewMode, featureType) {
+    // reset filters
+    if (expanded) {
+      this.props.setContribFilters('all');
+      this.props.setFilterCriteria('');
+
+      if (featureType !== 'all') {
+        this.props.setFeatureTypeFilterCategs(featureType, null);
+      } else {
+        this.props.setFilterCategories(null);
+      }
+    }
+
+    // create new state for expanded view
+    const newExpandedState = {
+      ...expanded,
+      unified: viewMode === 'unified' ? !expanded.unified : expanded.unified,
+    };
+
+    if (viewMode !== 'unified') {
+      if (featureType === 'positiveFeatures') {
+        newExpandedState.left = !expanded.left;
+      } else {
+        newExpandedState.right = !expanded.right;
+      }
+    }
+
+    this.setState(
+      {
+        viewMode,
+        expanded: newExpandedState,
+      },
+      () => this.recordUserAction,
+    );
+  }
+
+  renderFooter(featureType, isDataLoading) {
+    const { isCategoriesLoading, grouppedFeatures, features } = this.props;
+    const { positiveFeaturesContrib, negativeFeaturesContrib } = grouppedFeatures;
+    const { processedFeatures } = features;
+
+    const { expanded, viewMode } = this.state;
+    const expandedValue = this.getExpanded(expanded, viewMode, featureType);
+
+    const getResultsCount = () => {
+      if (isDataLoading) {
+        return 0;
+      }
+
+      const limitNumber = viewMode === 'unified' ? 10 : 5;
+      const positiveLength =
+        positiveFeaturesContrib.length > limitNumber && !expandedValue ? limitNumber : positiveFeaturesContrib.length;
+      const negativeLength =
+        negativeFeaturesContrib.length > limitNumber && !expandedValue ? limitNumber : negativeFeaturesContrib.length;
+      const processedLength =
+        processedFeatures.length > limitNumber && !expandedValue ? limitNumber : processedFeatures.length;
+
+      return featureType !== 'all'
+        ? featureType === 'positiveFeatures'
+          ? positiveLength
+          : negativeLength
+        : processedLength;
+    };
+
+    const expandButton = () => (
+      <Button
+        className="expand-button"
+        onClick={() => this.toggleDash(expanded, viewMode, featureType)}
+        startIcon={<ChevronDownIcon />}
+      >
+        {' '}
+        SHOW ALL FACTORS
+      </Button>
+    );
+    const hideButton = () => (
+      <Button
+        className="expand-button"
+        onClick={() => this.toggleDash(expanded, viewMode, featureType)}
+        startIcon={<ChevronUpIcon />}
+      >
+        {' '}
+        HIDE EXTRA FACTORS
+      </Button>
+    );
+
+    return (
+      !isCategoriesLoading && (
+        <div className="dash-footer">
+          <p>
+            Showing <span>{getResultsCount()}</span> factors
+          </p>
+          {expandedValue ? hideButton() : expandButton()}
+        </div>
       )
     );
   }
@@ -271,13 +388,17 @@ export class Details extends Component {
       <div>
         {this.renderDashHeader('all', isDataLoading)}
         {this.renderFeatures(processedFeatures, isDataLoading)}
+        {this.renderFooter('all', isDataLoading)}
       </div>
     );
   }
 
   renderFeatures(features, isDataLoading, featuresType = 'all') {
     const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue() : 0;
-    const { viewMode } = this.state;
+    const { viewMode, expanded } = this.state;
+    const expandedValue = this.getExpanded(expanded, viewMode, featuresType);
+
+    const featuresToShow = !expandedValue && features ? features.slice(0, 10) : features;
 
     return (
       <div className="sticky-wrapper scroll-style">
@@ -310,8 +431,8 @@ export class Details extends Component {
           </thead>
           <tbody>
             <Loader isLoading={isDataLoading}>
-              {features && features.length > 0 ? (
-                features.map((currentFeature) => (
+              {featuresToShow && featuresToShow.length > 0 ? (
+                featuresToShow.map((currentFeature) => (
                   <tr key={currentFeature.name}>
                     <td className="align-center">{this.getFeatureCategoryColor(currentFeature.category)}</td>
                     <td>{currentFeature.description}</td>
@@ -353,6 +474,7 @@ export class Details extends Component {
           <div className="split-container">
             {this.renderDashHeader('positiveFeatures', isDataLoading)}
             {this.renderFeatures(positiveFeaturesContrib, isDataLoading, 'positiveFeatures')}
+            {this.renderFooter('positiveFeatures', isDataLoading)}
           </div>
         </div>
         <div className="split-separator" />
@@ -361,6 +483,7 @@ export class Details extends Component {
           <div className="split-container">
             {this.renderDashHeader('negativeFeatures', isDataLoading)}
             {this.renderFeatures(negativeFeaturesContrib, isDataLoading, 'negativeFeatures')}
+            {this.renderFooter('negativeFeatures', isDataLoading)}
           </div>
         </div>
       </div>
@@ -414,6 +537,8 @@ export default connect(
     setSortContribDir: (direction) => dispatch(sortFeaturesByContribAction(direction)),
     // setFilterValues: (filterValue) => dispatch(setFilterValuesAction(filterValue)),
     setFilterCategories: (filterCategs) => dispatch(setFilterCategsAction(filterCategs)),
+    setFilterCriteria: (filterValue) => dispatch(setFilterCriteriaAction(filterValue)),
+
     setContribFilters: (currentContribFilters) => dispatch(setContribFiltersAction(currentContribFilters)),
     // setFeatureFilters: (featureType, filter) => dispatch(setFeatureTypeFilterAction(featureType, filter)),
     setFeatureSortDir: (featureType, direction) => dispatch(setFeatureTypeSortContribDirAction(featureType, direction)),
