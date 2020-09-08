@@ -52,10 +52,10 @@ const contribFilters = [
   { value: 'protective', label: 'Protective', isFixed: true },
 ];
 
-const initialExpandedState = {
-  unified: false,
-  left: false,
-  right: false,
+const initialContributionView = {
+  isCombinedExpanded: false,
+  isPositiveViewExpanded: false,
+  isNegativeViewExpanded: false,
 };
 
 export class Details extends Component {
@@ -63,7 +63,7 @@ export class Details extends Component {
     super(props);
     this.state = {
       viewMode: 'unified',
-      expanded: initialExpandedState,
+      expanded: initialContributionView,
     };
   }
 
@@ -82,12 +82,12 @@ export class Details extends Component {
 
   getExpanded(expanded, viewMode, featureType = null) {
     if (viewMode === 'unified') {
-      return expanded.unified;
+      return expanded.isCombinedExpanded;
     }
 
-    if (featureType === 'positiveFeatures') return expanded.left;
+    if (featureType === 'positiveFeatures') return expanded.isPositiveViewExpanded;
 
-    return expanded.right;
+    return expanded.isNegativeViewExpanded;
   }
 
   changeViewMode(viewMode) {
@@ -107,18 +107,20 @@ export class Details extends Component {
         <ul>
           <li className="search-field-holder">
             {viewMode === 'split' ? (
-              <Search disabled={!expanded.right || !expanded.left} />
+              <Search disabled={!expanded.isNegativeViewExpanded || !expanded.isPositiveViewExpanded} />
             ) : (
               <h4>Factor Contributions</h4>
             )}
           </li>
           {viewMode === 'split' ? (
-            <li className={`expand-tip ${expanded.right && expanded.left ? 'hide' : ''}`}>
-              <span>Click “Show All Factors” to enable Search and Filter in both tables</span>
+            <li
+              className={`expand-tip ${
+                expanded.isNegativeViewExpanded && expanded.isPositiveViewExpanded ? 'hide' : ''
+              }`}
+            >
+              <span>Click &ldquo;Show All Factors&ldquo; to enable Search and Filter in both tables</span>
             </li>
-          ) : (
-            <></>
-          )}
+          ) : null}
           <li>
             <MetTooltip title="Single Table View" placement="top">
               <button
@@ -182,7 +184,7 @@ export class Details extends Component {
             {viewMode === 'unified' && (
               <>
                 <li>
-                  <Search disabled={!expanded.unified} />
+                  <Search disabled={!expanded.isCombinedExpanded} />
                 </li>
                 <li className="sep" />
               </>
@@ -222,8 +224,8 @@ export class Details extends Component {
                     value={contribFilters.filter((currentContrib) => currentContrib.value === currentContribFilters)}
                   />
                 </li>
-                <li className={`expand-tip ${expanded.unified ? 'hide' : ''}`}>
-                  <span>Click “Show All Factors” to enable Search and Filter</span>
+                <li className={`expand-tip ${expanded.isCombinedExpanded ? 'hide' : ''}`}>
+                  <span>Click &ldquo;Show All Factors&ldquo; to enable Search and Filter</span>
                 </li>
               </>
             )}
@@ -249,14 +251,14 @@ export class Details extends Component {
     // create new state for expanded view
     const newExpandedState = {
       ...expanded,
-      unified: viewMode === 'unified' ? !expanded.unified : expanded.unified,
+      isCombinedExpanded: viewMode === 'unified' ? !expanded.isCombinedExpanded : expanded.isCombinedExpanded,
     };
 
     if (viewMode !== 'unified') {
       if (featureType === 'positiveFeatures') {
-        newExpandedState.left = !expanded.left;
+        newExpandedState.isPositiveViewExpanded = !expanded.isPositiveViewExpanded;
       } else {
-        newExpandedState.right = !expanded.right;
+        newExpandedState.isNegativeViewExpanded = !expanded.isNegativeViewExpanded;
       }
     }
 
@@ -297,24 +299,14 @@ export class Details extends Component {
         : processedLength;
     };
 
-    const expandButton = () => (
+    const toggleButton = () => (
       <Button
         className="expand-button"
         onClick={() => this.toggleDash(expanded, viewMode, featureType)}
-        startIcon={<ChevronDownIcon />}
+        startIcon={expandedValue ? <ChevronUpIcon /> : <ChevronDownIcon />}
       >
         {' '}
-        SHOW ALL FACTORS
-      </Button>
-    );
-    const hideButton = () => (
-      <Button
-        className="expand-button"
-        onClick={() => this.toggleDash(expanded, viewMode, featureType)}
-        startIcon={<ChevronUpIcon />}
-      >
-        {' '}
-        HIDE EXTRA FACTORS
+        {expandedValue ? 'HIDE EXTRA FACTORS' : 'SHOW ALL FACTORS'}
       </Button>
     );
 
@@ -324,7 +316,7 @@ export class Details extends Component {
           <p>
             Showing <span>{getResultsCount()}</span> factors
           </p>
-          {expandedValue ? hideButton() : expandButton()}
+          {toggleButton()}
         </div>
       )
     );
