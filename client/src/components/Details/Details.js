@@ -34,6 +34,7 @@ import {
   getFeatureTypeSortContribDir,
   getGrouppedFeatures,
   getFeatureTypeFilterCategs,
+  getMaxContributionRange,
 } from '../../model/selectors/features';
 import { setUserActionRecording } from '../../model/actions/userActions';
 
@@ -327,19 +328,6 @@ export class Details extends Component {
     );
   }
 
-  // getting the contribution max value to set the min/max range (-range, range)
-  getContributionsMaxValue() {
-    let maxRange = 0;
-    const { processedFeatures } = this.props.features;
-
-    processedFeatures.map((currentFeature) => {
-      const { contributionValue } = currentFeature;
-      maxRange = maxRange > Math.abs(contributionValue) ? maxRange : Math.abs(contributionValue);
-      return null;
-    });
-    return maxRange;
-  }
-
   getFeatureType(feature) {
     const { entityData } = this.props;
     const { name, type } = feature;
@@ -397,7 +385,7 @@ export class Details extends Component {
   }
 
   renderFeatures(features, isDataLoading, featuresType = 'all') {
-    const maxContributionRange = !isDataLoading ? this.getContributionsMaxValue() : 0;
+    const { maxContributionRange } = this.props;
     const { viewMode, featureContribView } = this.state;
     const featureContribViewValue = this.getExpanded(featureContribView, viewMode, featuresType);
 
@@ -537,6 +525,7 @@ export default connect(
     currentFeatureTypeSortDir: getFeatureTypeSortContribDir(state),
     grouppedFeatures: getGrouppedFeatures(state),
     currentFeatureTypeCategs: getFeatureTypeFilterCategs(state),
+    maxContributionRange: getMaxContributionRange(state),
   }),
   (dispatch) => ({
     setSortContribDir: (direction) => dispatch(sortFeaturesByContribAction(direction)),
