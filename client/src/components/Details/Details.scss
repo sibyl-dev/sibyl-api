@@ -1,3 +1,32 @@
+.dash-controls {
+    display: flex;
+
+    li {
+        flex: 1 1;
+        margin-right: 10px;
+
+        &.sep {
+            flex: 0;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        &:last-child {
+            margin-right: 0;
+        }
+
+        &.results-counter {
+            font-size: 14px;
+            line-height: 40px;
+            flex: 0 1;
+            white-space: nowrap;
+            margin-right: 10px;
+            span {
+                font-weight: bold;
+            }
+        }
+    }
+}
+
 .sub-header {
     h4 {
         margin: 10px 0;
