@@ -87,7 +87,13 @@ export const getFeaturesData = createSelector(
 
     if (filterCriteria) {
       const regex = new RegExp(filterCriteria, 'gi');
-      processedFeatures = processedFeatures.filter((currentFeature) => currentFeature.description.match(regex));
+      processedFeatures = processedFeatures.filter((currentFeature) => {
+        const { type, name } = currentFeature;
+        if (type === 'binary' && entityFeatures[name] === 0) {
+          return currentFeature.negated_description.match(regex);
+        }
+        return currentFeature.description.match(regex);
+      });
     }
 
     if (filterCategs !== null && filterCategs.length > 0) {
@@ -149,7 +155,13 @@ export const getGrouppedFeatures = createSelector(
 
     if (filterCriteria) {
       const regex = new RegExp(filterCriteria, 'gi');
-      processedFeatures = processedFeatures.filter((currentFeature) => currentFeature.description.match(regex));
+      processedFeatures = processedFeatures.filter((currentFeature) => {
+        const { type, name } = currentFeature;
+        if (type === 'binary' && entityFeatures[name] === 0) {
+          return currentFeature.negated_description.match(regex);
+        }
+        return currentFeature.description.match(regex);
+      });
     }
 
     let positiveFeaturesContrib = processedFeatures.filter((currentFeature) => currentFeature.contributionValue > 0);
