@@ -33,6 +33,37 @@ const roundContribValue = (contribValue) => {
   return contribValue < maxNegativeContrib ? contribValue : 0;
 };
 
+export const getMaxContributionRange = createSelector(
+  [getIsFeaturesLoading, getCurrentFeatures, getCurrentEntityData, getEntityContributions],
+  (isFeaturesLoading, currentFeatures, entityData, contributions) => {
+    if (isFeaturesLoading) {
+      return null;
+    }
+
+    const entityFeatures = entityData.features;
+    let processedFeatures = [];
+    let maxRange = 0;
+
+    currentFeatures.forEach((currentFeature) => {
+      processedFeatures.push({
+        ...currentFeature,
+        [currentFeature.name]: entityFeatures[currentFeature.name],
+        contributionValue: roundContribValue(contributions[currentFeature.name]),
+      });
+      return processedFeatures;
+    });
+
+    processedFeatures.map((feature) => {
+      const { contributionValue } = feature;
+      maxRange = maxRange > Math.abs(contributionValue) ? maxRange : Math.abs(contributionValue);
+      return null;
+    });
+
+    return maxRange;
+  },
+);
+
+// @TODO - update getMaxContributionRange to  return processedFeatures and not the maxRange only
 export const getFeaturesData = createSelector(
   [
     getIsFeaturesLoading,
