@@ -8,7 +8,7 @@ import {
   IndicatorIcon,
   // ScoreIcon,
   DetailsIcon,
-  SandboxIcon,
+  // SandboxIcon,
   // SimilarChildrenIcon,
   ModelIcon,
   MetLogo,
@@ -45,12 +45,12 @@ class Sidebar extends Component {
               <span>Details</span>
             </NavLink>
           </li>
-          <li>
+          {/* <li>
             <NavLink exact to="/sandbox" onClick={() => setActivePage('Sandbox')}>
               <SandboxIcon />
               <span>Sandbox</span>
             </NavLink>
-          </li>
+          </li> */}
           {/*
           Temporarily 'disabled'
           <li>
@@ -65,7 +65,7 @@ class Sidebar extends Component {
               <span>About Model</span>
               <IndicatorIcon dir="right" />
             </button>
-            <ul>
+            {/* <ul>
               <li>
                 <NavLink
                   exact
@@ -80,7 +80,7 @@ class Sidebar extends Component {
                   <span>Feature Distribution</span>
                 </NavLink>
               </li>
-            </ul>
+            </ul> */}
           </li>
         </ul>
       </div>
