@@ -3,7 +3,7 @@ import { Switch, Route } from 'react-router-dom';
 // import Score from '../Score/Score';
 import Details from '../Details/Details';
 import './Dashboard.scss';
-import Sandbox from '../Sandbox/Sandbox';
+// import Sandbox from '../Sandbox/Sandbox';
 import NotFound from '../common/NotFound';
 import Model from '../Model/Model';
 // import FeatureImportance from '../Model/FeatureImportance';
