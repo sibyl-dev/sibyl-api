@@ -79,7 +79,7 @@ def convert_from_categorical(cat_data, mappings):
         if col not in cat_cols:
             data[col] = cat_data[col]
         if col in cat_cols:
-            values = cat_data[col]
+            values = cat_data[col].astype(str)
             relevant_rows = mappings[mappings['name'] == col]
             for ind in relevant_rows.index:
                 new_col_name = relevant_rows['original_name'][ind]
