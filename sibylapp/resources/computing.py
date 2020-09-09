@@ -464,7 +464,7 @@ class FeatureContributions(Resource):
             return message, error_code
 
         contributions = lfe.get_contributions(
-            entity_features, explainer, transformer).iloc[0].tolist()
-        keys = list(entity_features.keys())
+            entity_features, explainer, transformer).iloc[0]
+        keys = list(contributions.index)
         contribution_dict = dict(zip(keys, contributions))
         return {"contributions": contribution_dict}, 200

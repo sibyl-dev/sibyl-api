@@ -81,16 +81,16 @@ def load_model_from_weights_sklearn(weights_filepath, model_base):
     return model, model_weights["name"][1:]
 
 
-def load_mappings_transformer(mappings_filepath):
+def load_mappings_transformer(mappings_filepath, features):
     mappings = pd.read_csv(mappings_filepath)
     mappings = mappings[mappings["include"]]
-    return MappingsTransformer(mappings)
+    return MappingsTransformer(mappings, features)
 
 
 def insert_model(model, transformer, set_doc, texts, importance_filepath=None, base_model=None,
                  explainer_filepath=None, features=None, dataset_filepath=None):
     def fit_explainer(base_model, transformer, dataset):
-        explainer = lfe.fit_contribution_explainer(base_model, dataset.sample(1000),
+        explainer = lfe.fit_contribution_explainer(base_model, dataset.sample(100),
                                                    transformer=transformer, return_result=True,
                                                    use_linear_explainer=True)
         return explainer
@@ -268,7 +268,7 @@ if __name__ == "__main__":
     base_model, model_features = load_model_from_weights_sklearn(
         os.path.join(directory, "weights.csv"), Lasso())
     model = ModelWrapperThresholds(base_model, thresholds, features=model_features)
-    transformer = load_mappings_transformer(os.path.join(directory, "mappings.csv"))
+    transformer = load_mappings_transformer(os.path.join(directory, "mappings.csv"), model_features)
 
     with open(os.path.join(directory, "description.txt"), 'r') as file:
         description = file.read()

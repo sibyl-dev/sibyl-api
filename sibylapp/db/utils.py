@@ -29,8 +29,6 @@ class ModelWrapper(ABC):
         :return: list of size (n_entities, )
                  Prediction for entities
         """
-        if self.features is not None:
-            X = X[self.features]
         return X
 
 
@@ -133,17 +131,16 @@ def combine_contributions_from_mappings(contributions, mappings):
         new_contribution = contributions[component_features].sum(axis=1)
         working_contributions = working_contributions.drop(component_features, axis="columns")
         working_contributions[agg_feature] = new_contribution
-    print("WC: ", working_contributions)
-    print("WC Shape: ", working_contributions.shape)
     return working_contributions
 
 
 class MappingsTransformer(ABC):
-    def __init__(self, mappings):
+    def __init__(self, mappings, features):
         self.mappings = mappings
+        self.features = features
 
     def transform(self, X):
-        return convert_from_categorical(X, self.mappings)
+        return convert_from_categorical(X, self.mappings)[self.features]
 
     def transform_contributions_shap(self, contributions):
         return combine_contributions_from_mappings(contributions, self.mappings)
