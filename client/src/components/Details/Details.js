@@ -389,7 +389,15 @@ export class Details extends Component {
     const { viewMode, featureContribView } = this.state;
     const featureContribViewValue = this.getExpanded(featureContribView, viewMode, featuresType);
 
-    const featuresToShow = !featureContribViewValue && features ? features.slice(0, 10) : features;
+    let featuresToShow = null;
+    if (!featureContribViewValue && features) {
+      featuresToShow =
+        featuresType === 'all'
+          ? features.slice(0, 5).concat(features.slice(Math.max(features.length - 5, 1)))
+          : features.slice(0, 10);
+    } else {
+      featuresToShow = features;
+    }
 
     return (
       <div className="sticky-wrapper scroll-style">
