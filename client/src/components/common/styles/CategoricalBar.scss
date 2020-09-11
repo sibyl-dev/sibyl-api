@@ -1,0 +1,113 @@
+@import '../../../assets/sass/colors.scss';
+
+.tooltip-content {
+    display: flex;
+    flex-wrap: wrap;
+
+    hr {
+        border: 1px dotted #bdbdbd;
+        border-style: none none dotted;
+        width: 100%;
+    }
+}
+
+.tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+
+    div:nth-child(-n + 2) {
+        font-family: Roboto;
+        font-size: 14px;
+        line-height: 16px;
+        color: #bdbdbd;
+    }
+}
+
+.tooltip-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    li {
+        list-style: none;
+        flex-basis: 33%;
+        display: flex;
+        align-items: center;
+        justify-content: stretch;
+
+        & .tooltip-circle {
+            height: 8px;
+            width: 8px;
+            border-radius: 50%;
+            display: inline-flex;
+            margin-right: 16px;
+        }
+
+        & .tooltip-categ-name {
+            font-size: 14px;
+            color: #828282;
+            margin-right: 52px;
+        }
+
+        & .tooltip-categ-percent {
+            font-weight: 500;
+            font-size: 14px;
+            color: #4f4f4f;
+            margin-left: auto;
+        }
+    }
+}
+
+.tooltip {
+    &.show {
+        opacity: 1;
+    }
+
+    & .tooltip-inner {
+        padding: 16px;
+        max-width: fit-content;
+        height: 100%;
+        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.12);
+        border-radius: 8px;
+        background-color: #ffffff;
+        opacity: 1;
+    }
+
+    & .arrow {
+        &:before {
+            border-top-color: #ffffff;
+        }
+    }
+}
+
+.categorical-bar {
+    border-radius: 16px;
+    display: flex;
+    height: 8px;
+    width: auto;
+    overflow: hidden;
+    margin: 0 24px;
+
+    & div:last-child {
+        border-top-right-radius: 16px;
+        border-bottom-right-radius: 16px;
+    }
+}
+
+.categorical-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:not(:last-child) {
+        border-right-style: solid;
+        border-right-color: white;
+    }
+}
+
+.percent-text {
+    color: #4f4f4f;
+    font: 700;
+    text-align: center;
+}

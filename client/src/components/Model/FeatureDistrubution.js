@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+
 import DashWrapper from '../common/DashWrapper';
 
 import Search from '../common/Search';
@@ -9,9 +10,14 @@ import {
   getIsEntitiesLoading,
   getIsEntityDistributionsLoading,
   getEntityDistributions,
+  getIsEntityScoreLoading,
 } from '../../model/selectors/entities';
+
+import { getIsCategoriesLoading } from '../../model/selectors/features';
+
 import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';
+import CategoricalBar from '../common/CategoricalBar';
 import { getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
 import { setUserActionRecording } from '../../model/actions/userActions';
 import Loader from '../common/Loader';
@@ -50,7 +56,8 @@ class FeatureDistribution extends Component {
   }
 
   drawDistribution(currentFeature) {
-    const { distributions } = this.props;
+    const { distributions, isDistributionsLoading } = this.props;
+
     if (distributions[currentFeature] === undefined) {
       return <p>No data to display</p>;
     }
@@ -58,6 +65,24 @@ class FeatureDistribution extends Component {
     if (distributions[currentFeature] !== undefined && distributions[currentFeature].type === 'numeric') {
       const data = distributions[currentFeature].metrics;
       return <DayGraph data={data} graphIndex={currentFeature} />;
+    }
+
+    if (distributions[currentFeature].type === 'categorical') {
+      const distribution = distributions[currentFeature];
+
+      const ratiosDistribution = {
+        ...distribution,
+        name: currentFeature,
+        valuesNo: distribution.metrics[0].length,
+        countsSum: distribution.metrics[1].reduce((acc, val) => acc + val, 0),
+        isLoading: isDistributionsLoading,
+      };
+
+      ratiosDistribution.countsRatios = distribution.metrics[1].map((item) => ({
+        ratio: parseInt((item / ratiosDistribution.countsSum) * 100),
+      }));
+
+      return <CategoricalBar category={ratiosDistribution}></CategoricalBar>;
     }
 
     if (distributions[currentFeature].type === 'category') {
@@ -136,12 +161,15 @@ export default connect(
   (state) => ({
     isFeaturesLoading: getIsFeaturesLoading(state),
     isEntityLoading: getIsEntitiesLoading(state),
+    isEntityScoreLoading: getIsEntityScoreLoading(state),
     isDistributionsLoading: getIsEntityDistributionsLoading(state),
     distributions: getEntityDistributions(state),
     features: getFeaturesData(state),
+    isCategoriesLoading: getIsCategoriesLoading(state),
   }),
   (dispatch) => ({
     setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
     setActivePage: (pageName) => dispatch(setActivePageAction(pageName)),
+    // setEntityFeatureDistribution: () => dispatch(getEntityFeatureDistributionAction()),
   }),
 )(FeatureDistribution);

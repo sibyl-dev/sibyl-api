@@ -227,11 +227,11 @@ init-db: clean-db
 
 .PHONY: load-db
 load-db: init-db
-	rm -f -r db/dump/sibylapp/
+	rm -f -r db/sibyl/sibylapp/
 	curl -o sibyl.zip "https://d3-ai-sibyl.s3.amazonaws.com/sibyl.zip"
 	unzip sibyl.zip -d ./db/ && rm sibyl.zip
 	mongo sibylapp --eval "db.dropDatabase()"
-	mongorestore --db sibylapp ./db/dump/sibylapp/
+	mongorestore --db sibylapp ./db/sibyl/sibylapp/
 
 .PHONY: install-sibyl
 install-sibyl:
