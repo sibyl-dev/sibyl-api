@@ -5,7 +5,7 @@
     flex-wrap: wrap;
 
     hr {
-        border: 1px dotted #bdbdbd;
+        border: 1px dotted $light-gray;
         border-style: none none dotted;
         width: 100%;
     }
@@ -16,11 +16,15 @@
     justify-content: space-between;
     width: 100%;
 
-    div:nth-child(-n + 2) {
+    div {
         font-family: Roboto;
         font-size: 14px;
         line-height: 16px;
-        color: #bdbdbd;
+        color: $light-gray;
+
+        &:first-child {
+            margin-right: 16px;
+        }
     }
 }
 
@@ -28,13 +32,13 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    width: 100%;
 
     li {
         list-style: none;
-        flex-basis: 33%;
         display: flex;
         align-items: center;
-        justify-content: stretch;
+        justify-content: space-between;
 
         & .tooltip-circle {
             height: 8px;
@@ -48,6 +52,7 @@
             font-size: 14px;
             color: #828282;
             margin-right: 52px;
+            white-space: nowrap;
         }
 
         & .tooltip-categ-percent {

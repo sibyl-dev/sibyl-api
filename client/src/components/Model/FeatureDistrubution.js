@@ -72,14 +72,14 @@ class FeatureDistribution extends Component {
 
       const ratiosDistribution = {
         ...distribution,
-        name: currentFeature,
-        valuesNo: distribution.metrics[0].length,
+        distributionName: currentFeature,
         countsSum: distribution.metrics[1].reduce((acc, val) => acc + val, 0),
         isLoading: isDistributionsLoading,
       };
 
-      ratiosDistribution.countsRatios = distribution.metrics[1].map((item) => ({
+      ratiosDistribution.countsRatios = distribution.metrics[1].map((item, index) => ({
         ratio: parseInt((item / ratiosDistribution.countsSum) * 100),
+        name: distribution.metrics[0][index],
       }));
 
       return <CategoricalBar category={ratiosDistribution}></CategoricalBar>;

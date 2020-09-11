@@ -13,7 +13,7 @@ const tooltipContent = ({ countsRatios }) => {
       </div>
       <hr />
       <ul className="tooltip-list">
-        {countsRatios.map(({ style, ratio }) => {
+        {countsRatios.map(({ style, ratio, name }) => {
           if (style !== undefined) {
             return (
               <li key={uuidv4()}>
@@ -24,10 +24,10 @@ const tooltipContent = ({ countsRatios }) => {
                     opacity: `${style.opacity}`,
                   }}
                 ></span>
-                <span className="tooltip-categ-name">{'category.name'}</span>
-                <span key={uuidv4()} className="tooltip-categ-percent">
+                <div className="tooltip-categ-name">{name}</div>
+                <div key={uuidv4()} className="tooltip-categ-percent">
                   {ratio}%
-                </span>
+                </div>
               </li>
             );
           } else {
@@ -69,6 +69,10 @@ const CategoricalBar = ({ category }) => {
       color: baseColor,
       opacity: '0.3',
     },
+    {
+      color: baseColor,
+      opacity: '0.15',
+    },
   ];
 
   const clonedCategory = JSON.parse(JSON.stringify(category));
@@ -85,7 +89,7 @@ const CategoricalBar = ({ category }) => {
   const { countsRatios } = clonedCategory;
 
   const categoriesToRender = countsRatios.map(({ style, ratio }) => {
-    if (style !== undefined) {
+    if (style !== undefined && ratio > 1) {
       return (
         <React.Fragment key={uuidv4()}>
           <MetTooltip title={tooltipContent(clonedCategory)} placement="top" className="tooltip">
