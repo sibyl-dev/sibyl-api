@@ -8,9 +8,9 @@ import {
   IndicatorIcon,
   // ScoreIcon,
   DetailsIcon,
-  SandboxIcon,
+  // SandboxIcon,
   // SimilarChildrenIcon,
-  ModelIcon,
+  // ModelIcon,
   MetLogo,
 } from '../../assets/icons/icons';
 
@@ -45,12 +45,12 @@ class Sidebar extends Component {
               <span>Details</span>
             </NavLink>
           </li>
-          <li>
+          {/* <li>
             <NavLink exact to="/sandbox" onClick={() => setActivePage('Sandbox')}>
               <SandboxIcon />
               <span>Sandbox</span>
             </NavLink>
-          </li>
+          </li> */}
           {/*
           Temporarily 'disabled'
           <li>
@@ -59,13 +59,13 @@ class Sidebar extends Component {
               <span>Similar Children</span>
             </NavLink>
           </li> */}
-          <li className="model">
+          {/* <li className="model">
             <button type="button" className="clean about-model" onClick={() => toggleSidebarState(!isSidebarCollapsed)}>
               <ModelIcon />
               <span>About Model</span>
               <IndicatorIcon dir="right" />
-            </button>
-            <ul>
+            </button> */}
+          {/* <ul>
               <li>
                 <NavLink
                   exact
@@ -80,8 +80,8 @@ class Sidebar extends Component {
                   <span>Feature Distribution</span>
                 </NavLink>
               </li>
-            </ul>
-          </li>
+            </ul> */}
+          {/* </li> */}
         </ul>
       </div>
     );

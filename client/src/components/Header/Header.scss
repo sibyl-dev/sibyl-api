@@ -1,3 +1,5 @@
+@import '../../assets/sass/colors.scss';
+
 .main-header,
 .sub-header {
     padding: 20px 40px;
@@ -13,6 +15,28 @@
             strong {
                 color: #4f4f4f;
             }
+        }
+
+        &.expand-tip{
+            font-size: 14px;
+            line-height: 16px;
+            white-space: nowrap;
+            padding: 12px 24px;
+            background-color: transparentize($light-blue, 0.95);
+            margin-left: 15px;
+            color: $darkish-blue;
+            border-radius: 8px;
+            transition: 0.15s all ease-in;
+            max-width: 480px;
+            text-align: center;
+
+            &.hide {
+                opacity: 0;
+            }
+        }
+
+        &.search-field-holder{
+            max-width: 480px;
         }
     }
 }
