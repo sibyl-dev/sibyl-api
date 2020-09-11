@@ -10,10 +10,7 @@ import {
   getIsEntitiesLoading,
   getIsEntityDistributionsLoading,
   getEntityDistributions,
-  getIsEntityScoreLoading,
 } from '../../model/selectors/entities';
-
-import { getIsCategoriesLoading } from '../../model/selectors/features';
 
 import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';
@@ -161,15 +158,12 @@ export default connect(
   (state) => ({
     isFeaturesLoading: getIsFeaturesLoading(state),
     isEntityLoading: getIsEntitiesLoading(state),
-    isEntityScoreLoading: getIsEntityScoreLoading(state),
     isDistributionsLoading: getIsEntityDistributionsLoading(state),
     distributions: getEntityDistributions(state),
     features: getFeaturesData(state),
-    isCategoriesLoading: getIsCategoriesLoading(state),
   }),
   (dispatch) => ({
     setUserActions: (userAction) => dispatch(setUserActionRecording(userAction)),
     setActivePage: (pageName) => dispatch(setActivePageAction(pageName)),
-    // setEntityFeatureDistribution: () => dispatch(getEntityFeatureDistributionAction()),
   }),
 )(FeatureDistribution);
