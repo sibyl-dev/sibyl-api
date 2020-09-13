@@ -1,8 +1,8 @@
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import MetTooltip from '../common/MetTooltip';
+import MetTooltip from './MetTooltip';
 
-import './styles/CategoricalBar.scss';
+import './styles/DistributionBar.scss';
 
 const tooltipContent = ({ countsRatios }) => {
   return (
@@ -39,7 +39,7 @@ const tooltipContent = ({ countsRatios }) => {
   );
 };
 
-const CategoricalBar = ({ category }) => {
+const DistributionBar = ({ category, isBinary }) => {
   const { isLoading } = category;
 
   if (isLoading) {
@@ -88,29 +88,67 @@ const CategoricalBar = ({ category }) => {
 
   const { countsRatios } = clonedCategory;
 
-  const categoriesToRender = countsRatios.map(({ style, ratio }) => {
-    if (style !== undefined && ratio > 1) {
-      return (
-        <React.Fragment key={uuidv4()}>
-          <MetTooltip title={tooltipContent(clonedCategory)} placement="top" className="tooltip">
+  const categoriesToRender = countsRatios.map(({ style, ratio }, index) => {
+    //calculate ratios formula
+    if (style !== undefined) {
+      if (isBinary) {
+        const setCategoryRef = (el) => {
+          el.setAttribute('data-before', `${isBinary ? ratio : null}%`);
+        };
+
+        return (
+          <React.Fragment key={uuidv4()}>
             <div
+              ref={setCategoryRef}
               data-placement="top"
-              className="categorical-data"
+              className="binary-data"
               style={{
-                background: `${style.color}`,
                 width: `${ratio}%`,
-                opacity: `${style.opacity}`,
               }}
             ></div>
-          </MetTooltip>
-        </React.Fragment>
-      );
+          </React.Fragment>
+        );
+      } else {
+        return (
+          <React.Fragment key={uuidv4()}>
+            <MetTooltip title={tooltipContent(clonedCategory)} placement="top" className="tooltip">
+              <div
+                data-placement="top"
+                className="categorical-data"
+                style={{
+                  background: `${style.color}`,
+                  width: `${ratio}%`,
+                  opacity: `${style.opacity}`,
+                }}
+              ></div>
+            </MetTooltip>
+          </React.Fragment>
+        );
+      }
     } else {
       return null;
     }
   });
 
-  return <div className="categorical-bar">{categoriesToRender}</div>;
+  if (isBinary) {
+    return (
+      <React.Fragment>
+        <div className="binary-wrapper">
+          <div className="binary-title-l">False</div>
+          <div className="binary-bar">{categoriesToRender}</div>
+          <div className="binary-title-r">True</div>
+        </div>
+      </React.Fragment>
+    );
+  } else {
+    return (
+      <React.Fragment>
+        <div className="categorical-wrapper">
+          <div className="categorical-bar">{categoriesToRender}</div>
+        </div>
+      </React.Fragment>
+    );
+  }
 };
 
-export default CategoricalBar;
+export default DistributionBar;

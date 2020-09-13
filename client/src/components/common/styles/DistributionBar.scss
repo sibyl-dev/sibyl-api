@@ -86,28 +86,85 @@
     }
 }
 
-.categorical-bar {
-    border-radius: 16px;
-    display: flex;
-    height: 8px;
-    width: auto;
-    overflow: hidden;
-    margin: 0 24px;
+.categorical-wrapper {
+    display: table;
+    min-width: 265px;
+    margin-left: auto;
 
-    & div:last-child {
-        border-top-right-radius: 16px;
-        border-bottom-right-radius: 16px;
+    & .categorical-bar {
+        border-radius: 16px;
+        display: flex;
+        height: 8px;
+        width: 200px;
+        overflow: hidden;
+        margin-left: 24px;
+
+        & div:last-child {
+            border-top-right-radius: 16px;
+            border-bottom-right-radius: 16px;
+        }
+    }
+}
+
+.binary-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+
+    & .binary-title-l {
+        line-height: 8px;
+        display: table-cell;
+        margin-right: 8px;
+    }
+
+    & .binary-title-r {
+        line-height: 8px;
+        display: table-cell;
+        margin-left: 8px;
+    }
+
+    & .binary-bar {
+        border-radius: 16px;
+        display: flex;
+        height: 8px;
+        width: 200px;
+        overflow: hidden;
+
+        & div:last-child {
+            border-top-right-radius: 16px;
+            border-bottom-right-radius: 16px;
+        }
     }
 }
 
 .categorical-data {
+    &:not(:last-child) {
+        border-right-style: solid;
+        border-right-color: white;
+    }
+}
+
+.binary-data {
+    background: #383f67;
     display: flex;
     align-items: center;
     justify-content: center;
 
-    &:not(:last-child) {
-        border-right-style: solid;
-        border-right-color: white;
+    &:before {
+        content: attr(data-before);
+        position: absolute;
+        margin-bottom: 36px;
+        font-size: 14px;
+        line-height: 16px;
+        color: #4f4f4f;
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+
+    &:last-child {
+        border: 1px solid #383f67;
+        background: repeating-linear-gradient(-45deg, #383f67, #383f67 1px, #ffffff 0px, #ffffff 4px);
     }
 }
 

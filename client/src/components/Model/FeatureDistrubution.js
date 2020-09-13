@@ -14,7 +14,7 @@ import {
 
 import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';
-import CategoricalBar from '../common/CategoricalBar';
+import DistributionBar from '../common/DistributionBar';
 import { getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
 import { setUserActionRecording } from '../../model/actions/userActions';
 import Loader from '../common/Loader';
@@ -55,18 +55,9 @@ class FeatureDistribution extends Component {
   drawDistribution(currentFeature) {
     const { distributions, isDistributionsLoading } = this.props;
 
-    if (distributions[currentFeature] === undefined) {
-      return <p>No data to display</p>;
-    }
+    const distribution = distributions[currentFeature];
 
-    if (distributions[currentFeature] !== undefined && distributions[currentFeature].type === 'numeric') {
-      const data = distributions[currentFeature].metrics;
-      return <DayGraph data={data} graphIndex={currentFeature} />;
-    }
-
-    if (distributions[currentFeature].type === 'categorical') {
-      const distribution = distributions[currentFeature];
-
+    const getRatiosDistribution = () => {
       const ratiosDistribution = {
         ...distribution,
         distributionName: currentFeature,
@@ -79,7 +70,26 @@ class FeatureDistribution extends Component {
         name: distribution.metrics[0][index],
       }));
 
-      return <CategoricalBar category={ratiosDistribution}></CategoricalBar>;
+      return ratiosDistribution;
+    };
+
+    if (distributions[currentFeature] === undefined) {
+      return <p>No data to display</p>;
+    }
+
+    if (distributions[currentFeature] !== undefined && distributions[currentFeature].type === 'numeric') {
+      const data = distributions[currentFeature].metrics;
+      return <DayGraph data={data} graphIndex={currentFeature} />;
+    }
+
+    if (distributions[currentFeature].type === 'categorical') {
+      const isCategoricalDistribution = distribution.metrics[0].length > 2;
+
+      if (isCategoricalDistribution) {
+        return <DistributionBar category={getRatiosDistribution()}></DistributionBar>;
+      } else {
+        return <DistributionBar isBinary category={getRatiosDistribution()}></DistributionBar>;
+      }
     }
 
     if (distributions[currentFeature].type === 'category') {
