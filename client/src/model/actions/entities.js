@@ -12,7 +12,7 @@ export function setEntityIdAction(entityID) {
     cookies.set('entityID', entityID, { path: '/' });
     const action = {
       type: 'SET_ENTITY_ID',
-      entityID: parseInt(entityID, 10),
+      entityID,
     };
     dispatch(action);
   };
