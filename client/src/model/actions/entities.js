@@ -36,7 +36,7 @@ export function setUserIdAction(userID) {
   };
 }
 
-export function getModelIDAction() {
+export function getModelsAction() {
   return function (dispatch) {
     return dispatch({
       type: 'GET_MODELS',

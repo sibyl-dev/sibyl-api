@@ -4,7 +4,7 @@ import { getIsSidebarCollapsed } from './model/selectors/sidebar';
 import Sidebar from './components/Sidebar/Sidebar';
 import Header from './components/Header/Header';
 import Dashboard from './components/Dashboard/Dashboard';
-import { setEntityIdAction, getEntityAction, setUserIdAction, getModelIDAction } from './model/actions/entities';
+import { setEntityIdAction, getEntityAction, setUserIdAction, getModelsAction } from './model/actions/entities';
 import { getCurrentEntityID, getCurrentUserID } from './model/selectors/entities';
 import './assets/sass/main.scss';
 
@@ -14,7 +14,7 @@ class App extends Component {
   }
 
   getEntityDetails() {
-    const { currentEntityID, setUserID, currentUserID, setEntityID, loadModelID, getFeaturesList } = this.props;
+    const { currentEntityID, setUserID, currentUserID, setEntityID, getModels, getFeaturesList } = this.props;
     const { location } = this.props;
 
     if (location.search.includes('user_id')) {
@@ -29,14 +29,14 @@ class App extends Component {
 
       if (currentEntityID !== entityID) {
         setEntityID(entityID)
-          .then(() => loadModelID())
+          .then(() => getModels())
           .then(() => getFeaturesList());
 
         return;
       }
     }
 
-    loadModelID().then(() => getFeaturesList());
+    getModels().then(() => getFeaturesList());
   }
 
   render() {
@@ -65,7 +65,7 @@ export default connect(
   (dispatch) => ({
     setEntityID: (entityID) => dispatch(setEntityIdAction(entityID)),
     setUserID: (userID) => dispatch(setUserIdAction(userID)),
-    loadModelID: (modelID) => dispatch(getModelIDAction(modelID)),
+    getModels: (modelID) => dispatch(getModelsAction(modelID)),
     getFeaturesList: () => dispatch(getEntityAction()),
   }),
 )(App);
