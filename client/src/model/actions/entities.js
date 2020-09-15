@@ -5,7 +5,7 @@ import {
   getCurrentEntityID,
   getActivePredictionScore,
   getPredictionScore,
-  getCurrentModelID,
+  getCurrentModels,
 } from '../selectors/entities';
 import { setUserActionRecording } from './userActions';
 
@@ -38,20 +38,17 @@ export function setUserIdAction(userID) {
 
 export function getModelIDAction() {
   return function (dispatch) {
-    dispatch({ type: 'GET_MODEL_ID_REQUEST' });
-
-    return api
-      .get(`/{path_to_model_id_endpoint}`)
-      .then((response) => response.json())
-      .then((data) => dispatch({ type: 'GET_MODEL_ID_SUCCESS', modelID: data }))
-      .catch(() => dispatch({ type: 'GET_MODEL_ID_FAILURE' }));
+    return dispatch({
+      type: 'GET_MODELS',
+      promise: api.get('/models/'),
+    });
   };
 }
 
 export function getEntityContributionsAction() {
   return function (dispatch, getState) {
     const entityID = getCurrentEntityID(getState());
-    const modelID = getCurrentModelID(getState());
+    const modelID = getCurrentModels(getState())[0].id;
     dispatch({ type: 'GET_ENTITY_CONTRIBUTIONS_REQUEST' });
 
     api
@@ -66,8 +63,9 @@ export function getEntityContributionsAction() {
 
 export function getEntityPredictionScoreAction() {
   return function (dispatch, getState) {
-    const entityID = getCurrentEntityID(getState());
-    const modelID = getCurrentModelID(getState());
+    const state = getState();
+    const entityID = getCurrentEntityID(state);
+    const modelID = getCurrentModels(state)[0].id;
 
     const action = {
       type: 'GET_ENTITY_SCORE',
@@ -79,9 +77,11 @@ export function getEntityPredictionScoreAction() {
 
 export function getEntityFeatureDistributionAction() {
   return function (dispatch, getState) {
+    const state = getState();
+    const modelID = getCurrentModels(state)[0].id;
+    const predictionScore = getActivePredictionScore(state);
+
     dispatch({ type: 'GET_ENTITY_DISTRIBUTIONS_REQUEST' });
-    const modelID = getCurrentModelID(getState());
-    const predictionScore = getActivePredictionScore(getState());
 
     api
       .post(`/feature_distributions/`, { prediction: predictionScore, model_id: modelID })
@@ -145,7 +145,7 @@ export function getOutcomeCountAction() {
       return;
     }
 
-    const modelID = getCurrentModelID(getState());
+    const modelID = getCurrentModels(getState())[0].id;
 
     return api
       .post('/outcome_count/', { prediction: predictionScore, model_id: modelID })
