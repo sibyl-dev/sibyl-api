@@ -40,12 +40,12 @@ const DistributionBar = ({ category, isBinary }) => {
 
   const sumDiffValue = countsRatios[0].sumDiff;
 
-  for (let i = 0; i < sumDiffValue; i++) {
+  for (let i = 0; i < sumDiffValue; i += 1) {
     countsRatios[i].ratioDown += 1;
   }
 
   const filteredRatios = countsRatios.filter((count) => {
-    //check if ratios are a pair of 100 and 0
+    //  check if ratios are a pair of 100 and 0
 
     if (countsRatios.length === 2) {
       if (count.ratioDown === 100) {
@@ -132,53 +132,52 @@ const DistributionBar = ({ category, isBinary }) => {
               style={{
                 width: ratioWidthPercent,
               }}
-            ></div>
+            />
           </React.Fragment>
         );
-      } else {
-        const tooltipContent = (styledRatios) => {
-          return (
-            <div className="tooltip-content">
-              <div className="tooltip-header">
-                <div>Category</div>
-                <div>Distribution</div>
-              </div>
-              <hr />
-              <ul className="tooltip-list">
-                {styledRatios.map((count) => {
-                  const { style, ratioTitlePercent, name } = count;
+      }
 
-                  if (style !== undefined) {
-                    return (
-                      <li key={uuidv4()}>
-                        <span
-                          className="tooltip-circle"
-                          style={{
-                            backgroundColor: `${style.color}`,
-                            opacity: `${style.opacity}`,
-                          }}
-                        ></span>
-                        <div className="tooltip-categ-name">{name}</div>
-                        <div key={uuidv4()} className="tooltip-categ-percent">
-                          {ratioTitlePercent === '0%' ? `~${ratioTitlePercent}` : ratioTitlePercent}
-                        </div>
-                      </li>
-                    );
-                  } else {
-                    return null;
-                  }
-                })}
-              </ul>
+      {
+        const tooltipContent = () => (
+          <div className="tooltip-content">
+            <div className="tooltip-header">
+              <div>Category</div>
+              <div>Distribution</div>
             </div>
-          );
-        };
+            <hr />
+            <ul className="tooltip-list">
+              {styledRatios.map((count) => {
+                const { style, ratioTitlePercent, name } = count;
+
+                if (style !== undefined) {
+                  return (
+                    <li key={uuidv4()}>
+                      <span
+                        className="tooltip-circle"
+                        style={{
+                          backgroundColor: `${style.color}`,
+                          opacity: `${style.opacity}`,
+                        }}
+                      ></span>
+                      <div className="tooltip-categ-name">{name}</div>
+                      <div key={uuidv4()} className="tooltip-categ-percent">
+                        {ratioTitlePercent === '0%' ? `~${ratioTitlePercent}` : ratioTitlePercent}
+                      </div>
+                    </li>
+                  );
+                }
+                return null;
+              })}
+            </ul>
+          </div>
+        );
 
         const minBarWidth = ratioWidthPercent !== '0%';
 
         if (minBarWidth) {
           return (
             <React.Fragment key={uuidv4()}>
-              <MetTooltip title={tooltipContent(styledRatios)} placement="top" className="tooltip">
+              <MetTooltip title={tooltipContent()} placement="top" className="tooltip">
                 <div
                   data-placement="top"
                   className="categorical-data"

@@ -65,12 +65,10 @@ class FeatureDistribution extends Component {
         isLoading: isDistributionsLoading,
       };
 
-      ratiosDistribution.countsRatios = distribution.metrics[1].map((item, index) => {
-        return {
-          ratio: parseFloat(((item / ratiosDistribution.countsSum) * 100).toFixed(2)),
-          name: distribution.metrics[0][index],
-        };
-      });
+      ratiosDistribution.countsRatios = distribution.metrics[1].map((item, index) => ({
+        ratio: parseFloat(((item / ratiosDistribution.countsSum) * 100).toFixed(2)),
+        name: distribution.metrics[0][index],
+      }));
 
       return ratiosDistribution;
     };
@@ -88,10 +86,9 @@ class FeatureDistribution extends Component {
       const isCategoricalDistribution = distribution.metrics[0].length > 2;
 
       if (isCategoricalDistribution) {
-        return <DistributionBar category={getRatiosDistribution()}></DistributionBar>;
-      } else {
-        return <DistributionBar isBinary category={getRatiosDistribution()}></DistributionBar>;
+        return <DistributionBar category={getRatiosDistribution()} />;
       }
+      return <DistributionBar isBinary category={getRatiosDistribution()} />;
     }
 
     if (distributions[currentFeature].type === 'category') {
