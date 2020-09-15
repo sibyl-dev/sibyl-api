@@ -50,7 +50,7 @@
 
         & .tooltip-categ-name {
             font-size: 14px;
-            color: #828282;
+            color: $dark-gray-100;
             margin-right: 52px;
             white-space: nowrap;
         }
@@ -58,7 +58,7 @@
         & .tooltip-categ-percent {
             font-weight: 500;
             font-size: 14px;
-            color: #4f4f4f;
+            color: $dark-gray-200;
             margin-left: auto;
         }
     }
@@ -145,7 +145,7 @@
 }
 
 .binary-data {
-    background: #383f67;
+    background: $dark-blue-100;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -156,20 +156,20 @@
         margin-bottom: 36px;
         font-size: 14px;
         line-height: 16px;
-        color: #4f4f4f;
+        color: $dark-gray-200;
         display: block;
         width: 100%;
         text-align: center;
     }
 
     &:last-child {
-        border: 1px solid #383f67;
-        background: repeating-linear-gradient(-45deg, #383f67, #383f67 1px, #ffffff 0px, #ffffff 4px);
+        border: 1px solid $dark-blue-100;
+        background: repeating-linear-gradient(-45deg, $dark-blue-100, $dark-blue-100 1px, #ffffff 0px, #ffffff 4px);
     }
 }
 
 .percent-text {
-    color: #4f4f4f;
+    color: $dark-gray-200;
     font: 700;
     text-align: center;
 }

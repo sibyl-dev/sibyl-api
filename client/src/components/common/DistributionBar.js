@@ -158,7 +158,7 @@ const DistributionBar = ({ category, isBinary }) => {
                           backgroundColor: `${style.color}`,
                           opacity: `${style.opacity}`,
                         }}
-                      ></span>
+                      />
                       <div className="tooltip-categ-name">{name}</div>
                       <div key={uuidv4()} className="tooltip-categ-percent">
                         {ratioTitlePercent === '0%' ? `~${ratioTitlePercent}` : ratioTitlePercent}
@@ -187,36 +187,34 @@ const DistributionBar = ({ category, isBinary }) => {
                     width: ratioWidthPercent,
                     opacity: `${style.opacity}`,
                   }}
-                ></div>
+                />
               </MetTooltip>
             </React.Fragment>
           );
-        } else {
-          return null;
         }
+        return null;
       }
-    } else {
-      return null;
     }
+    return null;
   });
 
   if (isBinary) {
     return (
-      <React.Fragment>
+      <>
         <div className="binary-wrapper">
           <div className="binary-title-l">False</div>
           <div className="binary-bar">{categoriesToRender}</div>
           <div className="binary-title-r">True</div>
         </div>
-      </React.Fragment>
+      </>
     );
   } else {
     return (
-      <React.Fragment>
+      <>
         <div className="categorical-wrapper">
           <div className="categorical-bar">{categoriesToRender}</div>
         </div>
-      </React.Fragment>
+      </>
     );
   }
 };
