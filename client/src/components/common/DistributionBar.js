@@ -112,7 +112,7 @@ const DistributionBar = ({ category, isBinary }) => {
     };
   });
 
-  const categoriesToRender = styledRatios.map((count) => {
+  const barsToRender = styledRatios.map((count) => {
     const { style, ratioTitlePercent, ratioWidthPercent } = count;
 
     if (style !== undefined) {
@@ -203,20 +203,20 @@ const DistributionBar = ({ category, isBinary }) => {
       <>
         <div className="binary-wrapper">
           <div className="binary-title-l">False</div>
-          <div className="binary-bar">{categoriesToRender}</div>
+          <div className="binary-bar">{barsToRender}</div>
           <div className="binary-title-r">True</div>
         </div>
       </>
     );
-  } else {
-    return (
-      <>
-        <div className="categorical-wrapper">
-          <div className="categorical-bar">{categoriesToRender}</div>
-        </div>
-      </>
-    );
   }
+
+  return (
+    <>
+      <div className="categorical-wrapper">
+        <div className="categorical-bar">{barsToRender}</div>
+      </div>
+    </>
+  );
 };
 
 export default DistributionBar;
