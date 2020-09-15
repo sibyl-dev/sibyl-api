@@ -65,10 +65,12 @@ class FeatureDistribution extends Component {
         isLoading: isDistributionsLoading,
       };
 
-      ratiosDistribution.countsRatios = distribution.metrics[1].map((item, index) => ({
-        ratio: parseInt((item / ratiosDistribution.countsSum) * 100),
-        name: distribution.metrics[0][index],
-      }));
+      ratiosDistribution.countsRatios = distribution.metrics[1].map((item, index) => {
+        return {
+          ratio: parseFloat(((item / ratiosDistribution.countsSum) * 100).toFixed(2)),
+          name: distribution.metrics[0][index],
+        };
+      });
 
       return ratiosDistribution;
     };
