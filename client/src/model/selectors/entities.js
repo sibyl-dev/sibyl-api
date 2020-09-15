@@ -15,6 +15,17 @@ export const getCurrentOutcomeData = (state) => state.entities.outcomeData;
 
 export const currentUserID = (state) => state.entities.userID;
 export const currentEntityID = (state) => state.entities.entityID;
+export const currentModelID = (state) => state.entities.modelID;
+
+export const getCurrentModelID = createSelector([currentModelID], (modelID) => {
+  const cookies = new Cookies();
+
+  if (modelID === null) {
+    modelID = cookies.get('modelID');
+  }
+
+  return modelID || 0;
+});
 
 export const getCurrentEntityID = createSelector([currentEntityID], (entityID) => {
   const cookies = new Cookies();
