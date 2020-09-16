@@ -112,8 +112,10 @@ const DistributionBar = ({ category, isBinary }) => {
     };
   });
 
-  const barsToRender = styledRatios.map((count) => {
-    const { style, ratioTitlePercent, ratioWidthPercent } = count;
+  const barsToRender = styledRatios.map((count, index, { length }) => {
+    const { style, ratioTitlePercent } = count;
+
+    let { ratioWidthPercent } = count;
 
     if (style !== undefined) {
       if (isBinary) {
@@ -172,6 +174,20 @@ const DistributionBar = ({ category, isBinary }) => {
           </div>
         );
 
+        const lastItemWidth = styledRatios[length - 1].ratioWidthPercent;
+
+        const secondToLastItemWidth = styledRatios[length - 2].ratioWidthPercent;
+
+        const barIsOnePercent = (currentValue) => currentValue === '1%';
+
+        const equalLastItems = [lastItemWidth, secondToLastItemWidth].every(barIsOnePercent);
+
+        const visibleSecondToLastItemWidth = `${parseInt(secondToLastItemWidth.charAt(0)) + 1.5}%`;
+
+        if (equalLastItems) {
+          styledRatios[length - 2].ratioWidthPercent = visibleSecondToLastItemWidth;
+        }
+
         const minBarWidth = ratioWidthPercent !== '0%';
 
         if (minBarWidth) {
@@ -182,7 +198,6 @@ const DistributionBar = ({ category, isBinary }) => {
                   data-placement="top"
                   className="categorical-data"
                   style={{
-                    visibility: `${ratioWidthPercent === '0%' ? 'hidden' : ''}`,
                     background: `${style.color}`,
                     width: ratioWidthPercent,
                     opacity: `${style.opacity}`,
