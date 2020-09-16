@@ -5,12 +5,14 @@ const initialState = {
   isEntityContributionsLoading: true,
   isEntityDistributionsLoading: true,
   isEntityScoreLoading: true,
+  isModelsLoading: true,
   entityScore: null,
   entityData: [],
   entityContributions: {},
   entityDistributions: {},
   entityID: null,
   userID: null,
+  models: [],
   predictionScore: null,
   outcomeData: null,
   isOutcomeDataLoading: true,
@@ -37,6 +39,23 @@ function SET_USER_ID(nextState, { userID }) {
 // -------
 function SET_ENTITY_ID(nextState, { entityID }) {
   nextState.entityID = entityID;
+}
+
+// -------
+function GET_MODELS_REQUEST(nextState) {
+  nextState.isModelsLoading = true;
+}
+
+// -------
+function GET_MODELS_SUCCESS(nextState, action) {
+  nextState.models = action.result.models;
+  nextState.isModelsLoading = false;
+}
+
+// -------
+function GET_MODELS_FAILURE(nextState) {
+  nextState.models = [];
+  nextState.isModelsLoading = false;
 }
 
 // -------
@@ -117,4 +136,7 @@ export default createReducer(initialState, {
   GET_OUTCOME_COUNT_REQUEST,
   GET_OUTCOME_COUNT_SUCCESS,
   SET_USER_ID,
+  GET_MODELS_FAILURE,
+  GET_MODELS_SUCCESS,
+  GET_MODELS_REQUEST,
 });
