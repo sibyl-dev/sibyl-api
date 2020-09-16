@@ -4,124 +4,127 @@ import MetTooltip from './MetTooltip';
 
 import './styles/DistributionBar.scss';
 
-const DistributionBar = ({ category, isBinary }) => {
-  const { isLoading } = category;
+const DistributionBar = ({ metrics, isBinary }) => {
+  const { isLoading } = metrics;
 
   if (isLoading) {
     return null;
   }
 
-  const clonedCategory = JSON.parse(JSON.stringify(category));
+  const clonedMetrics = JSON.parse(JSON.stringify(metrics));
 
-  let { countsRatios } = clonedCategory;
+  let { metricsRatios } = clonedMetrics;
 
-  countsRatios = countsRatios.map((count) => {
-    const roundDownRatio = Math.floor(count.ratio);
-    const ratioDecimals = count.ratio - Math.floor(count.ratio);
+  metricsRatios = metricsRatios
+    .map((metric) => {
+      const { ratio } = metric;
+
+      const roundDownRatio = Math.floor(ratio);
+      const ratioDecimals = ratio - Math.floor(ratio);
+
+      return {
+        ...metric,
+        ratioDown: roundDownRatio,
+        decimals: ratioDecimals,
+      };
+    })
+    .sort((a, b) => (a.decimals < b.decimals ? 1 : -1));
+
+  const calcSumDiff = 100 - metricsRatios.reduce((acc, metric) => acc + metric.ratioDown, 0);
+
+  metricsRatios = metricsRatios.map((metric) => {
+    metric.sumDiff = calcSumDiff;
 
     return {
-      ...count,
-      ratioDown: roundDownRatio,
-      decimals: ratioDecimals,
+      ...metric,
     };
   });
 
-  countsRatios.sort((a, b) => (a.decimals < b.decimals ? 1 : -1));
-
-  const calcSumDiff = 100 - countsRatios.reduce((acc, val) => acc + val.ratioDown, 0);
-
-  countsRatios = countsRatios.map((count) => {
-    count.sumDiff = calcSumDiff;
-
-    return {
-      ...count,
-    };
-  });
-
-  const sumDiffValue = countsRatios[0].sumDiff;
+  const sumDiffValue = metricsRatios[0].sumDiff;
 
   for (let i = 0; i < sumDiffValue; i += 1) {
-    countsRatios[i].ratioDown += 1;
+    metricsRatios[i].ratioDown += 1;
   }
 
-  const filteredRatios = countsRatios.filter((count) => {
+  const filteredMetrics = metricsRatios.filter((metric) => {
     //  check if ratios are a pair of 100 and 0
 
-    if (countsRatios.length === 2) {
-      if (count.ratioDown === 100) {
-        count.ratioDown = `~100%`;
-        return count;
+    let { ratioDown } = metric;
+
+    if (metricsRatios.length === 2) {
+      if (ratioDown === 100) {
+        ratioDown = '~100%';
+        return metric;
       }
 
-      if (count.ratioDown === 0) {
-        count.ratioDown = `~0%`;
-        return count;
+      if (ratioDown === 0) {
+        ratioDown = '~0%';
+        return metric;
       }
     }
-    return count;
+    return metric;
   });
 
-  const titleWidthRatios = filteredRatios.map((count) => {
-    const { ratioDown } = count;
+  const formattedMetrics = filteredMetrics
+    .map((metric) => {
+      const { ratioDown } = metric;
 
-    const ratioTitlePercent = ratioDown === '~100%' || ratioDown === '~0%' ? ratioDown : `${ratioDown}%`;
+      const metricTitlePercent = ratioDown === '~100%' || ratioDown === '~0%' ? ratioDown : `${ratioDown}%`;
 
-    const ratioWidthPercent = ratioDown === '~100%' || ratioDown === '~0%' ? ratioDown.substring(1) : `${ratioDown}%`;
+      const metricWidthPercent =
+        ratioDown === '~100%' || ratioDown === '~0%' ? ratioDown.substring(1) : `${ratioDown}%`;
 
-    count.ratioTitlePercent = ratioTitlePercent;
-    count.ratioWidthPercent = ratioWidthPercent;
+      metric.metricTitlePercent = metricTitlePercent;
+      metric.metricWidthPercent = metricWidthPercent;
 
-    return count;
-  });
+      return metric;
+    })
+    .sort((a, b) => (a.ratioDown < b.ratioDown ? 1 : -1));
 
-  titleWidthRatios.sort((a, b) => (a.ratioDown < b.ratioDown ? 1 : -1));
-
-  const styledRatios = titleWidthRatios.map((count, index) => {
-    const baseColor = '#383F67';
-
+  const styledBars = formattedMetrics.map((bar, index) => {
     const ratiosStyle = [
       {
-        color: baseColor,
+        color: '#383F67',
         opacity: '1',
       },
       {
-        color: baseColor,
+        color: '#383F67',
         opacity: '0.85',
       },
       {
-        color: baseColor,
+        color: '#383F67',
         opacity: '0.7',
       },
       {
-        color: baseColor,
+        color: '#383F67',
         opacity: '0.55',
       },
       {
-        color: baseColor,
+        color: '#383F67',
         opacity: '0.3',
       },
       {
-        color: baseColor,
+        color: '#383F67',
         opacity: '0.15',
       },
     ];
 
     return {
-      ...count,
+      ...bar,
       style: ratiosStyle[index],
     };
   });
 
-  const barsToRender = styledRatios.map((count, index, { length }) => {
-    const { style, ratioTitlePercent } = count;
+  const barsToRender = styledBars.map((bar, index, { length }) => {
+    const { style, metricTitlePercent } = bar;
 
-    let { ratioWidthPercent } = count;
+    let { metricWidthPercent } = bar;
 
     if (style !== undefined) {
       if (isBinary) {
         const setBinaryDataTitle = (el) => {
           if (el !== null) {
-            el.setAttribute('data-before', ratioTitlePercent);
+            el.setAttribute('data-before', metricTitlePercent);
           }
         };
 
@@ -132,7 +135,7 @@ const DistributionBar = ({ category, isBinary }) => {
               data-placement="top"
               className="binary-data"
               style={{
-                width: ratioWidthPercent,
+                width: metricWidthPercent,
               }}
             />
           </React.Fragment>
@@ -148,22 +151,22 @@ const DistributionBar = ({ category, isBinary }) => {
             </div>
             <hr />
             <ul className="tooltip-list">
-              {styledRatios.map((tooltipCount) => {
-                const { style, ratioTitlePercent, name } = tooltipCount;
+              {styledBars.map((tooltipBar) => {
+                const { style: tooltipStyle, metricTitlePercent: tooltipBarPercent, name: tooltipBarName } = tooltipBar;
 
-                if (style !== undefined) {
+                if (tooltipStyle !== undefined) {
                   return (
                     <li key={uuidv4()}>
                       <span
                         className="tooltip-circle"
                         style={{
-                          backgroundColor: `${style.color}`,
-                          opacity: `${style.opacity}`,
+                          backgroundColor: `${tooltipStyle.color}`,
+                          opacity: `${tooltipStyle.opacity}`,
                         }}
                       />
-                      <div className="tooltip-categ-name">{name}</div>
+                      <div className="tooltip-categ-name">{tooltipBarName}</div>
                       <div key={uuidv4()} className="tooltip-categ-percent">
-                        {ratioTitlePercent === '0%' ? `~${ratioTitlePercent}` : ratioTitlePercent}
+                        {tooltipBarPercent === '0%' ? `~${tooltipBarPercent}` : tooltipBarPercent}
                       </div>
                     </li>
                   );
@@ -174,21 +177,21 @@ const DistributionBar = ({ category, isBinary }) => {
           </div>
         );
 
-        const lastItemWidth = styledRatios[length - 1].ratioWidthPercent;
+        const lastBarWidth = styledBars[length - 1].metricWidthPercent;
 
-        const secondToLastItemWidth = styledRatios[length - 2].ratioWidthPercent;
+        const secondToLastBarWidth = styledBars[length - 2].metricWidthPercent;
 
         const barIsOnePercent = (currentValue) => currentValue === '1%';
 
-        const equalLastItems = [lastItemWidth, secondToLastItemWidth].every(barIsOnePercent);
+        const areLastBarsEqual = [lastBarWidth, secondToLastBarWidth].every(barIsOnePercent);
 
-        const visibleSecondToLastItemWidth = `${parseInt(secondToLastItemWidth.charAt(0)) + 1.5}%`;
+        const increasedSecondToLastBarWidth = `${parseInt(secondToLastBarWidth.charAt(0), 10) + 0.5}%`;
 
-        if (equalLastItems) {
-          styledRatios[length - 2].ratioWidthPercent = visibleSecondToLastItemWidth;
+        if (areLastBarsEqual) {
+          styledBars[length - 2].metricWidthPercent = increasedSecondToLastBarWidth;
         }
 
-        const minBarWidth = ratioWidthPercent !== '0%';
+        const minBarWidth = metricWidthPercent !== '0%';
 
         if (minBarWidth) {
           return (
@@ -199,7 +202,7 @@ const DistributionBar = ({ category, isBinary }) => {
                   className="categorical-data"
                   style={{
                     background: `${style.color}`,
-                    width: ratioWidthPercent,
+                    width: metricWidthPercent,
                     opacity: `${style.opacity}`,
                   }}
                 />

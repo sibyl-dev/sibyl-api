@@ -17,7 +17,6 @@
     width: 100%;
 
     div {
-        font-family: Roboto;
         font-size: 14px;
         line-height: 16px;
         color: $light-gray;
@@ -107,9 +106,7 @@
 }
 
 .binary-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr;
+    display: flex;
 
     & .binary-title-l {
         line-height: 8px;
@@ -138,9 +135,10 @@
 }
 
 .categorical-data {
-    &:not(:last-child) {
-        border-right-style: solid;
-        border-right-color: white;
+    border-right: 2px solid #fff;
+
+    &:last-child {
+        border-right: none;
     }
 }
 
