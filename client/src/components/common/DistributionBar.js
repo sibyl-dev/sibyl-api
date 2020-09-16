@@ -148,8 +148,8 @@ const DistributionBar = ({ category, isBinary }) => {
             </div>
             <hr />
             <ul className="tooltip-list">
-              {styledRatios.map((count) => {
-                const { style, ratioTitlePercent, name } = count;
+              {styledRatios.map((tooltipCount) => {
+                const { style, ratioTitlePercent, name } = tooltipCount;
 
                 if (style !== undefined) {
                   return (
