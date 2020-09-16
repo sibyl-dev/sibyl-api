@@ -16,6 +16,11 @@ export function getCategoriesAction() {
 export function getFeaturesImportanceAction() {
   return function (dispatch, getState) {
     const modelID = getSelectedModelID(getState());
+
+    if (!modelID) {
+      return;
+    }
+
     const action = {
       type: 'GET_FEATURES_IMPORTANCES',
       promise: api.get(`/importance/?model_id=${modelID}`),
@@ -42,6 +47,10 @@ export function updateFeaturePredictionScore(featuresData) {
     const state = getState();
     const entityID = getCurrentEntityID(state);
     const modelID = getSelectedModelID(state);
+
+    if (!modelID) {
+      return;
+    }
 
     const payLoad = {
       eid: entityID,
@@ -70,6 +79,10 @@ export function getModelPredictionAction() {
     const state = getState();
     const entityID = getCurrentEntityID(state);
     const modelID = getSelectedModelID(state);
+
+    if (!modelID) {
+      return;
+    }
 
     const { currentFeatures, reversedFeatures } = getModelPredictionPayload(getState());
     const currentPredictionPayload = {

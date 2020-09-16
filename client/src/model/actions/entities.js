@@ -50,6 +50,11 @@ export function getEntityContributionsAction() {
     const state = getState();
     const entityID = getCurrentEntityID(state);
     const modelID = getSelectedModelID(state);
+
+    if (!modelID) {
+      return;
+    }
+
     dispatch({ type: 'GET_ENTITY_CONTRIBUTIONS_REQUEST' });
 
     api
@@ -67,6 +72,10 @@ export function getEntityPredictionScoreAction() {
     const state = getState();
     const entityID = getCurrentEntityID(state);
     const modelID = getSelectedModelID(state);
+
+    if (!modelID) {
+      return;
+    }
 
     const action = {
       type: 'GET_ENTITY_SCORE',
@@ -145,6 +154,10 @@ export function getOutcomeCountAction() {
     const predictionScore = getPredictionScore(state);
 
     if (predictionScore === null) {
+      return;
+    }
+
+    if (!modelID) {
       return;
     }
 
