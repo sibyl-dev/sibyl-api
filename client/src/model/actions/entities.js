@@ -5,7 +5,7 @@ import {
   getCurrentEntityID,
   getActivePredictionScore,
   getPredictionScore,
-  getCurrentModels,
+  getSelectedModelID,
 } from '../selectors/entities';
 import { setUserActionRecording } from './userActions';
 
@@ -47,8 +47,9 @@ export function getModelsAction() {
 
 export function getEntityContributionsAction() {
   return function (dispatch, getState) {
-    const entityID = getCurrentEntityID(getState());
-    const modelID = getCurrentModels(getState())[0].id;
+    const state = getState();
+    const entityID = getCurrentEntityID(state);
+    const modelID = getSelectedModelID(state);
     dispatch({ type: 'GET_ENTITY_CONTRIBUTIONS_REQUEST' });
 
     api
@@ -65,7 +66,7 @@ export function getEntityPredictionScoreAction() {
   return function (dispatch, getState) {
     const state = getState();
     const entityID = getCurrentEntityID(state);
-    const modelID = getCurrentModels(state)[0].id;
+    const modelID = getSelectedModelID(state);
 
     const action = {
       type: 'GET_ENTITY_SCORE',
@@ -78,7 +79,7 @@ export function getEntityPredictionScoreAction() {
 export function getEntityFeatureDistributionAction() {
   return function (dispatch, getState) {
     const state = getState();
-    const modelID = getCurrentModels(state)[0].id;
+    const modelID = getSelectedModelID(state);
     const predictionScore = getActivePredictionScore(state);
 
     dispatch({ type: 'GET_ENTITY_DISTRIBUTIONS_REQUEST' });
@@ -139,13 +140,13 @@ export function getEntityAction() {
 
 export function getOutcomeCountAction() {
   return function (dispatch, getState) {
-    const predictionScore = getPredictionScore(getState());
+    const state = getState();
+    const modelID = getSelectedModelID(state);
+    const predictionScore = getPredictionScore(state);
 
     if (predictionScore === null) {
       return;
     }
-
-    const modelID = getCurrentModels(getState())[0].id;
 
     return api
       .post('/outcome_count/', { prediction: predictionScore, model_id: modelID })

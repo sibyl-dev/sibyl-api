@@ -1,5 +1,5 @@
 import { api } from '../api/api';
-import { getCurrentEntityID, getCurrentModels } from '../selectors/entities';
+import { getCurrentEntityID, getSelectedModelID } from '../selectors/entities';
 import { getModelPredictionPayload } from '../selectors/features';
 import { setUserActionRecording } from './userActions';
 
@@ -15,7 +15,7 @@ export function getCategoriesAction() {
 
 export function getFeaturesImportanceAction() {
   return function (dispatch, getState) {
-    const modelID = getCurrentModels(getState())[0].id;
+    const modelID = getSelectedModelID(getState());
     const action = {
       type: 'GET_FEATURES_IMPORTANCES',
       promise: api.get(`/importance/?model_id=${modelID}`),
@@ -41,7 +41,7 @@ export function updateFeaturePredictionScore(featuresData) {
   return function (dispatch, getState) {
     const state = getState();
     const entityID = getCurrentEntityID(state);
-    const modelID = getCurrentModels(state)[0].id;
+    const modelID = getSelectedModelID(state);
 
     const payLoad = {
       eid: entityID,
@@ -69,7 +69,7 @@ export function getModelPredictionAction() {
   return function (dispatch, getState) {
     const state = getState();
     const entityID = getCurrentEntityID(state);
-    const modelID = getCurrentModels(state)[0].id;
+    const modelID = getSelectedModelID(state);
 
     const { currentFeatures, reversedFeatures } = getModelPredictionPayload(getState());
     const currentPredictionPayload = {
