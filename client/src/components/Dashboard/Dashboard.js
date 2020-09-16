@@ -7,7 +7,7 @@ import Sandbox from '../Sandbox/Sandbox';
 import NotFound from '../common/NotFound';
 import Model from '../Model/Model';
 import FeatureImportance from '../Model/FeatureImportance';
-import FeatureDistrubution from '../Model/FeatureDistrubution';
+import FeatureDistribution from '../Model/FeatureDistribution';
 
 const Dashboard = (props) => {
   const { location } = props;
@@ -19,7 +19,7 @@ const Dashboard = (props) => {
         <Route path="/sandbox" exact component={Sandbox} />
         <Route path="/model" component={Model} />
         <Route path="/global-feature-importance" component={FeatureImportance} />
-        <Route path="/feature-distribution" component={FeatureDistrubution} />
+        <Route path="/feature-distribution" component={FeatureDistribution} />
         {/* <Route path="/" exact component={Score} /> */}
         <Route path="*" component={NotFound} />
       </Switch>
