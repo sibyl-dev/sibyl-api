@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect';
-import { getCurrentEntityData, getEntityContributions } from './entities';
+import { getCurrentEntityData, getEntityContributions, getIsEntitiesLoading } from './entities';
 
 export const getFeaturesImportances = (state) => state.features.featuresImportances;
 export const getIsFeaturesLoading = (state) => state.features.isFeaturesLoading;
@@ -34,9 +34,9 @@ const roundContribValue = (contribValue) => {
 };
 
 export const getMaxContributionRange = createSelector(
-  [getIsFeaturesLoading, getCurrentFeatures, getCurrentEntityData, getEntityContributions],
-  (isFeaturesLoading, currentFeatures, entityData, contributions) => {
-    if (isFeaturesLoading) {
+  [getIsFeaturesLoading, getIsEntitiesLoading, getCurrentFeatures, getCurrentEntityData, getEntityContributions],
+  (isFeaturesLoading, isEntityDataLoading, currentFeatures, entityData, contributions) => {
+    if (isFeaturesLoading || isEntityDataLoading) {
       return null;
     }
 
@@ -67,6 +67,7 @@ export const getMaxContributionRange = createSelector(
 export const getFeaturesData = createSelector(
   [
     getIsFeaturesLoading,
+    getIsEntitiesLoading,
     getCurrentFeatures,
     getCurrentEntityData,
     getEntityContributions,
@@ -79,6 +80,7 @@ export const getFeaturesData = createSelector(
   ],
   (
     isFeaturesLoading,
+    isEntityDataLoading,
     features,
     entityData,
     contributions,
@@ -89,7 +91,7 @@ export const getFeaturesData = createSelector(
     contribFilters,
     featureImportance,
   ) => {
-    if (isFeaturesLoading) {
+    if (isFeaturesLoading || isEntityDataLoading) {
       return [];
     }
 
@@ -151,6 +153,7 @@ export const getFeaturesData = createSelector(
 export const getGrouppedFeatures = createSelector(
   [
     getIsFeaturesLoading,
+    getIsEntitiesLoading,
     getCurrentFeatures,
     getCurrentEntityData,
     getEntityContributions,
@@ -161,6 +164,7 @@ export const getGrouppedFeatures = createSelector(
   ],
   (
     isFeaturesLoading,
+    isEntityDataLoading,
     currentFeatures,
     entityData,
     contributions,
@@ -169,7 +173,7 @@ export const getGrouppedFeatures = createSelector(
     filterCriteria,
     filterCategs,
   ) => {
-    if (isFeaturesLoading) {
+    if (isFeaturesLoading || isEntityDataLoading) {
       return [];
     }
 
@@ -242,9 +246,9 @@ export const getGrouppedFeatures = createSelector(
 );
 
 export const getModelPredictionPayload = createSelector(
-  [getIsFeaturesLoading, getCurrentFeatures, getCurrentEntityData],
-  (isFeaturesLoading, features, entityData) => {
-    if (isFeaturesLoading) {
+  [getIsFeaturesLoading, getIsEntitiesLoading, getCurrentFeatures, getCurrentEntityData],
+  (isFeaturesLoading, isEntityDataLoading, features, entityData) => {
+    if (isFeaturesLoading || isEntityDataLoading) {
       return [];
     }
 

@@ -37,7 +37,7 @@ export function getFeaturesAction() {
     };
 
     dispatch(action)
-      .then(dispatch(getFeaturesImportanceAction()))
+      .then(() => dispatch(getFeaturesImportanceAction()))
       .then(() => dispatch(getModelPredictionAction()));
   };
 }
@@ -85,6 +85,11 @@ export function getModelPredictionAction() {
     }
 
     const { currentFeatures, reversedFeatures } = getModelPredictionPayload(getState());
+
+    if (!currentFeatures || !currentFeatures.length) {
+      return;
+    }
+
     const currentPredictionPayload = {
       eid: entityID,
       model_id: modelID,
