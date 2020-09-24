@@ -40,7 +40,7 @@ export const getCurrentUserID = createSelector([currentUserID], (userID) => {
     userID = cookies.get('userID');
   }
 
-  return userID || 'null';
+  return userID || null;
 });
 
 export const getActivePredictionScore = createSelector(
