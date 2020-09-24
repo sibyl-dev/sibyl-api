@@ -1,4 +1,5 @@
 import reducer from '../../model/reducers/sidebar';
+import { generateTestsForSetReducers } from '../helpers/reducers.helpers';
 
 const defaultState = {
   isSidebarCollapsed: false,
@@ -11,29 +12,21 @@ describe('Sidebar Reducer', () => {
   });
 
   describe('Sidebar Changers', () => {
-    describe('TOGGLE_SIDEBAR_STATE', () => {
-      it('updates isSidebarCollapsed', () => {
-        const updateSidebarAction = {
-          type: 'TOGGLE_SIDEBAR_STATE',
-          isSidebarCollapsed: true,
-        };
-        expect(reducer(defaultState, updateSidebarAction)).toEqual({
-          ...defaultState,
-          isSidebarCollapsed: true,
-        });
-      });
-    });
-    describe('SET_ACTIVE_PAGE', () => {
-      it('updates pageName', () => {
-        const updateSidebarAction = {
-          type: 'SET_ACTIVE_PAGE',
-          pageName: 'new Page',
-        };
-        expect(reducer(defaultState, updateSidebarAction)).toEqual({
-          ...defaultState,
-          pageName: 'new Page',
-        });
-      });
-    });
+    generateTestsForSetReducers(reducer, defaultState, [
+      {
+        name: 'TOGGLE_SIDEBAR_STATE',
+        description: 'updates isSidebarCollapsed',
+        key: 'isSidebarCollapsed',
+        sendData: true,
+        testData: true,
+      },
+      {
+        name: 'SET_ACTIVE_PAGE',
+        description: 'updates pageName',
+        key: 'pageName',
+        sendData: 'new Page',
+        testData: 'new Page',
+      },
+    ]);
   });
 });
