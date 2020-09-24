@@ -44,7 +44,7 @@ describe('Entities Selectors', () => {
       expect(getCurrentUserID(defaultState)).toEqual('testID');
     });
     it('returns `null` string because userID is not set', () => {
-      expect(getCurrentUserID({ entities: { userID: null } })).toEqual('null');
+      expect(getCurrentUserID({ entities: { userID: null } })).toBeNull();
     });
   });
   describe('getActivePredictionScore()', () => {
