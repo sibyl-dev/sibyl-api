@@ -31,20 +31,6 @@ class FeatureDistribution extends Component {
     this.props.setActivePage('Feature Distribution');
   }
 
-  // getValues() {
-  //   const { data, rawData, graphIndex, distributions, lorem } = this.props;
-
-  //   const myData = distributions[rawData].metrics;
-
-  //   const currentMax = myData.reduce((max, currentValue) => Math.max(max, currentValue), myData[0]);
-
-  //   const myData2 = [{ metrics: [currentMax] }];
-
-  //   const max2 = myData2.reduce((max, currentValue) => {
-  //     return Math.max(max, currentValue.metrics);
-  //   }, myData2[0].metrics[0]);
-  // }
-
   renderDashHeader() {
     const { features, isFeaturesLoading } = this.props;
     const { processedFeatures } = features;
@@ -94,8 +80,6 @@ class FeatureDistribution extends Component {
     if (distributions[currentFeature] !== undefined && distributions[currentFeature].type === 'numeric') {
       const data = distributions[currentFeature].metrics;
 
-      // if type is numeric, metrics will include the min, Q1, median, Q3, and max for this prediction value
-
       return <DayGraph data={data} graphIndex={currentFeature} />;
     }
 
@@ -128,37 +112,6 @@ class FeatureDistribution extends Component {
     const { processedFeatures } = features;
     const isDataLoading = isDistributionsLoading || isEntityLoading || isFeaturesLoading;
 
-    // if (!isDataLoading) {
-    //   const tester = processedFeatures.map((item) => {
-    //     const name = item.name;
-
-    //     const myData3 = distributions[name];
-
-    //     if (myData3 !== undefined) {
-    //       const filtered = Object.entries(myData3)
-    //         .map(([key, value]) => ({ key, value }))
-    //         .filter((item) => item.value.length === 5);
-
-    //       if (filtered.length > 0) {
-    //         const arr = filtered[0].value;
-
-    //         const currentMax = arr.reduce((max, currentValue) => Math.max(max, currentValue), arr[0]);
-
-    //         const myData2 = [{ metrics: [currentMax] }];
-
-    //         const max2 = myData2.reduce((max, currentValue) => {
-    //           return Math.max(max, currentValue.metrics);
-    //         }, myData2[0].metrics[0]);
-
-    //         console.log(max2);
-    //       }
-
-    //       return;
-    //     }
-    //   });
-    //   // console.log(processedFeatures);
-    // }
-
     return (
       <div className="component-wrapper">
         <table className="distrib-info">
@@ -188,10 +141,10 @@ class FeatureDistribution extends Component {
               <tbody>
                 <Loader isLoading={isDataLoading} colSpan="2">
                   {processedFeatures && processedFeatures.length > 0 ? (
-                    processedFeatures.map((currentFeature, index, arr) => (
+                    processedFeatures.map((currentFeature) => (
                       <tr key={currentFeature.name}>
                         <td>{currentFeature.description}</td>
-                        <td className="align-right">{this.drawDistribution(currentFeature.name, arr)}</td>
+                        <td className="align-right">{this.drawDistribution(currentFeature.name)}</td>
                       </tr>
                     ))
                   ) : (
