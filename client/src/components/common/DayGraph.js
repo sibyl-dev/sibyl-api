@@ -30,7 +30,57 @@ class DayGraph extends Component {
 
     const { xCoord } = this.getCoords();
     let axisGenerator = d3.axisBottom(xCoord).tickValues([0, data[2], data[3], maxData]);
+
+    const min = xCoord(data[0]);
+
+    const q1 = xCoord(data[1]);
+
+    const median = xCoord(data[2]);
+
+    const q3 = xCoord(data[3]);
+
+    const max = xCoord(data[4]);
+
+    const predictionCases = {
+      // prediction - [0, 0, 0, 0, 4]
+      // visualisation - [dotted line 0-4 / 5px rectangle width at 0]
+
+      distributionOne: {
+        condition: [min, q1, median, q3].every((prediction) => prediction === 0),
+        dashedSegment: [data[0], data[4]],
+      },
+
+      // prediction - [0, 0, 23, 36, 42]
+      // visualisation - [dashed 0-23 / line 23-36/ rectangle 36-42]
+
+      distributionTwo: {
+        condition: min === 0 && q1 === 0 && median !== 0 && q3 !== 0 && max !== 0,
+        dashedSegment: [data[0], data[2]],
+      },
+
+      // prediction - [0, 5, 8, 12, 25];
+      // visualisation - [dashed 0-8 / line 8-12 / square 12-25]
+
+      distributionThree: {
+        condition: min === 0 && q1 !== 0 && median !== 0 && q3 !== 0 && max !== 0,
+        dashedSegment: [data[0], data[2]],
+      },
+
+      // prediction - [0, 0, 0, 2, 27];
+      // visualisation - [rectangle 0-2, line 2 - 27]
+
+      distributionFour: {
+        condition: min === 0 && q1 === 0 && median === 0 && q3 !== 0 && max !== 0,
+      },
+    };
+
     const xAxis = d3.select(`#_${graphIndex} .axis-x`).attr('transform', 'translate(25,35)').call(axisGenerator);
+
+    let xMiddlePosition = xCoord([data[3]]) / 2;
+
+    const formatTranslateX = `translate(-${xMiddlePosition}, -35)`;
+
+    const formatTick = `${data[0]} - ${data[3]}`;
 
     xAxis
       .selectAll(`#_${graphIndex} .tick text`)
@@ -45,43 +95,23 @@ class DayGraph extends Component {
           return 'translate(20, -15)';
         }
 
+        if (currentTick === data[3] && predictionCases.distributionFour.condition) {
+          return formatTranslateX;
+        }
+
         return 'translate(0,-35)';
       })
-      .attr('color', '#828282');
+      .attr('color', '#828282')
+      .text((currentTick) => {
+        if (currentTick === data[3] && predictionCases.distributionFour.condition) {
+          return formatTick;
+        }
+        return currentTick;
+      });
 
     xAxis.select('.domain').attr('color', '#9B9FB3').attr('stroke-width', 2);
 
-    const min = xCoord(data[0]);
-
-    const q1 = xCoord(data[1]);
-
-    const median = xCoord(data[2]);
-
-    const q3 = xCoord(data[3]);
-
-    const max = xCoord(data[4]);
-
-    const predictionCases = {
-      distribution1: {
-        condition: [min, q1, median, q3].every((prediction) => prediction === 0),
-        dashedSegment: [data[0], data[4]],
-      },
-
-      distribution2: {
-        condition: min === 0 && q1 === 0 && median !== 0 && q3 !== 0 && max !== 0,
-        dashedSegment: [data[0], data[2]],
-      },
-
-      distribution3: {
-        condition: min === 0 && q1 !== 0 && median !== 0 && q3 !== 0 && max !== 0,
-        dashedSegment: [data[0], data[2]],
-      },
-    };
-
     const generateStrokeCoord = () => {
-      // prediction - [0, 0, 0, 0, 4]
-      // visualisation - [dotted line 0-4 / 5px rectangle width at 0]
-
       const path = d3.select('.domain').node();
 
       const pathLength = path.getTotalLength();
@@ -118,12 +148,14 @@ class DayGraph extends Component {
         return segmentList;
       };
 
-      if (predictionCases.distribution1.condition) {
-        let strokeDashArray = segmentCoords(predictionCases.distribution1.dashedSegment)[0];
+      const { distributionOne, distributionTwo, distributionThree } = predictionCases;
 
-        let firstStrokeDashCoord = segmentCoords(predictionCases.distribution1.dashedSegment)[0];
+      const generateDashSegment = (distribution) => {
+        let strokeDashArray = segmentCoords(distribution.dashedSegment)[0];
 
-        while (firstStrokeDashCoord < segmentCoords(predictionCases.distribution1.dashedSegment)[1]) {
+        let firstStrokeDashCoord = segmentCoords(distribution.dashedSegment)[0];
+
+        while (firstStrokeDashCoord < segmentCoords(distribution.dashedSegment)[1]) {
           firstStrokeDashCoord += 4;
           strokeDashArray += ', 4';
         }
@@ -132,58 +164,25 @@ class DayGraph extends Component {
 
         if (count % 2 === 0) {
           strokeDashArray += ', 4';
-          strokeDashArray += ', ' + (pathLength - segmentCoords(predictionCases.distribution1.dashedSegment)[1]);
+          strokeDashArray += ', ' + (pathLength - segmentCoords(distribution.dashedSegment)[1]);
           count++;
         }
 
         return strokeDashArray;
-      }
+      };
 
-      // prediction - [0, 0, 23, 36, 42]
-      // visualisation - [dashed 0-23 / line 23-36/ rectangle 36-42]
+      switch (true) {
+        case distributionOne.condition:
+          return generateDashSegment(distributionOne);
 
-      if (predictionCases.distribution2.condition) {
-        let strokeDashArray = segmentCoords(predictionCases.distribution2.dashedSegment)[0];
+        case distributionTwo.condition:
+          return generateDashSegment(distributionTwo);
 
-        let firstStrokeDashCoord = segmentCoords(predictionCases.distribution2.dashedSegment)[0];
+        case distributionThree.condition:
+          return generateDashSegment(distributionThree);
 
-        let count = 0;
-
-        while (firstStrokeDashCoord < segmentCoords(predictionCases.distribution2.dashedSegment)[1]) {
-          firstStrokeDashCoord += 4;
-          strokeDashArray += ', 4';
-          count++;
-        }
-
-        if (count % 2 === 0) {
-          strokeDashArray += ', 4';
-          strokeDashArray += ', ' + (pathLength - segmentCoords(predictionCases.distribution2.dashedSegment)[1]);
-        }
-
-        return strokeDashArray;
-      }
-
-      // // prediction - [0, 5, 8, 12, 25];
-      // // visualisation - [dashed 0-8 / line 8-12 / square  12-25]
-      if (predictionCases.distribution3.condition) {
-        let strokeDashArray = segmentCoords(predictionCases.distribution3.dashedSegment)[0];
-
-        let firstStrokeDashCoord = segmentCoords(predictionCases.distribution3.dashedSegment)[0];
-
-        let count = 0;
-
-        while (firstStrokeDashCoord < segmentCoords(predictionCases.distribution3.dashedSegment)[1]) {
-          firstStrokeDashCoord += 4;
-          strokeDashArray += ', 4';
-          count++;
-        }
-
-        if (count % 2 === 0) {
-          strokeDashArray += ', 4';
-          strokeDashArray += ', ' + (pathLength - segmentCoords(predictionCases.distribution3.dashedSegment)[1]);
-        }
-
-        return strokeDashArray;
+        default:
+          return null;
       }
     };
 
@@ -216,30 +215,35 @@ class DayGraph extends Component {
     const max = xCoord(value[4]);
 
     const predictionCases = {
-      distribution1: {
+      distributionOne: {
         condition: [min, q1, median, q3].every((prediction) => prediction === 0),
       },
 
-      distribution2: {
+      distributionTwo: {
         condition: min === 0 && q1 === 0 && median !== 0 && q3 !== 0 && max !== 0,
       },
 
-      distribution3: {
+      distributionThree: {
         condition: min === 0 && q1 !== 0 && median !== 0 && q3 !== 0 && max !== 0,
       },
 
-      distribution4: {
+      distributionFour: {
         condition: min === 0 && q1 === 0 && median === 0 && q3 !== 0 && max !== 0,
       },
     };
 
-    if (predictionCases.distribution1.condition) {
+    const { distributionOne, distributionTwo, distributionThree, distributionFour } = predictionCases;
+
+    if (distributionOne.condition) {
+      // for hiding the start of segment
+      const offsetValue = 0.5;
+
       width = 5;
 
-      xPosition = xCoord([value[1]]);
+      xPosition = xCoord([value[1]]) - offsetValue;
     }
 
-    if (predictionCases.distribution2.condition) {
+    if (distributionTwo.condition) {
       // for hiding the end of segment
       const offsetValue = 1.5;
 
@@ -248,7 +252,7 @@ class DayGraph extends Component {
       xPosition = xCoord([value[3]]);
     }
 
-    if (predictionCases.distribution3.condition) {
+    if (distributionThree.condition) {
       const offsetValue = 1.5;
 
       width = xCoord(value[4]) - xCoord(value[3]) + offsetValue;
@@ -256,10 +260,7 @@ class DayGraph extends Component {
       xPosition = xCoord([value[3]]);
     }
 
-    // // prediction - [0, 0, 0, 2, 27];
-    // visualisation - [rectangle 0-2, line 2 - 27]
-
-    if (predictionCases.distribution4.condition) {
+    if (distributionFour.condition) {
       const offsetValue = 1.5;
 
       width = xCoord(value[3]) - xCoord(value[1]);
