@@ -111,6 +111,17 @@ class DayGraph extends Component {
 
     xAxis.select('.domain').attr('color', '#9B9FB3').attr('stroke-width', 2);
 
+    xAxis
+      .append('g')
+      .attr('class', 'label')
+      .append('text')
+      .attr('x', xCoord(data[4]) + 38)
+      .attr('y', 3.5)
+      .attr('fill', 'rgba(155, 159, 179, 1')
+      .attr('font-size', '14')
+      .attr('transform', 'translate(20, 0)')
+      .text('Value');
+
     const generateStrokeCoord = () => {
       const path = d3.select('.domain').node();
 
@@ -286,7 +297,12 @@ class DayGraph extends Component {
 
     return (
       (data[4] !== 0 && (
-        <svg width={dimensions.width + 15} height={dimensions.height} id={`_${this.props.graphIndex}`}>
+        <svg
+          width={dimensions.width + 15}
+          height={dimensions.height}
+          id={`_${this.props.graphIndex}`}
+          overflow="visible"
+        >
           <g className="axis-x" />
           <g className="data">{this.drawData(data)}</g>
         </svg>
