@@ -53,21 +53,27 @@ class DayGraph extends Component {
 
     const formatXTickDistThree = `${data[3]} - ${data[4]}`;
 
+    // prediction1 - [0, 0, 0, 0, 4]
+    // visualisation - [dotted line 0-4 / 5px rectangle width at 0]
+
+    // prediction2 - [0, 0, 23, 36, 42]
+    // visualisation - [dashed 0-23 / line 23-36/ rectangle 36-42]
+
+    // prediction3 - [0, 5, 8, 12, 25];
+    // visualisation - [dashed 0-8 / line 8-12 / square 12-25]
+
+    // prediction4 - [0, 0, 0, 2, 27];
+    // visualisation - [rectangle 0-2, line 2 - 27]
+
     const predictionCases = {
-      // prediction - [0, 0, 0, 0, 4]
-      // visualisation - [dotted line 0-4 / 5px rectangle width at 0]
       distributionOne: {
         condition: [min, q1, median, q3].every((prediction) => prediction === 0),
         dashedSegment: [data[0], data[4]],
       },
-      // prediction - [0, 0, 23, 36, 42]
-      // visualisation - [dashed 0-23 / line 23-36/ rectangle 36-42]
       distributionTwo: {
         condition: min === 0 && q1 === 0 && median !== 0 && q3 !== 0 && max !== 0,
         dashedSegment: [data[0], data[2]],
       },
-      // prediction - [0, 5, 8, 12, 25];
-      // visualisation - [dashed 0-8 / line 8-12 / square 12-25]
       distributionThree: {
         condition: min === 0 && q1 !== 0 && median !== 0 && q3 !== 0 && max !== 0,
         dashedSegment: [data[0], data[2]],
@@ -75,8 +81,6 @@ class DayGraph extends Component {
         formatX: formatXTransDistThree,
         formatTick: formatXTickDistThree,
       },
-      // prediction - [0, 0, 0, 2, 27];
-      // visualisation - [rectangle 0-2, line 2 - 27]
       distributionFour: {
         condition: min === 0 && q1 === 0 && median === 0 && q3 !== 0 && max !== 0,
         xMiddle: xMiddleDistFour,
