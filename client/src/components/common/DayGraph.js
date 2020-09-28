@@ -53,15 +53,6 @@ class DayGraph extends Component {
 
     const formatXTickDistThree = `${data[3]} - ${data[4]}`;
 
-    // prediction1 - [0, 0, 0, 0, 4]
-    // visualisation1 - [dotted line 0-4 / 5px rectangle width at 0]
-    // prediction2 - [0, 0, 23, 36, 42]
-    // visualisation2 - [dashed 0-23 / line 23-36/ rectangle 36-42]
-    // prediction3 - [0, 5, 8, 12, 25];
-    // visualisation3 - [dashed 0-8 / line 8-12 / square 12-25]
-    // prediction4 - [0, 0, 0, 2, 27];
-    // visualisation4 - [rectangle 0-2, line 2 - 27]
-
     const predictionCases = {
       distributionOne: {
         condition: [min, q1, median, q3].every((prediction) => prediction === 0),
