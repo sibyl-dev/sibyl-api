@@ -133,7 +133,7 @@ ENV/
 
 .idea/*
 
-.vscode/
+.vscode/*
 
 dbdata/
 sibylapp/db/data

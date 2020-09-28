@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+
 import DashWrapper from '../common/DashWrapper';
 
 import Search from '../common/Search';
@@ -10,8 +11,10 @@ import {
   getIsEntityDistributionsLoading,
   getEntityDistributions,
 } from '../../model/selectors/entities';
+
 import { PercentageProgressBar } from '../common/ProgressBars';
 import DayGraph from '../common/DayGraph';
+import DistributionBar from '../common/DistributionBar';
 import { getFeaturesData, getIsFeaturesLoading } from '../../model/selectors/features';
 import { setUserActionRecording } from '../../model/actions/userActions';
 import Loader from '../common/Loader';
@@ -50,14 +53,43 @@ class FeatureDistribution extends Component {
   }
 
   drawDistribution(currentFeature) {
-    const { distributions } = this.props;
+    const { distributions, isDistributionsLoading } = this.props;
+
+    const distribution = distributions[currentFeature];
+
+    const getMetricsDistribution = () => {
+      const metricsDistribution = {
+        ...distribution,
+        distributionName: currentFeature,
+        metricsSum: distribution.metrics[1].reduce((acc, val) => acc + val, 0),
+        isLoading: isDistributionsLoading,
+      };
+
+      metricsDistribution.metricsRatios = distribution.metrics[1].map((metric, index) => ({
+        ratio: parseFloat(((metric / metricsDistribution.metricsSum) * 100).toFixed(2)),
+        name: distribution.metrics[0][index],
+      }));
+
+      return metricsDistribution;
+    };
+
     if (distributions[currentFeature] === undefined) {
       return <p>No data to display</p>;
     }
 
     if (distributions[currentFeature] !== undefined && distributions[currentFeature].type === 'numeric') {
       const data = distributions[currentFeature].metrics;
+
       return <DayGraph data={data} graphIndex={currentFeature} />;
+    }
+
+    if (distributions[currentFeature].type === 'categorical') {
+      const isCategoricalDistribution = distribution.metrics[0].length > 2;
+
+      if (isCategoricalDistribution) {
+        return <DistributionBar metrics={getMetricsDistribution()} />;
+      }
+      return <DistributionBar isBinary metrics={getMetricsDistribution()} />;
     }
 
     if (distributions[currentFeature].type === 'category') {

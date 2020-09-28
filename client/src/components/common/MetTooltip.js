@@ -3,7 +3,14 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import '../../assets/sass/tooltip.scss';
 
 const MetTooltip = (props) => (
-  <OverlayTrigger placement={props.placement} overlay={<Tooltip id="tooltip">{props.title}</Tooltip>}>
+  <OverlayTrigger
+    placement={props.placement}
+    overlay={
+      <Tooltip id="tooltip" className={props.className}>
+        {props.title}
+      </Tooltip>
+    }
+  >
     {props.children}
   </OverlayTrigger>
 );
