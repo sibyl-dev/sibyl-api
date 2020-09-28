@@ -41,6 +41,18 @@ class DayGraph extends Component {
 
     const max = xCoord(data[4]);
 
+    let xMiddleDistFour = xCoord([data[3]]) / 2;
+
+    const formatXTransDistFour = `translate(-${xMiddleDistFour}, -35)`;
+
+    const formatXTickDistFour = `${data[0]} - ${data[3]}`;
+
+    let xMiddleDistThree = (xCoord(data[4]) - xCoord(data[3])) / 2;
+
+    const formatXTransDistThree = `translate(${xMiddleDistThree}, -35)`;
+
+    const formatXTickDistThree = `${data[3]} - ${data[4]}`;
+
     const predictionCases = {
       // prediction - [0, 0, 0, 0, 4]
       // visualisation - [dotted line 0-4 / 5px rectangle width at 0]
@@ -64,6 +76,9 @@ class DayGraph extends Component {
       distributionThree: {
         condition: min === 0 && q1 !== 0 && median !== 0 && q3 !== 0 && max !== 0,
         dashedSegment: [data[0], data[2]],
+        xMiddle: xMiddleDistThree,
+        formatX: formatXTransDistThree,
+        formatTick: formatXTickDistThree,
       },
 
       // prediction - [0, 0, 0, 2, 27];
@@ -71,16 +86,13 @@ class DayGraph extends Component {
 
       distributionFour: {
         condition: min === 0 && q1 === 0 && median === 0 && q3 !== 0 && max !== 0,
+        xMiddle: xMiddleDistFour,
+        formatX: formatXTransDistFour,
+        formatTick: formatXTickDistFour,
       },
     };
 
     const xAxis = d3.select(`#_${graphIndex} .axis-x`).attr('transform', 'translate(25,35)').call(axisGenerator);
-
-    let xMiddlePosition = xCoord([data[3]]) / 2;
-
-    const formatTranslateX = `translate(-${xMiddlePosition}, -35)`;
-
-    const formatTick = `${data[0]} - ${data[3]}`;
 
     xAxis
       .selectAll(`#_${graphIndex} .tick text`)
@@ -96,16 +108,36 @@ class DayGraph extends Component {
         }
 
         if (currentTick === data[3] && predictionCases.distributionFour.condition) {
-          return formatTranslateX;
+          return predictionCases.distributionFour.formatX;
+        }
+
+        if (
+          currentTick === data[3] &&
+          (predictionCases.distributionThree.condition || predictionCases.distributionTwo.condition)
+        ) {
+          return predictionCases.distributionThree.formatX;
         }
 
         return 'translate(0,-35)';
       })
-      .attr('color', '#828282')
+      .attr('color', (currentTick) => {
+        if (currentTick === data[3]) {
+          return '#4F4F4F';
+        }
+        return '#828282';
+      })
       .text((currentTick) => {
         if (currentTick === data[3] && predictionCases.distributionFour.condition) {
-          return formatTick;
+          return predictionCases.distributionFour.formatTick;
         }
+
+        if (
+          currentTick === data[3] &&
+          (predictionCases.distributionThree.condition || predictionCases.distributionTwo.condition)
+        ) {
+          return predictionCases.distributionThree.formatTick;
+        }
+
         return currentTick;
       });
 
