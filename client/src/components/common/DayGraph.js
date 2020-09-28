@@ -205,10 +205,12 @@ class DayGraph extends Component {
 
         let count = 0;
 
+        let dashPatternEnd = pathLength - segmentCoords(distribution.dashedSegment)[1];
+
         if (count % 2 === 0) {
           strokeDashArray += ', 4';
-          strokeDashArray += ', ' + (pathLength - segmentCoords(distribution.dashedSegment)[1]);
-          count++;
+          strokeDashArray += `, ${dashPatternEnd}`;
+          count = +1;
         }
 
         return strokeDashArray;
