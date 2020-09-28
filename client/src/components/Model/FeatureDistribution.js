@@ -79,6 +79,7 @@ class FeatureDistribution extends Component {
 
     if (distributions[currentFeature] !== undefined && distributions[currentFeature].type === 'numeric') {
       const data = distributions[currentFeature].metrics;
+
       return <DayGraph data={data} graphIndex={currentFeature} />;
     }
 
