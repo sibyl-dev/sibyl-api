@@ -237,6 +237,6 @@ load-db: init-db
 install-real:
 	git clone -b restructure https://github.com/DAI-Lab/sibyl.git real
 	cd real
-	pip install .
+	pip install -e .
 
 
