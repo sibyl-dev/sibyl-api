@@ -31,12 +31,12 @@ def get_entity(entity_doc, features=True):
     return entity
 
 
-def get_case(case_doc):
-    case = {
-        'case_id': case_doc.case_id,
-        'property': case_doc.property
+def get_referral(referral_doc):
+    referral = {
+        'referral_id': referral_doc.referral_id,
+        'property': referral_doc.property
     }
-    return case
+    return referral
 
 
 class Entity(Resource):
@@ -53,7 +53,7 @@ class Entity(Resource):
         @apiSuccess {String} features.name  Feature name.
         @apiSuccess {Number|String} features.value Feature value.
         @apiSuccess {Object} [property] Special property of this entity.
-        @apiSuccess {String[]} [property.case_ids] IDs of cases the entity
+        @apiSuccess {String[]} [property.referral_ids] IDs of referrals the entity
                                          is involved in.
 
         @apiSuccessExample {json} Success-Response:
@@ -67,7 +67,7 @@ class Entity(Resource):
                 ],
                 "property": {
                     "name": "Elsa",
-                    "case_ids": ["ca19", "ca88", "ca133"]
+                    "referral_ids": ["ca19", "ca88", "ca133"]
                 }
             }
         """
@@ -128,60 +128,60 @@ class Events(Resource):
         return events, 200
 
 
-class Case(Resource):
-    def get(self, case_id):
+class Referral(Resource):
+    def get(self, referral_id):
         """
-        @api {get} /cases/:case_id/ Get details of a case
-        @apiName GetCase
-        @apiGroup Case
+        @api {get} /referrals/:referral_id/ Get details of a referral
+        @apiName GetReferral
+        @apiGroup referral
         @apiVersion 1.0.0
-        @apiDescription Get details of a specific case.
+        @apiDescription Get details of a specific referral.
 
-        @apiSuccess {String} case_id ID of the case.
-        @apiSuccess {String} property properties of the case
+        @apiSuccess {String} referral_id ID of the referral.
+        @apiSuccess {String} property properties of the referral
         """
-        case = schema.Case.find_one(case_id=case_id)
-        if case is None:
-            LOGGER.exception('Error getting case. Case %s does not exist.', case_id)
-            return {'message': 'Case {} does not exist'.format(case_id)}, 400
+        referral = schema.Referral.find_one(referral_id=referral_id)
+        if referral is None:
+            LOGGER.exception('Error getting referral. referral %s does not exist.', referral_id)
+            return {'message': 'referral {} does not exist'.format(referral_id)}, 400
 
-        return get_case(case), 200
+        return get_referral(referral), 200
 
 
-class Cases(Resource):
+class Referrals(Resource):
     def get(self):
         """
-        @api {get} /cases/ Get a list of cases
-        @apiName GetCases
-        @apiGroup Case
+        @api {get} /referrals/ Get a list of referrals
+        @apiName GetReferrals
+        @apiGroup referral
         @apiVersion 1.0.0
-        @apiDescription Get a list of cases.
+        @apiDescription Get a list of referrals.
 
-        @apiSuccess {String[]} cases List of Case ids
+        @apiSuccess {String[]} referrals List of referral ids
         """
-        documents = schema.Case.find()
+        documents = schema.Referral.find()
         try:
-            case = [document.case_id for document in documents]
+            referral = [document.referral_id for document in documents]
         except Exception as e:
             LOGGER.exception(e)
             return {'message': str(e)}, 500
         else:
-            return {'cases': case}, 200
+            return {'referrals': referral}, 200
 
 
-class EntitiesInCase(Resource):
-    def get(self, case_id):
+class EntitiesInReferral(Resource):
+    def get(self, referral_id):
         """
-        @api {get} /entities_in_case/:case_id/ Get entities involved in a case
-        @apiName GetEntitiesInCase
-        @apiGroup Case
+        @api {get} /entities_in_referral/:referral_id/ Get entities involved in a referral
+        @apiName GetEntitiesInReferral
+        @apiGroup referral
         @apiVersion 1.0.0
-        @apiDescription Get entities involved in a case
+        @apiDescription Get entities involved in a referral
 
-        @apiSuccess {String[]} eids EIDs of entities involved in the case.
+        @apiSuccess {String[]} eids EIDs of entities involved in the referral.
         """
-        entities = schema.Entity.find(property__case_ids__contains=case_id)
+        entities = schema.Entity.find(property__referral_ids__contains=referral_id)
         if entities is None:
-            LOGGER.log('Case %s has no entities', case_id)
+            LOGGER.log('referral %s has no entities', referral_id)
             return []
         return [document.eid for document in entities], 200

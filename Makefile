@@ -190,7 +190,7 @@ clean-build: ## remove build artifacts
 	rm -fr dist/
 	rm -fr .eggs/
 	find . -name '*.egg-info' -exec rm -fr {} +
-	find . -name '*.egg' -exec rm -f {} +
+	find . -name '*.egg' -exec rm -fr {} +
 
 .PHONY: clean-pyc
 clean-pyc: ## remove Python file artifacts
@@ -233,9 +233,10 @@ load-db: init-db
 	mongo sibylapp --eval "db.dropDatabase()"
 	mongorestore --db sibylapp ./db/dump/sibylapp/
 
-.PHONY: install-sibyl
-install-sibyl:
-	git clone https://github.com/DAI-Lab/sibyl.git sibyl
-	cd sibyl
+.PHONY: install-real
+install-real:
+	git clone -b restructure https://github.com/DAI-Lab/sibyl.git real
+	cd real
 	pip install .
+
 

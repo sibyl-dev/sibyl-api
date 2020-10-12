@@ -16,11 +16,11 @@ def add_routes(app):
     api.add_resource(ctrl.entity.Entities, API_VERSION + 'entities/')
     api.add_resource(ctrl.entity.Events, API_VERSION + 'events/')
 
-    api.add_resource(ctrl.entity.Cases, API_VERSION + 'cases/')
-    api.add_resource(ctrl.entity.Case, API_VERSION + 'cases/<string:case_id>/')
+    api.add_resource(ctrl.entity.Referrals, API_VERSION + 'referrals/')
+    api.add_resource(ctrl.entity.Referral, API_VERSION + 'referrals/<string:case_id>/')
     api.add_resource(
-        ctrl.entity.EntitiesInCase,
-        API_VERSION + 'entities_in_case/<string:case_id>/')
+        ctrl.entity.EntitiesInReferral,
+        API_VERSION + 'entities_in_referral/<string:case_id>/')
 
     api.add_resource(ctrl.feature.Feature, API_VERSION + 'features/<string:feature_name>/')
     api.add_resource(ctrl.feature.Features, API_VERSION + 'features/')

@@ -137,6 +137,6 @@ ENV/
 
 dbdata/
 sibylapp/db/data
-sibyl/
+real/
 screening_log.csv
 sibyl_test/

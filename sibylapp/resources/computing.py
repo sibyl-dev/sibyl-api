@@ -6,8 +6,7 @@ import pandas as pd
 from flask import request
 from flask_restful import Resource
 
-from sibyl.sibyl import global_explanation as ge
-from sibyl.sibyl import local_feature_explanation as lfe
+from real.explainers import global_explanation as ge
 from sibylapp import g
 from sibylapp.db import schema
 from sibylapp.resources import helpers
@@ -23,10 +22,8 @@ class Similarities(Resource):
         @apiGroup Computing
         @apiVersion 1.0.0
         @apiDescription Get a list of similar entities.
-
         @apiParam {String} eid ID of the entity.
         @apiParam {Number} number Number of similar entities to search for.
-
         @apiSuccess {String[]} entities List of entity IDs.
         """
 
@@ -40,14 +37,12 @@ class SingleChangePredictions(Resource):
         @apiVersion 1.0.0
         @apiDescription Get the list of updated predictions after making
         single changes.
-
         @apiParam {String} eid ID of entity to predict on.
         @apiParam {String} model_id ID of model to use for predictions.
         @apiParam {2-Tuple[]} changes List of features to change and
             their new values.
         @apiParam {String} changes.item1 Name of the feature to change.
         @apiParam {String} changes.item2 Changed Value of the feature.
-
         @apiSuccess {2-Tuple[]} changes List of features to change and
             their new values.
         @apiSuccess {String} changes.item1 Name of the feature to change.
@@ -120,14 +115,12 @@ class ModifiedPrediction(Resource):
         @apiGroup Computing
         @apiVersion 1.0.0
         @apiDescription  Get the modified prediction under different conditions
-
         @apiParam {String} eid ID of entity to predict on.
         @apiParam {String} model_id ID of model to use for predictions.
         @apiParam {2-Tuple[]} changes List of features to change and
             their new values.
         @apiParam {String} changes.item1 Name of the feature to change.
         @apiParam {String} changes.item2 Changed Value of the feature.
-
         @apiSuccess {Number} prediction New prediction after making
             the requested changes.
         """
@@ -197,10 +190,8 @@ class FeatureDistributions(Resource):
         @apiGroup Computing
         @apiVersion 1.0.0
         @apiDescription Get the distributions of all features
-
         @apiParam {Number} prediction Prediction Prediction to look at distributions for.
         @apiParam {String} model_id ID of model to use for predictions.
-
         @apiSuccess {Object} distributions Information about the distributions of each
             feature for each feature.
         @apiSuccess {String} distributions.key Feature name
@@ -293,10 +284,8 @@ class PredictionCount(Resource):
         @apiGroup Computing
         @apiVersion 1.0.0
         @apiDescription Get the number of entities that were predicted as a certain value
-
         @apiParam {Number} prediction Prediction to look at counts for
         @apiParam {String} model_id ID of model to use for predictions.
-
         @apiSuccess {Number} count Number of entities who are predicted as prediction in
             the training set
         """
@@ -356,10 +345,8 @@ class OutcomeCount(Resource):
         @apiVersion 1.0.0
         @apiDescription Get the distributions of entity outcomes
                         that were predicted as a certain value
-
         @apiParam {Number} prediction Prediction Prediction to look at counts for
         @apiParam {String} model_id ID of model to use for predictions.
-
         @apiSuccess {Object} distributions Information about the distributions of each
                                            outcome.
         @apiSuccess {String} distributions.key Outcome name
@@ -413,10 +400,8 @@ class FeatureContributions(Resource):
         @apiGroup Computing
         @apiVersion 1.0.0
         @apiDescription  get the contributions of all features
-
         @apiParam {String} eid ID of the entity to compute.
         @apiParam {String} model_id ID of the model to compute.
-
         @apiSuccess {Object} contributions Feature contribution object (key-value pair).
         @apiSuccess {Number} contributions.[key] Contribution value of the feature [key].
         """
@@ -463,8 +448,7 @@ class FeatureContributions(Resource):
             message, error_code = payload
             return message, error_code
 
-        contributions = lfe.get_contributions(
-            entity_features, explainer, transformer).iloc[0]
-        keys = list(contributions.index)
-        contribution_dict = dict(zip(keys, contributions))
+        contributions = explainer.produce(entity_features)
+        keys = list(contributions.columns)
+        contribution_dict = dict(zip(keys, contributions.iloc[0, :]))
         return {"contributions": contribution_dict}, 200

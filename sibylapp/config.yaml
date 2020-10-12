@@ -3,20 +3,20 @@
 
 host: "localhost" # mongodb server address
 port: 27017 # mongodb server port
-db: "sibylapp" # database name
+db: "sibyl" # database name
 username: # for auth
 password: # for auth
 
 # docker
 dk_host: "db" # mongodb server address
 dk_port: 27017 # mongodb server port
-dk_db: "sibylapp" # database name
+dk_db: "sibyl" # database name
 dk_username: # for auth
 dk_password: # for auth
 
 # FLASK ENV
 #===================================
-server_port: 3000 # the port that flask application is running on
+server_port: 3001 # the port that flask application is running on
 ENV: "production" # development, production, testing
 DEBUG: False
 TESTING: False

@@ -184,16 +184,16 @@ class Model(SibylAppDocument):
     training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
 
 
-class Case(SibylAppDocument):
+class Referral(SibylAppDocument):
     """
     A **Case** contains information about a case
 
     Attributes
     ----------
-    case_id : str
+    referral_id : str
         ID of the case
     property : dict {property : value}
         Domain specific properties
     """
-    case_id = fields.StringField(required=True, validation=_valid_id)
+    referral_id = fields.StringField(required=True, validation=_valid_id)
     property = fields.DictField()
