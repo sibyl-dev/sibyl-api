@@ -21,7 +21,8 @@ requirements = [
 
     # Math
     'numpy>=1.15.4,<1.17',
-    'pandas>=0.23.4,<0.25',
+    #'pandas>=0.23.4,<0.25',
+    'pandas>=1.0.3'
 
     # Flask
     'Flask==1.0.2',

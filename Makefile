@@ -234,9 +234,9 @@ load-db: init-db
 	mongorestore --db sibylapp ./db/dump/sibylapp/
 
 .PHONY: install-real
-install-real:
-	git clone -b restructure https://github.com/DAI-Lab/sibyl.git real
-	cd real
+install-pyreal:
+	git clone https://github.com/DAI-Lab/pyreal.git pyreal
+	cd pyreal
 	pip install -e .
 
 

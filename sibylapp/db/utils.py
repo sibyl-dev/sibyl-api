@@ -142,7 +142,7 @@ class MappingsTransformer(ABC):
     def transform(self, X):
         return convert_from_categorical(X, self.mappings)[self.features]
 
-    def transform_contributions_shap(self, contributions):
+    def transform_contributions(self, contributions):
         return combine_contributions_from_mappings(contributions, self.mappings)
 
 
