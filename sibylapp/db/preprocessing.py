@@ -3,16 +3,16 @@ import os
 import pickle
 import random
 
-from mongoengine import connect
 import numpy as np
 import pandas as pd
+from mongoengine import connect
 from pymongo import MongoClient
 from pyreal.explainers import LocalFeatureContribution
 from sklearn.linear_model import Lasso
 
+import sibylapp.resources.global_explanation as ge
 from sibylapp.db import schema
 from sibylapp.db.utils import MappingsTransformer, ModelWrapperThresholds
-import sibylapp.resources.global_explanation as ge
 
 
 def load_data(features, dataset_filepath):

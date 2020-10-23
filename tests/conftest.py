@@ -1,13 +1,13 @@
 import datetime
 import pickle
 
-from mongoengine import connect
-from mongoengine.connection import disconnect
 import numpy as np
 import pandas as pd
+import pytest
+from mongoengine import connect
+from mongoengine.connection import disconnect
 from pymongo import MongoClient
 from pyreal.explainers import LocalFeatureContribution
-import pytest
 from sklearn.linear_model import LinearRegression
 
 from sibylapp.core import SibylApp
