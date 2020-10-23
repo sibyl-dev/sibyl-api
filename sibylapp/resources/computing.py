@@ -6,7 +6,7 @@ import pandas as pd
 from flask import request
 from flask_restful import Resource
 
-import sibylapp.resources.global_explanation as ge
+from sibylapp.resources import global_explanation as ge
 from sibylapp import g
 from sibylapp.db import schema
 from sibylapp.resources import helpers
