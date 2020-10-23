@@ -64,7 +64,7 @@ test: test-server test-client ## run tests on both server and client
 
 .PHONY: test-server
 test-server: ## run tests on server
-	py.test -n 2 ./tests
+	py.test ./tests
 
 .PHONY: test-server-flask
 test-server-flask: ## run tests on server

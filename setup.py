@@ -45,7 +45,7 @@ setup_requirements = [
 
 test_requirements = [
     'coverage>=4.5.1',
-    'pytest>=4.0.2',
+    'pytest>=5.3.1',
     'tox>=2.9.1',
 
     # --- Flask Testing --- #
