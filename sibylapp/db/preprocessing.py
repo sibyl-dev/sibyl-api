@@ -276,7 +276,7 @@ if __name__ == "__main__":
                  dataset_filepath=dataset_filepath, importance_filepath=importance_filepath)
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
-    #generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
-    #                                  os.path.join(directory, "agg_dataset.csv"),
-    #                                  os.path.join(directory, "agg_features.csv"))
+    '''generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
+                                      os.path.join(directory, "agg_dataset.csv"),
+                                      os.path.join(directory, "agg_features.csv"))'''
     test_validation()

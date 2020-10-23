@@ -1,5 +1,4 @@
 import logging
-import math
 
 from flask_restful import Resource
 
