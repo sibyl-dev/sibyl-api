@@ -56,19 +56,19 @@ def test_get_events(client, entities):
         assert found
 
 
-def test_get_cases(client, cases):
-    response = client.get('/api/v1/cases/').json
-    assert response["cases"] == [case["case_id"] for case in cases]
+def test_get_referrals(client, referrals):
+    response = client.get('/api/v1/referrals/').json
+    assert response["referrals"] == [referral["referral_id"] for referral in referrals]
 
 
-def test_get_case(client, cases):
-    case = cases[0]
-    response = client.get('/api/v1/cases/' + case["case_id"] + "/").json
-    assert response == case
+def test_get_referral(client, referrals):
+    referral = referrals[0]
+    response = client.get('/api/v1/referrals/' + referral["referral_id"] + "/").json
+    assert response == referral
 
 
-def test_entities_in_case(client):
-    case_id = "101"
+def test_entities_in_referral(client):
+    referral_id = "101"
     entities_involved = ["ent1", "ent2"]
-    response = client.get('/api/v1/entities_in_case/' + case_id + "/").json
+    response = client.get('/api/v1/entities_in_referral/' + referral_id + "/").json
     assert response == entities_involved

@@ -17,11 +17,10 @@ def test_post_logging(client):
 
     assert response["message"] == "log successful"
 
-    log_file = open("test.csv")
-    assert log_file.readline().strip() == \
-        "timestamp,user_id,eid,event_element,event_action,event_details"
-    assert log_file.readline().strip() == \
-        ",".join((timestamp, user_id, eid, event["element"], event["action"], event["details"])) \
-        + ","
-
+    with open("test.csv") as log_file:
+        assert log_file.readline().strip() == \
+            "timestamp,user_id,eid,event_element,event_action,event_details"
+        assert log_file.readline().strip() == \
+            ",".join((timestamp, user_id, eid, event["element"], event["action"], event["details"])) \
+            + ","
     os.remove("test.csv")

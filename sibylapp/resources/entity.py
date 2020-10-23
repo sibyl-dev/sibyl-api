@@ -182,6 +182,6 @@ class EntitiesInReferral(Resource):
         """
         entities = schema.Entity.find(property__referral_ids__contains=referral_id)
         if entities is None:
-            LOGGER.log('referral %s has no entities', referral_id)
+            LOGGER.log(20, 'referral %s has no entities' % str(referral_id))
             return []
         return [document.eid for document in entities], 200

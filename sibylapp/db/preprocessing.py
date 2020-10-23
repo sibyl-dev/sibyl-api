@@ -3,85 +3,16 @@ import os
 import pickle
 import random
 
+from mongoengine import connect
 import numpy as np
 import pandas as pd
-from mongoengine import connect
 from pymongo import MongoClient
+from pyreal.explainers import LocalFeatureContribution
 from sklearn.linear_model import Lasso
 
-from pyreal.explainers import LocalFeatureContribution
 from sibylapp.db import schema
 from sibylapp.db.utils import MappingsTransformer, ModelWrapperThresholds
-
-
-def get_rows_by_output(output, predict, X, row_labels=None):
-    """
-    Return the indices of the rows in X that get predicted as output
-
-    :param output: int or array-like
-           The output or outputs to look for
-    :param predict: function array-like (X.shape) -> (X.shape[0])
-           The prediction function
-    :param X: Dataframe of shape(n_samples, n_features)
-           The data to look through
-    :param row_labels: None or array_like of shape (n_samples,)
-           If not None, return the row_labels of relevant rows instead of
-           numerical indices
-    :return: array_like
-            The indices or row_labels of the rows of X that result in output
-            when run through predict
-    """
-    preds_train = predict(X)
-    if np.isscalar(output):
-        output = [output]
-    xs_of_interest = np.isin(preds_train, output)
-    if row_labels is None:
-        row_labels = np.arange(0, len(xs_of_interest))
-    else:
-        row_labels = np.asanyarray(row_labels)
-    return row_labels[xs_of_interest]
-
-
-def summary_categorical(X):
-    """
-    Returns the unique values and counts for each column in X
-    :param X: array_like of shape (n_samples, n_features)
-           The data to summarize
-    :return values: list of length n_features of arrays
-                    The unique values for each feature
-    :return count: list of length n_features
-                   The number of occurrences of each unique value
-                   for each feature
-    """
-    all_values = []
-    all_counts = []
-    X = np.asanyarray(X)
-    for col in X.T:
-        values, counts = np.unique(col, return_counts=True)
-        all_values.append(values)
-        all_counts.append(counts)
-    return all_values, all_counts
-
-
-def summary_numeric(X):
-    """
-    Find the minimum, 1st quartile, median, 2nd quartile, and maximum of the
-    values for each column in X
-    :param X: array_like of shape (n_samples, n_features)
-           The data to summarize
-    :return: A list of length (n_features) of lists of length 5
-             The metrics for each feature:
-             [minimum, 1st quartile, median, 2nd quartile, and maximum]
-    """
-    all_metrics = []
-    X = np.asanyarray(X)
-    for col in X.T:
-        quartiles = np.quantile(col, [0.25, 0.5, 0.75])
-        maximum = col.max()
-        minimum = col.min()
-        all_metrics.append([float(minimum), float(quartiles[0]), float(quartiles[1]),
-                            float(quartiles[2]), float(maximum)])
-    return all_metrics
+import sibylapp.resources.global_explanation as ge
 
 
 def load_data(features, dataset_filepath):
@@ -198,10 +129,10 @@ def insert_model(features, model_filepath, dataset_filepath,
             explainer_serial = f.read()
     else:
         explainer = LocalFeatureContribution(base_model, dataset.sample(100),
-                                             contribution_transformers=transformer,
+                                             contribution_transforms=transformer,
                                              e_algorithm="shap",
                                              e_transforms=transformer,
-                                             m_transforms=transformer)
+                                             m_transforms=transformer, fit_on_init=True)
         explainer_serial = pickle.dumps(explainer)
 
     items = {
@@ -281,15 +212,15 @@ def generate_feature_distribution_doc(save_path, model, transformer,
     summary_dict = {}
     for output in range(1, 21):
         row_details = {}
-        rows = get_rows_by_output(output, model.predict, dataset, row_labels=None)
+        rows = ge.get_rows_by_output(output, model.predict, dataset, row_labels=None)
 
         count_total = len(rows)
         count_removed = sum(targets.iloc[rows])
         row_details["total cases"] = count_total
         row_details["total removed"] = count_removed
 
-        cat_summary = summary_categorical(dataset_cat.iloc[rows].applymap(str))
-        num_summary = summary_numeric(dataset_num.iloc[rows])
+        cat_summary = ge.summary_categorical(dataset_cat.iloc[rows].applymap(str))
+        num_summary = ge.summary_numeric(dataset_num.iloc[rows])
 
         distributions = {}
         for (i, name) in enumerate(boolean_features):
@@ -313,7 +244,7 @@ if __name__ == "__main__":
     # CONFIGURATIONS
     include_database = False
     client = MongoClient("localhost", 27017)
-    connect('sibyl', host='localhost', port=27017)
+    connect('sibylapp', host='localhost', port=27017)
     directory = os.path.join("..", "..", "..", "sibyl-data")
 
     # INSERT CATEGORIES

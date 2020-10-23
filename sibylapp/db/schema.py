@@ -186,12 +186,11 @@ class Model(SibylAppDocument):
 
 class Referral(SibylAppDocument):
     """
-    A **Case** contains information about a case
-
+    A **Case** contains information about a referral
     Attributes
     ----------
     referral_id : str
-        ID of the case
+        ID of the referral
     property : dict {property : value}
         Domain specific properties
     """

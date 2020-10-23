@@ -7,8 +7,9 @@ import pytest
 from mongoengine import connect
 from mongoengine.connection import disconnect
 from pymongo import MongoClient
+from sklearn.linear_model import LinearRegression
 
-from sibyl.sibyl.local_feature_explanation import fit_contribution_explainer
+from pyreal.explainers import LocalFeatureContribution
 from sibylapp.core import SibylApp
 from sibylapp.db import schema
 
@@ -74,9 +75,9 @@ def entities():
                    "bin_feat": False}
     features3 = {"A": 2, "B": 5, "C": 4, "num_feat": 5, "cat_feat": "something", "bin_feat": False}
 
-    entities = [{"eid": "ent1", "property": {"case_ids": ["101", "102"]}, "features": features1,
-                 "events": [events[0], events[1]]},
-                {"eid": "ent2", "property": {"case_ids": ["101"]}, "features": features1_b},
+    entities = [{"eid": "ent1", "property": {"referral_ids": ["101", "102"]},
+                 "features": features1, "events": [events[0], events[1]]},
+                {"eid": "ent2", "property": {"referral_ids": ["101"]}, "features": features1_b},
                 {"eid": "ent3", "property": {"name": "First Last"}, "features": features2},
                 {"eid": "ent4", "property": {"name": "First Last"}, "features": features2_b},
                 {"eid": "ent5", "features": features3, "events": [events[2]]}]
@@ -84,58 +85,53 @@ def entities():
 
 
 @pytest.fixture(scope="module")
-def cases():
-    cases = [{"case_id": "101", "property": {"date": "today"}}, {"case_id": "102"}]
-    return cases
-
-
-class TestModel:
-    def fit(self):
-        return self
-
-    def predict(self, X):
-        assert (X.columns == ["A", "B", "C"]).all()
-        return X["A"] - X["B"]
+def referrals():
+    referrals = [{"referral_id": "101", "property": {"date": "today"}}, {"referral_id": "102"}]
+    return referrals
 
 
 class TestTransformer:
     def fit(self):
         return self
 
-    def transform(self, X):
-        return X[["A", "B", "C"]]
+    def transform(self, x):
+        return x[["A", "B", "C"]]
 
-    def transform_contributions_shap(self, contributions):
+    def transform_contributions(self, contributions):
         return contributions[["A", "B", "C"]]
-
-    def transform_importances_pfi(self, importances):
-        return importances
 
 
 @pytest.fixture(scope="module")
 def models():
-    model = TestModel()
+    dummy_x = np.zeros((1, 3))
+    dummy_y = np.zeros(1)
+    model = LinearRegression()
+    model.fit(dummy_x, dummy_y)
+    model.coef_ = np.array([1, -1, 0])
+    model.intercept_ = 0
     model_serial = pickle.dumps(model)
     transformer = TestTransformer()
     transformer_serial = pickle.dumps(transformer)
 
-    dataset = pd.DataFrame(np.random.randint(0, 5, size=(100, 4)), columns=list("ABCD"))
+    dataset = pd.DataFrame(np.random.randint(0, 5, size=(100, 6)), columns=list("ABCDEF"))
 
-    explainer = fit_contribution_explainer(model, dataset,
-                                           transformer=transformer, return_result=True,
-                                           use_linear_explainer=False)
+    # TODO: Replace with LocalFeatureContribution once LocalFeatureContribution supports
+    #       kernel keyword
+    explainer = LocalFeatureContribution(model, dataset, e_transforms=transformer,
+                                         contribution_transforms=transformer,
+                                         e_algorithm="shap", fit_on_init=True)
     explainer_serial = pickle.dumps(explainer)
 
     models = [{"model": model_serial, "transformer": transformer_serial,
                "name": "test model", "description": "a model", "performance": "does well",
-               "importances": {"A": 100, "B": 0, "C": 0, "D": 0},
+               "importances": {"A": 100, "B": 0, "C": 0, "D": 0, "E": 0, "F": 0},
                "explainer": explainer_serial},
               {"model": model_serial, "name": "filler"}]
     return models
 
 
 @pytest.fixture(scope="module", autouse=True)
-def testdb(categories, features, entities, cases, models):
+def testdb(categories, features, entities, referrals, models):
     client = MongoClient("localhost", 27017)
     connect(test_database_name, host=test_host, port=test_port)
 
@@ -157,7 +153,7 @@ def testdb(categories, features, entities, cases, models):
             item_with_ref["events"] = ref_events
         schema.Entity.insert_many([item_with_ref])  # this line does not appear to work with insert
 
-    schema.Case.insert_many(cases)
+    schema.Referral.insert_many(referrals)
 
     dataset = schema.TrainingSet.insert(entities=schema.Entity.find())
     for model in models:
