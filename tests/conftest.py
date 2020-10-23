@@ -18,7 +18,7 @@ test_host = "localhost"
 test_port = 27017
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def app():
     config = {"db": test_database_name,
               "host": test_host,
@@ -32,14 +32,14 @@ def app():
     return app
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def categories():
     categories = [{"name": "cat1", "color": "#000000", "abbreviation": "c1"},
                   {"name": "cat2", "abbreviation": "c2"}]
     return categories
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def features():
     features = [{"name": "num_feat", "description": "xyz", "negated_description": "not xyz",
                  "category": "cat1", "type": "numeric"},
@@ -57,7 +57,7 @@ def features():
     return features
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def entities():
     events = [
         {"event_id": "123", "datetime": datetime.datetime(2020, 1, 1),
@@ -84,7 +84,7 @@ def entities():
     return entities
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def referrals():
     referrals = [{"referral_id": "101", "property": {"date": "today"}}, {"referral_id": "102"}]
     return referrals
@@ -101,7 +101,7 @@ class TestTransformer:
         return contributions[["A", "B", "C"]]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def models():
     dummy_x = np.zeros((1, 3))
     dummy_y = np.zeros(1)
@@ -130,7 +130,7 @@ def models():
     return models
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def testdb(categories, features, entities, referrals, models):
     client = MongoClient("localhost", 27017)
     connect(test_database_name, host=test_host, port=test_port)
