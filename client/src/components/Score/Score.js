@@ -1,5 +1,9 @@
 import React from 'react';
 
-const Score = () => <p>Score here</p>;
+const Score = () => (
+  <div className="component-wrapper">
+    <p>Score here</p>
+  </div>
+);
 
 export default Score;

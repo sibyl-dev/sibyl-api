@@ -1,0 +1,87 @@
+@import '../../../assets/sass/colors.scss';
+@import '../../../assets/sass/icons.scss';
+
+.sibyl-select {
+    font-size: 14px !important;
+    .sibyl-select__control {
+        min-height: 40px;
+    }
+    .sibyl-select__control,
+    .sibyl-select__control--is-focused {
+        &,
+        &:hover {
+            border: 1px solid $light-gray;
+            border-radius: 8px;
+            box-shadow: none;
+        }
+    }
+    .sibyl-select__placeholder {
+        color: #828282;
+    }
+
+    .sibyl-select__indicator-separator {
+        display: none;
+    }
+
+    .sibyl-select__menu {
+        z-index: 8;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .sibyl-select__menu-list {
+        .sibyl-select__option--is-focused,
+        .sibyl-select__option--is-selected {
+            background: $mid-gray;
+            color: #4f4f4f;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .sibyl-select__option {
+            padding-left: 15px;
+            cursor: pointer;
+        }
+    }
+
+    .sibyl-select__clear-indicator {
+        cursor: pointer;
+    }
+
+    .sibyl-select__dropdown-indicator {
+        padding: 0 5px 0 0;
+    }
+
+    .sibyl-select__multi-value {
+        background: $mid-gray;
+        border-radius: 16px;
+        padding: 3px;
+        .sibyl-select__multi-value__remove {
+            padding: 0 2px 0 0;
+            color: #4f4f4f;
+            cursor: pointer;
+            &:hover {
+                background-color: transparent;
+            }
+        }
+    }
+    .sibyl-select__clear-indicator {
+        padding: 0;
+    }
+    i {
+        &.bullet {
+            margin-right: 2px;
+        }
+    }
+
+    .sibyl-select__placeholder {
+        color: $light-gray;
+    }
+
+    input {
+        &[type='text'] {
+            height: 20px;
+        }
+    }
+}

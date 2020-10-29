@@ -66,7 +66,7 @@ user = 'HDI-Project'
 # for |version| and |release|, also used in various other places throughout
 # the built documents.
 #
-# The short X.Y version.
+# The short x.Y version.
 version = sibylapp.__version__
 # The full version, including alpha/beta/rc tags.
 release = sibylapp.__version__

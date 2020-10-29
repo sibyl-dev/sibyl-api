@@ -20,19 +20,23 @@ requirements = [
     'passlib==1.7.2',
 
     # Math
-    'numpy>=1.15.4,<1.17',
-    'pandas>=0.23.4,<0.25',
+    'numpy>=1.15.4',
+    'pandas>=1.0.3',
 
     # Flask
     'Flask==1.0.2',
     'Flask-Cors==3.0.7',
     'Flask-RESTful==0.3.7',
-    'Werkzeug==0.15.3',
-    'gevent==1.2.2',
+    'Werkzeug==0.15.5',
+    'greenlet==0.4.17',
+    'gevent==1.5',
 
     # Database
     'mongoengine>=0.16.3,<0.17',
-    'pymongo>=3.7.2,<4'
+    'pymongo>=3.7.2,<4',
+
+    # Explanations
+    'pyreal==0.1.0.dev0',
 ]
 
 setup_requirements = [
@@ -41,7 +45,7 @@ setup_requirements = [
 
 test_requirements = [
     'coverage>=4.5.1',
-    'pytest>=4.0.2',
+    'pytest>=5.3.1',
     'tox>=2.9.1',
 
     # --- Flask Testing --- #
@@ -50,19 +54,22 @@ test_requirements = [
 ]
 
 development_requirements = [
+    'wheel>=0.30.0'
+
     # general
     'bumpversion>=0.5.3',
     'pip>=9.0.1',
     'watchdog>=0.8.3',
+    'scikit-learn>=0.23.0'
 
     # docs
     'm2r>=0.2.0',
-    'Sphinx>=1.7.1',
+    'sphinx>=1.7.1',
     'sphinx_rtd_theme>=0.2.4',
 
     # style check
     'flake8>=3.5.0',
-    'isort>=4.3.4',
+    'isort>=4.3.4,<5.0.0',
 
     # fix style issues
     'autoflake>=1.1',
@@ -70,7 +77,6 @@ development_requirements = [
 
     # distribute on PyPI
     'twine>=1.10.0',
-    'wheel>=0.30.0'
 ]
 
 

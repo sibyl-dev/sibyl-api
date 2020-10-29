@@ -1,0 +1,109 @@
+@import '../../assets/sass/colors.scss';
+
+.dash-controls {
+    display: flex;
+
+    li {
+        flex: 1 1;
+        margin-right: 10px;
+
+        &.sep {
+            flex: 0;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        &:last-child {
+            margin-right: 0;
+        }
+
+        &.results-counter {
+            font-size: 14px;
+            line-height: 40px;
+            flex: 0 1;
+            white-space: nowrap;
+            margin-right: 10px;
+            span {
+                font-weight: bold;
+            }
+        }
+
+        &.expand-tip {
+            font-size: 14px;
+            line-height: 16px;
+            white-space: nowrap;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: transparentize($light-blue, 0.95);
+            color: $darkish-blue;
+            padding: 0 24px;
+            border-radius: 8px;
+            transition: 0.15s all ease-in;
+
+            &.hide {
+                opacity: 0;
+            }
+        }
+    }
+}
+
+.dash-footer {
+    background-color: $light-blue;
+    color: white;
+    padding: 6px 24px;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    span{
+        font-weight: 700;
+    }
+
+    .expand-button {
+        color: white;
+        span{
+            font-weight: normal;
+        }
+        padding-left: 10px;
+    }
+}
+
+.sub-header {
+    h4 {
+        margin: 10px 0;
+    }
+    .search-wrapper {
+        max-width: 500px;
+    }
+}
+.split-wrapper {
+    display: flex;
+
+    .split-separator {
+        min-height: 100%;
+        border-left: 1px dashed #bdbdbd;
+        margin: 0 10px;
+    }
+
+    .split-container {
+        flex: 1;
+        box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+        padding: 7px 0 0 0;
+        border-radius: 8px;
+        min-height: 93%;
+    }
+
+    .split-side {
+        width: 100%;
+        h4 {
+            margin-bottom: 24px;
+        }
+    }
+}
+
+.feature-category-label {
+    padding-left: 8px;
+    font-size: 14px;
+}

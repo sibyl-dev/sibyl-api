@@ -20,3 +20,14 @@ server_port: 3000 # the port that flask application is running on
 ENV: "production" # development, production, testing
 DEBUG: False
 TESTING: False
+
+# LOGGING
+#===================================
+log_filename: "screening_log.csv"
+
+# PRE-SAVED INFORMATION
+#===================================
+feature_distribution_location: "sibylapp/db/precomputed/agg_distributions.json"
+                    # Location of pre-computed feature distribution information
+                    # Useful in cases where the dataset cannot be shared
+                    # null if this information should be calculated at runtime

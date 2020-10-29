@@ -1,224 +1,198 @@
-"""sibylapp Database Schema.
+"""SibylApp Database Schema.
 
-This module contains some utility functions and classes that assist
-on the usage of MongoEngine to define a DB Schema.
+This module contains the classes that define the SibylApp Database Schema:
+    * Event
+    * Entitiy
+    * Category
+    * Feature
+    * TrainingSet
+    * Model
+    * Case
 """
 
-import copy
-from datetime import datetime
+import logging
 
 import pandas as pd
-from bson import ObjectId
-from mongoengine import Document, fields
-from mongoengine.base.metaclasses import TopLevelDocumentMetaclass
+from mongoengine import DENY, NULLIFY, PULL, ValidationError, fields
+
+from sibylapp.db.base import SibylAppDocument
+
+LOGGER = logging.getLogger(__name__)
 
 
-def walk(document, transform):
-    if not isinstance(document, dict):
-        return document
-
-    new_doc = dict()
-    for key, value in document.items():
-        if isinstance(value, dict):
-            value = walk(value, transform)
-        elif isinstance(value, list):
-            value = [walk(v, transform) for v in value]
-
-        new_key, new_value = transform(key, value)
-        new_doc[new_key] = new_value
-
-    return new_doc
+def _valid_id(val):
+    if val is not None and not isinstance(val, str):
+        raise ValidationError("eid must be type string, given %s" % val)
 
 
-def remove_dots(document):
-    return walk(document, lambda key, value: (key.replace('.', '-'), value))
+def _eid_exists(val):
+    if Entity.find_one(eid=val) is None:
+        raise ValidationError("eid provided (%s) does not exist" % val)
 
 
-def restore_dots(document):
-    return walk(document, lambda key, value: (key.replace('-', '.'), value))
-
-
-def _merge_meta(base, child):
-    """Merge the base and the child meta attributes.
-
-    List entries, such as ``indexes`` are concatenated.
-    ``abstract`` value is set to ``True`` only if defined as such
-    in the child class.
-
-    Args:
-        base (dict):
-            ``meta`` attribute from the base class.
-        child (dict):
-            ``meta`` attribute from the child class.
-
-    Returns:
-        dict:
-            Merged metadata.
+class Event(SibylAppDocument):
     """
-    base = copy.deepcopy(base)
-    child.setdefault('abstract', False)
-    for key, value in child.items():
-        if isinstance(value, list):
-            base.setdefault(key, []).extend(value)
-        else:
-            base[key] = value
+    An **Event** holds information about an event an entity was involved with
 
-    return base
-
-
-class SibylAppMeta(TopLevelDocumentMetaclass):
-    """Metaclass for the OrionDocument class.
-
-    It ensures that the ``meta`` attribute from the OrionDocument
-    parent class is used even if the child class defines a new one
-    by merging both of them together.
+    Attributes
+    ----------
+    event_id : str
+        Reference ID for the event
+    datetime : DateTime
+        Date and time of the event
+    type : str
+        Type of event
+    property : dict {property : value}
+        Domain specific properties of the event
     """
+    event_id = fields.StringField()
+    datetime = fields.DateTimeField(required=True)
+    # TODO: choices from config
+    type = fields.StringField(required=True)
+    property = fields.DictField()  # {property:value}
 
-    def __new__(mcs, name, bases, attrs):
-        if 'meta' in attrs:
-            meta = attrs['meta']
-            for base in bases:
-                if base is not Document and hasattr(base, '_meta'):
-                    meta = _merge_meta(base._meta, meta)
-
-            attrs['meta'] = meta
-
-        if 'unique_key_fields' in attrs:
-            indexes = attrs.setdefault('meta', {}).setdefault('indexes', [])
-            indexes.append({
-                'fields': attrs['unique_key_fields'],
-                'unique': True,
-                'sparse': True,
-            })
-
-        return super().__new__(mcs, name, bases, attrs)
+    unique_key_fields = ['event_id']
 
 
-class SibylAppDocument(Document, metaclass=SibylAppMeta):
-    """Parent class for all the Document classes in Orion.
-
-    This class defines a few defaults, such as the ``instert_time`` field
-    and index, as well as a few utility methods to ease the interaction
-    with the database models.
+class Entity(SibylAppDocument):
     """
+    An **Entity** holds the feature values and details for one model input
 
-    insert_time = fields.DateTimeField(default=datetime.utcnow)
+    Attributes
+    ----------
+    eid : str
+        Unique ID of the entity
+    features : dict {feature_name : feature_value}
+        Feature values for the entity
+    property : dict {property : value}
+        Domain-specific properties
+    events : list [Event object]
+        List of events this entity was involved in
+    """
+    eid = fields.StringField(validation=_valid_id)
 
-    meta = {
-        'indexes': [
-            '$insert_time',
-        ],
-        'abstract': True,
-        'index_background': True,
-        'auto_create_index': True,
-    }
+    features = fields.DictField()  # {feature:value}
+    property = fields.DictField()  # {property:value}
 
-    @staticmethod
-    def _get_id(obj):
-        if isinstance(obj, ObjectId):
-            return obj
-        elif isinstance(obj, Document):
-            return obj.id
-        elif obj:
-            return ObjectId(obj)
+    events = fields.ListField(
+        fields.ReferenceField(Event, reverse_delete_rule=PULL))
 
-    @classmethod
-    def find(cls, as_df_=False, only_=None, exclude_=None, **kwargs):
-        name = cls.__name__.lower()
-        if name in kwargs:
-            kwargs['id'] = cls._get_id(kwargs.pop(name))
-
-        query = {
-            key: value
-            for key, value in kwargs.items()
-            if value is not None
-        }
-        cursor = cls.objects(**query)
-        if only_:
-            cursor = cursor.only(*only_)
-
-        if exclude_:
-            cursor = cursor.exclude(*exclude_)
-
-        if not as_df_:
-            return cursor
-
-        df = pd.DataFrame([
-            document.to_mongo()
-            for document in cursor
-        ]).rename(columns={'_id': name + '_id'})
-
-        if exclude_:
-            for column in exclude_:
-                if column in df:
-                    del df[column]
-
-        return df
-
-    @classmethod
-    def get(cls, **kwargs):
-        query = {
-            key: value
-            for key, value in kwargs.items()
-            if value is not None
-        }
-        if not query:
-            raise ValueError('Empty queries not supported')
-
-        cursor = cls.find(as_df_=False, **query)
-        if not cursor:
-            raise ValueError('No {} found for query {}'.format(cls.__name__, query))
-        elif cursor.count() > 1:
-            raise ValueError('Multiple {}s found for query {}'.format(cls.__name__, query))
-
-        return cursor.first()
-
-    @classmethod
-    def find_one(cls, **kwargs):
-        return cls.find(**kwargs).first()
-
-    @classmethod
-    def last(cls, **kwargs):
-        return cls.find(**kwargs).order_by('-insert_time').first()
-
-    @classmethod
-    def insert(cls, **kwargs):
-        document = cls(**kwargs)
-        document.save()
-
-        return document
-
-    @classmethod
-    def insert_many(cls, docs):
-        wrapped_docs = [cls(**d) for d in docs]
-        cls.objects.insert(wrapped_docs)
-
-    @classmethod
-    def find_or_insert(cls, **kwargs):
-        document = cls.find_one(**kwargs)
-        if document is None:
-            document = cls.insert(**kwargs)
-
-        return document
+    unique_key_fields = ['eid']
 
 
-class Status:
-    """Mixin that adds a status field and a method to check its live value."""
+class Category(SibylAppDocument):
+    """
+    A **Category** holds information about a feature category
 
-    status = fields.StringField()
+    Attributes
+    ----------
+    name : str
+        Name of the category
+    color : str
+        Hexidecimal color that should be used for the category
+    abbreviation : str
+        Two or three character abbreviation of the category
+    """
+    name = fields.StringField(required=True)
+    color = fields.StringField()
+    abbreviation = fields.StringField(max_length=3)
 
-    STATUS_PENDING = 'PENDING'
-    STATUS_RUNNING = 'RUNNING'
-    STATUS_SUCCESS = 'SUCCESS'
-    STATUS_ERRORED = 'ERRORED'
-
-    def get_status(self):
-        self.reload()
-        return self.status
+    unique_key_fields = ['name', 'abbreviation']
 
 
-def key_has_dollar(d):
-    """Recursively check if any key in a dict contains a dollar sign."""
-    for k, v in d.items():
-        if k.startswith('$') or (isinstance(v, dict) and key_has_dollar(v)):
-            return True
+class Feature(SibylAppDocument):
+    """
+    A **Feature** hold information about a model input feature
+
+    Attributes
+    ----------
+    name : str
+        Name of the feature
+    description : str
+        Readable description of the feature
+    negated_description : str
+        Readable description of the feature in negated form
+    category : Category object
+        Category the feature belongs to
+    type : str
+        Feature type (one of binary, categorical, and numeric)
+    """
+    name = fields.StringField(required=True)
+    description = fields.StringField()
+    negated_description = fields.StringField()
+    category = fields.ReferenceField(Category, reverse_delete_rule=NULLIFY)
+    type = fields.StringField(choices=['binary', 'categorical', 'numeric'])
+
+    unique_key_fields = ['name']
+
+
+class TrainingSet(SibylAppDocument):
+    """
+    A **TrainingSet** is a set of entities that can be used to explain a given model
+
+    Attributes
+    ----------
+    entities : list [Entity object[
+        List of entities in the dataset
+    neighbors : trained NN classifier
+        Trained nearest neighbors classifier for the dataset
+    """
+    entities = fields.ListField(
+        fields.ReferenceField(Entity, reverse_delete_rule=PULL))
+    neighbors = fields.BinaryField()  # trained NN classifier
+
+    def to_dataframe(self):
+        """
+        Returns this dataset as a Pandas dataframe
+        :return: dataframe
+        """
+        features = [entity.features for entity in self.entities]
+        training_set_df = pd.DataFrame(features)
+        return training_set_df
+
+
+class Model(SibylAppDocument):
+    """
+    A **Model** holds information about a model
+
+    Attributes
+    ----------
+    model : pickle-saved model
+        The model object. Must have a model.predict() function
+    name : str
+        Name of the model
+    description : str
+        Description of the model
+    performance : str
+        Description of performance
+    importances : dict {feature_name : importance}
+        Importances of all features to the model
+    explainer : contribution explainer
+        Trained contribution explainer
+    training_set : TrainingSet
+        Training set for the model
+    """
+    model = fields.BinaryField(required=True)  # the model (must have model.predict())
+    transformer = fields.BinaryField()  # the model's transformer
+
+    name = fields.StringField()
+    description = fields.StringField()
+    performance = fields.StringField()
+    importances = fields.DictField()  # {feature_name:importance}
+
+    explainer = fields.BinaryField()  # trained contribution explainer
+    training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
+
+
+class Referral(SibylAppDocument):
+    """
+    A **Case** contains information about a referral
+    Attributes
+    ----------
+    referral_id : str
+        ID of the referral
+    property : dict {property : value}
+        Domain specific properties
+    """
+    referral_id = fields.StringField(required=True, validation=_valid_id)
+    property = fields.DictField()

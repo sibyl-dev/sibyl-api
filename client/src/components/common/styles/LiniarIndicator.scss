@@ -1,0 +1,32 @@
+@import '../../../assets/sass/colors.scss';
+
+.percentage-background {
+    fill: rgba($light-gray, 0.5);
+    width: 100%;
+    height: 8px;
+    transform: translate(0px, 4px);
+}
+
+.separator {
+    width: 1px;
+    height: 16px;
+    fill: $light-gray;
+}
+
+.percentage-indicator {
+    $border-radius: 4px;
+    width: 100%;
+    border-radius: $border-radius;
+    background: rgba($light-gray, 0.5);
+    position: relative;
+    z-index: 0;
+    height: 8px;
+    overflow: hidden;
+
+    .progress {
+        left: 0;
+        height: 8px;
+        background: $dark-mauve;
+        border-radius: $border-radius;
+    }
+}

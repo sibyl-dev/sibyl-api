@@ -1,28 +1,50 @@
-.header {
-    .main-header,
-    .sub-header {
-        padding: 20px 40px;
-        ul {
-            display: flex;
-            align-items: center;
-        }
-        li {
-            flex: 1;
-            justify-content: space-between;
-            &:last-child {
-                text-align: right;
-                strong {
-                    color: #4f4f4f;
-                }
+@import '../../assets/sass/colors.scss';
+
+.main-header,
+.sub-header {
+    padding: 20px 40px;
+    ul {
+        display: flex;
+        align-items: center;
+    }
+    li {
+        flex: 1;
+        justify-content: space-between;
+        &:last-child {
+            text-align: right;
+            strong {
+                color: #4f4f4f;
             }
         }
-    }
 
-    .sub-header {
-        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.06) inset;
-        background: #fff;
-        border: 1px solid rgba(0, 0, 0, 0.06);
+        &.expand-tip{
+            font-size: 14px;
+            line-height: 16px;
+            white-space: nowrap;
+            padding: 12px 24px;
+            background-color: transparentize($light-blue, 0.95);
+            margin-left: 15px;
+            color: $darkish-blue;
+            border-radius: 8px;
+            transition: 0.15s all ease-in;
+            max-width: 480px;
+            text-align: center;
+
+            &.hide {
+                opacity: 0;
+            }
+        }
+
+        &.search-field-holder{
+            max-width: 480px;
+        }
     }
+}
+
+.sub-header {
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.06) inset;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
 
     button {
         border: 1px solid #bdbdbd;
