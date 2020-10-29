@@ -1,6 +1,5 @@
-- Sibylapp version:
+- Sibyl-api version:
 - Python version:
-- NodeJS version:
 - Operating System:
 
 ### Description

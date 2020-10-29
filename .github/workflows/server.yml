@@ -14,9 +14,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-18.04, ubuntu-latest]
         python-version: [3.6]
-        mongodb-version: [4.0, 4.2]
+        mongodb-version: [3.6]
 
     steps:
       - uses: actions/checkout@v2
