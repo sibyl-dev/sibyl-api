@@ -14,7 +14,7 @@ schemas = {
                 'type': 'object',
                 'properties': {
                     'data': {}
-                }
+                },
             }
         ]
     }
@@ -29,7 +29,7 @@ tags = [
 
 
 swagger_config = {
-    'title': 'sibyl RestAPI Documentation',
+    'title': 'Sibyl RestAPI Documentation',
     'uiversion': 3,
     'openapi': '3.0.2',
     'doc_dir': './apidocs/resources/',
@@ -59,14 +59,14 @@ Logo_DAI_highres.png" alt=“DAI-Lab” />
 
 # License
 
-[The MIT License](https://github.com/HDI-Project/MTV/blob/master/LICENSE)
+[The MIT License](https://github.com/DAI-Lab/sibyl-api/blob/master/LICENSE)
 """
 
 
 swagger_tpl = {
     'info': {
         'description': markdown_text,
-        'title': 'MTV RestAPI Documentation',
+        'title': 'Sibyl RestAPI Documentation',
         'version': '1.0.0'
     },
     'tags': tags,
@@ -83,15 +83,6 @@ swagger_tpl = {
             },
             'ErrorMessage': {
                 'description': 'Error message',
-                'content': {
-                    'application/json': {
-                        'schema': {'$ref': '#/components/schemas/Message'}
-                    }
-                }
-            },
-            'UnauthorizedError': {
-                'description': ('Authentication information is missing '
-                                'or invalid'),
                 'content': {
                     'application/json': {
                         'schema': {'$ref': '#/components/schemas/Message'}

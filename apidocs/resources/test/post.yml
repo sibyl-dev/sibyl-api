@@ -16,7 +16,7 @@ requestBody:
         required: ['item1', 'item2']
 responses:
   200:
-    description: Test Message
+    description: POST success message
     content:
       application/json:
         schema:
@@ -27,3 +27,5 @@ responses:
           data:
             item1: 'Your inputed item1 value'
             item2: 'Your inputed item2 value'
+  400:
+    $ref: '#/components/responses/ErrorMessage'

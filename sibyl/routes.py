@@ -59,4 +59,4 @@ def add_routes(app):
 
     api.add_resource(ctrl.logging.Logging, API_VERSION + 'logging/')
 
-    api.add_resource(ctrl.test.Test, API_VERSION + 'test/<string:param1>/')
+    api.add_resource(ctrl.test.Test, API_VERSION + 'test/')

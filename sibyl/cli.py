@@ -48,7 +48,7 @@ def main():
     args = parser.parse_args()
 
     setup_logging(args.verbose, args.logfile)
-    config = read_config('./sibyl/config.yaml')
+    config = read_config('./sibyl/config.yml')
     sibyl = Sibyl(config, args.docker)
 
     args.function(sibyl, args)

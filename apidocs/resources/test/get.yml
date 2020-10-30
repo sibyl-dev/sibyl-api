@@ -10,7 +10,7 @@ parameters:
     required: false
 responses:
   200:
-    description: Test Message
+    description: GET success message
     content:
       application/json:
         schema:
@@ -19,4 +19,6 @@ responses:
           code: 200
           message: 'GET test succeeded'
           data:
-            param1: 'Your inputed value'
+            param1: 'Value of param1'
+  400:
+    $ref: '#/components/responses/ErrorMessage'

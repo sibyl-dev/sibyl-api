@@ -1,4 +1,4 @@
-Test PUT method
+Test DELETE method
 ---
 tags:
   - test
@@ -6,11 +6,13 @@ security:
   - tokenAuth: []
 responses:
   200:
-    description: Test Message
+    description: Delete success message
     content:
       application/json:
         schema:
           $ref: '#/components/schemas/TestMessage'
         example:
           code: 200
-          message: 'PUT test succeeded'
+          message: 'DELETE test succeeded'
+  400:
+    $ref: '#/components/responses/ErrorMessage'

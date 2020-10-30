@@ -44,6 +44,13 @@ class Test(Resource):
         Refer to ./apidocs/resources/test/put.yml
         """
 
+        data = request.json
+        if (type(data['item1']) != str) or (type(data['item2']) != str):
+            return {
+                'code': 400,
+                'message': 'invalid arguments - item1 & item2 should be string'
+            }
+
         return {
             'code': 200,
             'message': 'PUT test succeeded'

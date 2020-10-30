@@ -13,7 +13,7 @@ end_of_line = lf
 [*.py]
 max_line_length = 99
 
-[*.yaml]
+[*.yml]
 indent_size = 2
 
 [*.bat]
