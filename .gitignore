@@ -133,10 +133,8 @@ ENV/
 
 .idea/*
 
-.vscode/*
-
 dbdata/
-sibylapp/db/data
+sibyl/db/data
 real/
 screening_log.csv
 sibyl_test/

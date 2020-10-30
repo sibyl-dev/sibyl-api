@@ -50,14 +50,14 @@ install-develop: clean-build clean-pyc ## install the package in editable mode a
 
 .PHONY: lint
 lint: ## check style with flake8 and isort
-	flake8 sibylapp tests --ignore W503
-	isort -c --recursive sibylapp tests
+	flake8 sibyl tests --ignore W503
+	isort -c --recursive sibyl tests
 
 .PHONY: fix-lint
 fix-lint: ## fix lint issues using autoflake, autopep8, and isort
-	find sibylapp tests -name '*.py' | xargs autoflake --in-place --remove-all-unused-imports --remove-unused-variables
-	autopep8 --in-place --recursive --aggressive sibylapp tests
-	isort --apply --atomic --recursive sibylapp tests
+	find sibyl tests -name '*.py' | xargs autoflake --in-place --remove-all-unused-imports --remove-unused-variables
+	autopep8 --in-place --recursive --aggressive sibyl tests
+	isort --apply --atomic --recursive sibyl tests
 
 .PHONY: test
 test: test-server test-client ## run tests on both server and client
@@ -76,7 +76,7 @@ test-client: ## run tests on client
 
 .PHONY: coverage
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source sibylapp -m pytest
+	coverage run --source sibyl -m pytest
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
@@ -89,7 +89,7 @@ coverage: ## check code coverage quickly with the default Python
 
 .PHONY: docs
 docs: clean-docs ## generate Sphinx HTML documentation, including API docs
-	sphinx-apidoc --separate --no-toc -o docs/api/ sibylapp
+	sphinx-apidoc --separate --no-toc -o docs/api/ sibyl
 	$(MAKE) -C docs html
 
 .PHONY: view-docs
@@ -102,7 +102,7 @@ serve-docs: view-docs ## compile the docs watching for changes
 
 .PHONY: apidocs
 apidocs:	## generate server API docs
-	apidoc -i sibylapp/resources -o apidocs/
+	apidoc -i sibyl/resources -o apidocs/
 
 .PHONY: view-apidocs
 view-apidocs:	## view server API docs
@@ -227,11 +227,11 @@ init-db: clean-db
 
 .PHONY: load-db
 load-db: init-db
-	rm -f -r db/dump/sibylapp/
+	rm -f -r db/dump/sibyl/
 	curl -o sibyl.zip "https://d3-ai-sibyl.s3.amazonaws.com/sibyl.zip"
 	unzip sibyl.zip -d ./db/ && rm sibyl.zip
-	mongo sibylapp --eval "db.dropDatabase()"
-	mongorestore --db sibylapp ./db/dump/sibylapp/
+	mongo sibyl --eval "db.dropDatabase()"
+	mongorestore --db sibyl ./db/dump/sibyl/
 
 .PHONY: install-real
 install-pyreal:
