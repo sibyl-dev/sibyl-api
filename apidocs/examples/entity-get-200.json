@@ -1,0 +1,21 @@
+{
+    "eid": "18",
+    "features": [
+        {
+            "name": "f1",
+            "value": "v1"
+        },
+        {
+            "name": "fn",
+            "value": "vn"
+        }
+    ],
+    "property": {
+        "name": "Elsa",
+        "referral_ids": [
+            "ca19",
+            "ca88",
+            "ca133"
+        ]
+    }
+}

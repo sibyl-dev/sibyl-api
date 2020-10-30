@@ -1,7 +1,7 @@
 import logging
 
 from flask import request
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
 
 from sibyl.db import schema
 
@@ -42,104 +42,225 @@ def get_referral(referral_doc):
 class Entity(Resource):
     def get(self, eid):
         """
-        @api {get} /entities/:eid/ Get an entity by ID
-        @apiName GetEntity
-        @apiGroup Entity
-        @apiVersion 1.0.0
-        @apiDescription Get the detailed information of an entity.
-
-        @apiSuccess {String} eid ID of the entity.
-        @apiSuccess {Object[]} features List of features.
-        @apiSuccess {String} features.name  Feature name.
-        @apiSuccess {Number|String} features.value Feature value.
-        @apiSuccess {Object} [property] Special property of this entity.
-        @apiSuccess {String[]} [property.referral_ids] IDs of referrals the entity
-                                         is involved in.
-
-        @apiSuccessExample {json} Success-Response:
-            HTTP/1.1 200 OK
-            {
-                "eid": "18",
-                "features": [
-                    {"name": "f1", "value": "v1"},
-                    ...
-                    {"name": "fn", "value": "vn"}
-                ],
-                "property": {
-                    "name": "Elsa",
-                    "referral_ids": ["ca19", "ca88", "ca133"]
-                }
-            }
+        Get an Entity by ID
+        ---
+        tags:
+          - entity
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: eid
+            in: path
+            schema:
+              type: string
+            required: true
+            description: ID of the entity to get
+        responses:
+          200:
+            description: Entity to be returned
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Entity'
+                examples:
+                  inlineJson:
+                    summary: inline example
+                    value: {
+                        "eid": "18",
+                        "features": [
+                            {
+                                "name": "f1",
+                                "value": "v1"
+                            }
+                        ],
+                        "property": {
+                            "name": "Elsa",
+                            "referral_ids": [
+                                "ca19",
+                                "ca88",
+                                "ca133"
+                            ]
+                        }
+                  }
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/entity-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
         entity = schema.Entity.find_one(eid=str(eid))
         if entity is None:
             LOGGER.exception('Error getting entity. '
                              'Entity %s does not exist.', eid)
             return {
-                'message': 'Entity {} does not exist'.format(eid)
+                'message': 'Entity {} does not exist'.format(eid),
+                'code': 400
             }, 400
 
         return get_entity(entity, features=True), 200
 
 
 class Entities(Resource):
+
+    def __init__(self):
+        parser_get = reqparse.RequestParser(bundle_errors=True)
+        parser_get.add_argument('referral_id', type=str, default=None,
+                                location='args')
+        self.parser_get = parser_get
+
     def get(self):
         """
-        @api {get} /entities/ Get all entities meta info
-        @apiName GetEntities
-        @apiGroup Entity
-        @apiVersion 1.0.0
-        @apiDescription Get meta information of all the entities.
-
-        @apiSuccess {Object[]} entities List of entity objects
-        @apiSuccess {Object} [entities.eid] ID of the entity.
-        @apiSuccess {String} [entities.property] Properties of the entity.
+        Get all Entities
+        If referral ID is specified, return entities of that referral.
+        ---
+        tags:
+          - entity
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: referral_id
+            in: query
+            schema:
+              type: string
+            required: false
+            description: ID of the referral to filter events
+        responses:
+          200:
+            description: All entities
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    entities:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Entity'
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/entities-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
-        documents = schema.Entity.find()
+
         try:
-            entities = [get_entity(document, features=False) for document in documents]
+            args = self.parser_get.parse_args()
         except Exception as e:
-            LOGGER.exception(e)
-            return {'message': str(e)}, 500
+            LOGGER.exception(str(e))
+            return {'message', str(e)}, 400
+
+        referral_id = args['referral_id']
+        if referral_id is None:
+            # no referral filter applied
+            documents = schema.Entity.find()
+            try:
+                entities = [
+                    get_entity(document, features=False)
+                    for document in documents
+                ]
+            except Exception as e:
+                LOGGER.exception(e)
+                return {'message': str(e)}, 500
+            else:
+                return {'entities': entities}
         else:
-            print(entities)
-            return {'entities': entities}
+            # filter entities by referral ID
+            entities = schema.Entity.find(
+                property__referral_ids__contains=referral_id)
+            if entities is None:
+                LOGGER.log(20, 'referral %s has no entities' % str(referral_id))
+                return []
+            return [document.eid for document in entities], 200
 
 
 class Events(Resource):
+
+    def __init__(self):
+        parser_get = reqparse.RequestParser(bundle_errors=True)
+        parser_get.add_argument('eid', type=str, required=True,
+                                location='args')
+        self.parser_get = parser_get
+
     def get(self):
         """
-        @api {get} /events/ Get the events of an entity
-        @apiName GetEvents
-        @apiGroup Entity
-        @apiVersion 1.0.0
-        @apiDescription Get the history/events of a entity.
-
-        @apiParam {String} eid EID of the entity.
-
-        @apiSuccess {Object[]} events List of Event Objects.
+        Get the Events of an Entity
+        ---
+        tags:
+          - entity
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: eid
+            in: query
+            schema:
+              type: string
+            required: true
+            description: ID of the entity to filter events
+        responses:
+          200:
+            description: Events of an entity
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    entities:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Event'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
-        eid = request.args.get('eid', None)
+
+        try:
+            args = self.parser_get.parse_args()
+        except Exception as e:
+            LOGGER.exception(str(e))
+            return {'message', str(e)}, 400
+
+        eid = args['eid']
+
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
-            LOGGER.exception('Error getting entity. Entity %s does not exist.', eid)
-            return {'message': 'Entity {} does not exist'.format(eid)}, 400
-        events = get_events(entity)
-        return events, 200
+            message = 'message: Entity {} does not exist'.format(eid)
+            LOGGER.exception(message)
+            return {'message': message, 'code': 400}, 400
+
+        return get_events(entity), 200
 
 
 class Referral(Resource):
     def get(self, referral_id):
         """
-        @api {get} /referrals/:referral_id/ Get details of a referral
-        @apiName GetReferral
-        @apiGroup referral
-        @apiVersion 1.0.0
-        @apiDescription Get details of a specific referral.
-
-        @apiSuccess {String} referral_id ID of the referral.
-        @apiSuccess {String} property properties of the referral
+        Get a Referral by ID
+        ---
+        tags:
+          - referral
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: referral_id
+            in: path
+            schema:
+              type: string
+            required: true
+            description: ID of the referral to get
+        responses:
+          200:
+            description: Referral to be returned
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Referral'
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/referral-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
+
         referral = schema.Referral.find_one(referral_id=referral_id)
         if referral is None:
             LOGGER.exception('Error getting referral. referral %s does not exist.', referral_id)
@@ -151,13 +272,30 @@ class Referral(Resource):
 class Referrals(Resource):
     def get(self):
         """
-        @api {get} /referrals/ Get a list of referrals
-        @apiName GetReferrals
-        @apiGroup referral
-        @apiVersion 1.0.0
-        @apiDescription Get a list of referrals.
-
-        @apiSuccess {String[]} referrals List of referral ids
+        Get all Referrals
+        ---
+        tags:
+          - referral
+        security:
+          - tokenAuth: []
+        responses:
+          200:
+            description: All Referrals
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    referrals:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Referral'
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/referrals-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
         documents = schema.Referral.find()
         try:
@@ -169,6 +307,7 @@ class Referrals(Resource):
             return {'referrals': referral}, 200
 
 
+# deprecated
 class EntitiesInReferral(Resource):
     def get(self, referral_id):
         """

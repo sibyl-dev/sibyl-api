@@ -222,16 +222,16 @@ clean-db:
 
 .PHONY: init-db
 init-db: clean-db
-	mkdir -p db
-	mkdir -p db/history_version/
+	mkdir -p dbdata
+	mkdir -p dbdata/history_version/
 
 .PHONY: load-db
 load-db: init-db
-	rm -f -r db/dump/sibyl/
+	rm -f -r dbdata/dump/sibyl/
 	curl -o sibyl.zip "https://d3-ai-sibyl.s3.amazonaws.com/sibyl.zip"
-	unzip sibyl.zip -d ./db/ && rm sibyl.zip
+	unzip sibyl.zip -d ./dbdata/ && rm sibyl.zip
 	mongo sibyl --eval "db.dropDatabase()"
-	mongorestore --db sibyl ./db/dump/sibyl/
+	mongorestore --db sibyl ./dbdata/dump/sibylapp/
 
 .PHONY: install-real
 install-pyreal:

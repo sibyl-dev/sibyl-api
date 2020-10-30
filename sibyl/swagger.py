@@ -1,4 +1,47 @@
 schemas = {
+    'Referral': {
+        'type': 'object',
+        'properties': {
+            'referral_id': {'type': 'string'},
+            'property': {'type': 'object', 'additionalProperties': {}}  # any
+        },
+        'required': ['event_id']
+    },
+    'Event': {
+        'type': 'object',
+        'properties': {
+            'event_id': {'type': 'string'},
+            'datetime': {'type': 'string'},
+            'type': {'type': 'string'},
+            'property': {'type': 'object', 'additionalProperties': {}}  # any
+        },
+        'required': ['event_id', 'message']
+    },
+    'Entity': {
+        'type': 'object',
+        'properties': {
+            'eid': {'type': 'string'},
+            'features': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'name': {'type': 'string'},
+                        'value': {
+                            'oneOf': [
+                                {'type': 'string'},
+                                {'type': 'integer'},
+                                {'type': 'number'}
+                            ]
+                        },
+                    }
+                },
+
+            },
+            'property': {'type': 'object', 'additionalProperties': {}}  # any
+        },
+        'required': ['code', 'message']
+    },
     'Message': {
         'type': 'object',
         'properties': {
@@ -24,7 +67,15 @@ tags = [
     {
         'name': 'default',
         'description': 'Uncategorized APIs'
-    }
+    },
+    {
+        'name': 'entity',
+        'description': 'Everything about entity interactions'
+    },
+    {
+        'name': 'referral',
+        'description': 'Everything about referral interactions'
+    },
 ]
 
 
@@ -43,8 +94,9 @@ swagger_config = {
             "model_filter": lambda tag: True,  # all in
         }
     ],
-    "swagger_ui": True,
-    "specs_route": "/apidocs/"
+    'swagger_ui': True,
+    'specs_route': '/apidocs/',
+    # 'static_folder': './apidocs/examples/'
 }
 
 markdown_text = """
