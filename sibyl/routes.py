@@ -27,11 +27,11 @@ def add_routes(app):
     api.add_resource(ctrl.entity.Entities, API_VERSION + 'entities/')
     api.add_resource(ctrl.entity.Events, API_VERSION + 'events/')
 
-    api.add_resource(ctrl.entity.Referrals, API_VERSION + 'referrals/')
-    api.add_resource(ctrl.entity.Referral,
+    api.add_resource(ctrl.referral.Referrals, API_VERSION + 'referrals/')
+    api.add_resource(ctrl.referral.Referral,
                      API_VERSION + 'referrals/<string:referral_id>/')
-    api.add_resource(ctrl.entity.EntitiesInReferral,
-                     API_VERSION + 'entities_in_referral/<string:referral_id>/')
+    # api.add_resource(ctrl.entity.EntitiesInReferral,
+    #                  API_VERSION + 'entities_in_referral/<string:referral_id>/')
 
     api.add_resource(ctrl.feature.Feature,
                      API_VERSION + 'features/<string:feature_name>/')
