@@ -1,6 +1,6 @@
-"""SibylApp Database Schema.
+"""Sibyl Database Schema.
 
-This module contains the classes that define the SibylApp Database Schema:
+This module contains the classes that define the Sibyl Database Schema:
     * Event
     * Entitiy
     * Category
@@ -15,7 +15,7 @@ import logging
 import pandas as pd
 from mongoengine import DENY, NULLIFY, PULL, ValidationError, fields
 
-from sibylapp.db.base import SibylAppDocument
+from sibyl.db.base import SibylDocument
 
 LOGGER = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ def _eid_exists(val):
         raise ValidationError("eid provided (%s) does not exist" % val)
 
 
-class Event(SibylAppDocument):
+class Event(SibylDocument):
     """
     An **Event** holds information about an event an entity was involved with
 
@@ -54,7 +54,7 @@ class Event(SibylAppDocument):
     unique_key_fields = ['event_id']
 
 
-class Entity(SibylAppDocument):
+class Entity(SibylDocument):
     """
     An **Entity** holds the feature values and details for one model input
 
@@ -80,7 +80,7 @@ class Entity(SibylAppDocument):
     unique_key_fields = ['eid']
 
 
-class Category(SibylAppDocument):
+class Category(SibylDocument):
     """
     A **Category** holds information about a feature category
 
@@ -100,7 +100,7 @@ class Category(SibylAppDocument):
     unique_key_fields = ['name', 'abbreviation']
 
 
-class Feature(SibylAppDocument):
+class Feature(SibylDocument):
     """
     A **Feature** hold information about a model input feature
 
@@ -126,7 +126,7 @@ class Feature(SibylAppDocument):
     unique_key_fields = ['name']
 
 
-class TrainingSet(SibylAppDocument):
+class TrainingSet(SibylDocument):
     """
     A **TrainingSet** is a set of entities that can be used to explain a given model
 
@@ -151,7 +151,7 @@ class TrainingSet(SibylAppDocument):
         return training_set_df
 
 
-class Model(SibylAppDocument):
+class Model(SibylDocument):
     """
     A **Model** holds information about a model
 
@@ -184,7 +184,7 @@ class Model(SibylAppDocument):
     training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
 
 
-class Referral(SibylAppDocument):
+class Referral(SibylDocument):
     """
     A **Case** contains information about a referral
     Attributes

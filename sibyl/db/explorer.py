@@ -10,7 +10,7 @@ from gridfs import GridFS
 from mongoengine import connect
 from pymongo.database import Database
 
-from sibylapp.db import schema
+from sibyl.db import schema
 
 LOGGER = logging.getLogger(__name__)
 

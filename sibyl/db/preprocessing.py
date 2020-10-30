@@ -10,9 +10,9 @@ from pymongo import MongoClient
 from pyreal.explainers import LocalFeatureContribution
 from sklearn.linear_model import Lasso
 
-import sibylapp.resources.global_explanation as ge
-from sibylapp.db import schema
-from sibylapp.db.utils import MappingsTransformer, ModelWrapperThresholds
+import sibyl.resources.global_explanation as ge
+from sibyl.db import schema
+from sibyl.db.utils import MappingsTransformer, ModelWrapperThresholds
 
 
 def load_data(features, dataset_filepath):
@@ -244,7 +244,7 @@ if __name__ == "__main__":
     # CONFIGURATIONS
     include_database = False
     client = MongoClient("localhost", 27017)
-    connect('sibylapp', host='localhost', port=27017)
+    connect('sibyl', host='localhost', port=27017)
     directory = os.path.join("..", "..", "..", "sibyl-data")
 
     # INSERT CATEGORIES

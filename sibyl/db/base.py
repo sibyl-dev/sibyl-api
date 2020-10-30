@@ -66,7 +66,7 @@ def _merge_meta(base, child):
     return base
 
 
-class SibylAppMeta(TopLevelDocumentMetaclass):
+class SibylMeta(TopLevelDocumentMetaclass):
     """Metaclass for the OrionDocument class.
 
     It ensures that the ``meta`` attribute from the OrionDocument
@@ -94,7 +94,7 @@ class SibylAppMeta(TopLevelDocumentMetaclass):
         return super().__new__(mcs, name, bases, attrs)
 
 
-class SibylAppDocument(Document, metaclass=SibylAppMeta):
+class SibylDocument(Document, metaclass=SibylMeta):
     """Parent class for all the Document classes in Orion.
 
     This class defines a few defaults, such as the ``instert_time`` field
