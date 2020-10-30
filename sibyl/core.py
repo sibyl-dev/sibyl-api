@@ -8,30 +8,34 @@ from gevent.pywsgi import WSGIServer
 from mongoengine import connect
 from termcolor import colored
 
-from sibylapp import g
-from sibylapp.routes import add_routes
+from sibyl import g
+from sibyl.routes import add_routes
 
 LOGGER = logging.getLogger(__name__)
 
 
-class SibylApp:
+class Sibyl:
+    """ Sibyl Class.
 
-    def __init__(self, conf, docker):
-        self._conf = conf.copy()
-        if not docker:
-            self._db = connect(db=conf['db'], host=conf['host'], port=conf['port'],
-                               username=conf['username'], password=conf['password'])
-        else:
-            self._db = connect(db=conf['dk_db'], host=conf['dk_host'], port=conf['dk_port'],
-                               username=conf['dk_username'], password=conf['dk_password'])
+    The Sibyl Class provides the main functionalities of Sibyl to launch or
+    test the Flask server.
+
+    Args:
+        conf (dict):
+            Dictionary loaded from `config.yaml`
+        docker (bool):
+            Whether launch app in docker environment.
+    """
 
     def _init_flask_app(self, env):
         app = Flask(
             __name__,
-            static_url_path=''
+            static_url_path='',
+            static_folder='../apidocs',
+            template_folder='../apidocs'
         )
 
-        app.config.from_mapping(**self._conf)
+        app.config.from_mapping(**self._conf['flask'])
 
         if env == 'production':
             app.config.from_mapping(DEBUG=False, TESTING=False)
@@ -51,10 +55,27 @@ class SibylApp:
 
         return app
 
-    def run_server(self, env, port):
+    def __init__(self, conf: dict, docker: bool):
+        self._conf = conf.copy()
 
-        env = self._conf['ENV'] if env is None else env
-        port = self._conf['server_port'] if port is None else port
+        if not docker:
+            kargs = {
+                key: conf['mongodb'][key]
+                for key in ['db', 'host', 'port', 'username', 'password']
+            }
+            self._db = connect(**kargs)
+        else:
+            kargs = {
+                key: conf['docker']['mongodb'][key]
+                for key in ['db', 'host', 'port', 'username', 'password']
+            }
+            self._db = connect(**kargs)
+        # TODO - using testing datasets in test env
+
+    def run_server(self, env=None, port=None):
+
+        env = self._conf['flask']['ENV'] if env is None else env
+        port = self._conf['flask']['PORT'] if port is None else port
 
         # env validation
         if env not in ['development', 'production', 'test']:

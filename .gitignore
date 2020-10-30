@@ -2,8 +2,6 @@
 .DS_Store
 tempCodeRunnerFile.ts
 tempCodeRunnerFile.py
-.vscode/
-apidocs
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -31,25 +29,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# Client
-node_modules/
-!/client/public/dist/
-/client/public/dist/*
-# The following two files are only used in prod mode
-!/client/public/dist/*.min.css
-!/client/public/dist/*.min.js
-/client/public/themes/
-npm-debug.log
-package-lock.json
-coverage/
-logs/
-
-# Data
-client/public/data/
-db/
-mtv/data/raw
-mtv/db/data
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -133,8 +112,9 @@ ENV/
 
 .idea/*
 
+# app specific added
+.vscode/
 dbdata/
 sibyl/db/data
-real/
-screening_log.csv
 sibyl_test/
+screening_log.csv

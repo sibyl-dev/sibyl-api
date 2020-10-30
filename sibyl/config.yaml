@@ -1,25 +1,30 @@
 # MongoDB params
 #===================================
+mongodb:
+  host: "localhost" # mongodb server address
+  port: 27017 # mongodb server port
+  db: "sibyl" # database name
+  username: # for auth
+  password: # for auth
 
-host: "localhost" # mongodb server address
-port: 27017 # mongodb server port
-db: "sibylapp" # database name
-username: # for auth
-password: # for auth
 
 # docker
-dk_host: "db" # mongodb server address
-dk_port: 27017 # mongodb server port
-dk_db: "sibylapp" # database name
-dk_username: # for auth
-dk_password: # for auth
+docker:
+  mongodb:
+    host: "db" # mongodb server address
+    port: 27017 # mongodb server port
+    db: "sibyl" # database name
+    username: # for auth
+    password: # for auth
 
-# FLASK ENV
+# FLASK
 #===================================
-server_port: 3000 # the port that flask application is running on
-ENV: "production" # development, production, testing
-DEBUG: False
-TESTING: False
+flask:
+  PORT: 3000
+  ENV: "production" # development, production, test
+  DEBUG: False
+  TESTING: False
+  BUNDLE_ERRORS: True
 
 # LOGGING
 #===================================
@@ -27,7 +32,7 @@ log_filename: "screening_log.csv"
 
 # PRE-SAVED INFORMATION
 #===================================
-feature_distribution_location: "sibylapp/db/precomputed/agg_distributions.json"
+feature_distribution_location: "sibyl/db/precomputed/agg_distributions.json"
                     # Location of pre-computed feature distribution information
                     # Useful in cases where the dataset cannot be shared
                     # null if this information should be calculated at runtime

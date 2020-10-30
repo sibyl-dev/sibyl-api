@@ -68,7 +68,7 @@ def create_dirs(dirs):
     else:
         LOGGER.exception('Error creating directories, argument "dirs" must be \
                          a string or a string list')
-        raise
+        raise Exception
 
 
 def get_dirs(dir):

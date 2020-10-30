@@ -1,11 +1,11 @@
 import argparse
 
-from sibylapp.core import SibylApp
-from sibylapp.utils import read_config, setup_logging
+from sibyl.core import Sibyl
+from sibyl.utils import read_config, setup_logging
 
 
-def _run(sibylapp, args):
-    sibylapp.run_server(args.env, args.port)
+def _run(sibyl, args):
+    sibyl.run_server(args.env, args.port)
 
 
 def get_parser():
@@ -23,19 +23,21 @@ def get_parser():
     common.add_argument('--docker', action='store_true',
                         help='deployed in docker environment')
 
-    parser = argparse.ArgumentParser(description='sibylapp Command Line Interface.')
+    parser = argparse.ArgumentParser(
+        description='sibyl Command Line Interface.')
     parser.set_defaults(function=None)
 
-    # sibylapp [action]
+    # sibyl [action]
     action = parser.add_subparsers(title='action', dest='action')
     action.required = True
 
-    # sibylapp run
+    # sibyl run
     run = action.add_parser('run', help='Start flask server', parents=[common])
     run.set_defaults(function=_run)
 
     run.add_argument('-P', '--port', type=int, help='Flask server port')
-    run.add_argument('-E', '--env', type=str, help='Flask environment')
+    run.add_argument('-E', '--env', type=str, help='Flask environment',
+                     choices=['development', 'production', 'test'])
 
     return parser
 
@@ -46,7 +48,7 @@ def main():
     args = parser.parse_args()
 
     setup_logging(args.verbose, args.logfile)
-    config = read_config('./sibylapp/config.yaml')
-    sibylapp = SibylApp(config, args.docker)
+    config = read_config('./sibyl/config.yaml')
+    sibyl = Sibyl(config, args.docker)
 
-    args.function(sibylapp, args)
+    args.function(sibyl, args)

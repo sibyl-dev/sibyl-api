@@ -23,13 +23,14 @@ requirements = [
     'numpy>=1.15.4',
     'pandas>=1.0.3',
 
-    # Flask
+    # Web Server
     'Flask==1.0.2',
     'Flask-Cors==3.0.7',
     'Flask-RESTful==0.3.7',
     'Werkzeug==0.15.5',
     'greenlet==0.4.17',
     'gevent==1.5',
+    'flasgger==0.9.5',
 
     # Database
     'mongoengine>=0.16.3,<0.17',
