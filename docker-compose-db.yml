@@ -2,9 +2,9 @@ version: '3'
 services:
   db:
     image: mongo:4.0
-    container_name: sibylapp_db
-    command: bash -c "mongod --bind_ip_all --port 27017 --logpath /sibylapp/log/db.log --fork && mongorestore --db sibylapp /sibylapp/dump/sibylapp/"
+    container_name: sibyl_db
+    command: bash -c "mongod --bind_ip_all --port 27017 --logpath /sibyl/log/db.log --fork && mongorestore --db sibyl /sibyl/dump/sibyl/"
     volumes:
-      - ./db/data:/sibylapp/data
-      - ./db/log:/sibylapp/log
-      - ./db/dump:/sibylapp/dump
+      - ./db/data:/sibyl/data
+      - ./db/log:/sibyl/log
+      - ./db/dump:/sibyl/dump

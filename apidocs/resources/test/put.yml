@@ -1,0 +1,29 @@
+Test PUT method
+---
+tags:
+  - test
+security:
+  - tokenAuth: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          item1:
+            type: string
+          item2:
+            type: string
+responses:
+  200:
+    description: PUT success message
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/TestMessage'
+        example:
+          code: 200
+          message: 'PUT test succeeded'
+  400:
+    $ref: '#/components/responses/ErrorMessage'

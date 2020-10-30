@@ -23,13 +23,14 @@ requirements = [
     'numpy>=1.15.4',
     'pandas>=1.0.3',
 
-    # Flask
+    # Web Server
     'Flask==1.0.2',
     'Flask-Cors==3.0.7',
     'Flask-RESTful==0.3.7',
     'Werkzeug==0.15.5',
     'greenlet==0.4.17',
     'gevent==1.5',
+    'flasgger==0.9.5',
 
     # Database
     'mongoengine>=0.16.3,<0.17',
@@ -97,7 +98,7 @@ setup(
     description='Explanation tool for machine learning',
     entry_points={
         'console_scripts': [
-            'sibylapp=sibylapp.cli:main',
+            'sibyl=sibyl.cli:main',
         ],
     },
     extras_require={
@@ -110,14 +111,14 @@ setup(
     long_description=readme + '\n\n' + history,
     long_description_content_type='text/markdown',
     include_package_data=True,
-    keywords='sibylapp sibylapp sibylapp',
-    name='sibylapp',
-    packages=find_packages(include=['sibylapp', 'sibylapp.*']),
+    keywords='sibyl-api sibyl api',
+    name='sibylapi',
+    packages=find_packages(include=['sibylapi', 'sibylapi.*']),
     python_requires='>=3.5',
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/HDI-Project/sibylapp',
+    url='https://github.com/DAI-Lab/sibyl-api',
     version='0.1.0.dev0',
     zip_safe=False,
 )
