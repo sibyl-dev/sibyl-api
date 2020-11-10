@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Occupation",
+        "color": "#7bd2e8",
+        "abbreviation": "OC"
+    },
+    {
+        "name": "Demographics",
+        "color": "None",
+        "abbreviation": "DG"
+    }
+]

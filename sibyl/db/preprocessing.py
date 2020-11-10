@@ -10,7 +10,7 @@ from pymongo import MongoClient
 from pyreal.explainers import LocalFeatureContribution
 from sklearn.linear_model import Lasso
 
-import sibyl.resources.global_explanation as ge
+import sibyl.global_explanation as ge
 from sibyl.db import schema
 from sibyl.db.utils import MappingsTransformer, ModelWrapperThresholds
 

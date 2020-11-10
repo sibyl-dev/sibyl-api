@@ -1,0 +1,16 @@
+[
+    {
+        "name": "IsDoctor",
+        "description": "Individual is a doctor",
+        "negated_description": "Individual is not a doctor",
+        "category": "Occupation",
+        "type": "binary"
+    },
+    {
+        "name": "Age",
+        "description": "Age of individual",
+        "negated_description": "None",
+        "category": "Demographics",
+        "type": "numeric"
+    }
+]

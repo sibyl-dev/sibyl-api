@@ -6,47 +6,58 @@ import pandas as pd
 from flask import request
 from flask_restful import Resource
 
-from sibyl import g
+from sibyl import g, global_explanation as ge, helpers
 from sibyl.db import schema
-from sibyl.resources import global_explanation as ge
-from sibyl.resources import helpers
 
 LOGGER = logging.getLogger(__name__)
-
-
-class Similarities(Resource):
-    def get(self):
-        """
-        @api {get} /similar_entities/ Get similar entities
-        @apiName GetSimilarities
-        @apiGroup Computing
-        @apiVersion 1.0.0
-        @apiDescription Get a list of similar entities.
-        @apiParam {String} eid ID of the entity.
-        @apiParam {Number} number Number of similar entities to search for.
-        @apiSuccess {String[]} entities List of entity IDs.
-        """
 
 
 class SingleChangePredictions(Resource):
     def post(self):
         """
-        @api {post} /single_change_predictions/ Post single prediction
-        @apiName PostSinglePrediction
-        @apiGroup Computing
-        @apiVersion 1.0.0
-        @apiDescription Get the list of updated predictions after making
-        single changes.
-        @apiParam {String} eid ID of entity to predict on.
-        @apiParam {String} model_id ID of model to use for predictions.
-        @apiParam {2-Tuple[]} changes List of features to change and
-            their new values.
-        @apiParam {String} changes.item1 Name of the feature to change.
-        @apiParam {String} changes.item2 Changed Value of the feature.
-        @apiSuccess {2-Tuple[]} changes List of features to change and
-            their new values.
-        @apiSuccess {String} changes.item1 Name of the feature to change.
-        @apiSuccess {String} changes.item2 New prediction of the feature.
+        Get the resulting model prediction after making changes, one at a time, to an entity
+        ---
+        tags:
+          - computing
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: eid
+            in: path
+            schema:
+              type: string
+            required: true
+            description: ID of the entity to get
+          - name: model_id
+            in: path
+            schema:
+              type: string
+            required: true
+            description: ID of the model to use for predictions
+          - name: changes
+            in: path
+            schema:
+              $ref: '#/components/schemas/Changes'
+            required: true
+            description: List of changes to make, one at a time
+        responses:
+          200:
+            description: Resulting predictions after making changes
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    changes:
+                        type: array
+                        items:
+                            type: number
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/entity-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
         attrs = ['eid', 'model_id', 'changes']
         d = {}
@@ -225,7 +236,7 @@ class FeatureDistributions(Resource):
         model_id = d["model_id"]
 
         # CHECK FOR PRECOMPUTED VALUES
-        distribution_filepath = g['config']['feature_distribution_location']
+        distribution_filepath = g['config']["mongodb"]['feature_distribution_location']
         if distribution_filepath is not None:
             distribution_filepath = os.path.normpath(distribution_filepath)
             with open(distribution_filepath, 'r') as f:
@@ -312,7 +323,7 @@ class PredictionCount(Resource):
         prediction = d["prediction"]
         model_id = d["model_id"]
 
-        distribution_filepath = g['config']['feature_distribution_location']
+        distribution_filepath = g['config']['mongodb']['feature_distribution_location']
         if distribution_filepath is not None:
             distribution_filepath = os.path.normpath(distribution_filepath)
             with open(distribution_filepath, 'r') as f:

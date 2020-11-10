@@ -70,5 +70,5 @@ def test_get_referral(client, referrals):
 def test_entities_in_referral(client):
     referral_id = "101"
     entities_involved = ["ent1", "ent2"]
-    response = client.get('/api/v1/entities_in_referral/' + referral_id + "/").json
+    response = client.get('/api/v1/entities/?referral_id=' + referral_id).json
     assert response == entities_involved

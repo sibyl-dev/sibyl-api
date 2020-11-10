@@ -3,7 +3,7 @@
 mongodb:
   host: "localhost" # mongodb server address
   port: 27017 # mongodb server port
-  db: "sibyl" # database name
+  db: "sibylapp" # database name
   username: # for auth
   password: # for auth
 
@@ -13,7 +13,7 @@ docker:
   mongodb:
     host: "db" # mongodb server address
     port: 27017 # mongodb server port
-    db: "sibyl" # database name
+    db: "sibylapp" # database name
     username: # for auth
     password: # for auth
 

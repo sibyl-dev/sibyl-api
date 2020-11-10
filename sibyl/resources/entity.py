@@ -30,14 +30,6 @@ def get_entity(entity_doc, features=True):
     return entity
 
 
-def get_referral(referral_doc):
-    referral = {
-        'referral_id': referral_doc.referral_id,
-        'property': referral_doc.property
-    }
-    return referral
-
-
 class Entity(Resource):
     def get(self, eid):
         """
@@ -227,22 +219,3 @@ class Events(Resource):
             return {'message': message, 'code': 400}, 400
 
         return get_events(entity), 200
-
-
-# deprecated
-class EntitiesInReferral(Resource):
-    def get(self, referral_id):
-        """
-        @api {get} /entities_in_referral/:referral_id/ Get entities involved in a referral
-        @apiName GetEntitiesInReferral
-        @apiGroup referral
-        @apiVersion 1.0.0
-        @apiDescription Get entities involved in a referral
-
-        @apiSuccess {String[]} eids EIDs of entities involved in the referral.
-        """
-        entities = schema.Entity.find(property__referral_ids__contains=referral_id)
-        if entities is None:
-            LOGGER.log(20, 'referral %s has no entities' % str(referral_id))
-            return []
-        return [document.eid for document in entities], 200

@@ -7,6 +7,14 @@ from sibyl.db import schema
 LOGGER = logging.getLogger(__name__)
 
 
+def get_referral(referral_doc):
+    referral = {
+        'referral_id': referral_doc.referral_id,
+        'property': referral_doc.property
+    }
+    return referral
+
+
 class Referral(Resource):
     def get(self, referral_id):
         """

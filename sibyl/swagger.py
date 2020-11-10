@@ -42,6 +42,55 @@ schemas = {
         },
         'required': ['code', 'message']
     },
+    'Model': {
+        'type': 'object',
+        'properties': {
+            'id': {'type': 'string'},
+            'name': {'type': 'string'},
+            'description': {'type': 'string'},
+            'performance': {'type': 'string'},
+        },
+        'required': ['id']
+    },
+    'Model_Partial': {
+        'type': 'object',
+        'properties': {
+            'id': {'type': 'string'},
+            'name': {'type': 'string'},
+        },
+        'required': ['id']
+    },
+    'Feature': {
+        'type': 'object',
+        'properties': {
+            'name': {'type': 'string'},
+            'description': {'type': 'string'},
+            'negated_description': {'type': 'string'},
+            'category': {'type': 'string'},
+            'type': {'type': 'string'}
+        },
+        'required': ['name']
+    },
+    'Category': {
+        'type': 'object',
+        'properties': {
+            'name': {'type': 'string'},
+            'color': {'type': 'string'},
+            'abbreviation': {'type': 'string'}
+        },
+        'required': ['name']
+    },
+    'Changes': {
+        'type': 'array',
+        'items': {
+            'type': 'object',
+            'properties': {
+                'feature_name': 'string',
+                'new_feature_value': 'object'
+            }
+        },
+        'required': ['name']
+    },
     'Message': {
         'type': 'object',
         'properties': {
