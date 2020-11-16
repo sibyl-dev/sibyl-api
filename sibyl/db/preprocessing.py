@@ -245,7 +245,7 @@ if __name__ == "__main__":
     include_database = False
     client = MongoClient("localhost", 27017)
     connect('sibyl', host='localhost', port=27017)
-    directory = os.path.join("..", "..", "..", "sibyl-data")
+    directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "family_screening")
 
     # INSERT CATEGORIES
     insert_categories(os.path.join(directory, "categories.csv"))
