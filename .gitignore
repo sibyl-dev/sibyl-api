@@ -115,7 +115,8 @@ ENV/
 # app specific added
 .vscode/
 dbdata/
-sibyl/db/data
+sibyl/db/family_screening
+sibyl/db/housing
 sibyl_test/
 screening_log.csv
-dbdata/
+
