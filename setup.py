@@ -29,7 +29,7 @@ requirements = [
     'Flask-RESTful==0.3.7',
     'Werkzeug==0.15.5',
     'greenlet==0.4.17',
-    'gevent==1.5',
+    'gevent==20.9.0',
     'flasgger==0.9.5',
 
     # Database

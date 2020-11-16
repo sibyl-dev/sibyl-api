@@ -118,4 +118,5 @@ dbdata/
 sibyl/db/data
 sibyl_test/
 screening_log.csv
-dbdata/
+sibyl/db/family_screening
+sibyl/db/housing
