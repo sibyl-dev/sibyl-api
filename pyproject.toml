@@ -1,0 +1,98 @@
+[tool.poetry]
+authors = ["MIT Data To AI Lab"]
+description = "Explanation tool for machine learning"
+license = "MIT"
+name = "sibyl-api"
+packages = [{include = "sibyl_api"}]
+readme = "README.md"
+version = "0.1.0"
+
+repository = "https://github.com/DAI-Lab/sibyl-api"
+
+keywords = ["sibyl-api", "sibyl", "api"]
+
+classifiers = [
+  'Development Status :: 2 - Pre-Alpha',
+  'Intended Audience :: Developers',
+  'License :: OSI Approved :: MIT License',
+  'Natural Language :: English',
+  'Programming Language :: Python :: 3',
+  'Programming Language :: Python :: 3.5',
+  'Programming Language :: Python :: 3.6',
+  'Programming Language :: Python :: 3.7',
+  'Programming Language :: Python :: 3.8',
+]
+
+[tool.poetry.dependencies]
+click = "^8.1.3"
+python = "^3.7"
+
+[tool.poetry.group.general.dependencies]
+PyYAML= "5.1"
+passlib= "1.7.2"
+termcolor = "^1.1.0"
+
+[tool.poetry.group.math.dependencies]
+numpy= "1.15.4"
+pandas= "1.0.3"
+
+[tool.poetry.group.web-server.dependencies]
+Flask = "1.0.2"
+Flask-Cors = "3.0.7"
+Flask-RESTful = "0.3.7"
+Werkzeug = "0.15.5"
+flasgger = "0.9.5"
+gevent = "20.9.0"
+greenlet = "0.4.17"
+
+[tool.poetry.group.database.dependencies]
+mongoengine = "0.16.3,<0.17"
+pymongo = "3.7.2,<4"
+
+[tool.poetry.group.explanations.dependencies]
+pyreal = "0.1.0.dev0"
+
+[tool.poetry.group.dev.dependencies]
+coverage = "4.5.1"
+pytest = "5.3.1"
+tox = "2.9.1"
+
+# --- Flask Testing --- #
+pytest-flask = "0.14.0"
+pytest-xdist = "1.25.0"
+
+wheel = "0.30.0"
+
+# general
+bumpversion = "0.5.3"
+pip = "9.0.1"
+scikit-learn = "0.23.0"
+watchdog = "0.8.3"
+
+# docs
+m2r = "0.2.0"
+sphinx = "1.7.1"
+sphinx_rtd_theme = "0.2.4"
+
+# style check
+flake8 = "3.5.0"
+isort = "4.3.4,<5.0.0"
+
+# fix style issues
+autoflake = "1.1"
+autopep8 = "1.3.5"
+
+# distribute on PyPI
+twine = "1.10.0"
+
+[tool.isort]
+include_trailing_comment = true
+line_length = 99
+lines_between_types = 0
+multi_line_output = 4
+not_skip = "__init__.py"
+use_parentheses = true
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
