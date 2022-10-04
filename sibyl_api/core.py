@@ -8,8 +8,8 @@ from gevent.pywsgi import WSGIServer
 from mongoengine import connect
 from termcolor import colored
 
-from sibyl import g
-from sibyl.routes import add_routes
+from sibyl_api import g
+from sibyl_api.routes import add_routes
 
 LOGGER = logging.getLogger(__name__)
 

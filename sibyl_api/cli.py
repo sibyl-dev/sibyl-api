@@ -1,7 +1,7 @@
 import argparse
 
-from sibyl.core import Sibyl
-from sibyl.utils import read_config, setup_logging
+from sibyl_api.core import Sibyl
+from sibyl_api.utils import read_config, setup_logging
 
 
 def _run(sibyl, args):

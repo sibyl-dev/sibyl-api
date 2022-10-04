@@ -4,8 +4,8 @@ import pandas as pd
 from flask import request
 from flask_restful import Resource
 
-from sibyl.db import schema
-from sibyl import helpers
+from sibyl_api.db import schema
+from sibyl_api import helpers
 
 LOGGER = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@
 
 """Tests for `sibylapp` package."""
 
-from sibyl.db import schema
+from sibyl_api.db import schema
 
 
 def test_get_models(client, models):

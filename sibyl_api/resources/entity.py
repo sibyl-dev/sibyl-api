@@ -2,7 +2,7 @@ import logging
 
 from flask_restful import Resource, reqparse
 
-from sibyl.db import schema
+from sibyl_api.db import schema
 
 LOGGER = logging.getLogger(__name__)
 

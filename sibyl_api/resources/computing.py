@@ -6,8 +6,8 @@ import pandas as pd
 from flask import request
 from flask_restful import Resource
 
-from sibyl import g, global_explanation as ge, helpers
-from sibyl.db import schema
+from sibyl_api import g, global_explanation as ge, helpers
+from sibyl_api.db import schema
 
 LOGGER = logging.getLogger(__name__)
 

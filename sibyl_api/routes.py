@@ -2,8 +2,8 @@ from flask import render_template
 from flask_restful import Api
 from flasgger import Swagger
 
-import sibyl.resources as ctrl
-from sibyl.swagger import swagger_config, swagger_tpl
+import sibyl_api.resources as ctrl
+from sibyl_api.swagger import swagger_config, swagger_tpl
 
 
 API_VERSION = '/api/v1/'

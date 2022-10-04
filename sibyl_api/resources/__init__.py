@@ -2,7 +2,7 @@
 
 This subpackage contains all the code related to the API Resource usage.
 """
-from sibyl.resources import (computing, entity, feature,
+from sibyl_api.resources import (computing, entity, feature,
                              logging, model, test, referral)
 
 __all__ = (
