@@ -60,24 +60,24 @@ development_requirements = [
     # general
     'bumpversion>=0.5.3',
     'pip>=9.0.1',
-    'watchdog>=0.8.3',
+    'watchdog?=0.8.3',
     'scikit-learn>=0.23.0'
 
     # docs
-    'm2r>=0.2.0',
-    'sphinx>=1.7.1',
-    'sphinx_rtd_theme>=0.2.4',
+    'm2r==0.2.0',
+    'sphinx==1.7.1',
+    'sphinx_rtd_theme==0.2.4',
 
     # style check
-    'flake8>=3.5.0',
-    'isort>=4.3.4,<5.0.0',
+    'flake8==3.5.0',
+    'isort==4.3.4,<5.0.0',
 
     # fix style issues
-    'autoflake>=1.1',
-    'autopep8>=1.3.5',
+    'autoflake==1.1',
+    'autopep8==1.3.5',
 
     # distribute on PyPI
-    'twine>=1.10.0',
+    'twine==1.10.0',
 ]
 
 
