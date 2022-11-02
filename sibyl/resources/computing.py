@@ -406,6 +406,51 @@ class OutcomeCount(Resource):
 class FeatureContributions(Resource):
     def post(self):
         """
+        Get feature contributions
+        ---
+        tags:
+          - computing
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: eid
+            in: path
+            schema:
+              type: string
+            required: true
+            description: ID of the entity to get
+          - name: model_id
+            in: path
+            schema:
+              type: string
+            required: true
+            description: ID of the model to use for predictions
+          - name: changes
+            in: path
+            schema:
+              $ref: '#/components/schemas/Changes'
+            required: true
+            description: List of changes to make, one at a time
+        responses:
+          200:
+            description: Resulting predictions after making changes
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    changes:
+                        type: array
+                        items:
+                            type: number
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/entity-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+        """
         @api {post} /contributions/ Get feature contributions
         @apiName GetFeatureContributions
         @apiGroup Computing

@@ -9,16 +9,22 @@ from mongoengine import connect
 from pymongo import MongoClient
 from pyreal.explainers import LocalFeatureContribution
 from sklearn.linear_model import Lasso
+from pyreal.transformers import MultiTypeImputer
+import xgboost
 
 import sibyl.global_explanation as ge
 from sibyl.db import schema
 from sibyl.db.utils import MappingsTransformer, ModelWrapperThresholds
 
 
+def make_compatible(s):
+    return s.replace(".", "_")
+
+
 def load_data(features, dataset_filepath):
     data = pd.read_csv(dataset_filepath)
 
-    y = data.PRO_PLSM_NEXT730_DUMMY
+    y = data.label
     X = data[features]
 
     return X, y
@@ -48,6 +54,7 @@ def convert_to_categorical(X, mappings):
 
 def insert_features(filepath):
     features_df = pd.read_csv(filepath)
+    # features_df.name = features_df.name.str.replace(".", "_")
 
     references = [schema.Category.find_one(name=cat) for cat in features_df['category']]
     features_df = features_df.drop('category', axis='columns')
@@ -89,25 +96,30 @@ def load_mappings_transformer(mappings_filepath, features):
 
 def insert_model(features, model_filepath, dataset_filepath,
                  importance_filepath=None, explainer_filepath=None):
-    thresholds = [0.01174609, 0.01857239, 0.0241622, 0.0293587,
-                  0.03448975, 0.0396932, 0.04531139, 0.051446,
-                  0.05834176, 0.06616039, 0.07549515, 0.08624243,
-                  0.09912388, 0.11433409, 0.13370343, 0.15944484,
-                  0.19579651, 0.25432879, 0.36464856, 1.0]
-    base_model, model_features = load_model_from_weights_sklearn(
-        model_filepath, Lasso())
+    #thresholds = [0.01174609, 0.01857239, 0.0241622, 0.0293587,
+    #              0.03448975, 0.0396932, 0.04531139, 0.051446,
+    #              0.05834176, 0.06616039, 0.07549515, 0.08624243,
+    #              0.09912388, 0.11433409, 0.13370343, 0.15944484,
+    #              0.19579651, 0.25432879, 0.36464856, 1.0]
+    #base_model, model_features = load_model_from_weights_sklearn(
+     #   model_filepath, Lasso())
 
-    model = ModelWrapperThresholds(base_model, thresholds, features=model_features)
-    transformer = load_mappings_transformer(os.path.join(directory, "mappings.csv"),
-                                            model_features)
+    #model = ModelWrapperThresholds(base_model, thresholds, features=model_features)
+    #transformer = load_mappings_transformer(os.path.join(directory, "mappings.csv"),
+    #                                        model_features)
+
+    model = pickle.load(open(model_filepath, "rb"))
 
     dataset, targets = load_data(features, dataset_filepath)
 
     model_serial = pickle.dumps(model)
+    transformer = MultiTypeImputer()
+    transformer.fit(dataset)
     transformer_serial = pickle.dumps(transformer)
+    print("TRANSFORMER: ", transformer_serial)
 
     texts = {
-        "name": "Lasso Regression Model",
+        "name": "Model",
         "description": "placeholder",
         "performance": "placeholder"
     }
@@ -128,11 +140,9 @@ def insert_model(features, model_filepath, dataset_filepath,
         with open(explainer_filepath, "rb") as f:
             explainer_serial = f.read()
     else:
-        explainer = LocalFeatureContribution(base_model, dataset.sample(100),
-                                             contribution_transforms=transformer,
+        explainer = LocalFeatureContribution(model, dataset.sample(100),
                                              e_algorithm="shap",
-                                             transformers=transformer,
-                                             m_transforms=transformer, fit_on_init=True)
+                                             transformers=transformer, fit_on_init=True)
         explainer_serial = pickle.dumps(explainer)
 
     items = {
@@ -244,8 +254,8 @@ if __name__ == "__main__":
     # CONFIGURATIONS
     include_database = False
     client = MongoClient("localhost", 27017)
-    connect('sibyl', host='localhost', port=27017)
-    directory = os.path.join("..", "..", "..", "sibyl-data")
+    connect('iberdrola', host='localhost', port=27017)
+    directory = os.path.join("..", "..", "..", "..", "..", "OneDrive", "Documents", "Research", "Sibyl", "data", "iberdrola")
 
     # INSERT CATEGORIES
     insert_categories(os.path.join(directory, "categories.csv"))
@@ -253,30 +263,24 @@ if __name__ == "__main__":
     # INSERT FEATURES
     feature_names = insert_features(os.path.join(directory, "features.csv")).tolist()
 
-    # INSERT REFERRALS
-    insert_referrals(os.path.join(directory, "referrals.csv"))
-
     # INSERT ENTITIES
-    eids = insert_entities(os.path.join(directory, "true_entities.csv"), feature_names,
-                           mappings_filepath=os.path.join(directory, "mappings.csv"),
-                           include_referrals=True)
+    eids = insert_entities(os.path.join(directory, "data.csv"), feature_names,
+                           include_referrals=False)
 
-    # INSERT FULL DATASET
-    if include_database:
-        eids = insert_entities(os.path.join(directory, "dataset.csv"), feature_names,
-                               counter_start=17, num=100000)
     set_doc = insert_training_set(eids)
 
     # INSERT MODEL
-    model_filepath = os.path.join(directory, "weights.csv")
-    dataset_filepath = os.path.join(directory, "dataset.csv")
+    model_filepath = os.path.join(directory, "brakepad_model.pkl")
+    dataset_filepath = os.path.join(directory, "data.csv")
     importance_filepath = os.path.join(directory, "importances.csv")
 
     insert_model(features=feature_names, model_filepath=model_filepath,
                  dataset_filepath=dataset_filepath, importance_filepath=importance_filepath)
 
-    # PRE-COMPUTE DISTRIBUTION INFORMATION
-    '''generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
-                                      os.path.join(directory, "agg_dataset.csv"),
-                                      os.path.join(directory, "agg_features.csv"))'''
-    test_validation()
+    cont = False
+    if cont:
+        # PRE-COMPUTE DISTRIBUTION INFORMATION
+        '''generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
+                                          os.path.join(directory, "agg_dataset.csv"),
+                                          os.path.join(directory, "agg_features.csv"))'''
+        test_validation()

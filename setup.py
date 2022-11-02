@@ -18,16 +18,17 @@ requirements = [
     'termcolor==1.1.0',
     'PyYAML==5.1',
     'passlib==1.7.2',
+    'xgboost==1.6.2',
 
     # Math
     'numpy>=1.15.4',
     'pandas>=1.0.3',
 
     # Web Server
-    'Flask==1.0.2',
+    'Flask==2.2.2',
     'Flask-Cors==3.0.7',
-    'Flask-RESTful==0.3.7',
-    'Werkzeug==0.15.5',
+    'Flask-RESTful==0.3.9',
+    'Werkzeug==2.2.2',
     'greenlet==0.4.17',
     'gevent==20.9.0',
     'flasgger==0.9.5',
@@ -37,7 +38,7 @@ requirements = [
     'pymongo>=3.7.2,<4',
 
     # Explanations
-    'pyreal==0.1.0.dev0',
+    'pyreal==0.3.0',
 ]
 
 setup_requirements = [
@@ -60,7 +61,7 @@ development_requirements = [
     # general
     'bumpversion>=0.5.3',
     'pip>=9.0.1',
-    'watchdog?=0.8.3',
+    'watchdog>=0.8.3',
     'scikit-learn>=0.23.0'
 
     # docs

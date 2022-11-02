@@ -13,6 +13,7 @@ from sklearn.linear_model import Lasso
 import sibyl.global_explanation as ge
 from sibyl.db import schema
 from sibyl.db.utils import MappingsTransformer, ModelWrapperThresholds
+from pyreal.transformers.one_hot_encode import MappingsOneHotEncoder, Mappings
 
 
 def load_data(features, dataset_filepath):
@@ -84,7 +85,8 @@ def load_model_from_weights_sklearn(weights_filepath, model_base):
 def load_mappings_transformer(mappings_filepath, features):
     mappings = pd.read_csv(mappings_filepath)
     mappings = mappings[mappings["include"]]
-    return MappingsTransformer(mappings, features)
+    mappings_obj = Mappings.generate_mappings(dataframe=mappings)
+    return MappingsOneHotEncoder(mappings_obj, interpret=False, algorithm=True, model=True)#, features)
 
 
 def insert_model(features, model_filepath, dataset_filepath,
@@ -102,6 +104,7 @@ def insert_model(features, model_filepath, dataset_filepath,
                                             model_features)
 
     dataset, targets = load_data(features, dataset_filepath)
+    print("PRI_FOCUS_GENDER" in dataset.columns)
 
     model_serial = pickle.dumps(model)
     transformer_serial = pickle.dumps(transformer)
@@ -129,10 +132,9 @@ def insert_model(features, model_filepath, dataset_filepath,
             explainer_serial = f.read()
     else:
         explainer = LocalFeatureContribution(base_model, dataset.sample(100),
-                                             contribution_transforms=transformer,
+                                             transformers=transformer,
                                              e_algorithm="shap",
-                                             e_transforms=transformer,
-                                             m_transforms=transformer, fit_on_init=True)
+                                             fit_on_init=True)
         explainer_serial = pickle.dumps(explainer)
 
     items = {
@@ -245,7 +247,7 @@ if __name__ == "__main__":
     include_database = False
     client = MongoClient("localhost", 27017)
     connect('sibyl', host='localhost', port=27017)
-    directory = os.path.join("..", "..", "..", "sibyl-data")
+    directory = os.path.join("..", "..", "..", "..", "..", "OneDrive", "Documents", "Research", "Sibyl", "data", "family-screening")
 
     # INSERT CATEGORIES
     insert_categories(os.path.join(directory, "categories.csv"))

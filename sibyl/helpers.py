@@ -38,6 +38,8 @@ def load_model(model_id, include_dataset=False, include_explainer=False):
         except Exception as e:
             LOGGER.exception(e)
             return False, ({'message': str(e)}, 500)
+    else:
+        return False, ({'message': 'model has no transformer'}, 500)
 
     payload = (model, transformer)
     if include_dataset:

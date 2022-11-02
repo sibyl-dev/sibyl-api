@@ -95,7 +95,7 @@ def preds_to_scores(preds, thresholds):
     return np.digitize(to_probs(preds), thresholds, right=True) + 1
 
 
-class ModelWrapperThresholds(ModelWrapper):
+class ModelWrapperThresholds:
     def __init__(self, base_model, thresholds, features=None):
         """
         Initialize the model wrapper
@@ -106,7 +106,7 @@ class ModelWrapperThresholds(ModelWrapper):
         """
         self.base_model = base_model
         self.thresholds = thresholds
-        super().__init__(features)
+        self.features = features
 
     def predict(self, x):
         """
@@ -117,8 +117,7 @@ class ModelWrapperThresholds(ModelWrapper):
         :return: list of size (n_entities, )
                  Prediction for entities
         """
-        x = super().predict(x)
-        pred = self.base_model.predict(x)
+        pred = self.base_model.predict(x[self.features])
         scores = preds_to_scores(pred, self.thresholds)
         return scores
 
