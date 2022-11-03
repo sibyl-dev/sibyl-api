@@ -412,34 +412,27 @@ class FeatureContributions(Resource):
           - computing
         security:
           - tokenAuth: []
-        parameters:
-          - name: eid
-            in: path
-            schema:
-              type: string
-            required: true
-            description: ID of the entity to get
-          - name: model_id
-            in: path
-            schema:
-              type: string
-            required: true
-            description: ID of the model to use for predictions
-          - name: changes
-            in: path
-            schema:
-              $ref: '#/components/schemas/Changes'
-            required: true
-            description: List of changes to make, one at a time
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  eid:
+                    type: string
+                  model_id:
+                    type: string
+                required: ['eid', 'model_id']
         responses:
           200:
-            description: Resulting predictions after making changes
+            description: Feature contributions
             content:
               application/json:
                 schema:
                   type: object
                   properties:
-                    changes:
+                    contributions:
                         type: array
                         items:
                             type: number
@@ -449,17 +442,6 @@ class FeatureContributions(Resource):
                     externalValue: '/examples/entity-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
-        """
-        """
-        @api {post} /contributions/ Get feature contributions
-        @apiName GetFeatureContributions
-        @apiGroup Computing
-        @apiVersion 1.0.0
-        @apiDescription  get the contributions of all features
-        @apiParam {String} eid ID of the entity to compute.
-        @apiParam {String} model_id ID of the model to compute.
-        @apiSuccess {Object} contributions Feature contribution object (key-value pair).
-        @apiSuccess {Number} contributions.[key] Contribution value of the feature [key].
         """
 
         # LOAD IN AND CHECK ATTRIBUTES:
@@ -504,7 +486,7 @@ class FeatureContributions(Resource):
             message, error_code = payload
             return message, error_code
 
-        contributions = explainer.produce(entity_features)
+        contributions, _ = explainer.produce(entity_features)
         keys = list(contributions.columns)
         contribution_dict = dict(zip(keys, contributions.iloc[0, :]))
         return {"contributions": contribution_dict}, 200
