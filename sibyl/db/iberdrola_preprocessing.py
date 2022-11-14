@@ -27,7 +27,10 @@ def load_data(features, dataset_filepath):
     y = data.label
     X = data[features]
 
-    return X, y
+    transformer = MultiTypeImputer()
+    transformer.fit(X)
+
+    return transformer.transform(X), y
 
 
 def convert_to_categorical(X, mappings):
@@ -116,7 +119,6 @@ def insert_model(features, model_filepath, dataset_filepath,
     transformer = MultiTypeImputer()
     transformer.fit(dataset)
     transformer_serial = pickle.dumps(transformer)
-    print("TRANSFORMER: ", transformer_serial)
 
     texts = {
         "name": "Model",
@@ -142,7 +144,7 @@ def insert_model(features, model_filepath, dataset_filepath,
     else:
         explainer = LocalFeatureContribution(model, dataset.sample(100),
                                              e_algorithm="shap",
-                                             transformers=transformer, fit_on_init=True)
+                                             fit_on_init=True)
         explainer_serial = pickle.dumps(explainer)
 
     items = {

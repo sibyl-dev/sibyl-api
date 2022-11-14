@@ -104,7 +104,6 @@ def insert_model(features, model_filepath, dataset_filepath,
                                             model_features)
 
     dataset, targets = load_data(features, dataset_filepath)
-    print("PRI_FOCUS_GENDER" in dataset.columns)
 
     model_serial = pickle.dumps(model)
     transformer_serial = pickle.dumps(transformer)
