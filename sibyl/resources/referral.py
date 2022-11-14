@@ -89,4 +89,4 @@ class Referrals(Resource):
             LOGGER.exception(e)
             return {'message': str(e)}, 500
         else:
-            return {'referrals': referral}, 200
+            return {'cases': referral}, 200

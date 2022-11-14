@@ -7,6 +7,8 @@ from flask_restful import Resource
 from sibyl.db import schema
 from sibyl import helpers
 
+import pickle
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -195,14 +197,30 @@ class Prediction(Resource):
             return {'message': 'Entity {} does not exist'.format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        success, payload = helpers.load_model(model_id)
-        if success:
-            model, transformer = payload
-        else:
-            message, error_code = payload
-            return message, error_code
+        #success, payload = helpers.load_model(model_id)
+        #if success:
+        #    model, transformer = payload
+        #else:
+        #    message, error_code = payload
+        #    return message, error_code
 
-        entity_features = transformer.transform(entity_features)
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
+            LOGGER.exception('Error getting model. Model %s does not exist.', model_id)
+            return {'message': 'Model {} does not exist'.format(model_id)}, 400
+        explainer_bytes = model_doc.explainer
+        if explainer_bytes is None:
+            LOGGER.exception('Model %s explainer has not been trained. ', model_id)
+            return {'message': 'Model {} does not have trained explainer'
+                           .format(model_id)}, 400
+        try:
+            explainer = pickle.loads(explainer_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
 
-        prediction = model.predict(entity_features)[0].tolist()
+        #entity_features = transformer.transform(entity_features)
+
+        #prediction = model.predict(entity_features)[0].tolist()
+        prediction = explainer.model_predict(entity_features)[0].tolist()
         return {"output": prediction}, 200
