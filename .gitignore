@@ -115,10 +115,7 @@ ENV/
 # app specific added
 .vscode/
 dbdata/
-sibyl/db/family_screening
-sibyl/db/housing
+sibyl/db/data
 sibyl_test/
 screening_log.csv
-sibyl/db/family_screening
-sibyl/db/housing
 sibyl-api-env/
