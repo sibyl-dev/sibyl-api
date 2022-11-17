@@ -21,7 +21,7 @@ requirements = [
     'xgboost==1.6.2',
 
     # Math
-    'numpy>=1.15.4',
+    'numpy>=1.15.4,<1.22.0',
     'pandas>=1.0.3',
 
     # Web Server

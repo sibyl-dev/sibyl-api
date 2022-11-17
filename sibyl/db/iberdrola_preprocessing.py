@@ -27,10 +27,7 @@ def load_data(features, dataset_filepath):
     y = data.label
     X = data[features]
 
-    transformer = MultiTypeImputer()
-    transformer.fit(X)
-
-    return transformer.transform(X), y
+    return X, y
 
 
 def convert_to_categorical(X, mappings):
@@ -118,6 +115,7 @@ def insert_model(features, model_filepath, dataset_filepath,
     model_serial = pickle.dumps(model)
     transformer = MultiTypeImputer()
     transformer.fit(dataset)
+    dataset = transformer.transform(dataset)
     transformer_serial = pickle.dumps(transformer)
 
     texts = {
@@ -163,6 +161,11 @@ def insert_model(features, model_filepath, dataset_filepath,
 def insert_entities(values_filepath, features_names, mappings_filepath=None,
                     counter_start=0, num=0, include_referrals=False):
     values_df = pd.read_csv(values_filepath)[features_names + ["eid"]]
+    transformer = MultiTypeImputer()
+    transformer.fit(values_df)
+    values_df = transformer.transform(values_df)
+    values_df["eid"] = values_df["eid"].astype(int)
+
     if mappings_filepath is not None:
         mappings = pd.read_csv(mappings_filepath)
         mappings = mappings[mappings["include"]]
