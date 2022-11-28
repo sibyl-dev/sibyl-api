@@ -198,9 +198,9 @@ class Referral(SibylDocument):
     property = fields.DictField()
 
 
-class Configuration(SibylDocument):
+class Config(SibylDocument):
     """
-    A **Configuration** contains information about UI configuration options specific to the given
+    A **Config** contains information about UI configuration options specific to the given
     domain.
     Attributes
     ----------
@@ -208,6 +208,6 @@ class Configuration(SibylDocument):
     pos_color : color to use for positive contribution bars
     neg_color : color to use for negative contribution bars
     """
-    term_dict = fields.DictField()
+    terms = fields.DictField()
     pos_color = fields.StringField()
     neg_color = fields.StringField()
