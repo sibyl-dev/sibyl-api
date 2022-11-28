@@ -212,20 +212,14 @@ def insert_referrals(filepath):
 def generate_feature_distribution_doc(save_path, model, transformer,
                                       dataset_filepath, features_filepath):
     features = pd.read_csv(features_filepath)
-    feature_names = features["name"].append(pd.Series(["PRO_PLSM_NEXT365_DUMMY",
-                                                       "PRO_PLSM_NEXT730_DUMMY"]))
+    feature_names = features["name"].append(pd.Series(["label"]))
     dataset, targets = load_data(feature_names, dataset_filepath)
 
-    boolean_features = features[features['type'].isin(['binary', 'categorical'])]["name"]
-    boolean_features = boolean_features.append(pd.Series(["PRO_PLSM_NEXT365_DUMMY",
-                                                          "PRO_PLSM_NEXT730_DUMMY"]))
-    dataset_cat = dataset[boolean_features]
-
-    numeric_features = features[features['type'] == 'numeric']["name"]
+    numeric_features = feature_names
     dataset_num = dataset[numeric_features]
 
     summary_dict = {}
-    for output in range(1, 21):
+    for output in range(2):
         row_details = {}
         rows = ge.get_rows_by_output(output, model.predict, dataset, row_labels=None)
 
@@ -285,7 +279,7 @@ if __name__ == "__main__":
     cont = False
     if cont:
         # PRE-COMPUTE DISTRIBUTION INFORMATION
-        '''generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
+        generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
                                           os.path.join(directory, "agg_dataset.csv"),
-                                          os.path.join(directory, "agg_features.csv"))'''
+                                          os.path.join(directory, "agg_features.csv"))
         test_validation()
