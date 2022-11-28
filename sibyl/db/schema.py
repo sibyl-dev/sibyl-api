@@ -196,3 +196,18 @@ class Referral(SibylDocument):
     """
     referral_id = fields.StringField(required=True, validation=_valid_id)
     property = fields.DictField()
+
+
+class Configuration(SibylDocument):
+    """
+    A **Configuration** contains information about UI configuration options specific to the given
+    domain.
+    Attributes
+    ----------
+    term_dict : dictionary of application-specific terms to use
+    pos_color : color to use for positive contribution bars
+    neg_color : color to use for negative contribution bars
+    """
+    term_dict = fields.DictField()
+    pos_color = fields.StringField()
+    neg_color = fields.StringField()
