@@ -64,6 +64,14 @@ def insert_categories(filepath):
     schema.Category.insert_many(items)
 
 
+def insert_config(filepath):
+    config_df = pd.read_csv(filepath)
+    items = dict(zip(config_df["key"], config_df["term"])) #config_df.to_dict(orient='records')
+    config_dict = {"terms": items}
+    print(config_dict)
+    schema.Config.insert(**config_dict)
+
+
 def load_model_from_weights_sklearn(weights_filepath, model_base):
     """
     Load the model
@@ -129,10 +137,8 @@ def insert_model(features, model_filepath, dataset_filepath,
             explainer_serial = f.read()
     else:
         explainer = LocalFeatureContribution(base_model, dataset.sample(100),
-                                             contribution_transforms=transformer,
                                              e_algorithm="shap",
-                                             e_transforms=transformer,
-                                             m_transforms=transformer, fit_on_init=True)
+                                             transformers=transformer, fit_on_init=True)
         explainer_serial = pickle.dumps(explainer)
 
     items = {
@@ -245,7 +251,7 @@ if __name__ == "__main__":
     include_database = False
     client = MongoClient("localhost", 27017)
     connect('sibyl', host='localhost', port=27017)
-    directory = os.path.join("..", "..", "..", "sibyl-data")
+    directory = os.path.join("..", "..", "..", "..", "..", "OneDrive", "Documents", "Research", "Sibyl", "data", "family-screening")
 
     # INSERT CATEGORIES
     insert_categories(os.path.join(directory, "categories.csv"))
@@ -260,6 +266,9 @@ if __name__ == "__main__":
     eids = insert_entities(os.path.join(directory, "true_entities.csv"), feature_names,
                            mappings_filepath=os.path.join(directory, "mappings.csv"),
                            include_referrals=True)
+
+    # INSERT CONFIG
+    insert_config(os.path.join(directory, "terms.csv"))
 
     # INSERT FULL DATASET
     if include_database:

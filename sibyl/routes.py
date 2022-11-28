@@ -44,6 +44,10 @@ def add_routes(app):
     api.add_resource(ctrl.model.Importance, API_VERSION + 'importance/')
     api.add_resource(ctrl.model.Prediction, API_VERSION + 'prediction/')
 
+    api.add_resource(ctrl.config.Config,
+                     API_VERSION + 'configs/<string:config_id>/')
+    api.add_resource(ctrl.config.Configs, API_VERSION + 'configs/')
+
     api.add_resource(ctrl.computing.FeatureContributions,
                      API_VERSION + 'contributions/')
     api.add_resource(ctrl.computing.FeatureDistributions,

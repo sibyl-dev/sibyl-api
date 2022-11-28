@@ -19,7 +19,7 @@ def get_config(config_doc):
 
 def get_config_id(config_doc):
     config = {
-        'id': str(config_doc.config_id),
+        'id': str(config_doc.id),
     }
     return config
 
@@ -100,4 +100,4 @@ class Configs(Resource):
             LOGGER.exception(e)
             return {'message': str(e)}, 500
         else:
-            return {'models': configs}, 200
+            return {'configs': configs}, 200
