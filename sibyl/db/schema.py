@@ -198,10 +198,10 @@ class Referral(SibylDocument):
     property = fields.DictField()
 
 
-class Config(SibylDocument):
+class Context(SibylDocument):
     """
-    A **Config** contains information about UI configuration options specific to the given
-    domain.
+    A **Context** contains information about UI configuration options specific to the given
+    context.
     Attributes
     ----------
     term_dict : dict {key : term}

@@ -64,12 +64,11 @@ def insert_categories(filepath):
     schema.Category.insert_many(items)
 
 
-def insert_config(filepath):
-    config_df = pd.read_csv(filepath)
-    items = dict(zip(config_df["key"], config_df["term"])) #config_df.to_dict(orient='records')
-    config_dict = {"terms": items}
-    print(config_dict)
-    schema.Config.insert(**config_dict)
+def insert_context(filepath):
+    context_df = pd.read_csv(filepath)
+    items = dict(zip(context_df["key"], context_df["term"])) #config_df.to_dict(orient='records')
+    context_dict = {"terms": items}
+    schema.Context.insert(**context_dict)
 
 
 def load_model_from_weights_sklearn(weights_filepath, model_base):
@@ -268,7 +267,7 @@ if __name__ == "__main__":
                            include_referrals=True)
 
     # INSERT CONFIG
-    insert_config(os.path.join(directory, "terms.csv"))
+    insert_context(os.path.join(directory, "terms.csv"))
 
     # INSERT FULL DATASET
     if include_database:
