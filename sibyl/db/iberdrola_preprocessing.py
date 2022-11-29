@@ -1,4 +1,3 @@
-import json
 import os
 import pickle
 import random
@@ -8,13 +7,11 @@ import pandas as pd
 from mongoengine import connect
 from pymongo import MongoClient
 from pyreal.explainers import LocalFeatureContribution
-from sklearn.linear_model import Lasso
-from pyreal.transformers import MultiTypeImputer
-import xgboost
 
-import sibyl.global_explanation as ge
+from pyreal.transformers import MultiTypeImputer
+
 from sibyl.db import schema
-from sibyl.db.utils import MappingsTransformer, ModelWrapperThresholds
+from sibyl.db.utils import MappingsTransformer
 
 
 def make_compatible(s):
@@ -54,7 +51,6 @@ def convert_to_categorical(X, mappings):
 
 def insert_features(filepath):
     features_df = pd.read_csv(filepath)
-    # features_df.name = features_df.name.str.replace(".", "_")
 
     references = [schema.Category.find_one(name=cat) for cat in features_df['category']]
     features_df = features_df.drop('category', axis='columns')
@@ -72,10 +68,6 @@ def insert_categories(filepath):
 
 
 def load_model_from_weights_sklearn(weights_filepath, model_base):
-    """
-    Load the model
-    :return: (model, model features)
-    """
     model_weights = pd.read_csv(weights_filepath)
 
     model = model_base
@@ -96,18 +88,6 @@ def load_mappings_transformer(mappings_filepath, features):
 
 def insert_model(features, model_filepath, dataset_filepath,
                  importance_filepath=None, explainer_filepath=None):
-    #thresholds = [0.01174609, 0.01857239, 0.0241622, 0.0293587,
-    #              0.03448975, 0.0396932, 0.04531139, 0.051446,
-    #              0.05834176, 0.06616039, 0.07549515, 0.08624243,
-    #              0.09912388, 0.11433409, 0.13370343, 0.15944484,
-    #              0.19579651, 0.25432879, 0.36464856, 1.0]
-    #base_model, model_features = load_model_from_weights_sklearn(
-     #   model_filepath, Lasso())
-
-    #model = ModelWrapperThresholds(base_model, thresholds, features=model_features)
-    #transformer = load_mappings_transformer(os.path.join(directory, "mappings.csv"),
-    #                                        model_features)
-
     model = pickle.load(open(model_filepath, "rb"))
 
     dataset, targets = load_data(features, dataset_filepath)
@@ -209,42 +189,6 @@ def insert_referrals(filepath):
     schema.Referral.insert_many(items)
 
 
-def generate_feature_distribution_doc(save_path, model, transformer,
-                                      dataset_filepath, features_filepath):
-    features = pd.read_csv(features_filepath)
-    feature_names = features["name"].append(pd.Series(["label"]))
-    dataset, targets = load_data(feature_names, dataset_filepath)
-
-    numeric_features = feature_names
-    dataset_num = dataset[numeric_features]
-
-    summary_dict = {}
-    for output in range(2):
-        row_details = {}
-        rows = ge.get_rows_by_output(output, model.predict, dataset, row_labels=None)
-
-        count_total = len(rows)
-        count_removed = sum(targets.iloc[rows])
-        row_details["total cases"] = count_total
-        row_details["total removed"] = count_removed
-
-        cat_summary = ge.summary_categorical(dataset_cat.iloc[rows].applymap(str))
-        num_summary = ge.summary_numeric(dataset_num.iloc[rows])
-
-        distributions = {}
-        for (i, name) in enumerate(boolean_features):
-            distributions[name] = {"type": "categorical", "metrics": [cat_summary[0][i].tolist(),
-                                                                      cat_summary[1][i].tolist()]}
-        for (i, name) in enumerate(numeric_features):
-            distributions[name] = {"type": "numeric", "metrics": num_summary[i]}
-        row_details["distributions"] = distributions
-
-        summary_dict[output] = row_details
-
-    with open(save_path, 'w') as f:
-        json.dump(summary_dict, f, indent=4, sort_keys=True)
-
-
 def test_validation():
     pass
 
@@ -275,11 +219,3 @@ if __name__ == "__main__":
 
     insert_model(features=feature_names, model_filepath=model_filepath,
                  dataset_filepath=dataset_filepath, importance_filepath=importance_filepath)
-
-    cont = False
-    if cont:
-        # PRE-COMPUTE DISTRIBUTION INFORMATION
-        generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
-                                          os.path.join(directory, "agg_dataset.csv"),
-                                          os.path.join(directory, "agg_features.csv"))
-        test_validation()
