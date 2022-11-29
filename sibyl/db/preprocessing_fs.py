@@ -2,7 +2,6 @@ import json
 import os
 import pickle
 import random
-import sys
 
 import numpy as np
 import pandas as pd
@@ -251,11 +250,10 @@ if __name__ == "__main__":
     include_database = False
     client = MongoClient("localhost", 27017)
     connect('sibyl', host='localhost', port=27017)
-    directory = os.path.join("..", "..", "dbdata", sys.argv[1])
+    directory = os.path.join("..", "..", "..", "..", "..", "OneDrive", "Documents", "Research", "Sibyl", "data", "family-screening")
 
     # INSERT CATEGORIES
-    if os.path.exists(os.path.join(directory, "categories.csv")):
-        insert_categories(os.path.join(directory, "categories.csv"))
+    insert_categories(os.path.join(directory, "categories.csv"))
 
     # INSERT FEATURES
     feature_names = insert_features(os.path.join(directory, "features.csv")).tolist()
