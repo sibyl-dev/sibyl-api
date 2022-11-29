@@ -204,9 +204,12 @@ class Config(SibylDocument):
     domain.
     Attributes
     ----------
-    term_dict : dictionary of application-specific terms to use
-    pos_color : color to use for positive contribution bars
-    neg_color : color to use for negative contribution bars
+    term_dict : dict {key : term}
+        dictionary of application-specific terms to use
+    pos_color : str
+        color to use for positive contribution bars
+    neg_color : str
+        color to use for negative contribution bars
     """
     terms = fields.DictField()
     pos_color = fields.StringField()
