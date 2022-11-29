@@ -18,16 +18,17 @@ requirements = [
     'termcolor==1.1.0',
     'PyYAML==5.1',
     'passlib==1.7.2',
+    'xgboost==1.6.2',
 
     # Math
-    'numpy>=1.15.4',
+    'numpy>=1.15.4,<1.22.0',
     'pandas>=1.0.3',
 
     # Web Server
-    'Flask==1.0.2',
+    'Flask==2.2.2',
     'Flask-Cors==3.0.7',
-    'Flask-RESTful==0.3.7',
-    'Werkzeug==0.15.5',
+    'Flask-RESTful==0.3.9',
+    'Werkzeug==2.2.2',
     'greenlet==0.4.17',
     'gevent==20.9.0',
     'flasgger==0.9.5',
@@ -37,7 +38,7 @@ requirements = [
     'pymongo>=3.7.2,<4',
 
     # Explanations
-    'pyreal==0.1.0.dev0',
+    'pyreal==0.3.0',
 ]
 
 setup_requirements = [
@@ -64,20 +65,20 @@ development_requirements = [
     'scikit-learn>=0.23.0'
 
     # docs
-    'm2r>=0.2.0',
-    'sphinx>=1.7.1',
-    'sphinx_rtd_theme>=0.2.4',
+    'm2r==0.2.0',
+    'sphinx==1.7.1',
+    'sphinx_rtd_theme==0.2.4',
 
     # style check
-    'flake8>=3.5.0',
-    'isort>=4.3.4,<5.0.0',
+    'flake8==3.5.0',
+    'isort==4.3.4,<5.0.0',
 
     # fix style issues
-    'autoflake>=1.1',
-    'autopep8>=1.3.5',
+    'autoflake==1.1',
+    'autopep8==1.3.5',
 
     # distribute on PyPI
-    'twine>=1.10.0',
+    'twine==1.10.0',
 ]
 
 
