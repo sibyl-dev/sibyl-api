@@ -145,18 +145,3 @@ class MappingsTransformer(ABC):
     def transform_contributions(self, contributions):
         return combine_contributions_from_mappings(contributions, self.mappings)
 
-
-def merge_databases():
-    pass
-
-
-def delete_datasets():
-    pass
-
-
-def prune_dataruns():
-    pass
-
-
-def main():
-    pass
