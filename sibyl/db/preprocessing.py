@@ -247,19 +247,26 @@ def test_validation():
 
 
 if __name__ == "__main__":
+    DROP_OLD = True
+
+    database = sys.argv[1]
+    directory = os.path.join("..", "..", "dbdata", sys.argv[2])
+
     # CONFIGURATIONS
     include_database = False
     client = MongoClient("localhost", 27017)
-    connect('sibyl', host='localhost', port=27017)
-    directory = os.path.join("..", "..", "dbdata", sys.argv[1])
 
-    # INSERT CATEGORIES
+    if DROP_OLD:
+        client.drop_database(database)
+    connect(database, host='localhost', port=27017)
+
+    # INSERT CATEGORIES, IF AVAILABLE
     if os.path.exists(os.path.join(directory, "categories.csv")):
         insert_categories(os.path.join(directory, "categories.csv"))
 
     # INSERT FEATURES
     feature_names = insert_features(os.path.join(directory, "features.csv")).tolist()
-
+'''
     # INSERT REFERRALS
     insert_referrals(os.path.join(directory, "referrals.csv"))
 
@@ -286,7 +293,8 @@ if __name__ == "__main__":
                  dataset_filepath=dataset_filepath, importance_filepath=importance_filepath)
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
-    '''generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
+    generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
                                       os.path.join(directory, "agg_dataset.csv"),
-                                      os.path.join(directory, "agg_features.csv"))'''
+                                      os.path.join(directory, "agg_features.csv"))
     test_validation()
+'''
