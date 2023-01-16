@@ -184,17 +184,17 @@ class Model(SibylDocument):
     training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
 
 
-class Referral(SibylDocument):
+class EntityGroup(SibylDocument):
     """
-    A **Case** contains information about a referral
+    An **EntityGroup** contains information about some categorization for entities
     Attributes
     ----------
-    referral_id : str
-        ID of the referral
+    group_id : str
+        ID of the group
     property : dict {property : value}
         Domain specific properties
     """
-    referral_id = fields.StringField(required=True, validation=_valid_id)
+    group_id = fields.StringField(required=True, validation=_valid_id)
     property = fields.DictField()
 
 
