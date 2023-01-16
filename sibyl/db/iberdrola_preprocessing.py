@@ -207,14 +207,14 @@ if __name__ == "__main__":
     feature_names = insert_features(os.path.join(directory, "features.csv")).tolist()
 
     # INSERT ENTITIES
-    eids = insert_entities(os.path.join(directory, "data.csv"), feature_names,
+    eids = insert_entities(os.path.join(directory, "data2.csv"), feature_names,
                            include_referrals=False)
 
     set_doc = insert_training_set(eids)
 
     # INSERT MODEL
-    model_filepath = os.path.join(directory, "brakepad_model.pkl")
-    dataset_filepath = os.path.join(directory, "data.csv")
+    model_filepath = os.path.join(directory, "model.pkl")
+    dataset_filepath = os.path.join(directory, "data2.csv")
     importance_filepath = os.path.join(directory, "importances.csv")
 
     insert_model(features=feature_names, model_filepath=model_filepath,
