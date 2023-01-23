@@ -259,7 +259,7 @@ if __name__ == "__main__":
     feature_names = insert_features(os.path.join(directory, "features.csv")).tolist()
 
     # INSERT REFERRALS
-    insert_referrals(os.path.join(directory, "referrals.csv"))
+    insert_referrals(os.path.join(directory, "groups.csv"))
 
     # INSERT ENTITIES
     eids = insert_entities(os.path.join(directory, "true_entities.csv"), feature_names,

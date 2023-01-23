@@ -73,13 +73,18 @@ if __name__ == "__main__":
         insert_categories(os.path.join(directory, "categories.csv"))
 
     # INSERT FEATURES
-    feature_names = insert_features(os.path.join(directory, "features.csv")).tolist()
-'''
-    # INSERT REFERRALS
-    insert_referrals(os.path.join(directory, "referrals.csv"))
+    feature_names = insert_features(os.path.join(directory, "features.csv"))
+
+    # INSERT ENTITY GROUPS
+    if os.path.exists(os.path.join(directory, "groups.csv")):
+        insert_entity_groups(os.path.join(directory, "groups.csv"))
 
     # INSERT CONTEXT
     insert_terms(os.path.join(directory, "terms.csv"))
+
+    # INSERT ENTITIES
+    eids = insert_entities(os.path.join(directory, "entities.csv"), feature_names,
+                           mappings_filepath=os.path.join(directory, "mappings.csv"))
 
 '''
     # INSERT ENTITIES
@@ -106,3 +111,4 @@ if __name__ == "__main__":
                                       os.path.join(directory, "agg_dataset.csv"),
                                       os.path.join(directory, "agg_features.csv"))
     test_validation()
+'''
