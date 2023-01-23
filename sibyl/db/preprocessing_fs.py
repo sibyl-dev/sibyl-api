@@ -164,7 +164,7 @@ def insert_entities(values_filepath, features_names, mappings_filepath=None,
         values_df = values_df.iloc[counter_start:num + counter_start]
     eids = values_df["eid"]
 
-    referrals = schema.Referral.find()
+    groups = schema.EntityGroup.find()
 
     raw_entities = values_df.to_dict(orient="records")
     entities = []
@@ -174,7 +174,7 @@ def insert_entities(values_filepath, features_names, mappings_filepath=None,
         del raw_entity["eid"]
         entity["features"] = raw_entity
         if include_referrals:
-            entity["property"] = {"referral_ids": [random.choice(referrals).referral_id]}
+            entity["property"] = {"referral_ids": [random.choice(groups).referral_id]}
         entities.append(entity)
     schema.Entity.insert_many(entities)
     return eids

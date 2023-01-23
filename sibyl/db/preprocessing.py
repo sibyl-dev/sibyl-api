@@ -54,6 +54,34 @@ def insert_terms(filepath):
     schema.Context.insert(**context_dict)
 
 
+def insert_entities(feature_values_filepath, features_names, mappings_filepath=None,
+                    counter_start=0, num=0):
+    values_df = pd.read_csv(feature_values_filepath)[features_names + ["eid"]]
+    # Mappings from one-hot encoded columns to categorical data
+    if mappings_filepath is not None:
+        mappings = pd.read_csv(mappings_filepath)
+        mappings = mappings[mappings["include"]]
+        values_df = convert_to_categorical(values_df, mappings)
+    if num > 0:
+        values_df = values_df.iloc[counter_start:num + counter_start]
+    eids = values_df["eid"]
+
+    referrals = schema.Referral.find()
+
+    raw_entities = values_df.to_dict(orient="records")
+    entities = []
+    for raw_entity in raw_entities:
+        entity = {}
+        entity["eid"] = str(raw_entity["eid"])
+        del raw_entity["eid"]
+        entity["features"] = raw_entity
+        if include_referrals:
+            entity["property"] = {"referral_ids": [random.choice(referrals).referral_id]}
+        entities.append(entity)
+    schema.Entity.insert_many(entities)
+    return eids
+
+
 if __name__ == "__main__":
     DROP_OLD = True
 
@@ -81,12 +109,11 @@ if __name__ == "__main__":
     # INSERT CONTEXT
     insert_terms(os.path.join(directory, "terms.csv"))
 
-'''
     # INSERT ENTITIES
     eids = insert_entities(os.path.join(directory, "entities.csv"), feature_names,
                            mappings_filepath=os.path.join(directory, "mappings.csv"))
 
-
+'''
     # INSERT FULL DATASET
     if include_database:
         eids = insert_entities(os.path.join(directory, "dataset.csv"), feature_names,
