@@ -98,15 +98,22 @@ def insert_training_set(eids):
 
 
 if __name__ == "__main__":
-    DROP_OLD = True
-
     database_name = sys.argv[1]
     directory = os.path.join("..", "..", "dbdata", sys.argv[2])
 
-    # CONFIGURATIONS
-    include_database = False
+    # CONFIGURATIONS TODO: move
+    # If true, automatically drop existing database
+    DROP_OLD = True
+    # If true, include the database in loading (set to False if privacy is a concern)
+    include_database = True
+    # Number of entries from database to include
     num_from_database = 100000
+    # filepath to fitted, pickled Pyreal transformers
+    transformers_fp = None
+    # filepath to mappings csv for one-hot decoder (TODO: add sample format)
+    one_hot_decode_fp = None
 
+    #
     client = MongoClient("localhost", 27017)
 
     if DROP_OLD:
@@ -129,13 +136,16 @@ if __name__ == "__main__":
 
     # INSERT ENTITIES
     eids = insert_entities(os.path.join(directory, "entities.csv"), feature_names,
-                           one_hot_decode_fp=os.path.join(directory, "mappings.csv"))
+                           transformers_fp=transformers_fp,
+                           one_hot_decode_fp=one_hot_decode_fp)
 
     # INSERT FULL DATASET
     if include_database and os.path.exists(os.path.join(directory, "dataset.csv")):
         eids = insert_entities(os.path.join(directory, "dataset.csv"), feature_names,
                                num=num_from_database)
     set_doc = insert_training_set(eids)
+
+    # INSERT MODEL
 
 '''
     # INSERT MODEL
