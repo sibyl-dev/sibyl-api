@@ -9,11 +9,11 @@ import pandas as pd
 from mongoengine import connect
 from pymongo import MongoClient
 from pyreal.explainers import LocalFeatureContribution
+from pyreal.transformers import run_transformers, MappingsOneHotDecoder, Mappings
 from sklearn.linear_model import Lasso
 
 import sibyl.global_explanation as ge
 from sibyl.db import schema
-from sibyl.db.utils import MappingsTransformer, ModelWrapperThresholds
 
 
 def insert_features(filepath):
@@ -54,19 +54,28 @@ def insert_terms(filepath):
     schema.Context.insert(**context_dict)
 
 
-def insert_entities(feature_values_filepath, features_names, mappings_filepath=None,
-                    counter_start=0, num=0):
+def insert_entities(feature_values_filepath, features_names,
+                    transformers_fp=None, one_hot_decode_fp=None,
+                    num=None):
     values_df = pd.read_csv(feature_values_filepath)[features_names + ["eid"]]
-    # Mappings from one-hot encoded columns to categorical data
-    if mappings_filepath is not None:
-        mappings = pd.read_csv(mappings_filepath)
-        mappings = mappings[mappings["include"]]
-        values_df = convert_to_categorical(values_df, mappings)
-    if num > 0:
-        values_df = values_df.iloc[counter_start:num + counter_start]
+    transformers = []
+    if transformers_fp is not None:
+        transformers = pickle.load(open(transformers_fp, "rb"))
+    if one_hot_decode_fp is not None:
+        # Mappings from one-hot encoded columns to categorical data
+        mappings = pd.read_csv(one_hot_decode_fp)
+        if "include" in mappings:
+            mappings = mappings[mappings["include"]]
+        transformer = MappingsOneHotDecoder(Mappings.generate_mappings(dataframe=mappings))
+        transformers.append(transformer)
+    values_df = run_transformers(transformers, values_df)
+
+    if num is not None:
+        values_df = values_df.sample(num, random_state=100)
     eids = values_df["eid"]
 
-    referrals = schema.Referral.find()
+    # TODO: add groups to entities
+    # groups = schema.EntityGroup.find()
 
     raw_entities = values_df.to_dict(orient="records")
     entities = []
@@ -75,11 +84,17 @@ def insert_entities(feature_values_filepath, features_names, mappings_filepath=N
         entity["eid"] = str(raw_entity["eid"])
         del raw_entity["eid"]
         entity["features"] = raw_entity
-        if include_referrals:
-            entity["property"] = {"referral_ids": [random.choice(referrals).referral_id]}
         entities.append(entity)
     schema.Entity.insert_many(entities)
     return eids
+
+
+def insert_training_set(eids):
+    references = [schema.Entity.find_one(eid=str(eid)) for eid in eids]
+    training_set = {"entities": references}
+
+    set_doc = schema.TrainingSet.insert(**training_set)
+    return set_doc
 
 
 if __name__ == "__main__":
@@ -90,6 +105,8 @@ if __name__ == "__main__":
 
     # CONFIGURATIONS
     include_database = False
+    num_from_database = 100000
+
     client = MongoClient("localhost", 27017)
 
     if DROP_OLD:
@@ -112,20 +129,15 @@ if __name__ == "__main__":
 
     # INSERT ENTITIES
     eids = insert_entities(os.path.join(directory, "entities.csv"), feature_names,
-                           mappings_filepath=os.path.join(directory, "mappings.csv"))
+                           one_hot_decode_fp=os.path.join(directory, "mappings.csv"))
 
-'''
-    # INSERT ENTITIES
-    eids = insert_entities(os.path.join(directory, "entities.csv"), feature_names,
-                           mappings_filepath=os.path.join(directory, "mappings.csv"))
-
-'''
     # INSERT FULL DATASET
-    if include_database:
+    if include_database and os.path.exists(os.path.join(directory, "dataset.csv")):
         eids = insert_entities(os.path.join(directory, "dataset.csv"), feature_names,
-                               counter_start=17, num=100000)
+                               num=num_from_database)
     set_doc = insert_training_set(eids)
 
+'''
     # INSERT MODEL
     model_filepath = os.path.join(directory, "weights.csv")
     dataset_filepath = os.path.join(directory, "dataset.csv")
@@ -139,4 +151,5 @@ if __name__ == "__main__":
                                       os.path.join(directory, "agg_dataset.csv"),
                                       os.path.join(directory, "agg_features.csv"))
     test_validation()
+
 '''

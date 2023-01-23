@@ -262,7 +262,7 @@ if __name__ == "__main__":
     insert_referrals(os.path.join(directory, "groups.csv"))
 
     # INSERT ENTITIES
-    eids = insert_entities(os.path.join(directory, "true_entities.csv"), feature_names,
+    eids = insert_entities(os.path.join(directory, "entities.csv"), feature_names,
                            mappings_filepath=os.path.join(directory, "mappings.csv"),
                            include_referrals=True)
 
