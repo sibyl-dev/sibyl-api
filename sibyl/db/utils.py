@@ -108,6 +108,9 @@ class ModelWrapperThresholds(ModelWrapper):
         self.thresholds = thresholds
         super().__init__(features)
 
+    def __call__(self, x):
+        return self.predict(x)
+
     def predict(self, x):
         """
         Predict on x, then convert to probabilities and scores based on

@@ -12,9 +12,25 @@ from pyreal.explainers import LocalFeatureContribution
 from pyreal.transformers import run_transformers, MappingsOneHotDecoder, Mappings
 from sklearn.linear_model import Lasso
 import yaml
+from utils import ModelWrapperThresholds, ModelWrapper
 
 import sibyl.global_explanation as ge
 from sibyl.db import schema
+
+
+def _process_fp(fn):
+    if fn is not None:
+        return os.path.join(directory, fn)
+    return None
+
+
+def _load_data(features, dataset_filepath, target):
+    data = pd.read_csv(dataset_filepath)
+
+    y = data[target]
+    X = data[features]
+
+    return X, y
 
 
 def _load_model_from_weights_sklearn(weights_filepath, model_base):
@@ -73,12 +89,10 @@ def insert_terms(filepath):
 
 
 def insert_entities(feature_values_filepath, features_names,
-                    transformers_fp=None, one_hot_decode_fp=None,
+                    pre_transformers_fp=None, one_hot_decode_fp=None,
                     num=None):
     values_df = pd.read_csv(feature_values_filepath)[features_names + ["eid"]]
     transformers = []
-    if transformers_fp is not None:
-        transformers = pickle.load(open(transformers_fp, "rb"))
     if one_hot_decode_fp is not None:
         # Mappings from one-hot encoded columns to categorical data
         mappings = pd.read_csv(one_hot_decode_fp)
@@ -86,6 +100,8 @@ def insert_entities(feature_values_filepath, features_names,
             mappings = mappings[mappings["include"]]
         transformer = MappingsOneHotDecoder(Mappings.generate_mappings(dataframe=mappings))
         transformers.append(transformer)
+    if pre_transformers_fp is not None:
+        transformers = pickle.load(open(pre_transformers_fp, "rb"))
     values_df = run_transformers(transformers, values_df)
 
     if num is not None:
@@ -116,31 +132,46 @@ def insert_training_set(eids):
 
 
 def insert_model(features,
+                 dataset_fp, target,
                  pickle_model_fp=None,
                  weights_fp=None,
                  threshold_fp=None,
-                 importance_fp=None, explainer_fp=None):
+                 one_hot_encode_fp=None,
+                 model_transformers_fp=None,
+                 importance_fp=None,
+                 explainer_fp=None):
+    model_features = features
     if pickle_model_fp is not None:
         print("Loading model from pickle file.")
         model = pickle.load(pickle_model_fp)
     elif weights_fp is not None:
         print("Loading model from weights")
-        base_model, model_features = _load_model_from_weights_sklearn(
+        model, model_features = _load_model_from_weights_sklearn(
             weights_fp, Lasso())
+    else:
+        raise ValueError("Must provide at least one model format")
 
     if threshold_fp is not None:
         threshold_df = pd.read_csv(threshold_fp)
         thresholds = threshold_df["thresholds"].tolist()
+        model = ModelWrapperThresholds(model, thresholds, features=model_features)
 
+    transformers = []
 
-    model = ModelWrapperThresholds(base_model, thresholds, features=model_features)
-    transformer = load_mappings_transformer(os.path.join(directory, "mappings.csv"),
-                                            model_features)
+    if one_hot_encode_fp is not None:
+        mappings = pd.read_csv(one_hot_encode_fp)
+        if "include" in mappings:
+            mappings = mappings[mappings["include"]]
+        transformer = MappingsOneHotDecoder(Mappings.generate_mappings(dataframe=mappings))
+        transformers.append(transformer)
 
-    dataset, targets = load_data(features, dataset_filepath)
+    if model_transformers_fp is not None:
+        transformers = pickle.load(model_transformers_fp)
+
+    train_dataset, targets = _load_data(features, dataset_fp, target)
 
     model_serial = pickle.dumps(model)
-    transformer_serial = pickle.dumps(transformer)
+    transformers_serial = pickle.dumps(transformers)
 
     texts = {
         "name": "Lasso Regression Model",
@@ -151,27 +182,29 @@ def insert_model(features,
     description = texts["description"]
     performance = texts["performance"]
 
-    if importance_filepath is not None:
-        importance_df = pd.read_csv(importance_filepath)
+    if importance_fp is not None:
+        importance_df = pd.read_csv(importance_fp)
         importance_df = importance_df.set_index("name")
     else:
-        raise NotImplementedError()
+        raise NotImplementedError("Calculating importances at preprocessing time is not "
+                                  "yet implemented")
 
     importances = importance_df.to_dict(orient='dict')["importance"]
 
-    if explainer_filepath is not None:
+    if explainer_fp is not None:
         print("Loading explainer from file")
-        with open(explainer_filepath, "rb") as f:
+        with open(explainer_fp, "rb") as f:
             explainer_serial = f.read()
     else:
-        explainer = LocalFeatureContribution(base_model, dataset.sample(100),
+        # TODO: add additional explainers/allow for multiple algorithms
+        explainer = LocalFeatureContribution(model, train_dataset.sample(1000),
                                              e_algorithm="shap",
-                                             transformers=transformer, fit_on_init=True)
+                                             transformers=transformers, fit_on_init=True)
         explainer_serial = pickle.dumps(explainer)
 
     items = {
         "model": model_serial,
-        "transformer": transformer_serial,
+        "transformer": transformers_serial,
         "name": name,
         "description": description,
         "performance": performance,
@@ -215,25 +248,30 @@ if __name__ == "__main__":
 
     # INSERT ENTITIES
     eids = insert_entities(os.path.join(directory, "entities.csv"), feature_names,
-                           transformers_fp=cfg["transformers_fp"],
-                           one_hot_decode_fp=cfg["one_hot_decode_fp"])
+                           pre_transformers_fp=_process_fp(cfg["pre_transformers_fn"]),
+                           one_hot_decode_fp=_process_fp(cfg["one_hot_decode_fn"]))
 
     # INSERT FULL DATASET
+    dataset_fp = os.path.join(directory, "dataset.csv")
     if cfg["include_database"] and os.path.exists(os.path.join(directory, "dataset.csv")):
-        eids = insert_entities(os.path.join(directory, "dataset.csv"), feature_names,
+        eids = insert_entities(dataset_fp, feature_names,
                                num=cfg["num_from_database"])
     set_doc = insert_training_set(eids)
 
     # INSERT MODEL
+    target = cfg["target"]
+    insert_model(feature_names, dataset_fp, target,
+                 weights_fp=_process_fp(cfg["weights_fn"]),
+                 threshold_fp=_process_fp(cfg["threshold_fn"]),
+                 importance_fp=_process_fp(cfg["importance_fn"]))
 
 '''
     # INSERT MODEL
     model_filepath = os.path.join(directory, "weights.csv")
-    dataset_filepath = os.path.join(directory, "dataset.csv")
+    dataset_filepath = os.path.join(director  y, "dataset.csv")
     importance_filepath = os.path.join(directory, "importances.csv")
 
-    insert_model(features=feature_names, model_filepath=model_filepath,
-                 dataset_filepath=dataset_filepath, importance_filepath=importance_filepath)
+
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
     generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,

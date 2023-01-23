@@ -19,9 +19,17 @@ num_from_database: 1000
 # Entity processing configurations
 # =================================================================================================
 # filepath to fitted, pickled Pyreal transformers
-transformers_fp:
+pre_transformers_fn:
 # filepath to mappings csv for one-hot decoder (TODO: add sample format)
-one_hot_decode_fp:
+one_hot_decode_fn: "mappings.csv"
 
 # Model processing configurations
 # =================================================================================================
+target: "PRO_PLSM_NEXT730_DUMMY"
+pickle_model_fn:
+weights_fn: "weights.csv"
+threshold_fn: "thresholds.csv"
+one_hot_encode_fn: "mappings.csv"
+model_transformers_fn:
+importance_fn: "importances.csv"
+explainer_fn: "explainer.pkl"
