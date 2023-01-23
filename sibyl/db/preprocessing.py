@@ -17,6 +17,23 @@ import sibyl.global_explanation as ge
 from sibyl.db import schema
 
 
+def _load_model_from_weights_sklearn(weights_filepath, model_base):
+    """
+    Load the model
+    :return: (model, model features)
+    """
+    model_weights = pd.read_csv(weights_filepath)
+
+    model = model_base
+    dummy_X = np.zeros((1, model_weights.shape[1] - 1))
+    dummy_y = np.zeros(model_weights.shape[1] - 1)
+    model.fit(dummy_X, dummy_y)
+
+    model.coef_ = np.array(model_weights["weight"][1:])
+    model.intercept_ = model_weights["weight"][0]
+    return model, model_weights["name"][1:]
+
+
 def insert_features(filepath):
     features_df = pd.read_csv(filepath)
 
@@ -96,6 +113,73 @@ def insert_training_set(eids):
 
     set_doc = schema.TrainingSet.insert(**training_set)
     return set_doc
+
+
+def insert_model(features,
+                 pickle_model_fp=None,
+                 weights_fp=None,
+                 threshold_fp=None,
+                 importance_fp=None, explainer_fp=None):
+    if pickle_model_fp is not None:
+        print("Loading model from pickle file.")
+        model = pickle.load(pickle_model_fp)
+    elif weights_fp is not None:
+        print("Loading model from weights")
+        base_model, model_features = _load_model_from_weights_sklearn(
+            weights_fp, Lasso())
+
+    if threshold_fp is not None:
+        threshold_df = pd.read_csv(threshold_fp)
+        thresholds = threshold_df["thresholds"].tolist()
+
+
+    model = ModelWrapperThresholds(base_model, thresholds, features=model_features)
+    transformer = load_mappings_transformer(os.path.join(directory, "mappings.csv"),
+                                            model_features)
+
+    dataset, targets = load_data(features, dataset_filepath)
+
+    model_serial = pickle.dumps(model)
+    transformer_serial = pickle.dumps(transformer)
+
+    texts = {
+        "name": "Lasso Regression Model",
+        "description": "placeholder",
+        "performance": "placeholder"
+    }
+    name = texts["name"]
+    description = texts["description"]
+    performance = texts["performance"]
+
+    if importance_filepath is not None:
+        importance_df = pd.read_csv(importance_filepath)
+        importance_df = importance_df.set_index("name")
+    else:
+        raise NotImplementedError()
+
+    importances = importance_df.to_dict(orient='dict')["importance"]
+
+    if explainer_filepath is not None:
+        print("Loading explainer from file")
+        with open(explainer_filepath, "rb") as f:
+            explainer_serial = f.read()
+    else:
+        explainer = LocalFeatureContribution(base_model, dataset.sample(100),
+                                             e_algorithm="shap",
+                                             transformers=transformer, fit_on_init=True)
+        explainer_serial = pickle.dumps(explainer)
+
+    items = {
+        "model": model_serial,
+        "transformer": transformer_serial,
+        "name": name,
+        "description": description,
+        "performance": performance,
+        "importances": importances,
+        "explainer": explainer_serial,
+        "training_set": set_doc
+    }
+    schema.Model.insert(**items)
 
 
 if __name__ == "__main__":
