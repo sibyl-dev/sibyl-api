@@ -11,6 +11,7 @@ from pymongo import MongoClient
 from pyreal.explainers import LocalFeatureContribution
 from pyreal.transformers import run_transformers, MappingsOneHotDecoder, Mappings
 from sklearn.linear_model import Lasso
+import yaml
 
 import sibyl.global_explanation as ge
 from sibyl.db import schema
@@ -98,25 +99,19 @@ def insert_training_set(eids):
 
 
 if __name__ == "__main__":
-    database_name = sys.argv[1]
-    directory = os.path.join("..", "..", "dbdata", sys.argv[2])
+    config_file = sys.argv[1]
+    with open(config_file, 'r') as f:
+        cfg = yaml.safe_load(f)
 
-    # CONFIGURATIONS TODO: move
-    # If true, automatically drop existing database
-    DROP_OLD = True
-    # If true, include the database in loading (set to False if privacy is a concern)
-    include_database = True
-    # Number of entries from database to include
-    num_from_database = 100000
-    # filepath to fitted, pickled Pyreal transformers
-    transformers_fp = None
-    # filepath to mappings csv for one-hot decoder (TODO: add sample format)
-    one_hot_decode_fp = None
-
-    #
+    # Begin database loading ---------------------------
     client = MongoClient("localhost", 27017)
+    database_name = cfg["database_name"]
+    if cfg["directory"] is None:
+        directory = os.path.join("..", "..", "dbdata", database_name)
+    else:
+        directory = os.path.join("..", "..", "dbdata", cfg["directory"])
 
-    if DROP_OLD:
+    if cfg["DROP_OLD"]:
         client.drop_database(database_name)
     connect(database_name, host='localhost', port=27017)
 
@@ -136,13 +131,13 @@ if __name__ == "__main__":
 
     # INSERT ENTITIES
     eids = insert_entities(os.path.join(directory, "entities.csv"), feature_names,
-                           transformers_fp=transformers_fp,
-                           one_hot_decode_fp=one_hot_decode_fp)
+                           transformers_fp=cfg["transformers_fp"],
+                           one_hot_decode_fp=cfg["one_hot_decode_fp"])
 
     # INSERT FULL DATASET
-    if include_database and os.path.exists(os.path.join(directory, "dataset.csv")):
+    if cfg["include_database"] and os.path.exists(os.path.join(directory, "dataset.csv")):
         eids = insert_entities(os.path.join(directory, "dataset.csv"), feature_names,
-                               num=num_from_database)
+                               num=cfg["num_from_database"])
     set_doc = insert_training_set(eids)
 
     # INSERT MODEL

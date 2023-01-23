@@ -1,0 +1,27 @@
+# Configurations for database preprocessing
+# =================================================================================================
+
+# Name of database to create
+database_name: "family-screening"
+# Name of directory in dbdata with csv files (if different from database_name)
+directory:
+# If true, automatically drop existing database
+DROP_OLD: True
+
+# Training data configurations
+# =================================================================================================
+# If true, include the full training database in loading (set to False if privacy is a concern)
+include_database: True
+# Number of entries from database to include
+num_from_database: 1000
+
+
+# Entity processing configurations
+# =================================================================================================
+# filepath to fitted, pickled Pyreal transformers
+transformers_fp:
+# filepath to mappings csv for one-hot decoder (TODO: add sample format)
+one_hot_decode_fp:
+
+# Model processing configurations
+# =================================================================================================
