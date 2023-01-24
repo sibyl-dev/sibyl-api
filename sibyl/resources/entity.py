@@ -95,7 +95,7 @@ class Entities(Resource):
 
     def __init__(self):
         parser_get = reqparse.RequestParser(bundle_errors=True)
-        parser_get.add_argument('referral_id', type=str, default=None,
+        parser_get.add_argument('group_id', type=str, default=None,
                                 location='args')
         self.parser_get = parser_get
 

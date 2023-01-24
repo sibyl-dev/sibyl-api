@@ -266,13 +266,6 @@ if __name__ == "__main__":
                  importance_fp=_process_fp(cfg["importance_fn"]))
 
 '''
-    # INSERT MODEL
-    model_filepath = os.path.join(directory, "weights.csv")
-    dataset_filepath = os.path.join(director  y, "dataset.csv")
-    importance_filepath = os.path.join(directory, "importances.csv")
-
-
-
     # PRE-COMPUTE DISTRIBUTION INFORMATION
     generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
                                       os.path.join(directory, "agg_dataset.csv"),
