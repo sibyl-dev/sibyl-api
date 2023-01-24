@@ -406,16 +406,43 @@ class OutcomeCount(Resource):
 class FeatureContributions(Resource):
     def post(self):
         """
-        @api {post} /contributions/ Get feature contributions
-        @apiName GetFeatureContributions
-        @apiGroup Computing
-        @apiVersion 1.0.0
-        @apiDescription  get the contributions of all features
-        @apiParam {String} eid ID of the entity to compute.
-        @apiParam {String} model_id ID of the model to compute.
-        @apiSuccess {Object} contributions Feature contribution object (key-value pair).
-        @apiSuccess {Number} contributions.[key] Contribution value of the feature [key].
-        """
+         Get feature contributions
+         ---
+         tags:
+           - computing
+         security:
+           - tokenAuth: []
+         requestBody:
+           required: true
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   eid:
+                     type: string
+                   model_id:
+                     type: string
+                 required: ['eid', 'model_id']
+         responses:
+           200:
+             description: Feature contributions
+             content:
+               application/json:
+                 schema:
+                   type: object
+                   properties:
+                     contributions:
+                         type: array
+                         items:
+                             type: number
+                 examples:
+                   externalJson:
+                     summary: external example
+                     externalValue: '/examples/entity-get-200.json'
+           400:
+             $ref: '#/components/responses/ErrorMessage'
+         """
 
         # LOAD IN AND CHECK ATTRIBUTES:
         attrs = ['eid', 'model_id']

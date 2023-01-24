@@ -12,7 +12,7 @@ from pyreal.explainers import LocalFeatureContribution
 from pyreal.transformers import run_transformers, MappingsOneHotDecoder, Mappings
 from sklearn.linear_model import Lasso
 import yaml
-from utils import ModelWrapperThresholds, ModelWrapper
+from sibyl.db.utils import ModelWrapperThresholds, ModelWrapper
 
 import sibyl.global_explanation as ge
 from sibyl.db import schema
