@@ -41,8 +41,9 @@ def _load_model_from_weights_sklearn(weights_filepath, model_base):
     model_weights = pd.read_csv(weights_filepath)
 
     model = model_base
-    dummy_X = np.zeros((1, model_weights.shape[1] - 1))
-    dummy_y = np.zeros(model_weights.shape[1] - 1)
+    dummy_X = pd.DataFrame(np.zeros((1, model_weights.shape[0] - 1)),
+                           columns=model_weights["weight"][1:])
+    dummy_y = np.zeros(1)
     model.fit(dummy_X, dummy_y)
 
     model.coef_ = np.array(model_weights["weight"][1:])
