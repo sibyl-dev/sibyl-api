@@ -9,7 +9,7 @@ import pandas as pd
 from mongoengine import connect
 from pymongo import MongoClient
 from pyreal.explainers import LocalFeatureContribution
-from pyreal.transformers import run_transformers, MappingsOneHotDecoder, Mappings
+from pyreal.transformers import run_transformers, MappingsOneHotDecoder, MappingsOneHotEncoder, Mappings
 from sklearn.linear_model import Lasso
 import yaml
 from sibyl.db.utils import ModelWrapperThresholds, ModelWrapper
@@ -162,7 +162,7 @@ def insert_model(features,
         mappings = pd.read_csv(one_hot_encode_fp)
         if "include" in mappings:
             mappings = mappings[mappings["include"]]
-        transformer = MappingsOneHotDecoder(Mappings.generate_mappings(dataframe=mappings))
+        transformer = MappingsOneHotEncoder(Mappings.generate_mappings(dataframe=mappings))
         transformers.append(transformer)
 
     if model_transformers_fp is not None:
@@ -263,7 +263,8 @@ if __name__ == "__main__":
     insert_model(feature_names, dataset_fp, target,
                  weights_fp=_process_fp(cfg["weights_fn"]),
                  threshold_fp=_process_fp(cfg["threshold_fn"]),
-                 importance_fp=_process_fp(cfg["importance_fn"]))
+                 importance_fp=_process_fp(cfg["importance_fn"]),
+                 one_hot_encode_fp=_process_fp(cfg["one_hot_encode_fn"]))
 
 '''
     # PRE-COMPUTE DISTRIBUTION INFORMATION

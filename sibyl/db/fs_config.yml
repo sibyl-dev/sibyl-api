@@ -32,4 +32,4 @@ threshold_fn: "thresholds.csv"
 one_hot_encode_fn: "mappings.csv"
 model_transformers_fn:
 importance_fn: "importances.csv"
-explainer_fn: "explainer.pkl"
+explainer_fn:
