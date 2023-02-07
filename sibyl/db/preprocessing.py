@@ -201,7 +201,6 @@ def insert_model(features,
         explainer = ShapFeatureContribution(model, train_dataset.sample(1000),
                                              shap_type="kernel",
                                              transformers=transformers, fit_on_init=True)
-        explainer.produce(train_dataset.sample(2))
         explainer_serial = pickle.dumps(explainer)
 
     items = {

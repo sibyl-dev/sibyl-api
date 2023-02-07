@@ -486,7 +486,7 @@ class FeatureContributions(Resource):
             message, error_code = payload
             return message, error_code
 
-        contributions = explainer.produce(entity_features)
+        contributions = explainer.produce(entity_features)[0]
         keys = list(contributions.columns)
         contribution_dict = dict(zip(keys, contributions.iloc[0, :]))
         return {"contributions": contribution_dict}, 200
