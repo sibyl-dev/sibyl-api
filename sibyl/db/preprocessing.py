@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from mongoengine import connect
 from pymongo import MongoClient
-from pyreal.explainers import LocalFeatureContribution
+from pyreal.explainers import ShapFeatureContribution
 from pyreal.transformers import run_transformers, MappingsOneHotDecoder, MappingsOneHotEncoder, Mappings
 from sklearn.linear_model import Lasso
 import yaml
@@ -198,9 +198,10 @@ def insert_model(features,
             explainer_serial = f.read()
     else:
         # TODO: add additional explainers/allow for multiple algorithms
-        explainer = LocalFeatureContribution(model, train_dataset.sample(1000),
-                                             e_algorithm="shap",
+        explainer = ShapFeatureContribution(model, train_dataset.sample(1000),
+                                             shap_type="kernel",
                                              transformers=transformers, fit_on_init=True)
+        explainer.produce(train_dataset.sample(2))
         explainer_serial = pickle.dumps(explainer)
 
     items = {
