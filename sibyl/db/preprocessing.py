@@ -10,7 +10,7 @@ from mongoengine import connect
 from pymongo import MongoClient
 from pyreal.explainers import ShapFeatureContribution
 from pyreal.transformers import run_transformers, MappingsOneHotDecoder, MappingsOneHotEncoder, Mappings
-from sklearn.linear_model import Lasso
+from sklearn.linear_model import Lasso, LinearRegression
 import yaml
 from sibyl.db.utils import ModelWrapperThresholds, ModelWrapper
 
@@ -142,17 +142,23 @@ def insert_model(features,
                  importance_fp=None,
                  explainer_fp=None):
     model_features = features
+
+    # Base model options
     if pickle_model_fp is not None:
+        # Load from pickle file
         print("Loading model from pickle file.")
         model = pickle.load(pickle_model_fp)
     elif weights_fp is not None:
+        # Load from list of weights
         print("Loading model from weights")
         model, model_features = _load_model_from_weights_sklearn(
-            weights_fp, Lasso())
+            weights_fp, LinearRegression())
     else:
         raise ValueError("Must provide at least one model format")
 
+    # Model wrapping options
     if threshold_fp is not None:
+        # Bin output based on thresholds
         threshold_df = pd.read_csv(threshold_fp)
         thresholds = threshold_df["thresholds"].tolist()
         model = ModelWrapperThresholds(model, thresholds, features=model_features)
@@ -198,9 +204,8 @@ def insert_model(features,
             explainer_serial = f.read()
     else:
         # TODO: add additional explainers/allow for multiple algorithms
-        explainer = ShapFeatureContribution(model, train_dataset.sample(1000),
-                                             shap_type="kernel",
-                                             transformers=transformers, fit_on_init=True)
+        explainer = ShapFeatureContribution(model, train_dataset.sample(100), shap_type="kernel",
+                                            transformers=transformers, fit_on_init=True)
         explainer_serial = pickle.dumps(explainer)
 
     items = {
