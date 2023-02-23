@@ -202,6 +202,7 @@ def insert_model(features,
         print("Loading explainer from file")
         with open(explainer_fp, "rb") as f:
             explainer_serial = f.read()
+            explainer = pickle.loads(explainer_serial)
     else:
         # TODO: add additional explainers/allow for multiple algorithms
         explainer = ShapFeatureContribution(model, train_dataset.sample(100), shap_type="kernel",
@@ -219,6 +220,48 @@ def insert_model(features,
         "training_set": set_doc
     }
     schema.Model.insert(**items)
+    return explainer
+
+
+def generate_feature_distribution_doc(save_path, explainer, target,
+                                      dataset_filepath, features_filepath):
+    features = pd.read_csv(features_filepath)
+    feature_names = features["name"]
+    dataset, targets = _load_data(feature_names, dataset_filepath, target)
+
+    boolean_features = features[features['type'].isin(['binary', 'categorical'])]["name"]
+    dataset_cat = dataset[boolean_features]
+
+    numeric_features = features[features['type'] == 'numeric']["name"]
+    dataset_num = dataset[numeric_features]
+
+    summary_dict = {}
+    # TODO: generalize list of outputs
+    for output in range(1, 21):
+        row_details = {}
+        rows = ge.get_rows_by_output(output, explainer.model_predict, dataset, row_labels=None)
+
+        count_total = len(rows)
+
+        count_removed = sum(targets.iloc[rows])
+        row_details["total cases"] = count_total
+        row_details["total removed"] = count_removed
+
+        cat_summary = ge.summary_categorical(dataset_cat.iloc[rows].applymap(str))
+        num_summary = ge.summary_numeric(dataset_num.iloc[rows])
+
+        distributions = {}
+        for (i, name) in enumerate(boolean_features):
+            distributions[name] = {"type": "categorical", "metrics": [cat_summary[0][i].tolist(),
+                                                                      cat_summary[1][i].tolist()]}
+        for (i, name) in enumerate(numeric_features):
+            distributions[name] = {"type": "numeric", "metrics": num_summary[i]}
+        row_details["distributions"] = distributions
+
+        summary_dict[output] = row_details
+
+    with open(save_path, 'w') as f:
+        json.dump(summary_dict, f, indent=4, sort_keys=True)
 
 
 if __name__ == "__main__":
@@ -266,17 +309,13 @@ if __name__ == "__main__":
 
     # INSERT MODEL
     target = cfg["target"]
-    insert_model(feature_names, dataset_fp, target,
-                 weights_fp=_process_fp(cfg["weights_fn"]),
-                 threshold_fp=_process_fp(cfg["threshold_fn"]),
-                 importance_fp=_process_fp(cfg["importance_fn"]),
-                 one_hot_encode_fp=_process_fp(cfg["one_hot_encode_fn"]))
+    explainer = insert_model(feature_names, dataset_fp, target,
+                             weights_fp=_process_fp(cfg["weights_fn"]),
+                             threshold_fp=_process_fp(cfg["threshold_fn"]),
+                             importance_fp=_process_fp(cfg["importance_fn"]),
+                             one_hot_encode_fp=_process_fp(cfg["one_hot_encode_fn"]))
 
-'''
     # PRE-COMPUTE DISTRIBUTION INFORMATION
-    generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
-                                      os.path.join(directory, "agg_dataset.csv"),
-                                      os.path.join(directory, "agg_features.csv"))
-    test_validation()
-
-'''
+    generate_feature_distribution_doc("precomputed/agg_distributions.json", explainer, target,
+                                      dataset_fp, os.path.join(directory, "features.csv"))
+    #test_validation()
