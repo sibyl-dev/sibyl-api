@@ -9,7 +9,7 @@ import pandas as pd
 from mongoengine import connect
 from pymongo import MongoClient
 from pyreal.explainers import ShapFeatureContribution
-from pyreal.transformers import run_transformers, MappingsOneHotDecoder, MappingsOneHotEncoder, Mappings
+from pyreal.transformers import run_transformers, MappingsOneHotDecoder, MappingsOneHotEncoder, Mappings, MultiTypeImputer
 from sklearn.linear_model import Lasso, LinearRegression
 import yaml
 from sibyl.db.utils import ModelWrapperThresholds, ModelWrapper
@@ -90,10 +90,12 @@ def insert_terms(filepath):
 
 
 def insert_entities(feature_values_filepath, features_names,
-                    pre_transformers_fp=None, one_hot_decode_fp=None,
+                    pre_transformers_fp=None, one_hot_decode_fp=None, impute=False,
                     num=None):
     values_df = pd.read_csv(feature_values_filepath)[features_names + ["eid"]]
     transformers = []
+    if impute is not None and impute:
+        transformers.append(MultiTypeImputer())
     if one_hot_decode_fp is not None:
         # Mappings from one-hot encoded columns to categorical data
         mappings = pd.read_csv(one_hot_decode_fp)
@@ -298,11 +300,12 @@ if __name__ == "__main__":
     # INSERT ENTITIES
     eids = insert_entities(os.path.join(directory, "entities.csv"), feature_names,
                            pre_transformers_fp=_process_fp(cfg["pre_transformers_fn"]),
-                           one_hot_decode_fp=_process_fp(cfg["one_hot_decode_fn"]))
+                           one_hot_decode_fp=_process_fp(cfg["one_hot_decode_fn"]),
+                           impute=cfg["impute"])
 
     # INSERT FULL DATASET
-    dataset_fp = os.path.join(directory, "dataset.csv")
-    if cfg["include_database"] and os.path.exists(os.path.join(directory, "dataset.csv")):
+    dataset_fp = _process_fp(cfg["dataset_fn"])
+    if cfg["include_database"] and os.path.exists(dataset_fp):
         eids = insert_entities(dataset_fp, feature_names,
                                num=cfg["num_from_database"])
     set_doc = insert_training_set(eids)
@@ -316,6 +319,6 @@ if __name__ == "__main__":
                              one_hot_encode_fp=_process_fp(cfg["one_hot_encode_fn"]))
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
-    generate_feature_distribution_doc("precomputed/agg_distributions.json", explainer, target,
-                                      dataset_fp, os.path.join(directory, "features.csv"))
+    # generate_feature_distribution_doc("precomputed/agg_distributions.json", explainer, target,
+    #                                   dataset_fp, os.path.join(directory, "features.csv"))
     #test_validation()

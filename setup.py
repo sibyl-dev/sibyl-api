@@ -38,7 +38,7 @@ requirements = [
     'pymongo>=3.7.2,<4',
 
     # Explanations
-    'pyreal==0.3.0',
+    'pyreal==0.3.2',
 ]
 
 setup_requirements = [

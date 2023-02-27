@@ -2,9 +2,9 @@
 # =================================================================================================
 
 # Name of database to create
-database_name: "family-screening"
+database_name: "brakepad"
 # Name of directory in dbdata with csv files (if different from database_name)
-directory:
+directory: "wind-turbines"
 # If true, automatically drop existing database
 DROP_OLD: True
 
@@ -23,15 +23,17 @@ num_from_database: 1000
 # filepath to fitted, pickled Pyreal transformers
 pre_transformers_fn:
 # filepath to mappings csv for one-hot decoder (TODO: add sample format)
-one_hot_decode_fn: "mappings.csv"
+one_hot_decode_fn:
+# If true, impute data using pyreal.MultiTypeImputer()
+impute: True
 
 # Model processing configurations
 # =================================================================================================
-target: "PRO_PLSM_NEXT730_DUMMY"
-pickle_model_fn:
-weights_fn: "weights.csv"
-threshold_fn: "thresholds.csv"
-one_hot_encode_fn: "mappings.csv"
+target: "target"
+pickle_model_fn: "model.pkl"
+weights_fn:
+threshold_fn:
+one_hot_encode_fn:
 model_transformers_fn:
 importance_fn: "importances.csv"
 explainer_fn:

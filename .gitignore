@@ -116,6 +116,7 @@ ENV/
 .vscode/
 dbdata/
 sibyl/db/data
+sibyl/db/dump
 sibyl_test/
 screening_log.csv
 sibyl/db/family_screening
