@@ -144,7 +144,8 @@ def insert_model(features,
                  one_hot_encode_fp=None,
                  model_transformers_fp=None,
                  importance_fp=None,
-                 explainer_fp=None):
+                 explainer_fp=None,
+                 shap_type=None):
     model_features = features
 
     # Base model options
@@ -209,7 +210,7 @@ def insert_model(features,
             explainer = pickle.loads(explainer_serial)
     else:
         # TODO: add additional explainers/allow for multiple algorithms
-        explainer = ShapFeatureContribution(model, train_dataset.sample(100), shap_type="kernel",
+        explainer = ShapFeatureContribution(model, train_dataset.sample(100), shap_type=shap_type,
                                             transformers=transformers, fit_on_init=True)
         explainer_serial = pickle.dumps(explainer)
 
@@ -319,7 +320,8 @@ if __name__ == "__main__":
                              weights_fp=_process_fp(cfg["weights_fn"]),
                              threshold_fp=_process_fp(cfg["threshold_fn"]),
                              importance_fp=_process_fp(cfg["importance_fn"]),
-                             one_hot_encode_fp=_process_fp(cfg["one_hot_encode_fn"]))
+                             one_hot_encode_fp=_process_fp(cfg["one_hot_encode_fn"]),
+                             shap_type=cfg["shap_type"])
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
     # generate_feature_distribution_doc("precomputed/agg_distributions.json", explainer, target,

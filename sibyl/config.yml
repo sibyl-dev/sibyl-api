@@ -3,7 +3,7 @@
 mongodb:
   host: "localhost" # mongodb server address
   port: 27017 # mongodb server port
-  db: "family-screening" # database name
+  db: "brakepad" # database name
   username: # for auth
   password: # for auth
 

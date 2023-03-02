@@ -14,6 +14,9 @@ with open('HISTORY.md', encoding='utf-8') as history_file:
 requirements = [
     'Click>=6.0',
 
+    # Explanations
+    'pyreal==0.3.2',
+
     # General
     'termcolor==1.1.0',
     'PyYAML==5.1',
@@ -21,7 +24,7 @@ requirements = [
     'xgboost==1.6.2',
 
     # Math
-    'numpy>=1.15.4,<1.22.0',
+    'numpy>=1.15.4',
     'pandas>=1.0.3',
 
     # Web Server
@@ -36,9 +39,6 @@ requirements = [
     # Database
     'mongoengine>=0.16.3,<0.17',
     'pymongo>=3.7.2,<4',
-
-    # Explanations
-    'pyreal==0.3.2',
 ]
 
 setup_requirements = [

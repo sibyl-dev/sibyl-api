@@ -37,3 +37,4 @@ one_hot_encode_fn:
 model_transformers_fn:
 importance_fn: "importances.csv"
 explainer_fn:
+shap_type: # TODO: make this process smoother
