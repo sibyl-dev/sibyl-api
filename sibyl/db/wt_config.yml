@@ -11,9 +11,9 @@ DROP_OLD: True
 # Training data configurations
 # =================================================================================================
 # If true, include the full training database in loading (set to False if privacy is a concern)
-include_database: True
+include_database: False
 # Name of database file
-database_fn: "entities.csv"
+dataset_fn: "entities.csv"
 # Number of entries from database to include
 num_from_database: 1000
 
@@ -29,7 +29,7 @@ impute: True
 
 # Model processing configurations
 # =================================================================================================
-target: "target"
+target: "label"
 pickle_model_fn: "model.pkl"
 weights_fn:
 threshold_fn:

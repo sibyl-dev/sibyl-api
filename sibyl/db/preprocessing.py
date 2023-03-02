@@ -95,7 +95,9 @@ def insert_entities(feature_values_filepath, features_names,
     values_df = pd.read_csv(feature_values_filepath)[features_names + ["eid"]]
     transformers = []
     if impute is not None and impute:
-        transformers.append(MultiTypeImputer())
+        transformer = MultiTypeImputer()
+        transformer.fit(values_df)
+        transformers.append(transformer)
     if one_hot_decode_fp is not None:
         # Mappings from one-hot encoded columns to categorical data
         mappings = pd.read_csv(one_hot_decode_fp)
@@ -149,7 +151,7 @@ def insert_model(features,
     if pickle_model_fp is not None:
         # Load from pickle file
         print("Loading model from pickle file.")
-        model = pickle.load(pickle_model_fp)
+        model = pickle.load(open(pickle_model_fp, "rb"))
     elif weights_fp is not None:
         # Load from list of weights
         print("Loading model from weights")
@@ -175,7 +177,7 @@ def insert_model(features,
         transformers.append(transformer)
 
     if model_transformers_fp is not None:
-        transformers = pickle.load(model_transformers_fp)
+        transformers = pickle.load(open(model_transformers_fp, "rb"))
 
     train_dataset, targets = _load_data(features, dataset_fp, target)
 
@@ -313,6 +315,7 @@ if __name__ == "__main__":
     # INSERT MODEL
     target = cfg["target"]
     explainer = insert_model(feature_names, dataset_fp, target,
+                             pickle_model_fp=_process_fp(cfg["pickle_model_fn"]),
                              weights_fp=_process_fp(cfg["weights_fn"]),
                              threshold_fp=_process_fp(cfg["threshold_fn"]),
                              importance_fp=_process_fp(cfg["importance_fn"]),
