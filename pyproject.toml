@@ -2,7 +2,7 @@
 authors = ["MIT Data To AI Lab"]
 description = "Explanation tool for machine learning"
 license = "MIT"
-name = "sibyl-api"
+name = "sibyl"
 packages = [{include = "sibyl"}]
 readme = "README.md"
 version = "0.1.0"
