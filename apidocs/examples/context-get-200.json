@@ -1,0 +1,14 @@
+{
+    "id": "abc1",
+    "terms": {
+        "positive": "risk",
+        "negative": "protective",
+        "feature": "factor",
+        "prediction": "risk score",
+        "feature_contributions": "details",
+        "counterfactuals": "sandbox",
+        "feature_importances": "factor importance",
+        "feature_distributions": "factor distributions",
+        "contribution": "contribution"
+    }
+}
