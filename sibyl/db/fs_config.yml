@@ -11,9 +11,9 @@ DROP_OLD: True
 # Training data configurations
 # =================================================================================================
 # If true, include the full training database in loading (set to False if privacy is a concern)
-include_database: True
+include_database: False
 # Name of database file
-database_fn: "entities.csv"
+dataset_fn: "dataset.csv"
 # Number of entries from database to include
 num_from_database: 1000
 
@@ -24,6 +24,8 @@ num_from_database: 1000
 pre_transformers_fn:
 # filepath to mappings csv for one-hot decoder (TODO: add sample format)
 one_hot_decode_fn: "mappings.csv"
+# If true, impute data using pyreal.MultiTypeImputer()
+impute: False
 
 # Model processing configurations
 # =================================================================================================

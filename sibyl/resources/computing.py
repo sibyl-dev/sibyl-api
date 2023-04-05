@@ -123,7 +123,7 @@ class SingleChangePredictions(Resource):
             value = change[1]
             modified = entity_features.copy()
             modified[feature] = value
-            prediction = explainer.model_predict(entity_features)[0].tolist()
+            prediction = explainer.model_predict(modified)[0].tolist()
             predictions.append([feature, prediction])
         return {"changes": predictions}
 
@@ -235,7 +235,7 @@ class ModifiedPrediction(Resource):
             feature = change[0]
             value = change[1]
             modified[feature] = value
-        prediction = explainer.model_predict(entity_features)[0].tolist()
+        prediction = explainer.model_predict(modified)[0].tolist()
         return {"prediction": prediction}
 
 
