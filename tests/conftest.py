@@ -10,8 +10,8 @@ from pymongo import MongoClient
 from pyreal.explainers import LocalFeatureContribution
 from sklearn.linear_model import LinearRegression
 
-from sibyl_api.core import Sibyl
-from sibyl_api.db import schema
+from sibyl.core import Sibyl
+from sibyl.db import schema
 
 test_database_name = 'sibylapp_test'
 test_host = "localhost"

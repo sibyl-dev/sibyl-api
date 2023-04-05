@@ -15,7 +15,7 @@ import logging
 import pandas as pd
 from mongoengine import DENY, NULLIFY, PULL, ValidationError, fields
 
-from sibyl_api.db.base import SibylDocument
+from sibyl.db.base import SibylDocument
 
 LOGGER = logging.getLogger(__name__)
 

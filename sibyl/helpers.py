@@ -1,7 +1,7 @@
 import logging
 import pickle
 
-from sibyl_api.db import schema
+from sibyl.db import schema
 
 LOGGER = logging.getLogger(__name__)
 

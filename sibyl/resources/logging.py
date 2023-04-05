@@ -3,7 +3,7 @@ import logging
 from flask import request
 from flask_restful import Resource
 
-from sibyl_api import g
+from sibyl import g
 
 LOGGER = logging.getLogger(__name__)
 

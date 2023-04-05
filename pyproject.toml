@@ -3,7 +3,7 @@ authors = ["MIT Data To AI Lab"]
 description = "Explanation tool for machine learning"
 license = "MIT"
 name = "sibyl-api"
-packages = [{include = "sibyl_api"}]
+packages = [{include = "sibyl"}]
 readme = "README.md"
 version = "0.1.0"
 
@@ -21,6 +21,9 @@ classifiers = [
   'Programming Language :: Python :: 3.9',
   'Programming Language :: Python :: 3.10',
 ]
+
+[tool.poetry.scripts]
+sibyl = "sibyl.cli:main"
 
 [tool.poetry.dependencies]
 # Main Python Requirements

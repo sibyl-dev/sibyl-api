@@ -10,9 +10,9 @@ from pymongo import MongoClient
 from pyreal.explainers import LocalFeatureContribution
 from sklearn.linear_model import Lasso
 
-import sibyl_api.global_explanation as ge
-from sibyl_api.db import schema
-from sibyl_api.db.utils import MappingsTransformer, ModelWrapperThresholds
+import sibyl.global_explanation as ge
+from sibyl.db import schema
+from sibyl.db.utils import MappingsTransformer, ModelWrapperThresholds
 
 
 def load_data(features, dataset_filepath):
