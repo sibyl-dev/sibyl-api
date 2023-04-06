@@ -30,59 +30,67 @@ Sibylapp is an online interactive tool built on the top of Sibyl (python library
 
 ## Requirements
 
-**sibylapp** has been developed and tested on [Python 3.5, 3.6, 3.7 and 3.8](https://www.python.org/downloads/)
+**Sibyl-API** has been developed and tested on [Python 3.8, 3.9, and 3.10](https://www.python.org/downloads/)
 
-Also, although it is not strictly required, the usage of a [virtualenv](https://virtualenv.pypa.io/en/latest/)
-is highly recommended in order to avoid interfering with other software installed in the system
-in which **sibylapp** is run.
-
-These are the minimum commands needed to create a virtualenv using python3.6 for **sibylapp**:
-
-```bash
-pip install virtualenv
-virtualenv -p $(which python3.6) sibylapp-venv
-```
-
-Afterwards, you have to execute this command to activate the virtualenv:
-
-```bash
-source sibylapp-venv/bin/activate
-```
-
-Remember to execute it every time you start a new console to work on **sibylapp**!
-
-<!-- Uncomment this section after releasing the package to PyPI for installation instructions
-## Install from PyPI
-
-After creating the virtualenv and activating it, we recommend using
-[pip](https://pip.pypa.io/en/stable/) in order to install **sibylapp**:
-
-```bash
-pip install sibylapp
-```
-
-This will pull and install the latest stable release from [PyPI](https://pypi.org/).
--->
+This library uses Poetry for package management.
 
 ## Install from source
 
-With your virtualenv activated, you can clone the repository and install it from
-source by running `make install` on the `stable` branch:
+If you do not have **poetry** installed, please head to [poetry installation guide](https://python-poetry.org/docs/#installation)
+and install poetry according to the instructions.
+Run the following command to make sure poetry is activated. You may need to close and reopen the terminal.
 
 ```bash
-git clone git@github.com:HDI-Project/sibylapp.git
-cd sibylapp
-git checkout stable
-make install
+poetry --version
 ```
 
-## Install for Development
+Finally, you can clone this repository and install it from
+source by running `poetry install`:
 
-If you want to contribute to the project, a few more steps are required to make the project ready
-for development.
+```bash
+git clone https://github.com/sibyl-dev/sibyl-api.git
+cd sibyl-api
+poetry install
+```
 
-Please head to the [Contributing Guide](https://HDI-Project.github.io/sibylapp/contributing.html#get-started)
-for more details about this process.
+## Preparing database
+Sibyl-API uses a MongoDB-based database system. You can fill the database using the `preprocessing.py` script by
+following these steps:
+
+First, if it doesn't already exist, add a `dbdata` directory in the top-level `sibyl-api` directory.
+
+Next, add a directory in `dbdata` named after your domain, and fill it with your data files. You should end with a file
+structure that looks like:
+```
+sibyl-api
+|---dbdata
+   |---domain_name
+        |---entities.csv
+        |   feature.csv
+        |   model.pkl
+        |   ...
+```
+
+Next, copy `sibyl/db/config_template.yml` and fill it in with your file names.
+
+Finally, run the preprocessing script with:
+```bash
+poetry run python preprocessing.py [CONFIG_NAME].yml
+```
+
+## Running APIs
+
+Once the library has been installed, you can run the APIs locally with:
+
+```bash
+poetry run sibyl run -v
+```
+
+Or, to run in development mode:
+```bash
+poetry shell
+sibyl run -E development -v
+```
 
 # Quickstart
 
