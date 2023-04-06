@@ -20,7 +20,6 @@ def get_rows_by_output(output, predict, x, row_labels=None):
             when run through predict
     """
     preds_train = predict(x)
-    print(preds_train, output)
     if np.isscalar(output):
         output = [output]
     xs_of_interest = np.isin(preds_train, output)
@@ -65,7 +64,6 @@ def summary_numeric(X):
     all_metrics = []
     X = np.asanyarray(X)
     for col in X.T:
-        print(col)
         quartiles = np.quantile(col, [0.25, 0.5, 0.75])
         maximum = col.max()
         minimum = col.min()
