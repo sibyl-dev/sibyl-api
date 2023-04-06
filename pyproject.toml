@@ -54,7 +54,7 @@ mongoengine = "^0.24.2"
 pymongo = "^4.2.0"
 
 [tool.poetry.group.explanations.dependencies]
-pyreal = { git = "https://github.com/sibyl-dev/pyreal", branch = "dev" }
+pyreal = "0.3.2"
 
 [tool.poetry.group.dev.dependencies]
 coverage = ">=6.5.0"
