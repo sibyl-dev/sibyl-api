@@ -2,7 +2,7 @@
 authors = ["MIT Data To AI Lab"]
 description = "Explanation tool for machine learning"
 license = "MIT"
-name = "sibyl"
+name = "sibylapi"
 packages = [{include = "sibyl"}]
 readme = "README.md"
 version = "0.1.0"
@@ -35,6 +35,7 @@ click = "^8.1.3"
 PyYAML= "^6.0"
 passlib= "^1.7.4"
 termcolor = "^2.0.1"
+xgboost = "1.6.2"
 
 [tool.poetry.group.math.dependencies]
 numpy= "^1.23.3"

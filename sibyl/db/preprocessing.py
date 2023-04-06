@@ -2,60 +2,66 @@ import json
 import os
 import pickle
 import random
+import sys
 
 import numpy as np
 import pandas as pd
 from mongoengine import connect
 from pymongo import MongoClient
-from pyreal.explainers import LocalFeatureContribution
-from sklearn.linear_model import Lasso
+from pyreal.explainers import ShapFeatureContribution
+from pyreal.transformers import run_transformers, MappingsOneHotDecoder, MappingsOneHotEncoder, Mappings, MultiTypeImputer
+from sklearn.linear_model import Lasso, LinearRegression
+import yaml
+from sibyl.db.utils import ModelWrapperThresholds, ModelWrapper
 
 import sibyl.global_explanation as ge
 from sibyl.db import schema
-from sibyl.db.utils import MappingsTransformer, ModelWrapperThresholds
 
 
-def load_data(features, dataset_filepath):
+def _process_fp(fn):
+    if fn is not None:
+        return os.path.join(directory, fn)
+    return None
+
+
+def _load_data(features, dataset_filepath, target):
     data = pd.read_csv(dataset_filepath)
 
-    y = data.PRO_PLSM_NEXT730_DUMMY
+    y = data[target]
     X = data[features]
 
     return X, y
 
 
-def convert_to_categorical(X, mappings):
-    cols = X.columns
-    num_rows = X.shape[0]
-    cat_cols = mappings['original_name'].values
-    cat_data = {}
-    for col in cols:
-        if col not in cat_cols:
-            cat_data[col] = X[col]
-        if col in cat_cols:
-            new_name = mappings[mappings['original_name'] == col]["name"].values[0]
-            if new_name not in cat_data:
-                cat_data[new_name] = np.empty(num_rows, dtype='object')
-                # Handle a few specific cases
-                if new_name == "PRI_FOCUS_GENDER":
-                    cat_data[new_name] = np.full(num_rows, "Male", dtype='object')
-                if new_name == "PRI_VICTIM_COUNT":
-                    cat_data[new_name] = np.full(num_rows, "0")
-            cat_data[new_name][np.where(X[col] == 1)] = \
-                mappings[mappings['original_name'] == col]["value"].values[0]
-    return pd.DataFrame(cat_data)
+def _load_model_from_weights_sklearn(weights_filepath, model_base):
+    """
+    Load the model
+    :return: (model, model features)
+    """
+    model_weights = pd.read_csv(weights_filepath)
+
+    model = model_base
+    dummy_X = pd.DataFrame(np.zeros((1, model_weights.shape[0] - 1)),
+                           columns=model_weights["weight"][1:])
+    dummy_y = np.zeros(1)
+    model.fit(dummy_X, dummy_y)
+
+    model.coef_ = np.array(model_weights["weight"][1:])
+    model.intercept_ = model_weights["weight"][0]
+    return model, model_weights["name"][1:]
 
 
 def insert_features(filepath):
     features_df = pd.read_csv(filepath)
 
-    references = [schema.Category.find_one(name=cat) for cat in features_df['category']]
-    features_df = features_df.drop('category', axis='columns')
-    features_df['category'] = references
+    if 'category' in features_df:
+        references = [schema.Category.find_one(name=cat) for cat in features_df['category']]
+        features_df = features_df.drop('category', axis='columns')
+        features_df['category'] = references
 
     items = features_df.to_dict(orient='records')
     schema.Feature.insert_many(items)
-    return features_df["name"]
+    return features_df["name"].tolist()
 
 
 def insert_categories(filepath):
@@ -64,107 +70,51 @@ def insert_categories(filepath):
     schema.Category.insert_many(items)
 
 
-def insert_context(filepath):
+def insert_entity_groups(filepath):
+    group_df = pd.read_csv(filepath)
+    items_raw = group_df.to_dict(orient='records')
+    items = []
+    for item_raw in items_raw:
+        properties = {key: val for key, val in item_raw.items() if key != 'group_id'}
+        item = {"group_id": str(item_raw["group_id"]),
+                "property": properties}
+        items.append(item)
+    schema.EntityGroup.insert_many(items)
+
+
+def insert_terms(filepath):
     context_df = pd.read_csv(filepath)
-    items = dict(zip(context_df["key"], context_df["term"])) #config_df.to_dict(orient='records')
+    items = dict(zip(context_df["key"], context_df["term"]))
     context_dict = {"terms": items}
     schema.Context.insert(**context_dict)
 
 
-def load_model_from_weights_sklearn(weights_filepath, model_base):
-    """
-    Load the model
-    :return: (model, model features)
-    """
-    model_weights = pd.read_csv(weights_filepath)
+def insert_entities(feature_values_filepath, features_names,
+                    pre_transformers_fp=None, one_hot_decode_fp=None, impute=False,
+                    num=None):
+    values_df = pd.read_csv(feature_values_filepath)[features_names + ["eid"]]
+    transformers = []
+    if impute is not None and impute:
+        transformer = MultiTypeImputer()
+        transformer.fit(values_df)
+        transformers.append(transformer)
+    if one_hot_decode_fp is not None:
+        # Mappings from one-hot encoded columns to categorical data
+        mappings = pd.read_csv(one_hot_decode_fp)
+        if "include" in mappings:
+            mappings = mappings[mappings["include"]]
+        transformer = MappingsOneHotDecoder(Mappings.generate_mappings(dataframe=mappings))
+        transformers.append(transformer)
+    if pre_transformers_fp is not None:
+        transformers = pickle.load(open(pre_transformers_fp, "rb"))
+    values_df = run_transformers(transformers, values_df)
 
-    model = model_base
-    dummy_X = np.zeros((1, model_weights.shape[1] - 1))
-    dummy_y = np.zeros(model_weights.shape[1] - 1)
-    model.fit(dummy_X, dummy_y)
-
-    model.coef_ = np.array(model_weights["weight"][1:])
-    model.intercept_ = model_weights["weight"][0]
-    return model, model_weights["name"][1:]
-
-
-def load_mappings_transformer(mappings_filepath, features):
-    mappings = pd.read_csv(mappings_filepath)
-    mappings = mappings[mappings["include"]]
-    return MappingsTransformer(mappings, features)
-
-
-def insert_model(features, model_filepath, dataset_filepath,
-                 importance_filepath=None, explainer_filepath=None):
-    thresholds = [0.01174609, 0.01857239, 0.0241622, 0.0293587,
-                  0.03448975, 0.0396932, 0.04531139, 0.051446,
-                  0.05834176, 0.06616039, 0.07549515, 0.08624243,
-                  0.09912388, 0.11433409, 0.13370343, 0.15944484,
-                  0.19579651, 0.25432879, 0.36464856, 1.0]
-    base_model, model_features = load_model_from_weights_sklearn(
-        model_filepath, Lasso())
-
-    model = ModelWrapperThresholds(base_model, thresholds, features=model_features)
-    transformer = load_mappings_transformer(os.path.join(directory, "mappings.csv"),
-                                            model_features)
-
-    dataset, targets = load_data(features, dataset_filepath)
-
-    model_serial = pickle.dumps(model)
-    transformer_serial = pickle.dumps(transformer)
-
-    texts = {
-        "name": "Lasso Regression Model",
-        "description": "placeholder",
-        "performance": "placeholder"
-    }
-    name = texts["name"]
-    description = texts["description"]
-    performance = texts["performance"]
-
-    if importance_filepath is not None:
-        importance_df = pd.read_csv(importance_filepath)
-        importance_df = importance_df.set_index("name")
-    else:
-        raise NotImplementedError()
-
-    importances = importance_df.to_dict(orient='dict')["importance"]
-
-    if explainer_filepath is not None:
-        print("Loading explainer from file")
-        with open(explainer_filepath, "rb") as f:
-            explainer_serial = f.read()
-    else:
-        explainer = LocalFeatureContribution(base_model, dataset.sample(100),
-                                             e_algorithm="shap",
-                                             transformers=transformer, fit_on_init=True)
-        explainer_serial = pickle.dumps(explainer)
-
-    items = {
-        "model": model_serial,
-        "transformer": transformer_serial,
-        "name": name,
-        "description": description,
-        "performance": performance,
-        "importances": importances,
-        "explainer": explainer_serial,
-        "training_set": set_doc
-    }
-    schema.Model.insert(**items)
-
-
-def insert_entities(values_filepath, features_names, mappings_filepath=None,
-                    counter_start=0, num=0, include_referrals=False):
-    values_df = pd.read_csv(values_filepath)[features_names + ["eid"]]
-    if mappings_filepath is not None:
-        mappings = pd.read_csv(mappings_filepath)
-        mappings = mappings[mappings["include"]]
-        values_df = convert_to_categorical(values_df, mappings)
-    if num > 0:
-        values_df = values_df.iloc[counter_start:num + counter_start]
+    if num is not None:
+        values_df = values_df.sample(num, random_state=100)
     eids = values_df["eid"]
 
-    referrals = schema.Referral.find()
+    # TODO: add groups to entities
+    # groups = schema.EntityGroup.find()
 
     raw_entities = values_df.to_dict(orient="records")
     entities = []
@@ -173,8 +123,6 @@ def insert_entities(values_filepath, features_names, mappings_filepath=None,
         entity["eid"] = str(raw_entity["eid"])
         del raw_entity["eid"]
         entity["features"] = raw_entity
-        if include_referrals:
-            entity["property"] = {"referral_ids": [random.choice(referrals).referral_id]}
         entities.append(entity)
     schema.Entity.insert_many(entities)
     return eids
@@ -188,38 +136,118 @@ def insert_training_set(eids):
     return set_doc
 
 
-def insert_referrals(filepath):
-    referral_df = pd.read_csv(filepath)
-    items_raw = referral_df.to_dict(orient='records')
-    items = []
-    for item_raw in items_raw:
-        item = {"referral_id": str(item_raw["referral_id"]),
-                "property": {"team": item_raw["team"]}}
-        items.append(item)
-    schema.Referral.insert_many(items)
+def insert_model(features,
+                 dataset_fp, target,
+                 pickle_model_fp=None,
+                 weights_fp=None,
+                 threshold_fp=None,
+                 one_hot_encode_fp=None,
+                 model_transformers_fp=None,
+                 importance_fp=None,
+                 explainer_fp=None,
+                 shap_type=None):
+    model_features = features
+
+    # Base model options
+    if pickle_model_fp is not None:
+        # Load from pickle file
+        print("Loading model from pickle file.")
+        model = pickle.load(open(pickle_model_fp, "rb"))
+    elif weights_fp is not None:
+        # Load from list of weights
+        print("Loading model from weights")
+        model, model_features = _load_model_from_weights_sklearn(
+            weights_fp, LinearRegression())
+    else:
+        raise ValueError("Must provide at least one model format")
+
+    # Model wrapping options
+    if threshold_fp is not None:
+        # Bin output based on thresholds
+        threshold_df = pd.read_csv(threshold_fp)
+        thresholds = threshold_df["thresholds"].tolist()
+        model = ModelWrapperThresholds(model, thresholds, features=model_features)
+
+    transformers = []
+
+    if one_hot_encode_fp is not None:
+        mappings = pd.read_csv(one_hot_encode_fp)
+        if "include" in mappings:
+            mappings = mappings[mappings["include"]]
+        transformer = MappingsOneHotEncoder(Mappings.generate_mappings(dataframe=mappings))
+        transformers.append(transformer)
+
+    if model_transformers_fp is not None:
+        transformers = pickle.load(open(model_transformers_fp, "rb"))
+
+    train_dataset, targets = _load_data(features, dataset_fp, target)
+
+    model_serial = pickle.dumps(model)
+    transformers_serial = pickle.dumps(transformers)
+
+    texts = {
+        "name": "placeholder",
+        "description": "placeholder",
+        "performance": "placeholder"
+    }
+    name = texts["name"]
+    description = texts["description"]
+    performance = texts["performance"]
+
+    if importance_fp is not None:
+        importance_df = pd.read_csv(importance_fp)
+        importance_df = importance_df.set_index("name")
+    else:
+        raise NotImplementedError("Calculating importances at preprocessing time is not "
+                                  "yet implemented")
+
+    importances = importance_df.to_dict(orient='dict')["importance"]
+
+    if explainer_fp is not None:
+        print("Loading explainer from file")
+        with open(explainer_fp, "rb") as f:
+            explainer_serial = f.read()
+            explainer = pickle.loads(explainer_serial)
+    else:
+        # TODO: add additional explainers/allow for multiple algorithms
+        explainer = ShapFeatureContribution(model, train_dataset.sample(100), shap_type=shap_type,
+                                            transformers=transformers, fit_on_init=True)
+        explainer_serial = pickle.dumps(explainer)
+
+    items = {
+        "model": model_serial,
+        "transformer": transformers_serial,
+        "name": name,
+        "description": description,
+        "performance": performance,
+        "importances": importances,
+        "explainer": explainer_serial,
+        "training_set": set_doc
+    }
+    schema.Model.insert(**items)
+    return explainer
 
 
-def generate_feature_distribution_doc(save_path, model, transformer,
+def generate_feature_distribution_doc(save_path, explainer, target,
                                       dataset_filepath, features_filepath):
     features = pd.read_csv(features_filepath)
-    feature_names = features["name"].append(pd.Series(["PRO_PLSM_NEXT365_DUMMY",
-                                                       "PRO_PLSM_NEXT730_DUMMY"]))
-    dataset, targets = load_data(feature_names, dataset_filepath)
+    feature_names = features["name"]
+    dataset, targets = _load_data(feature_names, dataset_filepath, target)
 
     boolean_features = features[features['type'].isin(['binary', 'categorical'])]["name"]
-    boolean_features = boolean_features.append(pd.Series(["PRO_PLSM_NEXT365_DUMMY",
-                                                          "PRO_PLSM_NEXT730_DUMMY"]))
     dataset_cat = dataset[boolean_features]
 
     numeric_features = features[features['type'] == 'numeric']["name"]
     dataset_num = dataset[numeric_features]
 
     summary_dict = {}
+    # TODO: generalize list of outputs
     for output in range(1, 21):
         row_details = {}
-        rows = ge.get_rows_by_output(output, model.predict, dataset, row_labels=None)
+        rows = ge.get_rows_by_output(output, explainer.model_predict, dataset, row_labels=None)
 
         count_total = len(rows)
+
         count_removed = sum(targets.iloc[rows])
         row_details["total cases"] = count_total
         row_details["total removed"] = count_removed
@@ -241,50 +269,61 @@ def generate_feature_distribution_doc(save_path, model, transformer,
         json.dump(summary_dict, f, indent=4, sort_keys=True)
 
 
-def test_validation():
-    pass
-
-
 if __name__ == "__main__":
-    # CONFIGURATIONS
-    include_database = False
-    client = MongoClient("localhost", 27017)
-    connect('sibyl', host='localhost', port=27017)
-    directory = os.path.join("..", "..", "..", "..", "..", "OneDrive", "Documents", "Research", "Sibyl", "data", "family-screening")
+    config_file = sys.argv[1]
+    with open(config_file, 'r') as f:
+        cfg = yaml.safe_load(f)
 
-    # INSERT CATEGORIES
-    insert_categories(os.path.join(directory, "categories.csv"))
+    # Begin database loading ---------------------------
+    client = MongoClient("localhost", 27017)
+    database_name = cfg["database_name"]
+    if cfg["directory"] is None:
+        directory = os.path.join("..", "..", "dbdata", database_name)
+    else:
+        directory = os.path.join("..", "..", "dbdata", cfg["directory"])
+
+    if cfg["DROP_OLD"]:
+        client.drop_database(database_name)
+    connect(database_name, host='localhost', port=27017)
+
+    # INSERT CATEGORIES, IF PROVIDED
+    if os.path.exists(os.path.join(directory, "categories.csv")):
+        insert_categories(os.path.join(directory, "categories.csv"))
 
     # INSERT FEATURES
-    feature_names = insert_features(os.path.join(directory, "features.csv")).tolist()
+    feature_names = insert_features(os.path.join(directory, "features.csv"))
 
-    # INSERT REFERRALS
-    insert_referrals(os.path.join(directory, "referrals.csv"))
+    # INSERT ENTITY GROUPS
+    if os.path.exists(os.path.join(directory, "groups.csv")):
+        insert_entity_groups(os.path.join(directory, "groups.csv"))
+
+    # INSERT CONTEXT
+    insert_terms(os.path.join(directory, "terms.csv"))
 
     # INSERT ENTITIES
-    eids = insert_entities(os.path.join(directory, "true_entities.csv"), feature_names,
-                           mappings_filepath=os.path.join(directory, "mappings.csv"),
-                           include_referrals=True)
-
-    # INSERT CONFIG
-    insert_context(os.path.join(directory, "terms.csv"))
+    eids = insert_entities(os.path.join(directory, "entities.csv"), feature_names,
+                           pre_transformers_fp=_process_fp(cfg["pre_transformers_fn"]),
+                           one_hot_decode_fp=_process_fp(cfg["one_hot_decode_fn"]),
+                           impute=cfg["impute"])
 
     # INSERT FULL DATASET
-    if include_database:
-        eids = insert_entities(os.path.join(directory, "dataset.csv"), feature_names,
-                               counter_start=17, num=100000)
+    dataset_fp = _process_fp(cfg["dataset_fn"])
+    if cfg["include_database"] and os.path.exists(dataset_fp):
+        eids = insert_entities(dataset_fp, feature_names,
+                               num=cfg["num_from_database"])
     set_doc = insert_training_set(eids)
 
     # INSERT MODEL
-    model_filepath = os.path.join(directory, "weights.csv")
-    dataset_filepath = os.path.join(directory, "dataset.csv")
-    importance_filepath = os.path.join(directory, "importances.csv")
-
-    insert_model(features=feature_names, model_filepath=model_filepath,
-                 dataset_filepath=dataset_filepath, importance_filepath=importance_filepath)
+    target = cfg["target"]
+    explainer = insert_model(feature_names, dataset_fp, target,
+                             pickle_model_fp=_process_fp(cfg["pickle_model_fn"]),
+                             weights_fp=_process_fp(cfg["weights_fn"]),
+                             threshold_fp=_process_fp(cfg["threshold_fn"]),
+                             importance_fp=_process_fp(cfg["importance_fn"]),
+                             one_hot_encode_fp=_process_fp(cfg["one_hot_encode_fn"]),
+                             shap_type=cfg["shap_type"])
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
-    '''generate_feature_distribution_doc("precomputed/agg_distributions.json", model, transformer,
-                                      os.path.join(directory, "agg_dataset.csv"),
-                                      os.path.join(directory, "agg_features.csv"))'''
-    test_validation()
+    # generate_feature_distribution_doc("precomputed/agg_distributions.json", explainer, target,
+    #                                   dataset_fp, os.path.join(directory, "features.csv"))
+    #test_validation()

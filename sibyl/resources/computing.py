@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import pickle
 
 import pandas as pd
 from flask import request
@@ -21,25 +22,26 @@ class SingleChangePredictions(Resource):
           - computing
         security:
           - tokenAuth: []
-        parameters:
-          - name: eid
-            in: path
-            schema:
-              type: string
-            required: true
-            description: ID of the entity to get
-          - name: model_id
-            in: path
-            schema:
-              type: string
-            required: true
-            description: ID of the model to use for predictions
-          - name: changes
-            in: path
-            schema:
-              $ref: '#/components/schemas/Changes'
-            required: true
-            description: List of changes to make, one at a time
+        requestBody:
+           required: true
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   eid:
+                     type: string
+                   model_id:
+                     type: string
+                   changes:
+                     type: array
+                     items:
+                       type: array
+                       items:
+                         oneOf:
+                           type: string
+                           type: number
+                 required: ['eid', 'model_id', 'changes']
         responses:
           200:
             description: Resulting predictions after making changes
@@ -99,13 +101,21 @@ class SingleChangePredictions(Resource):
             return {'message': 'Entity {} does not exist'.format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        success, payload = helpers.load_model(model_id)
-        if success:
-            model, transformer = payload
-        else:
-            message, error_code = payload
-            return message, error_code
-        entity_features = transformer.transform(entity_features)
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
+            LOGGER.exception('Error getting model. Model %s does not exist.', model_id)
+            return {'message': 'Model {} does not exist'.format(model_id)}, 400
+        explainer_bytes = model_doc.explainer
+        if explainer_bytes is None:
+            LOGGER.exception('Model %s explainer has not been trained. ', model_id)
+            return {'message': 'Model {} does not have trained explainer'
+                           .format(model_id)}, 400
+
+        try:
+            explainer = pickle.loads(explainer_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
 
         predictions = []
         for change in changes:
@@ -113,7 +123,7 @@ class SingleChangePredictions(Resource):
             value = change[1]
             modified = entity_features.copy()
             modified[feature] = value
-            prediction = model.predict(modified)[0].tolist()
+            prediction = explainer.model_predict(modified)[0].tolist()
             predictions.append([feature, prediction])
         return {"changes": predictions}
 
@@ -121,19 +131,48 @@ class SingleChangePredictions(Resource):
 class ModifiedPrediction(Resource):
     def post(self):
         """
-        @api {post} /modified_prediction/ Post multiple prediction
-        @apiName PostMultiplePrediction
-        @apiGroup Computing
-        @apiVersion 1.0.0
-        @apiDescription  Get the modified prediction under different conditions
-        @apiParam {String} eid ID of entity to predict on.
-        @apiParam {String} model_id ID of model to use for predictions.
-        @apiParam {2-Tuple[]} changes List of features to change and
-            their new values.
-        @apiParam {String} changes.item1 Name of the feature to change.
-        @apiParam {String} changes.item2 Changed Value of the feature.
-        @apiSuccess {Number} prediction New prediction after making
-            the requested changes.
+        Get the resulting model prediction after making all changes
+        ---
+        tags:
+          - computing
+        security:
+          - tokenAuth: []
+        requestBody:
+           required: true
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   eid:
+                     type: string
+                   model_id:
+                     type: string
+                   changes:
+                     type: array
+                     items:
+                       type: array
+                       items:
+                         oneOf:
+                           type: string
+                           type: number
+                 required: ['eid', 'model_id', 'changes']
+        responses:
+          200:
+            description: Resulting predictions after making changes
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    changes:
+                        type: number
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/entity-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
         attrs = ['eid', 'model_id', 'changes']
         d = {}
@@ -175,21 +214,28 @@ class ModifiedPrediction(Resource):
             return {'message': 'Entity {} does not exist'.format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        success, payload = helpers.load_model(model_id)
-        if success:
-            model, transformer = payload
-        else:
-            message, error_code = payload
-            return message, error_code
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
+            LOGGER.exception('Error getting model. Model %s does not exist.', model_id)
+            return {'message': 'Model {} does not exist'.format(model_id)}, 400
+        explainer_bytes = model_doc.explainer
+        if explainer_bytes is None:
+            LOGGER.exception('Model %s explainer has not been trained. ', model_id)
+            return {'message': 'Model {} does not have trained explainer'
+                .format(model_id)}, 400
 
-        entity_features = transformer.transform(entity_features)
+        try:
+            explainer = pickle.loads(explainer_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
 
         modified = entity_features.copy()
         for change in changes:
             feature = change[0]
             value = change[1]
             modified[feature] = value
-        prediction = model.predict(modified)[0].tolist()
+        prediction = explainer.model_predict(modified)[0].tolist()
         return {"prediction": prediction}
 
 
@@ -406,16 +452,43 @@ class OutcomeCount(Resource):
 class FeatureContributions(Resource):
     def post(self):
         """
-        @api {post} /contributions/ Get feature contributions
-        @apiName GetFeatureContributions
-        @apiGroup Computing
-        @apiVersion 1.0.0
-        @apiDescription  get the contributions of all features
-        @apiParam {String} eid ID of the entity to compute.
-        @apiParam {String} model_id ID of the model to compute.
-        @apiSuccess {Object} contributions Feature contribution object (key-value pair).
-        @apiSuccess {Number} contributions.[key] Contribution value of the feature [key].
-        """
+         Get feature contributions
+         ---
+         tags:
+           - computing
+         security:
+           - tokenAuth: []
+         requestBody:
+           required: true
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   eid:
+                     type: string
+                   model_id:
+                     type: string
+                 required: ['eid', 'model_id']
+         responses:
+           200:
+             description: Feature contributions
+             content:
+               application/json:
+                 schema:
+                   type: object
+                   properties:
+                     contributions:
+                         type: array
+                         items:
+                             type: number
+                 examples:
+                   externalJson:
+                     summary: external example
+                     externalValue: '/examples/entity-get-200.json'
+           400:
+             $ref: '#/components/responses/ErrorMessage'
+         """
 
         # LOAD IN AND CHECK ATTRIBUTES:
         attrs = ['eid', 'model_id']
@@ -459,7 +532,7 @@ class FeatureContributions(Resource):
             message, error_code = payload
             return message, error_code
 
-        contributions = explainer.produce(entity_features)
+        contributions = explainer.produce(entity_features)[0]
         keys = list(contributions.columns)
         contribution_dict = dict(zip(keys, contributions.iloc[0, :]))
         return {"contributions": contribution_dict}, 200

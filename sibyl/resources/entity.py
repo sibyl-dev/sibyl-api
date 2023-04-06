@@ -95,26 +95,26 @@ class Entities(Resource):
 
     def __init__(self):
         parser_get = reqparse.RequestParser(bundle_errors=True)
-        parser_get.add_argument('referral_id', type=str, default=None,
+        parser_get.add_argument('group_id', type=str, default=None,
                                 location='args')
         self.parser_get = parser_get
 
     def get(self):
         """
         Get all Entities
-        If referral ID is specified, return entities of that referral.
+        If group ID is specified, return entities of that group.
         ---
         tags:
           - entity
         security:
           - tokenAuth: []
         parameters:
-          - name: referral_id
+          - name: group_id
             in: query
             schema:
               type: string
             required: false
-            description: ID of the referral to filter events
+            description: ID of the group to filter entities
         responses:
           200:
             description: All entities
@@ -141,8 +141,8 @@ class Entities(Resource):
             LOGGER.exception(str(e))
             return {'message', str(e)}, 400
 
-        referral_id = args['referral_id']
-        if referral_id is None:
+        group_id = args['group_id']
+        if group_id is None:
             # no referral filter applied
             documents = schema.Entity.find()
             try:
@@ -158,9 +158,9 @@ class Entities(Resource):
         else:
             # filter entities by referral ID
             entities = schema.Entity.find(
-                property__referral_ids__contains=referral_id)
+                property__group_ids__contains=group_id)
             if entities is None:
-                LOGGER.log(20, 'referral %s has no entities' % str(referral_id))
+                LOGGER.log(20, 'group %s has no entities' % str(group_id))
                 return []
             return [document.eid for document in entities], 200
 

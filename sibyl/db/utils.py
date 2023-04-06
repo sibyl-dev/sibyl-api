@@ -108,6 +108,9 @@ class ModelWrapperThresholds(ModelWrapper):
         self.thresholds = thresholds
         super().__init__(features)
 
+    def __call__(self, x):
+        return self.predict(x)
+
     def predict(self, x):
         """
         Predict on x, then convert to probabilities and scores based on
@@ -145,18 +148,3 @@ class MappingsTransformer(ABC):
     def transform_contributions(self, contributions):
         return combine_contributions_from_mappings(contributions, self.mappings)
 
-
-def merge_databases():
-    pass
-
-
-def delete_datasets():
-    pass
-
-
-def prune_dataruns():
-    pass
-
-
-def main():
-    pass

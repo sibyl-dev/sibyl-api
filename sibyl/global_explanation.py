@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def get_rows_by_output(output, predict, x, row_labels=None, transformer=None):
+def get_rows_by_output(output, predict, x, row_labels=None):
     """
     Return the indices of the rows in x that get predicted as output
 
@@ -19,8 +19,6 @@ def get_rows_by_output(output, predict, x, row_labels=None, transformer=None):
             The indices or row_labels of the rows of x that result in output
             when run through predict
     """
-    if transformer is not None:
-        x = transformer.transform(x)
     preds_train = predict(x)
     if np.isscalar(output):
         output = [output]
