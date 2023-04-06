@@ -186,7 +186,7 @@ def insert_model(features,
     transformers_serial = pickle.dumps(transformers)
 
     texts = {
-        "name": "Lasso Regression Model",
+        "name": "placeholder",
         "description": "placeholder",
         "performance": "placeholder"
     }
