@@ -320,6 +320,7 @@ if __name__ == "__main__":
                              weights_fp=_process_fp(cfg["weights_fn"]),
                              threshold_fp=_process_fp(cfg["threshold_fn"]),
                              importance_fp=_process_fp(cfg["importance_fn"]),
+                             explainer_fp=_process_fp(cfg["explainer_fn"]),
                              one_hot_encode_fp=_process_fp(cfg["one_hot_encode_fn"]),
                              shap_type=cfg["shap_type"])
 
