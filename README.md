@@ -92,14 +92,4 @@ poetry shell
 sibyl run -E development -v
 ```
 
-# Quickstart
-
-In this short tutorial we will guide you through a series of steps that will help you
-getting started with **sibylapp**.
-
-TODO: Create a step by step guide here.
-
-# What's next?
-
-For more details about **sibylapp** and all its possibilities
-and features, please check the [documentation site](https://HDI-Project.github.io/sibylapp/).
+You can then access your APIs locally at http://localhost:3000/apidocs
