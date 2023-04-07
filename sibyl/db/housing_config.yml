@@ -25,7 +25,7 @@ pre_transformers_fn:
 # filename of mappings csv for one-hot decoder (TODO: add sample format)
 one_hot_decode_fn:
 # If true, impute data using pyreal.MultiTypeImputer()
-impute: False
+impute: True
 
 # Model processing configurations
 # =================================================================================================
