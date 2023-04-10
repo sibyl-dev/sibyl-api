@@ -1,0 +1,49 @@
+# Configurations for database preprocessing
+# =================================================================================================
+
+# Name of database to create
+database_name: "housing"
+# Name of directory in dbdata with csv and pkl files (if different from database_name)
+directory: "housing"
+# If true, automatically drop existing database
+DROP_OLD: True
+
+# Training data configurations
+# =================================================================================================
+# If true, include the full training database in loading (set to False if privacy is a concern)
+include_database: False
+# Name of database file
+dataset_fn: "entities.csv"
+# Number of entries from database to include (if not given, include all)
+num_from_database:
+
+
+# Entity processing configurations
+# =================================================================================================
+# filename of fitted, pickled Pyreal transformers
+pre_transformers_fn:
+# filename of mappings csv for one-hot decoder (TODO: add sample format)
+one_hot_decode_fn:
+# If true, impute data using pyreal.MultiTypeImputer()
+impute: True
+
+# Model processing configurations
+# =================================================================================================
+# Name of target column in database
+target: "SalePrice"
+# filename of pickled model
+pickle_model_fn: "model.pkl"
+# filename of csv with weights for linear model
+weights_fn:
+# filename with thresholds for thresholding model output
+threshold_fn:
+# filename of mappings csv for one-hot encoder (TODO: add sample format)
+one_hot_encode_fn:
+# filename of pickled list of model transformers
+model_transformers_fn:
+# filename of csv with pretrained importances
+importance_fn: "importances.csv"
+# filename of pickled explainer
+explainer_fn: "explainer.pkl"
+# shap type to use for explainer if not provided
+shap_type: "linear" # TODO: make this process smoother
