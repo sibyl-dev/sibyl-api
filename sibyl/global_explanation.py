@@ -14,7 +14,6 @@ def get_rows_by_output(output, predict, x, row_labels=None):
     :param row_labels: None or array_like of shape (n_samples,)
            If not None, return the row_labels of relevant rows instead of
            numerical indices
-    :param transformer: Transformer to use before running model
     :return: array_like
             The indices or row_labels of the rows of x that result in output
             when run through predict

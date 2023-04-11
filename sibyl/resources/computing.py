@@ -123,7 +123,7 @@ class SingleChangePredictions(Resource):
             value = change[1]
             modified = entity_features.copy()
             modified[feature] = value
-            prediction = explainer.model_predict(modified)[0].tolist()
+            prediction = explainer.predict(modified)[0].tolist()
             predictions.append([feature, prediction])
         return {"changes": predictions}
 
@@ -235,7 +235,7 @@ class ModifiedPrediction(Resource):
             feature = change[0]
             value = change[1]
             modified[feature] = value
-        prediction = explainer.model_predict(modified)[0].tolist()
+        prediction = explainer.predict(modified)[0].tolist()
         return {"prediction": prediction}
 
 
@@ -292,7 +292,7 @@ class FeatureDistributions(Resource):
         # LOAD IN AND VALIDATE MODEL DATA
         success, payload = helpers.load_model(model_id, include_dataset=True)
         if success:
-            model, transformer, dataset = payload
+            model, dataset = payload
         else:
             message, error_code = payload
             return message, error_code
@@ -314,7 +314,7 @@ class FeatureDistributions(Resource):
 
         distributions = {}
         rows = ge.get_rows_by_output(prediction, model.predict, dataset,
-                                     row_labels=None, transformer=transformer)
+                                     row_labels=None)
         if len(rows) == 0:
             LOGGER.exception('No data with that prediction: %s', prediction)
             return {'message': 'No data with that prediction: {}'.format(prediction)}, 400
@@ -380,13 +380,13 @@ class PredictionCount(Resource):
         # LOAD IN AND VALIDATE MODEL DATA
         success, payload = helpers.load_model(model_id, include_dataset=True)
         if success:
-            model, transformer, dataset = payload
+            model, dataset = payload
         else:
             message, error_code = payload
             return message, error_code
 
         rows = ge.get_rows_by_output(prediction, model.predict, dataset,
-                                     row_labels=None, transformer=transformer)
+                                     row_labels=None)
 
         count = len(rows)
 
@@ -527,12 +527,12 @@ class FeatureContributions(Resource):
         # LOAD IN AND VALIDATE MODEL DATA
         success, payload = helpers.load_model(model_id, include_explainer=True)
         if success:
-            model, transformer, explainer = payload
+            model, explainer = payload
         else:
             message, error_code = payload
             return message, error_code
 
-        contributions = explainer.produce(entity_features)[0]
-        keys = list(contributions.columns)
-        contribution_dict = dict(zip(keys, contributions.iloc[0, :]))
+        contributions = explainer.produce_feature_contributions(entity_features)[0]
+        keys = list(contributions["Feature Name"])
+        contribution_dict = dict(zip(keys, contributions["Contribution"]))
         return {"contributions": contribution_dict}, 200
