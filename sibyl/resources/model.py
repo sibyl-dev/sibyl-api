@@ -211,8 +211,5 @@ class Prediction(Resource):
             LOGGER.exception(e)
             return {'message': str(e)}, 500
 
-        #entity_features = transformer.transform(entity_features)
-
-        #prediction = model.predict(entity_features)[0].tolist()
-        prediction = explainer.model_predict(entity_features)[0].tolist()
+        prediction = explainer.predict(entity_features)[0].tolist()
         return {"output": prediction}, 200

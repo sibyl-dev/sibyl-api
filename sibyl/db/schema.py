@@ -173,7 +173,6 @@ class Model(SibylDocument):
         Training set for the model
     """
     model = fields.BinaryField(required=True)  # the model (must have model.predict())
-    transformer = fields.BinaryField()  # the model's transformer
 
     name = fields.StringField()
     description = fields.StringField()

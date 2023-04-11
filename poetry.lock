@@ -498,27 +498,6 @@ files = [
 ]
 
 [[package]]
-name = "eli5"
-version = "0.13.0"
-description = "Debug machine learning classifiers and explain their predictions"
-category = "dev"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "eli5-0.13.0.tar.gz", hash = "sha256:ec8459eaaf09d66743c53a7bdb115c6cda7e533d7a5d02a5a8bb717ee843eb37"},
-]
-
-[package.dependencies]
-attrs = ">17.1.0"
-graphviz = "*"
-jinja2 = ">=3.0.0"
-numpy = ">=1.9.0"
-scikit-learn = ">=0.20"
-scipy = "*"
-six = "*"
-tabulate = ">=0.7.7"
-
-[[package]]
 name = "exceptiongroup"
 version = "1.1.1"
 description = "Backport of PEP 654 (exception groups)"
@@ -711,23 +690,6 @@ docs = ["repoze.sphinx.autointerface", "sphinxcontrib-programoutput", "zope.sche
 monitor = ["psutil (>=5.7.0)"]
 recommended = ["backports.socketpair", "cffi (>=1.12.2)", "dnspython (>=1.16.0,<2.0)", "idna", "psutil (>=5.7.0)", "selectors2"]
 test = ["backports.socketpair", "cffi (>=1.12.2)", "contextvars (==2.4)", "coverage (>=5.0)", "coveralls (>=1.7.0)", "dnspython (>=1.16.0,<2.0)", "futures", "idna", "mock", "objgraph", "psutil (>=5.7.0)", "requests", "selectors2"]
-
-[[package]]
-name = "graphviz"
-version = "0.20.1"
-description = "Simple Python interface for Graphviz"
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "graphviz-0.20.1-py3-none-any.whl", hash = "sha256:587c58a223b51611c0cf461132da386edd896a029524ca61a1462b880bf97977"},
-    {file = "graphviz-0.20.1.zip", hash = "sha256:8c58f14adaa3b947daf26c19bc1e98c4e0702cdc31cf99153e6f06904d492bf8"},
-]
-
-[package.extras]
-dev = ["flake8", "pep8-naming", "tox (>=3)", "twine", "wheel"]
-docs = ["sphinx (>=5)", "sphinx-autodoc-typehints", "sphinx-rtd-theme"]
-test = ["coverage", "mock (>=4)", "pytest (>=7)", "pytest-cov", "pytest-mock (>=3)"]
 
 [[package]]
 name = "greenlet"
@@ -1819,18 +1781,17 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyreal"
-version = "0.3.2"
+version = "0.4.0"
 description = "Library for evaluating and deploying human readable machine learning explanations."
 category = "dev"
 optional = false
 python-versions = ">=3.8,<3.11"
 files = [
-    {file = "pyreal-0.3.2-py3-none-any.whl", hash = "sha256:2fc66e3f2813f0c506e1ece7262c53c34d854f10ffbd333beaff928a06333ed3"},
-    {file = "pyreal-0.3.2.tar.gz", hash = "sha256:0c5fa6f7804a6a03ad2ba2b6248ec1af252fbc57b18acaf2e2e73df51a8751a2"},
+    {file = "pyreal-0.4.0-py3-none-any.whl", hash = "sha256:48dbd4e05720991c9467d374303948e8aec3c86bc8fe05c58a57914eea3f1d81"},
+    {file = "pyreal-0.4.0.tar.gz", hash = "sha256:ba1834f2a45d6d014aaef301adc91c6bd74e885ac510d24cd7431497a79003aa"},
 ]
 
 [package.dependencies]
-eli5 = ">=0.11,<0.14"
 lime = ">=0.2.0.1,<0.3.0.0"
 matplotlib = ">=3.6.0,<4.0.0"
 numba = ">=0.56.2,<0.57.0"
@@ -1841,7 +1802,7 @@ seaborn = ">=0.12.2,<0.13.0"
 shap = "0.40.0"
 
 [package.extras]
-examples = ["lightgbm (>=3.3.2,<4.0.0)", "tensorflow (>=2.6.0,<=2.10.0)"]
+examples = ["lightgbm (>=3.3.2,<4.0.0)"]
 
 [[package]]
 name = "pyrsistent"
@@ -2500,21 +2461,6 @@ lint = ["docutils-stubs", "flake8", "mypy"]
 test = ["pytest"]
 
 [[package]]
-name = "tabulate"
-version = "0.9.0"
-description = "Pretty-print tabular data"
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "tabulate-0.9.0-py3-none-any.whl", hash = "sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f"},
-    {file = "tabulate-0.9.0.tar.gz", hash = "sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c"},
-]
-
-[package.extras]
-widechars = ["wcwidth"]
-
-[[package]]
 name = "termcolor"
 version = "2.2.0"
 description = "ANSI color formatting for output in terminal"
@@ -2752,4 +2698,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8, <3.11"
-content-hash = "23c6b38d8572c99a3d68530cd2fe5422828623c8988fcfa80468b37ffebe5190"
+content-hash = "8256ce2d85bb67f23aa0f113b1d1fe521cebb755af4a1d1f8364c58a978484df"

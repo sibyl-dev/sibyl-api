@@ -16,7 +16,7 @@ def load_model(model_id, include_dataset=False, include_explainer=False):
     :param include_explainer: boolean
        If true, return the trained model explainer as well
     :return: success->boolean, payload->object
-             If success is True, payload is (model, transformer, [dataset], [explainer])
+             If success is True, payload is (model, [dataset], [explainer])
              Else, payload is (error message, error code)
     """
     model_doc = schema.Model.find_one(id=model_id)
@@ -30,16 +30,7 @@ def load_model(model_id, include_dataset=False, include_explainer=False):
         LOGGER.exception(e)
         return False, ({'message': str(e)}, 500)
 
-    transformer_bytes = model_doc.transformer
-    transformer = None
-    if transformer_bytes is not None:
-        try:
-            transformer = pickle.loads(transformer_bytes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return False, ({'message': str(e)}, 500)
-
-    payload = (model, transformer)
+    payload = (model, )
     if include_dataset:
         dataset_doc = model_doc.training_set
         if dataset_doc is None:
