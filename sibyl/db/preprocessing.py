@@ -1,18 +1,17 @@
 import json
 import os
 import pickle
-import random
 import sys
 
 import numpy as np
 import pandas as pd
 from mongoengine import connect
 from pymongo import MongoClient
-from pyreal.explainers import ShapFeatureContribution
+from pyreal import RealApp
 from pyreal.transformers import run_transformers, MappingsOneHotDecoder, MappingsOneHotEncoder, Mappings, MultiTypeImputer
-from sklearn.linear_model import Lasso, LinearRegression
+from sklearn.linear_model import LinearRegression
 import yaml
-from sibyl.db.utils import ModelWrapperThresholds, ModelWrapper
+from sibyl.db.utils import ModelWrapperThresholds
 
 import sibyl.global_explanation as ge
 from sibyl.db import schema
@@ -183,7 +182,6 @@ def insert_model(features,
     train_dataset, targets = _load_data(features, dataset_fp, target)
 
     model_serial = pickle.dumps(model)
-    transformers_serial = pickle.dumps(transformers)
 
     texts = {
         "name": "placeholder",
@@ -210,13 +208,18 @@ def insert_model(features,
             explainer = pickle.loads(explainer_serial)
     else:
         # TODO: add additional explainers/allow for multiple algorithms
-        explainer = ShapFeatureContribution(model, train_dataset.sample(100), shap_type=shap_type,
-                                            transformers=transformers, fit_on_init=True)
+        if shap_type == "kernel":
+            explainer = RealApp(model, X_train_orig=train_dataset.iloc[0:100],
+                                y_orig=targets.iloc[0:100], transformers=transformers)
+        else:
+            explainer = RealApp(model, X_train_orig=train_dataset.iloc[0:100],
+                                y_orig=targets.iloc[0:100], transformers=transformers)
+        explainer.prepare_feature_contributions(model_id=0, shap_type=shap_type)
+        explainer.prepare_feature_importance(model_id=0, shap_type=shap_type)
         explainer_serial = pickle.dumps(explainer)
 
     items = {
         "model": model_serial,
-        "transformer": transformers_serial,
         "name": name,
         "description": description,
         "performance": performance,

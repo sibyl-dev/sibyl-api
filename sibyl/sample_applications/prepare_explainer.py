@@ -3,7 +3,7 @@ from pyreal.transformers import OneHotEncoder
 from sklearn.linear_model import Ridge
 from pyreal.transformers import run_transformers
 import pickle
-from pyreal.explainers import LocalFeatureContribution
+from pyreal import RealApp
 from sibyl.sample_applications.transformers import AmesHousingImputer
 
 
@@ -29,6 +29,5 @@ model.fit(x_model, y_orig)
 pickle.dump(model, open("../../dbdata/housing/model.pkl", "wb"))
 
 transformers = [imputer, onehotencoder]
-lfc = LocalFeatureContribution(model="../../dbdata/housing/model.pkl", x_train_orig=x_orig,
-                               transformers=transformers, fit_on_init=True)
-pickle.dump(lfc, open("../../dbdata/housing/explainer.pkl", "wb"))
+explainer = RealApp(model, X_train_orig=x_orig, transformers=transformers)
+pickle.dump(explainer, open("../../dbdata/housing/explainer.pkl", "wb"))
