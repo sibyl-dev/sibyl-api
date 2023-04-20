@@ -173,7 +173,6 @@ class Model(SibylDocument):
         Training set for the model
     """
     model = fields.BinaryField(required=True)  # the model (must have model.predict())
-    transformer = fields.BinaryField()  # the model's transformer
 
     name = fields.StringField()
     description = fields.StringField()
@@ -184,15 +183,33 @@ class Model(SibylDocument):
     training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
 
 
-class Referral(SibylDocument):
+class EntityGroup(SibylDocument):
     """
-    A **Case** contains information about a referral
+    An **EntityGroup** contains information about some categorization for entities
     Attributes
     ----------
-    referral_id : str
-        ID of the referral
+    group_id : str
+        ID of the group
     property : dict {property : value}
         Domain specific properties
     """
-    referral_id = fields.StringField(required=True, validation=_valid_id)
+    group_id = fields.StringField(required=True, validation=_valid_id)
     property = fields.DictField()
+
+
+class Context(SibylDocument):
+    """
+    A **Context** contains information about UI configuration options specific to the given
+    context.
+    Attributes
+    ----------
+    term_dict : dict {key : term}
+        dictionary of application-specific terms to use
+    pos_color : str
+        color to use for positive contribution bars
+    neg_color : str
+        color to use for negative contribution bars
+    """
+    terms = fields.DictField()
+    pos_color = fields.StringField()
+    neg_color = fields.StringField()

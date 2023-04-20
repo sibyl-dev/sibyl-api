@@ -5,7 +5,8 @@ from flask import request
 from flask_restful import Resource
 
 from sibyl.db import schema
-from sibyl.resources import helpers
+from sibyl import helpers
+import pickle
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,18 +25,32 @@ def get_model(model_doc, basic=True):
 class Model(Resource):
     def get(self, model_id):
         """
-        @api {get} /models/:model_id/ Get metadata of a model
-        @apiName GetModel
-        @apiGroup Model
-        @apiVersion 1.0.0
-        @apiDescription Get the metadata of a model.
-
-        @apiSuccess {String} id ID of the model.
-        @apiSuccess {String} name Name of the model.
-        @apiSuccess {String} description Short paragraph description of
-            model functionality.
-        @apiSuccess {String} performance Short paragraph description of
-            model performance
+        Get a Model by ID
+        ---
+        tags:
+          - model
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: model_id
+            in: path
+            schema:
+              type: string
+            required: true
+            description: ID of the model to get information about
+        responses:
+          200:
+            description: Information about the model
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Model'
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/model-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
         model = schema.Model.find_one(id=model_id)
         if model is None:
@@ -50,15 +65,30 @@ class Model(Resource):
 class Models(Resource):
     def get(self):
         """
-        @api {get} /models/ Get metadata of all models
-        @apiName GetModels
-        @apiGroup Model
-        @apiVersion 1.0.0
-        @apiDescription Return all model metadatas with model IDs and names.
-
-        @apiSuccess {Object[]} models List of Model Object.
-        @apiSuccess {String} models.id ID of the model.
-        @apiSuccess {String} models.name Name of the model.
+        Get all Models
+        ---
+        tags:
+          - model
+        security:
+          - tokenAuth: []
+        responses:
+          200:
+            description: All models
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    models:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Model_Partial'
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/models-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
         documents = schema.Model.find()
         try:
@@ -73,16 +103,41 @@ class Models(Resource):
 class Importance(Resource):
     def get(self):
         """
-        @api {get} /importance/ Get global feature importance of a model
-        @apiName GetFeatureImportance
-        @apiGroup Model
-        @apiVersion 1.0.0
-        @apiDescription Get the importances of all features of a specified model.
-
-        @apiParam {String} model_id ID of the model to get feature importances.
-
-        @apiSuccess {Object} importances Feature importance object.
-        @apiSuccess {Number} importances.[key] Importance value of the feature [key].
+        Get a Model by ID
+        ---
+        tags:
+          - model
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: model_id
+            in: path
+            schema:
+              type: string
+            required: true
+            description: ID of the model to get importances for
+        responses:
+          200:
+            description: Feature importance for the model
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    importances:
+                      type: array
+                      items:
+                        importance:
+                            feature:
+                                type: string
+                            importance:
+                                type: float
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/importance-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
         model_id = request.args.get('model_id', None)
         model = schema.Model.find_one(id=model_id)
@@ -99,17 +154,38 @@ class Importance(Resource):
 class Prediction(Resource):
     def get(self):
         """
-        @api {get} /prediction/ Get prediction of an entity
-        @apiName GetPrediction
-        @apiGroup Model
-        @apiVersion 1.0.0
-        @apiDescription Get prediction of a specified entity.
-
-        @apiParam {String} model_id ID of the model to get prediction.
-        @apiParam {String} eid ID of the entity to get prediction.
-
-        @apiSuccess {Number} output Prediction of the entity by the
-            specified model.
+        Get a prediction using the model
+        ---
+        tags:
+          - model
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: model_id
+            in: query
+            schema:
+              type: string
+            required: true
+            description: ID of the model to use to predict
+          - name: eid
+            in: query
+            schema:
+              type: string
+            required: true
+            description: ID of the entity to predict on
+        responses:
+          200:
+            description: Prediction
+            content:
+              application/json:
+                schema:
+                  type: number
+                examples:
+                  inlineJson:
+                    summary: inline example
+                    value: 10.0
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
         model_id = request.args.get('model_id', None)
         eid = request.args.get('eid', None)
@@ -120,14 +196,20 @@ class Prediction(Resource):
             return {'message': 'Entity {} does not exist'.format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        success, payload = helpers.load_model(model_id)
-        if success:
-            model, transformer = payload
-        else:
-            message, error_code = payload
-            return message, error_code
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
+            LOGGER.exception('Error getting model. Model %s does not exist.', model_id)
+            return {'message': 'Model {} does not exist'.format(model_id)}, 400
+        explainer_bytes = model_doc.explainer
+        if explainer_bytes is None:
+            LOGGER.exception('Model %s explainer has not been trained. ', model_id)
+            return {'message': 'Model {} does not have trained explainer'
+                           .format(model_id)}, 400
+        try:
+            explainer = pickle.loads(explainer_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {'message': str(e)}, 500
 
-        entity_features = transformer.transform(entity_features)
-
-        prediction = model.predict(entity_features)[0].tolist()
+        prediction = explainer.predict(entity_features)[0].tolist()
         return {"output": prediction}, 200

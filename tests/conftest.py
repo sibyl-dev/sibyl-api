@@ -10,8 +10,8 @@ from pymongo import MongoClient
 from pyreal.explainers import LocalFeatureContribution
 from sklearn.linear_model import LinearRegression
 
-from sibylapp.core import SibylApp
-from sibylapp.db import schema
+from sibyl.core import Sibyl
+from sibyl.db import schema
 
 test_database_name = 'sibylapp_test'
 test_host = "localhost"
@@ -20,14 +20,15 @@ test_port = 27017
 
 @pytest.fixture(scope="session")
 def app():
-    config = {"db": test_database_name,
+    config = {"mongodb": {"db": test_database_name,
               "host": test_host,
               "port": test_port,
               "username": None,
               "password": None,
               "log_filename": "test.csv",
-              "feature_distribution_location": None}
-    explorer = SibylApp(config, docker=False)
+              "feature_distribution_location": None},
+              "flask":{}}
+    explorer = Sibyl(config, docker=False)
     app = explorer._init_flask_app('test')
     return app
 

@@ -27,9 +27,9 @@ def add_routes(app):
     api.add_resource(ctrl.entity.Entities, API_VERSION + 'entities/')
     api.add_resource(ctrl.entity.Events, API_VERSION + 'events/')
 
-    api.add_resource(ctrl.referral.Referrals, API_VERSION + 'referrals/')
-    api.add_resource(ctrl.referral.Referral,
-                     API_VERSION + 'referrals/<string:referral_id>/')
+    api.add_resource(ctrl.group.EntityGroups, API_VERSION + 'groups/')
+    api.add_resource(ctrl.group.EntityGroup,
+                     API_VERSION + 'groups/<string:group_id>/')
     # api.add_resource(ctrl.entity.EntitiesInReferral,
     #                  API_VERSION + 'entities_in_referral/<string:referral_id>/')
 
@@ -43,6 +43,10 @@ def add_routes(app):
     api.add_resource(ctrl.model.Models, API_VERSION + 'models/')
     api.add_resource(ctrl.model.Importance, API_VERSION + 'importance/')
     api.add_resource(ctrl.model.Prediction, API_VERSION + 'prediction/')
+
+    api.add_resource(ctrl.context.Context,
+                     API_VERSION + 'contexts/<string:context_id>/')
+    api.add_resource(ctrl.context.Contexts, API_VERSION + 'contexts/')
 
     api.add_resource(ctrl.computing.FeatureContributions,
                      API_VERSION + 'contributions/')
