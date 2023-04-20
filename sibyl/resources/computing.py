@@ -369,7 +369,7 @@ class PredictionCount(Resource):
         prediction = d["prediction"]
         model_id = d["model_id"]
 
-        distribution_filepath = g['config']['mongodb']['feature_distribution_location']
+        distribution_filepath = g['config']['feature_distribution_location']
         if distribution_filepath is not None:
             distribution_filepath = os.path.normpath(distribution_filepath)
             with open(distribution_filepath, 'r') as f:
