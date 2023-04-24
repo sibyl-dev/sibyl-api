@@ -210,13 +210,13 @@ def insert_model(features,
     else:
         # TODO: add additional explainers/allow for multiple algorithms
         if shap_type == "kernel":
-            explainer = RealApp(model, X_train_orig=train_dataset.iloc[0:100],
-                                y_train=targets.iloc[0:100], transformers=transformers)
+            explainer = RealApp(model, transformers=transformers)
         else:
-            explainer = RealApp(model, X_train_orig=train_dataset,
-                                y_train=targets, transformers=transformers)
-        explainer.prepare_feature_contributions(model_id=0, shap_type=shap_type)
-        explainer.prepare_feature_importance(model_id=0, shap_type=shap_type)
+            explainer = RealApp(model, transformers=transformers)
+        explainer.prepare_feature_contributions(model_id=0, shap_type=shap_type,
+                                                x_train_orig=train_dataset, y_train=targets)
+        explainer.prepare_feature_importance(model_id=0, shap_type=shap_type,
+                                             x_train_orig=train_dataset, y_train=targets)
         explainer_serial = pickle.dumps(explainer)
 
     items = {
