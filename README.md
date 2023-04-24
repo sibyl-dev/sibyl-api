@@ -53,11 +53,8 @@ cd sibyl-api
 poetry install
 ```
 
-Sibyl-API runs using MongoDB. To install, run:
-
-```bash
-pip install mongoengine
-```
+Sibyl-API runs using MongoDB. To install, follow the instructions
+[here](https://www.mongodb.com/docs/manual/administration/install-community/).
 
 ## Quickstart
 Follow these steps to get started with the built-in Ames Housing dataset example
