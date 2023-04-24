@@ -12,7 +12,7 @@ if "Id" in x_orig:  # TODO: remove once fixed in Pyreal's data
 transformers = ames_housing.load_transformers()
 model = ames_housing.load_model()
 
-explainer = RealApp(model, X_train_orig=x_orig, y_orig=y_orig, transformers=transformers)
+explainer = RealApp(model, X_train_orig=x_orig, y_train=y_orig, transformers=transformers)
 
 pickle.dump(model, open(os.path.join(DIRECTORY, "model.pkl"), "wb"))
 pickle.dump(explainer, open(os.path.join(DIRECTORY, "explainer.pkl"), "wb"))
