@@ -53,6 +53,24 @@ cd sibyl-api
 poetry install
 ```
 
+Sibyl-API runs using MongoDB. To install, run:
+
+```bash
+pip install mongoengine
+```
+
+## Quickstart
+Follow these steps to get started with the built-in Ames Housing dataset example
+1. Load the housing dataset into MongoDB by running the preprocessing script with `housing_config.yml`:
+```bash
+poetry run python sibyl\db\preprocessing.py sibyl\sample_applications\housing_config.yml
+```
+2. Make sure mongodb.db in `sibyl/config.yml` is set to `housing`.
+3. Run  Sibyl-API with:
+```bash
+poetry run sibyl run -v
+```
+
 ## Preparing database
 Sibyl-API uses a MongoDB-based database system. You can fill the database using the `preprocessing.py` script by
 following these steps:

@@ -5,6 +5,7 @@ import os
 
 from bson import ObjectId
 from yaml import load
+from pathlib import Path
 
 try:
     from yaml import CLoader as Loader
@@ -13,7 +14,6 @@ except ImportError:
 
 
 LOGGER = logging.getLogger(__name__)
-
 
 class _JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -42,6 +42,10 @@ def read_config(path_to_config):
         raise Exception
 
     return dictionary
+
+
+def get_project_root():
+    return Path(__file__).absolute().parent.parent
 
 
 def import_object(object_name):
