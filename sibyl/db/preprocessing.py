@@ -15,6 +15,7 @@ from sibyl.db.utils import ModelWrapperThresholds
 
 import sibyl.global_explanation as ge
 from sibyl.db import schema
+from sibyl.utils import get_project_root
 
 
 def _process_fp(fn):
@@ -281,9 +282,9 @@ if __name__ == "__main__":
     client = MongoClient("localhost", 27017)
     database_name = cfg["database_name"]
     if cfg["directory"] is None:
-        directory = os.path.join("..", "..", "dbdata", database_name)
+        directory = os.path.join(get_project_root(), "dbdata", database_name)
     else:
-        directory = os.path.join("..", "..", "dbdata", cfg["directory"])
+        directory = os.path.join(get_project_root(), "dbdata", cfg["directory"])
 
     if cfg["DROP_OLD"]:
         client.drop_database(database_name)
