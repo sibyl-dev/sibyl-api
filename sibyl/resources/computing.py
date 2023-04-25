@@ -1,12 +1,15 @@
 import json
 import logging
 import os
+import pickle
 
 import pandas as pd
 from flask import request
 from flask_restful import Resource
 
-from sibyl import g, global_explanation as ge, helpers
+from sibyl import g
+from sibyl import global_explanation as ge
+from sibyl import helpers
 from sibyl.db import schema
 
 LOGGER = logging.getLogger(__name__)
@@ -21,25 +24,26 @@ class SingleChangePredictions(Resource):
           - computing
         security:
           - tokenAuth: []
-        parameters:
-          - name: eid
-            in: path
-            schema:
-              type: string
-            required: true
-            description: ID of the entity to get
-          - name: model_id
-            in: path
-            schema:
-              type: string
-            required: true
-            description: ID of the model to use for predictions
-          - name: changes
-            in: path
-            schema:
-              $ref: '#/components/schemas/Changes'
-            required: true
-            description: List of changes to make, one at a time
+        requestBody:
+           required: true
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   eid:
+                     type: string
+                   model_id:
+                     type: string
+                   changes:
+                     type: array
+                     items:
+                       type: array
+                       items:
+                         oneOf:
+                           type: string
+                           type: number
+                 required: ['eid', 'model_id', 'changes']
         responses:
           200:
             description: Resulting predictions after making changes
@@ -59,7 +63,7 @@ class SingleChangePredictions(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        attrs = ['eid', 'model_id', 'changes']
+        attrs = ["eid", "model_id", "changes"]
         d = {}
         body = request.json
         for attr in attrs:
@@ -71,41 +75,52 @@ class SingleChangePredictions(Resource):
                     d[attr] = request.form[attr]
         # validate data type
         try:
-            d['eid'] = str(d['eid'])
-            d['model_id'] = str(d['model_id'])
-            for change in d['changes']:
+            d["eid"] = str(d["eid"])
+            d["model_id"] = str(d["model_id"])
+            for change in d["changes"]:
                 change[0] = str(change[0])
                 change[1] = float(change[1])
                 if schema.Feature.find_one(name=change[0]) is None:
-                    LOGGER.exception('Invalid feature %s' % change[0])
-                    return {'message': 'Invalid feature {}'.format(change[0])
-                            }, 400
-                if schema.Feature.find_one(
-                        name=change[0]).type == "binary" and change[1] not in [0, 1]:
-                    LOGGER.exception('Feature %s is binary, change value of %s is invalid.'
-                                     % (change[0], change[1]))
-                    return {'message': 'Feature {} is binary, invalid change value'.format(
-                            change[0])}, 400
+                    LOGGER.exception("Invalid feature %s" % change[0])
+                    return {"message": "Invalid feature {}".format(change[0])}, 400
+                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [
+                    0,
+                    1,
+                ]:
+                    LOGGER.exception(
+                        "Feature %s is binary, change value of %s is invalid."
+                        % (change[0], change[1])
+                    )
+                    return {
+                        "message": "Feature {} is binary, invalid change value".format(change[0])
+                    }, 400
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 400
+            return {"message": str(e)}, 400
 
         eid = d["eid"]
         model_id = d["model_id"]
         changes = d["changes"]
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
-            LOGGER.exception('Error getting entity. Entity %s does not exist.', eid)
-            return {'message': 'Entity {} does not exist'.format(eid)}, 400
+            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
+            return {"message": "Entity {} does not exist".format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        success, payload = helpers.load_model(model_id)
-        if success:
-            model, transformer = payload
-        else:
-            message, error_code = payload
-            return message, error_code
-        entity_features = transformer.transform(entity_features)
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
+            LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
+            return {"message": "Model {} does not exist".format(model_id)}, 400
+        explainer_bytes = model_doc.explainer
+        if explainer_bytes is None:
+            LOGGER.exception("Model %s explainer has not been trained. ", model_id)
+            return {"message": "Model {} does not have trained explainer".format(model_id)}, 400
+
+        try:
+            explainer = pickle.loads(explainer_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {"message": str(e)}, 500
 
         predictions = []
         for change in changes:
@@ -113,7 +128,7 @@ class SingleChangePredictions(Resource):
             value = change[1]
             modified = entity_features.copy()
             modified[feature] = value
-            prediction = model.predict(modified)[0].tolist()
+            prediction = explainer.predict(modified)[0].tolist()
             predictions.append([feature, prediction])
         return {"changes": predictions}
 
@@ -121,21 +136,50 @@ class SingleChangePredictions(Resource):
 class ModifiedPrediction(Resource):
     def post(self):
         """
-        @api {post} /modified_prediction/ Post multiple prediction
-        @apiName PostMultiplePrediction
-        @apiGroup Computing
-        @apiVersion 1.0.0
-        @apiDescription  Get the modified prediction under different conditions
-        @apiParam {String} eid ID of entity to predict on.
-        @apiParam {String} model_id ID of model to use for predictions.
-        @apiParam {2-Tuple[]} changes List of features to change and
-            their new values.
-        @apiParam {String} changes.item1 Name of the feature to change.
-        @apiParam {String} changes.item2 Changed Value of the feature.
-        @apiSuccess {Number} prediction New prediction after making
-            the requested changes.
+        Get the resulting model prediction after making all changes
+        ---
+        tags:
+          - computing
+        security:
+          - tokenAuth: []
+        requestBody:
+           required: true
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   eid:
+                     type: string
+                   model_id:
+                     type: string
+                   changes:
+                     type: array
+                     items:
+                       type: array
+                       items:
+                         oneOf:
+                           type: string
+                           type: number
+                 required: ['eid', 'model_id', 'changes']
+        responses:
+          200:
+            description: Resulting predictions after making changes
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    changes:
+                        type: number
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/entity-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
-        attrs = ['eid', 'model_id', 'changes']
+        attrs = ["eid", "model_id", "changes"]
         d = {}
         body = request.json
         for attr in attrs:
@@ -147,49 +191,59 @@ class ModifiedPrediction(Resource):
                     d[attr] = request.form[attr]
         # validate data type
         try:
-            d['eid'] = str(d['eid'])
-            d['model_id'] = str(d['model_id'])
-            for change in d['changes']:
+            d["eid"] = str(d["eid"])
+            d["model_id"] = str(d["model_id"])
+            for change in d["changes"]:
                 change[0] = str(change[0])
                 change[1] = float(change[1])
                 if schema.Feature.find_one(name=change[0]) is None:
-                    LOGGER.exception('Invalid feature %s' % change[0])
-                    return {'message': 'Invalid feature {}'.format(change[0])
-                            }, 400
-                if schema.Feature.find_one(
-                        name=change[0]).type == "binary" and change[1] not in [0, 1]:
-                    LOGGER.exception('Feature %s is binary, change value of %s is invalid.'
-                                     % (change[0], change[1]))
-                    return {'message': 'Feature {} is binary, invalid change value'.format(
-                        change[0])}, 400
+                    LOGGER.exception("Invalid feature %s" % change[0])
+                    return {"message": "Invalid feature {}".format(change[0])}, 400
+                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [
+                    0,
+                    1,
+                ]:
+                    LOGGER.exception(
+                        "Feature %s is binary, change value of %s is invalid."
+                        % (change[0], change[1])
+                    )
+                    return {
+                        "message": "Feature {} is binary, invalid change value".format(change[0])
+                    }, 400
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 400
+            return {"message": str(e)}, 400
 
         eid = d["eid"]
         model_id = d["model_id"]
         changes = d["changes"]
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
-            LOGGER.exception('Error getting entity. Entity %s does not exist.', eid)
-            return {'message': 'Entity {} does not exist'.format(eid)}, 400
+            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
+            return {"message": "Entity {} does not exist".format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        success, payload = helpers.load_model(model_id)
-        if success:
-            model, transformer = payload
-        else:
-            message, error_code = payload
-            return message, error_code
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
+            LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
+            return {"message": "Model {} does not exist".format(model_id)}, 400
+        explainer_bytes = model_doc.explainer
+        if explainer_bytes is None:
+            LOGGER.exception("Model %s explainer has not been trained. ", model_id)
+            return {"message": "Model {} does not have trained explainer".format(model_id)}, 400
 
-        entity_features = transformer.transform(entity_features)
+        try:
+            explainer = pickle.loads(explainer_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {"message": str(e)}, 500
 
         modified = entity_features.copy()
         for change in changes:
             feature = change[0]
             value = change[1]
             modified[feature] = value
-        prediction = model.predict(modified)[0].tolist()
+        prediction = explainer.predict(modified)[0].tolist()
         return {"prediction": prediction}
 
 
@@ -212,7 +266,7 @@ class FeatureDistributions(Resource):
             [[values],[counts]]
         """
         # LOAD IN PARAMETERS
-        attrs = ['prediction', 'model_id']
+        attrs = ["prediction", "model_id"]
         attrs_type = [int, str]
         d = dict()
         body = request.json
@@ -230,59 +284,59 @@ class FeatureDistributions(Resource):
                 d[attr] = attrs_type[i](d[attr])
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 400
+            return {"message": str(e)}, 400
 
         prediction = d["prediction"]
         model_id = d["model_id"]
 
         # CHECK FOR PRECOMPUTED VALUES
-        distribution_filepath = g['config']["mongodb"]['feature_distribution_location']
+        distribution_filepath = g["config"]["feature_distribution_location"]
         if distribution_filepath is not None:
             distribution_filepath = os.path.normpath(distribution_filepath)
-            with open(distribution_filepath, 'r') as f:
+            with open(distribution_filepath, "r") as f:
                 all_distributions = json.load(f)
-            return {"distributions": all_distributions[str(prediction)]['distributions']}
+            return {"distributions": all_distributions[str(prediction)]["distributions"]}
 
         # LOAD IN AND VALIDATE MODEL DATA
-        success, payload = helpers.load_model(model_id, include_dataset=True)
+        success, payload = helpers.load_model(
+            model_id, include_explainer=True, include_dataset=True
+        )
         if success:
-            model, transformer, dataset = payload
+            model, dataset, explainer = payload
         else:
             message, error_code = payload
             return message, error_code
 
         # LOAD IN FEATURES
         feature_docs = schema.Feature.find()
-        features = [{"name": feature_doc.name, "type": feature_doc.type}
-                    for feature_doc in feature_docs]
+        features = [
+            {"name": feature_doc.name, "type": feature_doc.type} for feature_doc in feature_docs
+        ]
         features = pd.DataFrame(features)
 
         # FIND CATEGORICAL FEATURES
-        boolean_features = features[
-            features['type'].isin(['binary', 'categorical'])]["name"]
+        boolean_features = features[features["type"].isin(["binary", "categorical"])]["name"]
         categorical_dataset = dataset[boolean_features]
 
-        numeric_features = features[
-            features['type'] == 'numeric']["name"]
+        numeric_features = features[features["type"] == "numeric"]["name"]
         numeric_dataset = dataset[numeric_features]
 
         distributions = {}
-        rows = ge.get_rows_by_output(prediction, model.predict, dataset,
-                                     row_labels=None, transformer=transformer)
+        rows = ge.get_rows_by_output(prediction, explainer.predict, dataset, row_labels=None)
         if len(rows) == 0:
-            LOGGER.exception('No data with that prediction: %s', prediction)
-            return {'message': 'No data with that prediction: {}'.format(prediction)}, 400
+            LOGGER.exception("No data with that prediction: %s", prediction)
+            return {"message": "No data with that prediction: {}".format(prediction)}, 400
 
         cat_summary = ge.summary_categorical(categorical_dataset.iloc[rows])
         num_summary = ge.summary_numeric(numeric_dataset.iloc[rows])
 
-        for (i, name) in enumerate(boolean_features):
-            distributions[name] = {"type": "categorical",
-                                   "metrics": [cat_summary[0][i].tolist(),
-                                               cat_summary[1][i].tolist()]}
-        for (i, name) in enumerate(numeric_features):
-            distributions[name] = {"type": "numeric",
-                                   "metrics": num_summary[i]}
+        for i, name in enumerate(boolean_features):
+            distributions[name] = {
+                "type": "categorical",
+                "metrics": [cat_summary[0][i].tolist(), cat_summary[1][i].tolist()],
+            }
+        for i, name in enumerate(numeric_features):
+            distributions[name] = {"type": "numeric", "metrics": num_summary[i]}
 
         return {"distributions": distributions}
 
@@ -300,7 +354,7 @@ class PredictionCount(Resource):
         @apiSuccess {Number} count Number of entities who are predicted as prediction in
             the training set
         """
-        attrs = ['prediction', 'model_id']
+        attrs = ["prediction", "model_id"]
         attrs_type = [int, str]
         d = dict()
         body = request.json
@@ -318,29 +372,29 @@ class PredictionCount(Resource):
                 d[attr] = attrs_type[i](d[attr])
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 400
+            return {"message": str(e)}, 400
 
         prediction = d["prediction"]
         model_id = d["model_id"]
 
-        distribution_filepath = g['config']['mongodb']['feature_distribution_location']
+        distribution_filepath = g["config"]["feature_distribution_location"]
         if distribution_filepath is not None:
             distribution_filepath = os.path.normpath(distribution_filepath)
-            with open(distribution_filepath, 'r') as f:
+            with open(distribution_filepath, "r") as f:
                 all_distributions = json.load(f)
-            return {"count:":
-                    all_distributions[str(prediction)]["total cases"]}
+            return {"count:": all_distributions[str(prediction)]["total cases"]}
 
         # LOAD IN AND VALIDATE MODEL DATA
-        success, payload = helpers.load_model(model_id, include_dataset=True)
+        success, payload = helpers.load_model(
+            model_id, include_explainer=True, include_dataset=True
+        )
         if success:
-            model, transformer, dataset = payload
+            model, dataset, explainer = payload
         else:
             message, error_code = payload
             return message, error_code
 
-        rows = ge.get_rows_by_output(prediction, model.predict, dataset,
-                                     row_labels=None, transformer=transformer)
+        rows = ge.get_rows_by_output(prediction, explainer.predict, dataset, row_labels=None)
 
         count = len(rows)
 
@@ -368,7 +422,7 @@ class OutcomeCount(Resource):
                                                     If type is "categorical" or "binary":
                                                         [[values],[counts]]
         """
-        attrs = ['prediction', 'model_id']
+        attrs = ["prediction", "model_id"]
         attrs_type = [int, str]
         d = dict()
         body = request.json
@@ -386,39 +440,67 @@ class OutcomeCount(Resource):
                 d[attr] = attrs_type[i](d[attr])
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 400
+            return {"message": str(e)}, 400
 
         prediction = d["prediction"]
 
-        distribution_filepath = g['config']['feature_distribution_location']
+        distribution_filepath = g["config"]["feature_distribution_location"]
         if distribution_filepath is not None:
             distribution_filepath = os.path.normpath(distribution_filepath)
-            with open(distribution_filepath, 'r') as f:
+            with open(distribution_filepath, "r") as f:
                 all_distributions = json.load(f)
-            outcome_metrics = all_distributions[
-                str(prediction)]["distributions"]["PRO_PLSM_NEXT730_DUMMY"]
+            outcome_metrics = all_distributions[str(prediction)]["distributions"][
+                "PRO_PLSM_NEXT730_DUMMY"
+            ]
             return {"distributions": {"PRO_PLSM_NEXT730_DUMMY": outcome_metrics}}
         else:
             LOGGER.exception("Not implemented - Please provide precomputed document")
-            return {'message': "Not implemented - Please provide precomputed document"}, 501
+            return {"message": "Not implemented - Please provide precomputed document"}, 501
 
 
 class FeatureContributions(Resource):
     def post(self):
         """
-        @api {post} /contributions/ Get feature contributions
-        @apiName GetFeatureContributions
-        @apiGroup Computing
-        @apiVersion 1.0.0
-        @apiDescription  get the contributions of all features
-        @apiParam {String} eid ID of the entity to compute.
-        @apiParam {String} model_id ID of the model to compute.
-        @apiSuccess {Object} contributions Feature contribution object (key-value pair).
-        @apiSuccess {Number} contributions.[key] Contribution value of the feature [key].
+        Get feature contributions
+        ---
+        tags:
+          - computing
+        security:
+          - tokenAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  eid:
+                    type: string
+                  model_id:
+                    type: string
+                required: ['eid', 'model_id']
+        responses:
+          200:
+            description: Feature contributions
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    contributions:
+                        type: array
+                        items:
+                            type: number
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/entity-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
 
         # LOAD IN AND CHECK ATTRIBUTES:
-        attrs = ['eid', 'model_id']
+        attrs = ["eid", "model_id"]
         attrs_type = [str, str]
         d = dict()
         body = request.json
@@ -436,7 +518,7 @@ class FeatureContributions(Resource):
                 d[attr] = attrs_type[i](d[attr])
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 400
+            return {"message": str(e)}, 400
 
         eid = d["eid"]
         model_id = d["model_id"]
@@ -444,22 +526,22 @@ class FeatureContributions(Resource):
         # LOAD IN AND VALIDATE ENTITY
         entity = schema.Entity.find_one(eid=str(eid))
         if entity is None:
-            LOGGER.exception('Error getting entity. Entity %s does not exist.', eid)
-            return {'message': 'Entity {} does not exist'.format(eid)}, 400
+            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
+            return {"message": "Entity {} does not exist".format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
         if entity_features is None:
-            LOGGER.exception('Entity %s has no features. ', eid)
-            return {'message': 'Entity {} does not have features.'.format(eid)}, 400
+            LOGGER.exception("Entity %s has no features. ", eid)
+            return {"message": "Entity {} does not have features.".format(eid)}, 400
 
         # LOAD IN AND VALIDATE MODEL DATA
         success, payload = helpers.load_model(model_id, include_explainer=True)
         if success:
-            model, transformer, explainer = payload
+            model, explainer = payload
         else:
             message, error_code = payload
             return message, error_code
 
-        contributions = explainer.produce(entity_features)
-        keys = list(contributions.columns)
-        contribution_dict = dict(zip(keys, contributions.iloc[0, :]))
+        contributions = explainer.produce_feature_contributions(entity_features)[0]
+        keys = list(contributions["Feature Name"])
+        contribution_dict = dict(zip(keys, contributions["Contribution"]))
         return {"contributions": contribution_dict}, 200

@@ -45,13 +45,14 @@ class Event(SibylDocument):
     property : dict {property : value}
         Domain specific properties of the event
     """
+
     event_id = fields.StringField()
     datetime = fields.DateTimeField(required=True)
     # TODO: choices from config
     type = fields.StringField(required=True)
     property = fields.DictField()  # {property:value}
 
-    unique_key_fields = ['event_id']
+    unique_key_fields = ["event_id"]
 
 
 class Entity(SibylDocument):
@@ -69,15 +70,15 @@ class Entity(SibylDocument):
     events : list [Event object]
         List of events this entity was involved in
     """
+
     eid = fields.StringField(validation=_valid_id)
 
     features = fields.DictField()  # {feature:value}
     property = fields.DictField()  # {property:value}
 
-    events = fields.ListField(
-        fields.ReferenceField(Event, reverse_delete_rule=PULL))
+    events = fields.ListField(fields.ReferenceField(Event, reverse_delete_rule=PULL))
 
-    unique_key_fields = ['eid']
+    unique_key_fields = ["eid"]
 
 
 class Category(SibylDocument):
@@ -93,11 +94,12 @@ class Category(SibylDocument):
     abbreviation : str
         Two or three character abbreviation of the category
     """
+
     name = fields.StringField(required=True)
     color = fields.StringField()
     abbreviation = fields.StringField(max_length=3)
 
-    unique_key_fields = ['name', 'abbreviation']
+    unique_key_fields = ["name", "abbreviation"]
 
 
 class Feature(SibylDocument):
@@ -117,13 +119,14 @@ class Feature(SibylDocument):
     type : str
         Feature type (one of binary, categorical, and numeric)
     """
+
     name = fields.StringField(required=True)
     description = fields.StringField()
     negated_description = fields.StringField()
     category = fields.ReferenceField(Category, reverse_delete_rule=NULLIFY)
-    type = fields.StringField(choices=['binary', 'categorical', 'numeric'])
+    type = fields.StringField(choices=["binary", "categorical", "numeric"])
 
-    unique_key_fields = ['name']
+    unique_key_fields = ["name"]
 
 
 class TrainingSet(SibylDocument):
@@ -137,8 +140,8 @@ class TrainingSet(SibylDocument):
     neighbors : trained NN classifier
         Trained nearest neighbors classifier for the dataset
     """
-    entities = fields.ListField(
-        fields.ReferenceField(Entity, reverse_delete_rule=PULL))
+
+    entities = fields.ListField(fields.ReferenceField(Entity, reverse_delete_rule=PULL))
     neighbors = fields.BinaryField()  # trained NN classifier
 
     def to_dataframe(self):
@@ -172,8 +175,8 @@ class Model(SibylDocument):
     training_set : TrainingSet
         Training set for the model
     """
+
     model = fields.BinaryField(required=True)  # the model (must have model.predict())
-    transformer = fields.BinaryField()  # the model's transformer
 
     name = fields.StringField()
     description = fields.StringField()
@@ -184,15 +187,35 @@ class Model(SibylDocument):
     training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
 
 
-class Referral(SibylDocument):
+class EntityGroup(SibylDocument):
     """
-    A **Case** contains information about a referral
+    An **EntityGroup** contains information about some categorization for entities
     Attributes
     ----------
-    referral_id : str
-        ID of the referral
+    group_id : str
+        ID of the group
     property : dict {property : value}
         Domain specific properties
     """
-    referral_id = fields.StringField(required=True, validation=_valid_id)
+
+    group_id = fields.StringField(required=True, validation=_valid_id)
     property = fields.DictField()
+
+
+class Context(SibylDocument):
+    """
+    A **Context** contains information about UI configuration options specific to the given
+    context.
+    Attributes
+    ----------
+    term_dict : dict {key : term}
+        dictionary of application-specific terms to use
+    pos_color : str
+        color to use for positive contribution bars
+    neg_color : str
+        color to use for negative contribution bars
+    """
+
+    terms = fields.DictField()
+    pos_color = fields.StringField()
+    neg_color = fields.StringField()

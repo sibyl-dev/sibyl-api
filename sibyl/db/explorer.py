@@ -65,7 +65,7 @@ class DBExplorer:
         ... )
     """
 
-    def __init__(self, user, database='orion', mongodb_config=None):
+    def __init__(self, user, database="orion", mongodb_config=None):
         """Initiaize this OrionDBExplorer.
 
         Args:
@@ -95,7 +95,7 @@ class DBExplorer:
             mongodb_config = mongodb_config.copy()
 
         self.user = user
-        self.database = mongodb_config.pop('database', database)
+        self.database = mongodb_config.pop("database", database)
         self._db = connect(database, **mongodb_config)
         self._fs = GridFS(Database(self._db, self.database))
 
@@ -131,11 +131,7 @@ class DBExplorer:
         Returns:
             Dataset
         """
-        return schema.Dataset.insert(
-            name=name,
-            entity=entity,
-            created_by=self.user
-        )
+        return schema.Dataset.insert(name=name, entity=entity, created_by=self.user)
 
     def get_datasets(self, name=None, entity=None, created_by=None):
         """Query the Datasets collection.
@@ -158,12 +154,7 @@ class DBExplorer:
         Returns:
             pandas.DataFrame
         """
-        return schema.Dataset.find(
-            as_df_=True,
-            name=name,
-            entity=entity,
-            created_by=created_by
-        )
+        return schema.Dataset.find(as_df_=True, name=name, entity=entity, created_by=created_by)
 
     def get_dataset(self, dataset=None, name=None, entity=None, created_by=None):
         """Get a Dataset object from the database.
@@ -190,9 +181,4 @@ class DBExplorer:
         Returns:
             Dataset
         """
-        return schema.Dataset.get(
-            dataset=dataset,
-            name=name,
-            entity=entity,
-            created_by=created_by
-        )
+        return schema.Dataset.get(dataset=dataset, name=name, entity=entity, created_by=created_by)

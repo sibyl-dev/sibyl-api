@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def get_rows_by_output(output, predict, x, row_labels=None, transformer=None):
+def get_rows_by_output(output, predict, x, row_labels=None):
     """
     Return the indices of the rows in x that get predicted as output
 
@@ -14,14 +14,11 @@ def get_rows_by_output(output, predict, x, row_labels=None, transformer=None):
     :param row_labels: None or array_like of shape (n_samples,)
            If not None, return the row_labels of relevant rows instead of
            numerical indices
-    :param transformer: Transformer to use before running model
     :return: array_like
             The indices or row_labels of the rows of x that result in output
             when run through predict
     """
-    if transformer is not None:
-        x = transformer.transform(x)
-    preds_train = predict(x)
+    preds_train = list(predict(x).values())
     if np.isscalar(output):
         output = [output]
     xs_of_interest = np.isin(preds_train, output)
@@ -69,6 +66,13 @@ def summary_numeric(X):
         quartiles = np.quantile(col, [0.25, 0.5, 0.75])
         maximum = col.max()
         minimum = col.min()
-        all_metrics.append([float(minimum), float(quartiles[0]), float(quartiles[1]),
-                            float(quartiles[2]), float(maximum)])
+        all_metrics.append(
+            [
+                float(minimum),
+                float(quartiles[0]),
+                float(quartiles[1]),
+                float(quartiles[2]),
+                float(maximum),
+            ]
+        )
     return all_metrics

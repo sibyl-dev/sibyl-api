@@ -1,23 +1,21 @@
 import logging
+import pickle
 
 import pandas as pd
 from flask import request
 from flask_restful import Resource
 
-from sibyl.db import schema
 from sibyl import helpers
+from sibyl.db import schema
 
 LOGGER = logging.getLogger(__name__)
 
 
 def get_model(model_doc, basic=True):
-    model = {
-        'id': str(model_doc.id),
-        'name': model_doc.name
-    }
+    model = {"id": str(model_doc.id), "name": model_doc.name}
     if not basic:
-        model['description'] = model_doc.description
-        model['performance'] = model_doc.performance
+        model["description"] = model_doc.description
+        model["performance"] = model_doc.performance
     return model
 
 
@@ -53,10 +51,8 @@ class Model(Resource):
         """
         model = schema.Model.find_one(id=model_id)
         if model is None:
-            LOGGER.exception('Error getting model. Model %s does not exist.', model_id)
-            return {
-                'message': 'Model {} does not exist'.format(model_id)
-            }, 400
+            LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
+            return {"message": "Model {} does not exist".format(model_id)}, 400
 
         return get_model(model, basic=False), 200
 
@@ -94,9 +90,9 @@ class Models(Resource):
             model = [get_model(document, basic=True) for document in documents]
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 500
+            return {"message": str(e)}, 500
         else:
-            return {'models': model}, 200
+            return {"models": model}, 200
 
 
 class Importance(Resource):
@@ -138,16 +134,14 @@ class Importance(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        model_id = request.args.get('model_id', None)
+        model_id = request.args.get("model_id", None)
         model = schema.Model.find_one(id=model_id)
         if model is None:
-            LOGGER.exception('Error getting model. Model %s does not exist.', model_id)
-            return {
-                'message': 'Model {} does not exist'.format(model_id)
-            }, 400
+            LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
+            return {"message": "Model {} does not exist".format(model_id)}, 400
 
         importances = model.importances
-        return {'importances': importances}
+        return {"importances": importances}
 
 
 class Prediction(Resource):
@@ -186,23 +180,28 @@ class Prediction(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        model_id = request.args.get('model_id', None)
-        eid = request.args.get('eid', None)
+        model_id = request.args.get("model_id", None)
+        eid = request.args.get("eid", None)
 
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
-            LOGGER.exception('Error getting entity. Entity %s does not exist.', eid)
-            return {'message': 'Entity {} does not exist'.format(eid)}, 400
+            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
+            return {"message": "Entity {} does not exist".format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        success, payload = helpers.load_model(model_id)
-        if success:
-            model, transformer = payload
-        else:
-            message, error_code = payload
-            return message, error_code
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
+            LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
+            return {"message": "Model {} does not exist".format(model_id)}, 400
+        explainer_bytes = model_doc.explainer
+        if explainer_bytes is None:
+            LOGGER.exception("Model %s explainer has not been trained. ", model_id)
+            return {"message": "Model {} does not have trained explainer".format(model_id)}, 400
+        try:
+            explainer = pickle.loads(explainer_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {"message": str(e)}, 500
 
-        entity_features = transformer.transform(entity_features)
-
-        prediction = model.predict(entity_features)[0].tolist()
+        prediction = explainer.predict(entity_features)[0].tolist()
         return {"output": prediction}, 200

@@ -18,17 +18,10 @@ import requests
 
 LOGGER = logging.getLogger(__name__)
 
-DATA_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    'data'
-)
-BUCKET = 'sibylapp'
-S3_URL = 'https://{}.s3.amazonaws.com/{}'
-DATA_FILES = (
-    'model_weights.csv',
-    'tabular_data.csv',
-    'model.pkl'
-)
+DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+BUCKET = "sibylapp"
+S3_URL = "https://{}.s3.amazonaws.com/{}"
+DATA_FILES = ("model_weights.csv", "tabular_data.csv", "model.pkl")
 
 
 def download(name, data_path=DATA_PATH):
@@ -50,28 +43,28 @@ def download(name, data_path=DATA_PATH):
     """
 
     url = None
-    if name.startswith('s3://'):
-        parts = name[5:].split('/', 1)
+    if name.startswith("s3://"):
+        parts = name[5:].split("/", 1)
         bucket = parts[0]
         path = parts[1]
         url = S3_URL.format(bucket, path)
 
-        filename = os.path.join(data_path, path.split('/')[-1])
+        filename = os.path.join(data_path, path.split("/")[-1])
     else:
         filename = os.path.join(data_path, name)
 
     if not os.path.exists(filename):
-        url = url or S3_URL.format(BUCKET, '{}'.format(filename))
+        url = url or S3_URL.format(BUCKET, "{}".format(filename))
 
-        LOGGER.info('Downloading %s from %s', filename, url)
+        LOGGER.info("Downloading %s from %s", filename, url)
         os.makedirs(data_path, exist_ok=True)
 
         r = requests.get(url, allow_redirects=True)
-        open(filename, 'wb').write(r.content)
+        open(filename, "wb").write(r.content)
 
 
 def download_demo():
-    LOGGER.info('Downloading SibylApp Demo Data')
+    LOGGER.info("Downloading SibylApp Demo Data")
     for name in DATA_FILES:
         download(name)
 

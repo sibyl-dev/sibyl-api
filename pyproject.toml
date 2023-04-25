@@ -1,0 +1,86 @@
+[tool.poetry]
+authors = ["MIT Data To AI Lab"]
+description = "Explanation tool for machine learning"
+license = "MIT"
+name = "sibylapi"
+packages = [{include = "sibyl"}]
+readme = "README.md"
+version = "0.1.0"
+
+repository = "https://github.com/DAI-Lab/sibyl-api"
+
+keywords = ["sibyl-api", "sibyl", "api"]
+
+classifiers = [
+  'Development Status :: 2 - Pre-Alpha',
+  'Intended Audience :: Developers',
+  'License :: OSI Approved :: MIT License',
+  'Natural Language :: English',
+  'Programming Language :: Python :: 3',
+  'Programming Language :: Python :: 3.8',
+  'Programming Language :: Python :: 3.9',
+  'Programming Language :: Python :: 3.10',
+]
+
+[tool.poetry.scripts]
+sibyl = "sibyl.cli:main"
+
+[tool.poetry.dependencies]
+# Main Python Requirements
+python = "^3.8, <3.11"
+
+click = "^8.1.3"
+
+[tool.poetry.group.general.dependencies]
+PyYAML= "^6.0"
+passlib= "^1.7.4"
+termcolor = "^2.0.1"
+xgboost = "1.6.2"
+
+[tool.poetry.group.math.dependencies]
+numpy= "^1.23.3"
+pandas= "^1.5.0"
+
+[tool.poetry.group.web-server.dependencies]
+Flask = "2.2.2"
+Flask-Cors = "3.0.10"
+Flask-RESTful = "0.3.9"
+Werkzeug = "2.2.2"
+flasgger = "0.9.5"
+gevent = "21.12.0"
+greenlet = "1.1.3"
+
+[tool.poetry.group.database.dependencies]
+mongoengine = "^0.24.2"
+pymongo = "^4.2.0"
+
+[tool.poetry.group.explanations.dependencies]
+pyreal = "0.4.0"
+
+[tool.poetry.group.dev.dependencies]
+coverage = ">=6.5.0"
+invoke = ">=1.7.3"
+pytest = ">=7.1.3"
+pytest-cov = ">=4.0.0"
+
+# docs
+m2r2 = ">=0.3.3"
+Sphinx = ">=5.2.3"
+
+# Style Dependencies
+flake8 = "^5.0.4"
+isort = "^5.11.4"
+black = "^23.1.0"
+
+[tool.black]
+line-length = 99
+preview = true
+
+[tool.isort]
+profile = "black"
+line_length = 99
+skip = ["__init__.py"]
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
