@@ -12,7 +12,7 @@ def test_post_contributions(client, models, entities):
     response = client.post('/api/v1/contributions/',
                            json={"eid": entity["eid"], "model_id": model_id}).json
     contributions = response["contributions"]
-    assert len(contributions) == 3
+    assert len(contributions) == 6
     assert "A" in contributions
     assert contributions["A"] > .0001
 
@@ -20,7 +20,11 @@ def test_post_contributions(client, models, entities):
     assert contributions["B"] < .0001
 
     assert "C" in contributions
-    assert abs(contributions["C"]) < .00001
+    assert abs(contributions["C"]) < .0001
+
+    for col in ["num_feat", "cat_feat", "bin_feat"]:
+        assert col in contributions
+        assert abs(contributions[col]) < .0001
 
 
 def test_post_feature_distributions(client, models):

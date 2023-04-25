@@ -102,7 +102,6 @@ class Logging(Resource):
                         "event_action": event_action,
                         "event_details": event_details
                         }
-
         log_file = g['config']["log_filename"]
         try:
             with open(log_file, "a+") as f:

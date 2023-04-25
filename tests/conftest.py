@@ -8,7 +8,7 @@ from mongoengine import connect
 from mongoengine.connection import disconnect
 from pymongo import MongoClient
 from pyreal import RealApp
-from pyreal.transformers import Transformer
+from pyreal.transformers import FeatureSelectTransformer
 from pyreal.types.explanations.feature_based import FeatureContributionExplanation
 from sklearn.linear_model import LinearRegression
 
@@ -20,23 +20,15 @@ test_host = "localhost"
 test_port = 27017
 
 
-class TestTransformer(Transformer):
-    def data_transform(self, x):
-        return x[["A", "B", "C"]]
-
-    def inverse_transform_explanation(self, explanation):
-        return FeatureContributionExplanation(explanation.get()[["A", "B", "C"]])
-
-
 @pytest.fixture(scope="session")
 def client():
     config = {"mongodb": {"db": test_database_name,
               "host": test_host,
               "port": test_port,
               "username": None,
-              "password": None,
+              "password": None},
               "log_filename": "test.csv",
-              "feature_distribution_location": None},
+              "feature_distribution_location": None,
               "flask":{}}
     explorer = Sibyl(config, docker=False)
     app = explorer._init_flask_app('test')
@@ -110,9 +102,9 @@ def models():
     model.coef_ = np.array([1, -1, 0])
     model.intercept_ = 0
     model_serial = pickle.dumps(model)
-    transformer = TestTransformer()
-
-    dataset = pd.DataFrame(np.random.randint(0, 5, size=(100, 6)), columns=list("ABCDEF"))
+    columns = ["A", "B", "C", "num_feat", "cat_feat", "bin_feat"]
+    dataset = pd.DataFrame(np.random.randint(0, 5, size=(100, 6)), columns=columns)
+    transformer = FeatureSelectTransformer(columns=["A", "B", "C"]).fit(dataset)
 
     explainer = RealApp(model, dataset, transformers=transformer)
     explainer_serial = pickle.dumps(explainer)
