@@ -1,7 +1,7 @@
 name: Test Python
 
 on:
-  pull_request: 
+  pull_request:
 
 jobs:
   test:
@@ -29,7 +29,7 @@ jobs:
 
       - name: Install Dependencies
         if: steps.cache-primes.outputs.cache-hit != 'true' # Only run if the cache is old
-        run: poetry install --no-interaction -E examples
+        run: poetry install --no-interaction
 
       - name: Lint
         run: poetry run invoke lint
