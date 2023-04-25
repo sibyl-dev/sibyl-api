@@ -8,10 +8,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def get_group(group_doc):
-    group = {
-        'group_id': group_doc.group_id,
-        'property': group_doc.property
-    }
+    group = {"group_id": group_doc.group_id, "property": group_doc.property}
     return group
 
 
@@ -48,8 +45,8 @@ class EntityGroup(Resource):
 
         group = schema.EntityGroup.find_one(group_id=group_id)
         if group is None:
-            LOGGER.exception('Error getting group. group %s does not exist.', group_id)
-            return {'message': 'group {} does not exist'.format(group_id)}, 400
+            LOGGER.exception("Error getting group. group %s does not exist.", group_id)
+            return {"message": "group {} does not exist".format(group_id)}, 400
 
         return get_group(group), 200
 
@@ -87,6 +84,6 @@ class EntityGroups(Resource):
             group = [document.group_id for document in documents]
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 500
+            return {"message": str(e)}, 500
         else:
-            return {'groups': group}, 200
+            return {"groups": group}, 200

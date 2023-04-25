@@ -66,6 +66,13 @@ def summary_numeric(X):
         quartiles = np.quantile(col, [0.25, 0.5, 0.75])
         maximum = col.max()
         minimum = col.min()
-        all_metrics.append([float(minimum), float(quartiles[0]), float(quartiles[1]),
-                            float(quartiles[2]), float(maximum)])
+        all_metrics.append(
+            [
+                float(minimum),
+                float(quartiles[0]),
+                float(quartiles[1]),
+                float(quartiles[2]),
+                float(maximum),
+            ]
+        )
     return all_metrics

@@ -5,7 +5,7 @@
 
 
 def test_get_entities(client, entities):
-    response = client.get('/api/v1/entities/').json
+    response = client.get("/api/v1/entities/").json
 
     assert len(response["entities"]) == len(entities)
 
@@ -23,7 +23,7 @@ def test_get_entities(client, entities):
 
 def test_get_entity(client, entities):
     entity = entities[0]
-    response = client.get('/api/v1/entities/' + entity["eid"] + "/").json
+    response = client.get("/api/v1/entities/" + entity["eid"] + "/").json
     assert response["eid"] == entity["eid"]
     assert response["features"] == entity["features"]
     assert response["property"] == entity["property"]
@@ -32,7 +32,7 @@ def test_get_entity(client, entities):
 
 def test_get_events(client, entities):
     entity = entities[0]
-    response = client.get('/api/v1/events/?eid=' + entity["eid"]).json
+    response = client.get("/api/v1/events/?eid=" + entity["eid"]).json
 
     assert len(response["events"]) == len(entity["events"])
 
@@ -57,18 +57,18 @@ def test_get_events(client, entities):
 
 
 def test_get_groups(client, groups):
-    response = client.get('/api/v1/groups/').json
+    response = client.get("/api/v1/groups/").json
     assert response["groups"] == [group["group_id"] for group in groups]
 
 
 def test_get_group(client, groups):
     group = groups[0]
-    response = client.get('/api/v1/groups/' + group["group_id"] + "/").json
+    response = client.get("/api/v1/groups/" + group["group_id"] + "/").json
     assert response == group
 
 
 def test_entities_in_group(client):
     group_id = "101"
     entities_involved = ["ent1", "ent2"]
-    response = client.get('/api/v1/entities/?group_id=' + group_id).json
+    response = client.get("/api/v1/entities/?group_id=" + group_id).json
     assert response == entities_involved

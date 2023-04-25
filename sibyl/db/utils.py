@@ -7,9 +7,9 @@ import pandas as pd
 LOGGER = logging.getLogger(__name__)
 
 
-''' =====================================
+""" =====================================
 BASE CLASSES
-========================================'''
+========================================"""
 
 
 class ModelWrapper(ABC):
@@ -60,9 +60,9 @@ class Transformer(ABC):
         return importances
 
 
-'''=====================================
+"""=====================================
 Implementations
-======================================'''
+======================================"""
 
 
 def convert_from_categorical(cat_data, mappings):
@@ -70,7 +70,7 @@ def convert_from_categorical(cat_data, mappings):
     num_rows = cat_data.shape[0]
 
     # List of column names that will be converted to one-hot
-    cat_cols = mappings['name'].values
+    cat_cols = mappings["name"].values
 
     data = {}
     for col in cols:
@@ -78,11 +78,11 @@ def convert_from_categorical(cat_data, mappings):
             data[col] = cat_data[col]
         if col in cat_cols:
             values = cat_data[col].astype(str)
-            relevant_rows = mappings[mappings['name'] == col]
+            relevant_rows = mappings[mappings["name"] == col]
             for ind in relevant_rows.index:
-                new_col_name = relevant_rows['original_name'][ind]
+                new_col_name = relevant_rows["original_name"][ind]
                 data[new_col_name] = np.zeros(num_rows)
-                data[new_col_name][np.where(values == relevant_rows['value'][ind])] = 1
+                data[new_col_name][np.where(values == relevant_rows["value"][ind])] = 1
     return pd.DataFrame(data)
 
 
@@ -147,4 +147,3 @@ class MappingsTransformer(ABC):
 
     def transform_contributions(self, contributions):
         return combine_contributions_from_mappings(contributions, self.mappings)
-
