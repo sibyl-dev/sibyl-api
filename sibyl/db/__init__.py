@@ -6,8 +6,4 @@ Orion Database usage.
 from sibyl.db import schema, utils
 from sibyl.db.explorer import DBExplorer
 
-__all__ = (
-    'DBExplorer',
-    'schema',
-    'utils'
-)
+__all__ = ("DBExplorer", "schema", "utils")

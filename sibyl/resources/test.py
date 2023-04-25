@@ -12,11 +12,7 @@ class Test(Resource):
         Refer to ./apidocs/resources/test/get.yml
         """
 
-        return {
-            'code': 200,
-            'message': 'GET test succeeded',
-            'data': request.args
-        }, 200
+        return {"code": 200, "message": "GET test succeeded", "data": request.args}, 200
 
     def post(self):
         """
@@ -24,9 +20,9 @@ class Test(Resource):
         """
 
         return {
-            'code': 200,
-            'message': 'POST test succeeded',
-            'data': request.json
+            "code": 200,
+            "message": "POST test succeeded",
+            "data": request.json,
         }, 200
 
     def delete(self):
@@ -34,10 +30,7 @@ class Test(Resource):
         Refer to ./apidocs/resources/test/delete.yml
         """
 
-        return {
-            'code': 200,
-            'message': 'DELETE test succeeded'
-        }, 200
+        return {"code": 200, "message": "DELETE test succeeded"}, 200
 
     def put(self):
         """
@@ -45,13 +38,10 @@ class Test(Resource):
         """
 
         data = request.json
-        if (type(data['item1']) != str) or (type(data['item2']) != str):
+        if (type(data["item1"]) != str) or (type(data["item2"]) != str):
             return {
-                'code': 400,
-                'message': 'invalid arguments - item1 & item2 should be string'
+                "code": 400,
+                "message": "invalid arguments - item1 & item2 should be string",
             }
 
-        return {
-            'code': 200,
-            'message': 'PUT test succeeded'
-        }, 200
+        return {"code": 200, "message": "PUT test succeeded"}, 200

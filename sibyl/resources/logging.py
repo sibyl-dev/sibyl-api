@@ -7,8 +7,14 @@ from sibyl import g
 
 LOGGER = logging.getLogger(__name__)
 
-log_headers = ["timestamp", "user_id", "eid", "event_element",
-               "event_action", "event_details"]
+log_headers = [
+    "timestamp",
+    "user_id",
+    "eid",
+    "event_element",
+    "event_action",
+    "event_details",
+]
 
 
 def format_message(event):
@@ -56,7 +62,7 @@ class Logging(Resource):
             user_id = str(user_id)
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 400
+            return {"message": str(e)}, 400
 
         eid = body.get("eid")
         if eid is None:
@@ -65,28 +71,28 @@ class Logging(Resource):
             eid = str(eid)
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 400
+            return {"message": str(e)}, 400
 
         timestamp = body.get("timestamp")
         if timestamp is None:
-            LOGGER.exception('Must provide timestamp to log')
-            return {'Must provide timestamp to log'}, 400
+            LOGGER.exception("Must provide timestamp to log")
+            return {"Must provide timestamp to log"}, 400
         try:
             timestamp = int(timestamp)
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 400
+            return {"message": str(e)}, 400
 
         event = body.get("event")
         if event is None:
-            LOGGER.exception('Must provide event to log')
-            return {'Must provide event to log'}, 400
+            LOGGER.exception("Must provide event to log")
+            return {"Must provide event to log"}, 400
         if "element" not in event:
-            LOGGER.exception('Event must have element')
-            return {'Event must have element'}, 400
+            LOGGER.exception("Event must have element")
+            return {"Event must have element"}, 400
         if "action" not in event:
-            LOGGER.exception('Event must have action')
-            return {'Event must have action'}, 400
+            LOGGER.exception("Event must have action")
+            return {"Event must have action"}, 400
 
         event_element = event["element"]
         event_action = event["action"]
@@ -95,15 +101,15 @@ class Logging(Resource):
         else:
             event_details = ""
 
-        full_message = {"user_id": user_id,
-                        "eid": eid,
-                        "timestamp": timestamp,
-                        "event_element": event_element,
-                        "event_action": event_action,
-                        "event_details": event_details
-                        }
-
-        log_file = g['config']["log_filename"]
+        full_message = {
+            "user_id": user_id,
+            "eid": eid,
+            "timestamp": timestamp,
+            "event_element": event_element,
+            "event_action": event_action,
+            "event_details": event_details,
+        }
+        log_file = g["config"]["log_filename"]
         try:
             with open(log_file, "a+") as f:
                 if f.tell() == 0:
@@ -112,6 +118,6 @@ class Logging(Resource):
                 f.write(format_message(full_message))
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 400
+            return {"message": str(e)}, 400
 
         return {"message": "log successful"}, 200

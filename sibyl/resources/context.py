@@ -9,17 +9,17 @@ LOGGER = logging.getLogger(__name__)
 
 def get_context(context_doc):
     context = {
-        'id': str(context_doc.id),
-        'terms': context_doc.terms,
-        'pos_color': context_doc.pos_color,
-        'neg_color': context_doc.neg_color,
+        "id": str(context_doc.id),
+        "terms": context_doc.terms,
+        "pos_color": context_doc.pos_color,
+        "neg_color": context_doc.neg_color,
     }
     return context
 
 
 def get_context_id(context_doc):
     context = {
-        'id': str(context_doc.id),
+        "id": str(context_doc.id),
     }
     return context
 
@@ -55,11 +55,10 @@ class Context(Resource):
         """
         context = schema.Context.find_one(id=str(context_id))
         if context is None:
-            LOGGER.exception('Error getting context. '
-                             'Context %s does not exist.', context_id)
+            LOGGER.exception("Error getting context. Context %s does not exist.", context_id)
             return {
-                'message': 'Context {} does not exist'.format(context_id),
-                'code': 400
+                "message": "Context {} does not exist".format(context_id),
+                "code": 400,
             }, 400
 
         return get_context(context), 200
@@ -98,6 +97,6 @@ class Contexts(Resource):
             contexts = [get_context_id(document) for document in documents]
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 500
+            return {"message": str(e)}, 500
         else:
-            return {'contexts': contexts}, 200
+            return {"contexts": contexts}, 200

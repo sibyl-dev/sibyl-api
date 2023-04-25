@@ -1,7 +1,9 @@
-from pyreal.sample_applications import ames_housing
-from pyreal import RealApp
-import pickle
 import os
+import pickle
+
+from pyreal import RealApp
+from pyreal.sample_applications import ames_housing
+
 from sibyl.utils import get_project_root
 
 DIRECTORY = os.path.join(get_project_root(), "dbdata", "housing")
