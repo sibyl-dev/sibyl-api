@@ -18,7 +18,7 @@ def get_rows_by_output(output, predict, x, row_labels=None):
             The indices or row_labels of the rows of x that result in output
             when run through predict
     """
-    preds_train = predict(x)
+    preds_train = list(predict(x).values())
     if np.isscalar(output):
         output = [output]
     xs_of_interest = np.isin(preds_train, output)

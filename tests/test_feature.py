@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """Tests for `sibylapp` package."""
+import json
 
 
 def test_get_categories(client, categories):

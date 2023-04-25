@@ -282,7 +282,7 @@ class FeatureDistributions(Resource):
         model_id = d["model_id"]
 
         # CHECK FOR PRECOMPUTED VALUES
-        distribution_filepath = g['config']["mongodb"]['feature_distribution_location']
+        distribution_filepath = g['config']['feature_distribution_location']
         if distribution_filepath is not None:
             distribution_filepath = os.path.normpath(distribution_filepath)
             with open(distribution_filepath, 'r') as f:
@@ -290,9 +290,10 @@ class FeatureDistributions(Resource):
             return {"distributions": all_distributions[str(prediction)]['distributions']}
 
         # LOAD IN AND VALIDATE MODEL DATA
-        success, payload = helpers.load_model(model_id, include_dataset=True)
+        success, payload = helpers.load_model(model_id, include_explainer=True,
+                                              include_dataset=True)
         if success:
-            model, dataset = payload
+            model, dataset, explainer = payload
         else:
             message, error_code = payload
             return message, error_code
@@ -313,7 +314,7 @@ class FeatureDistributions(Resource):
         numeric_dataset = dataset[numeric_features]
 
         distributions = {}
-        rows = ge.get_rows_by_output(prediction, model.predict, dataset,
+        rows = ge.get_rows_by_output(prediction, explainer.predict, dataset,
                                      row_labels=None)
         if len(rows) == 0:
             LOGGER.exception('No data with that prediction: %s', prediction)
@@ -378,14 +379,14 @@ class PredictionCount(Resource):
                     all_distributions[str(prediction)]["total cases"]}
 
         # LOAD IN AND VALIDATE MODEL DATA
-        success, payload = helpers.load_model(model_id, include_dataset=True)
+        success, payload = helpers.load_model(model_id, include_explainer=True, include_dataset=True)
         if success:
-            model, dataset = payload
+            model, dataset, explainer = payload
         else:
             message, error_code = payload
             return message, error_code
 
-        rows = ge.get_rows_by_output(prediction, model.predict, dataset,
+        rows = ge.get_rows_by_output(prediction, explainer.predict, dataset,
                                      row_labels=None)
 
         count = len(rows)
