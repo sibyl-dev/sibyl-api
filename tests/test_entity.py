@@ -56,19 +56,19 @@ def test_get_events(client, entities):
         assert found
 
 
-def test_get_referrals(client, referrals):
-    response = client.get('/api/v1/referrals/').json
-    assert response["referrals"] == [referral["referral_id"] for referral in referrals]
+def test_get_groups(client, groups):
+    response = client.get('/api/v1/groups/').json
+    assert response["groups"] == [group["group_id"] for group in groups]
 
 
-def test_get_referral(client, referrals):
-    referral = referrals[0]
-    response = client.get('/api/v1/referrals/' + referral["referral_id"] + "/").json
-    assert response == referral
+def test_get_group(client, groups):
+    group = groups[0]
+    response = client.get('/api/v1/groups/' + group["group_id"] + "/").json
+    assert response == group
 
 
-def test_entities_in_referral(client):
-    referral_id = "101"
+def test_entities_in_group(client):
+    group_id = "101"
     entities_involved = ["ent1", "ent2"]
-    response = client.get('/api/v1/entities/?referral_id=' + referral_id).json
+    response = client.get('/api/v1/entities/?group_id=' + group_id).json
     assert response == entities_involved

@@ -7,7 +7,9 @@ import pytest
 from mongoengine import connect
 from mongoengine.connection import disconnect
 from pymongo import MongoClient
-from pyreal.explainers import LocalFeatureContribution
+from pyreal import RealApp
+from pyreal.transformers import Transformer
+from pyreal.types.explanations.feature_based import FeatureContributionExplanation
 from sklearn.linear_model import LinearRegression
 
 from sibyl.core import Sibyl
@@ -18,8 +20,16 @@ test_host = "localhost"
 test_port = 27017
 
 
+class TestTransformer(Transformer):
+    def data_transform(self, x):
+        return x[["A", "B", "C"]]
+
+    def inverse_transform_explanation(self, explanation):
+        return FeatureContributionExplanation(explanation.get()[["A", "B", "C"]])
+
+
 @pytest.fixture(scope="session")
-def app():
+def client():
     config = {"mongodb": {"db": test_database_name,
               "host": test_host,
               "port": test_port,
@@ -30,7 +40,7 @@ def app():
               "flask":{}}
     explorer = Sibyl(config, docker=False)
     app = explorer._init_flask_app('test')
-    return app
+    return app.test_client()
 
 
 @pytest.fixture(scope="session")
@@ -76,9 +86,9 @@ def entities():
                    "bin_feat": False}
     features3 = {"A": 2, "B": 5, "C": 4, "num_feat": 5, "cat_feat": "something", "bin_feat": False}
 
-    entities = [{"eid": "ent1", "property": {"referral_ids": ["101", "102"]},
+    entities = [{"eid": "ent1", "property": {"group_ids": ["101", "102"]},
                  "features": features1, "events": [events[0], events[1]]},
-                {"eid": "ent2", "property": {"referral_ids": ["101"]}, "features": features1_b},
+                {"eid": "ent2", "property": {"group_ids": ["101"]}, "features": features1_b},
                 {"eid": "ent3", "property": {"name": "First Last"}, "features": features2},
                 {"eid": "ent4", "property": {"name": "First Last"}, "features": features2_b},
                 {"eid": "ent5", "features": features3, "events": [events[2]]}]
@@ -86,20 +96,9 @@ def entities():
 
 
 @pytest.fixture(scope="session")
-def referrals():
-    referrals = [{"referral_id": "101", "property": {"date": "today"}}, {"referral_id": "102"}]
-    return referrals
-
-
-class TestTransformer:
-    def fit(self):
-        return self
-
-    def transform(self, x):
-        return x[["A", "B", "C"]]
-
-    def transform_contributions(self, contributions):
-        return contributions[["A", "B", "C"]]
+def groups():
+    groups = [{"group_id": "101", "property": {"date": "today"}}, {"group_id": "102"}]
+    return groups
 
 
 @pytest.fixture(scope="session")
@@ -112,18 +111,13 @@ def models():
     model.intercept_ = 0
     model_serial = pickle.dumps(model)
     transformer = TestTransformer()
-    transformer_serial = pickle.dumps(transformer)
 
     dataset = pd.DataFrame(np.random.randint(0, 5, size=(100, 6)), columns=list("ABCDEF"))
 
-    # TODO: Replace with LocalFeatureContribution once LocalFeatureContribution supports
-    #       kernel keyword
-    explainer = LocalFeatureContribution(model, dataset, e_transforms=transformer,
-                                         contribution_transforms=transformer,
-                                         e_algorithm="shap", fit_on_init=True)
+    explainer = RealApp(model, dataset, transformers=transformer)
     explainer_serial = pickle.dumps(explainer)
 
-    models = [{"model": model_serial, "transformer": transformer_serial,
+    models = [{"model": model_serial,
                "name": "test model", "description": "a model", "performance": "does well",
                "importances": {"A": 100, "B": 0, "C": 0, "D": 0, "E": 0, "F": 0},
                "explainer": explainer_serial},
@@ -132,8 +126,9 @@ def models():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def testdb(categories, features, entities, referrals, models):
+def testdb(categories, features, entities, groups, models):
     client = MongoClient("localhost", 27017)
+    client.drop_database(test_database_name)
     connect(test_database_name, host=test_host, port=test_port)
 
     schema.Category.insert_many(categories)
@@ -154,14 +149,14 @@ def testdb(categories, features, entities, referrals, models):
             item_with_ref["events"] = ref_events
         schema.Entity.insert_many([item_with_ref])  # this line does not appear to work with insert
 
-    schema.Referral.insert_many(referrals)
+    schema.EntityGroup.insert_many(groups)
 
     dataset = schema.TrainingSet.insert(entities=schema.Entity.find())
     for model in models:
         model["training_set"] = dataset
         schema.Model.insert(**model)
 
-    yield
+    yield client
 
     client.drop_database(test_database_name)
     disconnect()
