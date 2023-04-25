@@ -1,8 +1,35 @@
-name: Test CI
+name: Test Python
 
 on:
-  pull_request:
+  workflow_call:
 
 jobs:
   test:
-    uses: sibyl-dev/.github/.github/workflows/python-test.yml@main
+    strategy:
+      fail-fast: true
+      matrix:
+        os: ["ubuntu-latest", "windows-latest"]
+        python-version: ["3.8", "3.9", "3.10"]
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
+
+      - name: Install Dependencies
+        if: steps.cache-primes.outputs.cache-hit != 'true' # Only run if the cache is old
+        run: poetry install --no-interaction -E examples
+
+      - name: Lint
+        run: poetry run invoke lint
