@@ -227,10 +227,12 @@ def insert_model(
             explainer = RealApp(model, transformers=transformers)
         else:
             explainer = RealApp(model, transformers=transformers)
-        explainer.prepare_feature_contributions(model_id=0, shap_type=shap_type,
-                                                x_train_orig=train_dataset, y_train=targets)
-        explainer.prepare_feature_importance(model_id=0, shap_type=shap_type,
-                                             x_train_orig=train_dataset, y_train=targets)
+        explainer.prepare_feature_contributions(
+            model_id=0, shap_type=shap_type, x_train_orig=train_dataset, y_train=targets
+        )
+        explainer.prepare_feature_importance(
+            model_id=0, shap_type=shap_type, x_train_orig=train_dataset, y_train=targets
+        )
         explainer_serial = pickle.dumps(explainer)
 
     items = {
