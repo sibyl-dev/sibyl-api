@@ -6,7 +6,7 @@ import json
 
 
 def test_get_categories(client, categories):
-    response = client.get('/api/v1/categories/').json
+    response = client.get("/api/v1/categories/").json
 
     for expected_item in categories:
         found = False
@@ -22,7 +22,7 @@ def test_get_categories(client, categories):
 
 
 def test_get_features(client, features):
-    response = client.get('/api/v1/features/').json
+    response = client.get("/api/v1/features/").json
 
     for expected_item in features:
         found = False
@@ -39,9 +39,9 @@ def test_get_features(client, features):
 
 def test_get_feature(client, features):
     feature = features[0]
-    response = client.get('/api/v1/features/' + feature['name'] + "/").json
-    assert response['name'] == feature['name']
-    assert response['description'] == feature['description']
-    assert response['negated_description'] == feature['negated_description']
-    assert response['category'] == feature['category']
-    assert response['type'] == response['type']
+    response = client.get("/api/v1/features/" + feature["name"] + "/").json
+    assert response["name"] == feature["name"]
+    assert response["description"] == feature["description"]
+    assert response["negated_description"] == feature["negated_description"]
+    assert response["category"] == feature["category"]
+    assert response["type"] == response["type"]

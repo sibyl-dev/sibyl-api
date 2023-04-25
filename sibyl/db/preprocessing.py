@@ -5,16 +5,22 @@ import sys
 
 import numpy as np
 import pandas as pd
+import yaml
 from mongoengine import connect
 from pymongo import MongoClient
 from pyreal import RealApp
-from pyreal.transformers import run_transformers, MappingsOneHotDecoder, MappingsOneHotEncoder, Mappings, MultiTypeImputer
+from pyreal.transformers import (
+    Mappings,
+    MappingsOneHotDecoder,
+    MappingsOneHotEncoder,
+    MultiTypeImputer,
+    run_transformers,
+)
 from sklearn.linear_model import LinearRegression
-import yaml
-from sibyl.db.utils import ModelWrapperThresholds
 
 import sibyl.global_explanation as ge
 from sibyl.db import schema
+from sibyl.db.utils import ModelWrapperThresholds
 from sibyl.utils import get_project_root
 
 
@@ -41,8 +47,9 @@ def _load_model_from_weights_sklearn(weights_filepath, model_base):
     model_weights = pd.read_csv(weights_filepath)
 
     model = model_base
-    dummy_X = pd.DataFrame(np.zeros((1, model_weights.shape[0] - 1)),
-                           columns=model_weights["weight"][1:])
+    dummy_X = pd.DataFrame(
+        np.zeros((1, model_weights.shape[0] - 1)), columns=model_weights["weight"][1:]
+    )
     dummy_y = np.zeros(1)
     model.fit(dummy_X, dummy_y)
 
@@ -54,30 +61,29 @@ def _load_model_from_weights_sklearn(weights_filepath, model_base):
 def insert_features(filepath):
     features_df = pd.read_csv(filepath)
 
-    if 'category' in features_df:
-        references = [schema.Category.find_one(name=cat) for cat in features_df['category']]
-        features_df = features_df.drop('category', axis='columns')
-        features_df['category'] = references
+    if "category" in features_df:
+        references = [schema.Category.find_one(name=cat) for cat in features_df["category"]]
+        features_df = features_df.drop("category", axis="columns")
+        features_df["category"] = references
 
-    items = features_df.to_dict(orient='records')
+    items = features_df.to_dict(orient="records")
     schema.Feature.insert_many(items)
     return features_df["name"].tolist()
 
 
 def insert_categories(filepath):
     cat_df = pd.read_csv(filepath)
-    items = cat_df.to_dict(orient='records')
+    items = cat_df.to_dict(orient="records")
     schema.Category.insert_many(items)
 
 
 def insert_entity_groups(filepath):
     group_df = pd.read_csv(filepath)
-    items_raw = group_df.to_dict(orient='records')
+    items_raw = group_df.to_dict(orient="records")
     items = []
     for item_raw in items_raw:
-        properties = {key: val for key, val in item_raw.items() if key != 'group_id'}
-        item = {"group_id": str(item_raw["group_id"]),
-                "property": properties}
+        properties = {key: val for key, val in item_raw.items() if key != "group_id"}
+        item = {"group_id": str(item_raw["group_id"]), "property": properties}
         items.append(item)
     schema.EntityGroup.insert_many(items)
 
@@ -89,9 +95,14 @@ def insert_terms(filepath):
     schema.Context.insert(**context_dict)
 
 
-def insert_entities(feature_values_filepath, features_names,
-                    pre_transformers_fp=None, one_hot_decode_fp=None, impute=False,
-                    num=None):
+def insert_entities(
+    feature_values_filepath,
+    features_names,
+    pre_transformers_fp=None,
+    one_hot_decode_fp=None,
+    impute=False,
+    num=None,
+):
     values_df = pd.read_csv(feature_values_filepath)[features_names + ["eid"]]
     transformers = []
     if impute is not None and impute:
@@ -136,16 +147,19 @@ def insert_training_set(eids):
     return set_doc
 
 
-def insert_model(features,
-                 dataset_fp, target,
-                 pickle_model_fp=None,
-                 weights_fp=None,
-                 threshold_fp=None,
-                 one_hot_encode_fp=None,
-                 model_transformers_fp=None,
-                 importance_fp=None,
-                 explainer_fp=None,
-                 shap_type=None):
+def insert_model(
+    features,
+    dataset_fp,
+    target,
+    pickle_model_fp=None,
+    weights_fp=None,
+    threshold_fp=None,
+    one_hot_encode_fp=None,
+    model_transformers_fp=None,
+    importance_fp=None,
+    explainer_fp=None,
+    shap_type=None,
+):
     model_features = features
 
     # Base model options
@@ -156,8 +170,7 @@ def insert_model(features,
     elif weights_fp is not None:
         # Load from list of weights
         print("Loading model from weights")
-        model, model_features = _load_model_from_weights_sklearn(
-            weights_fp, LinearRegression())
+        model, model_features = _load_model_from_weights_sklearn(weights_fp, LinearRegression())
     else:
         raise ValueError("Must provide at least one model format")
 
@@ -187,7 +200,7 @@ def insert_model(features,
     texts = {
         "name": "placeholder",
         "description": "placeholder",
-        "performance": "placeholder"
+        "performance": "placeholder",
     }
     name = texts["name"]
     description = texts["description"]
@@ -197,10 +210,11 @@ def insert_model(features,
         importance_df = pd.read_csv(importance_fp)
         importance_df = importance_df.set_index("name")
     else:
-        raise NotImplementedError("Calculating importances at preprocessing time is not "
-                                  "yet implemented")
+        raise NotImplementedError(
+            "Calculating importances at preprocessing time is not yet implemented"
+        )
 
-    importances = importance_df.to_dict(orient='dict')["importance"]
+    importances = importance_df.to_dict(orient="dict")["importance"]
 
     if explainer_fp is not None:
         print("Loading explainer from file")
@@ -210,11 +224,19 @@ def insert_model(features,
     else:
         # TODO: add additional explainers/allow for multiple algorithms
         if shap_type == "kernel":
-            explainer = RealApp(model, X_train_orig=train_dataset.iloc[0:100],
-                                y_orig=targets.iloc[0:100], transformers=transformers)
+            explainer = RealApp(
+                model,
+                X_train_orig=train_dataset.iloc[0:100],
+                y_orig=targets.iloc[0:100],
+                transformers=transformers,
+            )
         else:
-            explainer = RealApp(model, X_train_orig=train_dataset.iloc[0:100],
-                                y_orig=targets.iloc[0:100], transformers=transformers)
+            explainer = RealApp(
+                model,
+                X_train_orig=train_dataset.iloc[0:100],
+                y_orig=targets.iloc[0:100],
+                transformers=transformers,
+            )
         explainer.prepare_feature_contributions(model_id=0, shap_type=shap_type)
         explainer.prepare_feature_importance(model_id=0, shap_type=shap_type)
         explainer_serial = pickle.dumps(explainer)
@@ -226,22 +248,23 @@ def insert_model(features,
         "performance": performance,
         "importances": importances,
         "explainer": explainer_serial,
-        "training_set": set_doc
+        "training_set": set_doc,
     }
     schema.Model.insert(**items)
     return explainer
 
 
-def generate_feature_distribution_doc(save_path, explainer, target,
-                                      dataset_filepath, features_filepath):
+def generate_feature_distribution_doc(
+    save_path, explainer, target, dataset_filepath, features_filepath
+):
     features = pd.read_csv(features_filepath)
     feature_names = features["name"]
     dataset, targets = _load_data(feature_names, dataset_filepath, target)
 
-    boolean_features = features[features['type'].isin(['binary', 'categorical'])]["name"]
+    boolean_features = features[features["type"].isin(["binary", "categorical"])]["name"]
     dataset_cat = dataset[boolean_features]
 
-    numeric_features = features[features['type'] == 'numeric']["name"]
+    numeric_features = features[features["type"] == "numeric"]["name"]
     dataset_num = dataset[numeric_features]
 
     summary_dict = {}
@@ -260,22 +283,24 @@ def generate_feature_distribution_doc(save_path, explainer, target,
         num_summary = ge.summary_numeric(dataset_num.iloc[rows])
 
         distributions = {}
-        for (i, name) in enumerate(boolean_features):
-            distributions[name] = {"type": "categorical", "metrics": [cat_summary[0][i].tolist(),
-                                                                      cat_summary[1][i].tolist()]}
-        for (i, name) in enumerate(numeric_features):
+        for i, name in enumerate(boolean_features):
+            distributions[name] = {
+                "type": "categorical",
+                "metrics": [cat_summary[0][i].tolist(), cat_summary[1][i].tolist()],
+            }
+        for i, name in enumerate(numeric_features):
             distributions[name] = {"type": "numeric", "metrics": num_summary[i]}
         row_details["distributions"] = distributions
 
         summary_dict[output] = row_details
 
-    with open(save_path, 'w') as f:
+    with open(save_path, "w") as f:
         json.dump(summary_dict, f, indent=4, sort_keys=True)
 
 
 if __name__ == "__main__":
     config_file = sys.argv[1]
-    with open(config_file, 'r') as f:
+    with open(config_file, "r") as f:
         cfg = yaml.safe_load(f)
 
     # Begin database loading ---------------------------
@@ -288,7 +313,7 @@ if __name__ == "__main__":
 
     if cfg["DROP_OLD"]:
         client.drop_database(database_name)
-    connect(database_name, host='localhost', port=27017)
+    connect(database_name, host="localhost", port=27017)
 
     # INSERT CATEGORIES, IF PROVIDED
     if os.path.exists(os.path.join(directory, "categories.csv")):
@@ -305,30 +330,36 @@ if __name__ == "__main__":
     insert_terms(os.path.join(directory, "terms.csv"))
 
     # INSERT ENTITIES
-    eids = insert_entities(os.path.join(directory, "entities.csv"), feature_names,
-                           pre_transformers_fp=_process_fp(cfg["pre_transformers_fn"]),
-                           one_hot_decode_fp=_process_fp(cfg["one_hot_decode_fn"]),
-                           impute=cfg["impute"])
+    eids = insert_entities(
+        os.path.join(directory, "entities.csv"),
+        feature_names,
+        pre_transformers_fp=_process_fp(cfg["pre_transformers_fn"]),
+        one_hot_decode_fp=_process_fp(cfg["one_hot_decode_fn"]),
+        impute=cfg["impute"],
+    )
 
     # INSERT FULL DATASET
     dataset_fp = _process_fp(cfg["dataset_fn"])
     if cfg["include_database"] and os.path.exists(dataset_fp):
-        eids = insert_entities(dataset_fp, feature_names,
-                               num=cfg["num_from_database"])
+        eids = insert_entities(dataset_fp, feature_names, num=cfg["num_from_database"])
     set_doc = insert_training_set(eids)
 
     # INSERT MODEL
     target = cfg["target"]
-    explainer = insert_model(feature_names, dataset_fp, target,
-                             pickle_model_fp=_process_fp(cfg["pickle_model_fn"]),
-                             weights_fp=_process_fp(cfg["weights_fn"]),
-                             threshold_fp=_process_fp(cfg["threshold_fn"]),
-                             importance_fp=_process_fp(cfg["importance_fn"]),
-                             explainer_fp=_process_fp(cfg["explainer_fn"]),
-                             one_hot_encode_fp=_process_fp(cfg["one_hot_encode_fn"]),
-                             shap_type=cfg["shap_type"])
+    explainer = insert_model(
+        feature_names,
+        dataset_fp,
+        target,
+        pickle_model_fp=_process_fp(cfg["pickle_model_fn"]),
+        weights_fp=_process_fp(cfg["weights_fn"]),
+        threshold_fp=_process_fp(cfg["threshold_fn"]),
+        importance_fp=_process_fp(cfg["importance_fn"]),
+        explainer_fp=_process_fp(cfg["explainer_fn"]),
+        one_hot_encode_fp=_process_fp(cfg["one_hot_encode_fn"]),
+        shap_type=cfg["shap_type"],
+    )
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
     # generate_feature_distribution_doc("precomputed/agg_distributions.json", explainer, target,
     #                                   dataset_fp, os.path.join(directory, "features.csv"))
-    #test_validation()
+    # test_validation()

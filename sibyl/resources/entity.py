@@ -10,23 +10,25 @@ LOGGER = logging.getLogger(__name__)
 def get_events(entity_doc):
     events = []
     for event_doc in entity_doc.events:
-        events.append({
-            'event_id': event_doc.event_id,
-            'datetime': str(event_doc.datetime),
-            'type': event_doc.type,
-            'property': event_doc.property
-        })
-    events = {'events': events}
+        events.append(
+            {
+                "event_id": event_doc.event_id,
+                "datetime": str(event_doc.datetime),
+                "type": event_doc.type,
+                "property": event_doc.property,
+            }
+        )
+    events = {"events": events}
     return events
 
 
 def get_entity(entity_doc, features=True):
     entity = {
-        'eid': entity_doc.eid,
-        'property': entity_doc.property,
+        "eid": entity_doc.eid,
+        "property": entity_doc.property,
     }
     if features:
-        entity['features'] = entity_doc.features
+        entity["features"] = entity_doc.features
     return entity
 
 
@@ -81,22 +83,16 @@ class Entity(Resource):
         """
         entity = schema.Entity.find_one(eid=str(eid))
         if entity is None:
-            LOGGER.exception('Error getting entity. '
-                             'Entity %s does not exist.', eid)
-            return {
-                'message': 'Entity {} does not exist'.format(eid),
-                'code': 400
-            }, 400
+            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
+            return {"message": "Entity {} does not exist".format(eid), "code": 400}, 400
 
         return get_entity(entity, features=True), 200
 
 
 class Entities(Resource):
-
     def __init__(self):
         parser_get = reqparse.RequestParser(bundle_errors=True)
-        parser_get.add_argument('group_id', type=str, default=None,
-                                location='args')
+        parser_get.add_argument("group_id", type=str, default=None, location="args")
         self.parser_get = parser_get
 
     def get(self):
@@ -139,38 +135,32 @@ class Entities(Resource):
             args = self.parser_get.parse_args()
         except Exception as e:
             LOGGER.exception(str(e))
-            return {'message', str(e)}, 400
+            return {"message", str(e)}, 400
 
-        group_id = args['group_id']
+        group_id = args["group_id"]
         if group_id is None:
             # no referral filter applied
             documents = schema.Entity.find()
             try:
-                entities = [
-                    get_entity(document, features=False)
-                    for document in documents
-                ]
+                entities = [get_entity(document, features=False) for document in documents]
             except Exception as e:
                 LOGGER.exception(e)
-                return {'message': str(e)}, 500
+                return {"message": str(e)}, 500
             else:
-                return {'entities': entities}
+                return {"entities": entities}
         else:
             # filter entities by referral ID
-            entities = schema.Entity.find(
-                property__group_ids__contains=group_id)
+            entities = schema.Entity.find(property__group_ids__contains=group_id)
             if entities is None:
-                LOGGER.log(20, 'group %s has no entities' % str(group_id))
+                LOGGER.log(20, "group %s has no entities" % str(group_id))
                 return []
             return [document.eid for document in entities], 200
 
 
 class Events(Resource):
-
     def __init__(self):
         parser_get = reqparse.RequestParser(bundle_errors=True)
-        parser_get.add_argument('eid', type=str, required=True,
-                                location='args')
+        parser_get.add_argument("eid", type=str, required=True, location="args")
         self.parser_get = parser_get
 
     def get(self):
@@ -208,14 +198,14 @@ class Events(Resource):
             args = self.parser_get.parse_args()
         except Exception as e:
             LOGGER.exception(str(e))
-            return {'message', str(e)}, 400
+            return {"message", str(e)}, 400
 
-        eid = args['eid']
+        eid = args["eid"]
 
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
-            message = 'message: Entity {} does not exist'.format(eid)
+            message = "message: Entity {} does not exist".format(eid)
             LOGGER.exception(message)
-            return {'message': message, 'code': 400}, 400
+            return {"message": message, "code": 400}, 400
 
         return get_events(entity), 200

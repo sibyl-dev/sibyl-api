@@ -31,11 +31,11 @@ def walk(document, transform):
 
 
 def remove_dots(document):
-    return walk(document, lambda key, value: (key.replace('.', '-'), value))
+    return walk(document, lambda key, value: (key.replace(".", "-"), value))
 
 
 def restore_dots(document):
-    return walk(document, lambda key, value: (key.replace('-', '.'), value))
+    return walk(document, lambda key, value: (key.replace("-", "."), value))
 
 
 def _merge_meta(base, child):
@@ -56,7 +56,7 @@ def _merge_meta(base, child):
             Merged metadata.
     """
     base = copy.deepcopy(base)
-    child.setdefault('abstract', False)
+    child.setdefault("abstract", False)
     for key, value in child.items():
         if isinstance(value, list):
             base.setdefault(key, []).extend(value)
@@ -75,21 +75,23 @@ class SibylMeta(TopLevelDocumentMetaclass):
     """
 
     def __new__(mcs, name, bases, attrs):
-        if 'meta' in attrs:
-            meta = attrs['meta']
+        if "meta" in attrs:
+            meta = attrs["meta"]
             for base in bases:
-                if base is not Document and hasattr(base, '_meta'):
+                if base is not Document and hasattr(base, "_meta"):
                     meta = _merge_meta(base._meta, meta)
 
-            attrs['meta'] = meta
+            attrs["meta"] = meta
 
-        if 'unique_key_fields' in attrs:
-            indexes = attrs.setdefault('meta', {}).setdefault('indexes', [])
-            indexes.append({
-                'fields': attrs['unique_key_fields'],
-                'unique': True,
-                'sparse': True,
-            })
+        if "unique_key_fields" in attrs:
+            indexes = attrs.setdefault("meta", {}).setdefault("indexes", [])
+            indexes.append(
+                {
+                    "fields": attrs["unique_key_fields"],
+                    "unique": True,
+                    "sparse": True,
+                }
+            )
 
         return super().__new__(mcs, name, bases, attrs)
 
@@ -105,12 +107,12 @@ class SibylDocument(Document, metaclass=SibylMeta):
     insert_time = fields.DateTimeField(default=datetime.utcnow)
 
     meta = {
-        'indexes': [
-            '$insert_time',
+        "indexes": [
+            "$insert_time",
         ],
-        'abstract': True,
-        'index_background': True,
-        'auto_create_index': True,
+        "abstract": True,
+        "index_background": True,
+        "auto_create_index": True,
     }
 
     @staticmethod
@@ -126,13 +128,9 @@ class SibylDocument(Document, metaclass=SibylMeta):
     def find(cls, as_df_=False, only_=None, exclude_=None, **kwargs):
         name = cls.__name__.lower()
         if name in kwargs:
-            kwargs['id'] = cls._get_id(kwargs.pop(name))
+            kwargs["id"] = cls._get_id(kwargs.pop(name))
 
-        query = {
-            key: value
-            for key, value in kwargs.items()
-            if value is not None
-        }
+        query = {key: value for key, value in kwargs.items() if value is not None}
         cursor = cls.objects(**query)
         if only_:
             cursor = cursor.only(*only_)
@@ -143,10 +141,9 @@ class SibylDocument(Document, metaclass=SibylMeta):
         if not as_df_:
             return cursor
 
-        df = pd.DataFrame([
-            document.to_mongo()
-            for document in cursor
-        ]).rename(columns={'_id': name + '_id'})
+        df = pd.DataFrame([document.to_mongo() for document in cursor]).rename(
+            columns={"_id": name + "_id"}
+        )
 
         if exclude_:
             for column in exclude_:
@@ -157,19 +154,15 @@ class SibylDocument(Document, metaclass=SibylMeta):
 
     @classmethod
     def get(cls, **kwargs):
-        query = {
-            key: value
-            for key, value in kwargs.items()
-            if value is not None
-        }
+        query = {key: value for key, value in kwargs.items() if value is not None}
         if not query:
-            raise ValueError('Empty queries not supported')
+            raise ValueError("Empty queries not supported")
 
         cursor = cls.find(as_df_=False, **query)
         if not cursor:
-            raise ValueError('No {} found for query {}'.format(cls.__name__, query))
+            raise ValueError("No {} found for query {}".format(cls.__name__, query))
         elif cursor.count() > 1:
-            raise ValueError('Multiple {}s found for query {}'.format(cls.__name__, query))
+            raise ValueError("Multiple {}s found for query {}".format(cls.__name__, query))
 
         return cursor.first()
 
@@ -179,7 +172,7 @@ class SibylDocument(Document, metaclass=SibylMeta):
 
     @classmethod
     def last(cls, **kwargs):
-        return cls.find(**kwargs).order_by('-insert_time').first()
+        return cls.find(**kwargs).order_by("-insert_time").first()
 
     @classmethod
     def insert(cls, **kwargs):
@@ -205,5 +198,5 @@ class SibylDocument(Document, metaclass=SibylMeta):
 def key_has_dollar(d):
     """Recursively check if any key in a dict contains a dollar sign."""
     for k, v in d.items():
-        if k.startswith('$') or (isinstance(v, dict) and key_has_dollar(v)):
+        if k.startswith("$") or (isinstance(v, dict) and key_has_dollar(v)):
             return True

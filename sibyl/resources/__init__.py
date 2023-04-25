@@ -2,16 +2,24 @@
 
 This subpackage contains all the code related to the API Resource usage.
 """
-from sibyl.resources import (computing, entity, feature,
-                             logging, model, test, group, context)
+from sibyl.resources import (
+    computing,
+    context,
+    entity,
+    feature,
+    group,
+    logging,
+    model,
+    test,
+)
 
 __all__ = (
-    'entity',
-    'feature',
-    'model',
-    'computing',
-    'test',
-    'logging',
-    'group.py',
-    'context.py'
+    "entity",
+    "feature",
+    "model",
+    "computing",
+    "test",
+    "logging",
+    "group.py",
+    "context.py",
 )

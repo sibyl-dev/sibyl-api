@@ -9,27 +9,27 @@ LOGGER = logging.getLogger(__name__)
 
 def get_feature(feature_doc):
     feature = {
-        'name': feature_doc.name,
-        'description': feature_doc.description,
-        'type': feature_doc.type,
+        "name": feature_doc.name,
+        "description": feature_doc.description,
+        "type": feature_doc.type,
     }
     # TODO: Prevent this from ever happening from database side
-    if str(feature_doc.negated_description) == 'nan':
-        feature['negated_description'] = None
+    if str(feature_doc.negated_description) == "nan":
+        feature["negated_description"] = None
     else:
-        feature['negated_description'] = feature_doc.negated_description
+        feature["negated_description"] = feature_doc.negated_description
     if feature_doc.category is not None:
-        feature['category'] = feature_doc.category.name
+        feature["category"] = feature_doc.category.name
     else:
-        feature['category'] = None
+        feature["category"] = None
     return feature
 
 
 def get_category(category_doc):
     category = {
-        'name': category_doc.name,
-        'color': category_doc.color,
-        'abbreviation': category_doc.abbreviation
+        "name": category_doc.name,
+        "color": category_doc.color,
+        "abbreviation": category_doc.abbreviation,
     }
     return category
 
@@ -66,10 +66,8 @@ class Feature(Resource):
         """
         feature = schema.Feature.find_one(name=feature_name)
         if feature is None:
-            LOGGER.exception('Error getting feature. '
-                             'Feature %s does not exist.', feature_name)
-            return {'message':
-                    'Feature {} does not exist'.format(feature_name)}, 400
+            LOGGER.exception("Error getting feature. Feature %s does not exist.", feature_name)
+            return {"message": "Feature {} does not exist".format(feature_name)}, 400
 
         return get_feature(feature), 200
 
@@ -107,9 +105,9 @@ class Features(Resource):
             features = [get_feature(document) for document in documents]
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 500
+            return {"message": str(e)}, 500
         else:
-            return {'features': features}, 200
+            return {"features": features}, 200
 
 
 class Categories(Resource):
@@ -145,6 +143,6 @@ class Categories(Resource):
             categories = [get_category(document) for document in documents]
         except Exception as e:
             LOGGER.exception(e)
-            return {'message': str(e)}, 500
+            return {"message": str(e)}, 500
         else:
-            return {'categories': categories}
+            return {"categories": categories}
