@@ -58,6 +58,15 @@ def _load_model_from_weights_sklearn(weights_filepath, model_base):
     return model, model_weights["name"][1:]
 
 
+def _validate_model_and_explainer(explainer, train_dataset):
+    """
+    Run predict and explain processes to make sure everything is working correctly
+    """
+    explainer.predict(train_dataset.iloc[0:2])
+    explainer.produce_feature_contributions(train_dataset.iloc[0:2])
+    print("Model predict and produce validated")
+
+
 def insert_features(filepath):
     features_df = pd.read_csv(filepath)
 
@@ -238,6 +247,9 @@ def insert_model(
         )
         explainer_serial = pickle.dumps(explainer)
 
+    # Check that everything is working correctly
+    _validate_model_and_explainer(explainer, train_dataset)
+
     items = {
         "model": model_serial,
         "name": name,
@@ -303,12 +315,12 @@ if __name__ == "__main__":
     # Begin database loading ---------------------------
     client = MongoClient("localhost", 27017)
     database_name = cfg["database_name"]
-    if cfg["directory"] is None:
+    if cfg.get("directory") is None:
         directory = os.path.join(get_project_root(), "dbdata", database_name)
     else:
         directory = os.path.join(get_project_root(), "dbdata", cfg["directory"])
 
-    if cfg["DROP_OLD"]:
+    if cfg.get("DROP_OLD", False):
         client.drop_database(database_name)
     connect(database_name, host="localhost", port=27017)
 
@@ -330,19 +342,19 @@ if __name__ == "__main__":
     eids = insert_entities(
         os.path.join(directory, "entities.csv"),
         feature_names,
-        pre_transformers_fp=_process_fp(cfg["pre_transformers_fn"]),
-        one_hot_decode_fp=_process_fp(cfg["one_hot_decode_fn"]),
-        impute=cfg["impute"],
+        pre_transformers_fp=_process_fp(cfg.get("pre_transformers_fn")),
+        one_hot_decode_fp=_process_fp(cfg.get("one_hot_decode_fn")),
+        impute=cfg.get("impute", False),
     )
 
     # INSERT FULL DATASET
-    dataset_fp = _process_fp(cfg["dataset_fn"])
-    if cfg["include_database"] and os.path.exists(dataset_fp):
-        eids = insert_entities(dataset_fp, feature_names, num=cfg["num_from_database"])
+    dataset_fp = _process_fp(cfg.get("dataset_fn"))
+    if cfg.get("include_database", False) and os.path.exists(dataset_fp):
+        eids = insert_entities(dataset_fp, feature_names, num=cfg.get("num_from_database"))
     set_doc = insert_training_set(eids)
 
     # INSERT MODEL
-    target = cfg["target"]
+    target = cfg.get("target")
     explainer = insert_model(
         feature_names,
         dataset_fp,
