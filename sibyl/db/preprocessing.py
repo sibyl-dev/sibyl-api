@@ -159,6 +159,7 @@ def insert_model(
     importance_fp=None,
     explainer_fp=None,
     shap_type=None,
+    training_size=None
 ):
     model_features = features
 
@@ -228,10 +229,12 @@ def insert_model(
         else:
             explainer = RealApp(model, transformers=transformers)
         explainer.prepare_feature_contributions(
-            model_id=0, shap_type=shap_type, x_train_orig=train_dataset, y_train=targets
+            model_id=0, shap_type=shap_type, x_train_orig=train_dataset, y_train=targets,
+            training_size=training_size
         )
         explainer.prepare_feature_importance(
-            model_id=0, shap_type=shap_type, x_train_orig=train_dataset, y_train=targets
+            model_id=0, shap_type=shap_type, x_train_orig=train_dataset, y_train=targets,
+            training_size=training_size
         )
         explainer_serial = pickle.dumps(explainer)
 
@@ -344,13 +347,14 @@ if __name__ == "__main__":
         feature_names,
         dataset_fp,
         target,
-        pickle_model_fp=_process_fp(cfg["pickle_model_fn"]),
-        weights_fp=_process_fp(cfg["weights_fn"]),
-        threshold_fp=_process_fp(cfg["threshold_fn"]),
-        importance_fp=_process_fp(cfg["importance_fn"]),
-        explainer_fp=_process_fp(cfg["explainer_fn"]),
-        one_hot_encode_fp=_process_fp(cfg["one_hot_encode_fn"]),
-        shap_type=cfg["shap_type"],
+        pickle_model_fp=_process_fp(cfg.get("pickle_model_fn")),
+        weights_fp=_process_fp(cfg.get("weights_fn")),
+        threshold_fp=_process_fp(cfg.get("threshold_fn")),
+        importance_fp=_process_fp(cfg.get("importance_fn")),
+        explainer_fp=_process_fp(cfg.get("explainer_fn")),
+        one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
+        shap_type=cfg.get("shap_type"),
+        training_size=cfg.get("training_size")
     )
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION

@@ -1799,24 +1799,28 @@ version = "0.4.0"
 description = "Library for evaluating and deploying human readable machine learning explanations."
 category = "dev"
 optional = false
-python-versions = ">=3.8,<3.11"
-files = [
-    {file = "pyreal-0.4.0-py3-none-any.whl", hash = "sha256:48dbd4e05720991c9467d374303948e8aec3c86bc8fe05c58a57914eea3f1d81"},
-    {file = "pyreal-0.4.0.tar.gz", hash = "sha256:ba1834f2a45d6d014aaef301adc91c6bd74e885ac510d24cd7431497a79003aa"},
-]
+python-versions = "^3.8, <3.11"
+files = []
+develop = false
 
 [package.dependencies]
-lime = ">=0.2.0.1,<0.3.0.0"
-matplotlib = ">=3.6.0,<4.0.0"
-numba = ">=0.56.2,<0.57.0"
-numpy = ">=1.23.3,<2.0.0"
-pandas = ">=1.5.0,<2.0.0"
-scikit-learn = ">=1.1.2,<2.0.0"
-seaborn = ">=0.12.2,<0.13.0"
-shap = "0.40.0"
+lime = "^0.2.0.1"
+matplotlib = "^3.6.0"
+numba = "^0.56.2"
+numpy = "^1.23.3"
+pandas = "^1.5.0"
+scikit-learn = "^1.1.2"
+seaborn = "^0.12.2"
+shap = "=0.40.0"
 
 [package.extras]
 examples = ["lightgbm (>=3.3.2,<4.0.0)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/sibyl-dev/pyreal.git"
+reference = "dev"
+resolved_reference = "75a6d81b1ff25611b3d3481c2bffb4aef8ee7823"
 
 [[package]]
 name = "pyrsistent"
@@ -2712,4 +2716,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8, <3.11"
-content-hash = "5a356eac4530aa34a836f02ba1b9c2f0ed3bc4b147f2146ed90a435e24b19fc1"
+content-hash = "b1045b44ac3df1b44c103cd7a4bc8075d4b24537edc8d74f6ee150153ed33cd5"
