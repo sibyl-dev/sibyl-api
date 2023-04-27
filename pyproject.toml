@@ -38,8 +38,8 @@ termcolor = "^2.0.1"
 xgboost = "1.6.2"
 
 [tool.poetry.group.math.dependencies]
-numpy= "^1.23.3"
-pandas= "^1.5.0"
+numpy = "^1.23.3"
+pandas = "^1.5.0"
 
 [tool.poetry.group.web-server.dependencies]
 Flask = "2.2.2"
@@ -55,7 +55,7 @@ mongoengine = "^0.24.2"
 pymongo = "^4.2.0"
 
 [tool.poetry.group.explanations.dependencies]
-pyreal = "0.4.0"
+pyreal = { git = "https://github.com/sibyl-dev/pyreal.git", branch = "dev" }
 
 [tool.poetry.group.dev.dependencies]
 coverage = ">=6.5.0"

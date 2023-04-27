@@ -168,6 +168,7 @@ def insert_model(
     importance_fp=None,
     explainer_fp=None,
     shap_type=None,
+    training_size=None
 ):
     model_features = features
 
@@ -232,22 +233,15 @@ def insert_model(
             explainer = pickle.loads(explainer_serial)
     else:
         # TODO: add additional explainers/allow for multiple algorithms
-        if shap_type == "kernel":
-            explainer = RealApp(
-                model,
-                X_train_orig=train_dataset.iloc[0:100],
-                y_orig=targets.iloc[0:100],
-                transformers=transformers,
-            )
-        else:
-            explainer = RealApp(
-                model,
-                X_train_orig=train_dataset.iloc[0:100],
-                y_orig=targets.iloc[0:100],
-                transformers=transformers,
-            )
-        explainer.prepare_feature_contributions(model_id=0, shap_type=shap_type)
-        explainer.prepare_feature_importance(model_id=0, shap_type=shap_type)
+        explainer = RealApp(model, transformers=transformers)
+        explainer.prepare_feature_contributions(
+            model_id=0, shap_type=shap_type, x_train_orig=train_dataset, y_train=targets,
+            training_size=training_size
+        )
+        explainer.prepare_feature_importance(
+            model_id=0, shap_type=shap_type, x_train_orig=train_dataset, y_train=targets,
+            training_size=training_size
+        )
         explainer_serial = pickle.dumps(explainer)
 
     # Check that everything is working correctly
@@ -369,6 +363,7 @@ if __name__ == "__main__":
         explainer_fp=_process_fp(cfg.get("explainer_fn")),
         one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
         shap_type=cfg.get("shap_type"),
+        training_size=cfg.get("training_size")
     )
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
