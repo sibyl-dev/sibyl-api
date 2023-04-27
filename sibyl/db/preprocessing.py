@@ -216,16 +216,6 @@ def insert_model(
     description = texts["description"]
     performance = texts["performance"]
 
-    if importance_fp is not None:
-        importance_df = pd.read_csv(importance_fp)
-        importance_df = importance_df.set_index("name")
-    else:
-        raise NotImplementedError(
-            "Calculating importances at preprocessing time is not yet implemented"
-        )
-
-    importances = importance_df.to_dict(orient="dict")["importance"]
-
     if explainer_fp is not None:
         print("Loading explainer from file")
         with open(explainer_fp, "rb") as f:
@@ -246,6 +236,17 @@ def insert_model(
 
     # Check that everything is working correctly
     _validate_model_and_explainer(explainer, train_dataset)
+
+    if importance_fp is not None:
+        importance_df = pd.read_csv(importance_fp)
+        importance_df = importance_df.set_index("name")
+    else:
+        importance_dict = explainer.produce_feature_importance()
+        importance_df = pd.DataFrame.from_dict(importance_dict)
+        importance_df = importance_df.rename(columns={"Feature Name": "name", "Importance": "importance"})
+        importance_df.set_index("name")
+
+    importances = importance_df.to_dict(orient="dict")["importance"]
 
     items = {
         "model": model_serial,

@@ -24,8 +24,6 @@ impute: True
 target: "SalePrice"
 # filename of pickled model
 pickle_model_fn: "model.pkl"
-# filename of csv with pretrained importances
-importance_fn: "importances.csv"
 # filename of pickled explainer
 explainer_fn: "explainer.pkl"
 # shap type to use for explainer if not provided
