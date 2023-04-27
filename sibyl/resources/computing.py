@@ -79,7 +79,10 @@ class SingleChangePredictions(Resource):
             d["model_id"] = str(d["model_id"])
             for change in d["changes"]:
                 change[0] = str(change[0])
-                change[1] = float(change[1])
+                try:
+                    change[1] = float(change[1])
+                except:
+                    pass
                 if schema.Feature.find_one(name=change[0]) is None:
                     LOGGER.exception("Invalid feature %s" % change[0])
                     return {"message": "Invalid feature {}".format(change[0])}, 400
@@ -195,7 +198,10 @@ class ModifiedPrediction(Resource):
             d["model_id"] = str(d["model_id"])
             for change in d["changes"]:
                 change[0] = str(change[0])
-                change[1] = float(change[1])
+                try:
+                    change[1] = float(change[1])
+                except:
+                    pass
                 if schema.Feature.find_one(name=change[0]) is None:
                     LOGGER.exception("Invalid feature %s" % change[0])
                     return {"message": "Invalid feature {}".format(change[0])}, 400
