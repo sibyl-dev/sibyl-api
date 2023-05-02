@@ -364,7 +364,7 @@ if __name__ == "__main__":
         dataset_fp,
         target,
         pickle_model_fp=_process_fp(cfg.get("pickle_model_fn")),
-        xgboost_model_fn=_process_fp(cfg.get("xgboost_model_fn")),
+        xgboost_model_fp=_process_fp(cfg.get("xgboost_model_fn")),
         weights_fp=_process_fp(cfg.get("weights_fn")),
         threshold_fp=_process_fp(cfg.get("threshold_fn")),
         importance_fp=_process_fp(cfg.get("importance_fn")),
