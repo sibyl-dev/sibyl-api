@@ -2,6 +2,7 @@ import json
 import os
 import pickle
 import sys
+import xgboost
 
 import numpy as np
 import pandas as pd
@@ -161,6 +162,7 @@ def insert_model(
     dataset_fp,
     target,
     pickle_model_fp=None,
+    xgboost_model_fp=None,
     weights_fp=None,
     threshold_fp=None,
     one_hot_encode_fp=None,
@@ -168,15 +170,19 @@ def insert_model(
     importance_fp=None,
     explainer_fp=None,
     shap_type=None,
-    training_size=None
+    training_size=None,
 ):
     model_features = features
 
     # Base model options
     if pickle_model_fp is not None:
         # Load from pickle file
-        print("Loading model from pickle file.")
+        print("Loading model from pickle file")
         model = pickle.load(open(pickle_model_fp, "rb"))
+    elif xgboost_model_fp is not None:
+        print("Loading xgboost model")
+        model = xgboost.Booster()
+        model.load_model(xgboost_model_fp)
     elif weights_fp is not None:
         # Load from list of weights
         print("Loading model from weights")
@@ -358,13 +364,14 @@ if __name__ == "__main__":
         dataset_fp,
         target,
         pickle_model_fp=_process_fp(cfg.get("pickle_model_fn")),
+        xgboost_model_fn=_process_fp(cfg.get("xgboost_model_fn")),
         weights_fp=_process_fp(cfg.get("weights_fn")),
         threshold_fp=_process_fp(cfg.get("threshold_fn")),
         importance_fp=_process_fp(cfg.get("importance_fn")),
         explainer_fp=_process_fp(cfg.get("explainer_fn")),
         one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
         shap_type=cfg.get("shap_type"),
-        training_size=cfg.get("training_size")
+        training_size=cfg.get("training_size"),
     )
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
