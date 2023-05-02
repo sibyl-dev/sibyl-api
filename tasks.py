@@ -145,6 +145,11 @@ def test(context):
     except subprocess.CalledProcessError:
         failures_in.append("Unit tests")
 
+    try:
+        test_scripts(context)
+    except subprocess.CalledProcessError:
+        failures_in.append("Testing scripts")
+
     if len(failures_in) == 0:
         print_green("\nAll tests successful :)")
     else:
@@ -158,6 +163,14 @@ def test_unit(context):
     Runs all unit tests and outputs results and coverage
     """
     subprocess.run(["pytest", "--cov=sibyl"], check=True)
+
+@task
+def test_scripts(context):
+    """
+    Runs all scripts in the tutorials directory and checks for exceptions
+    """
+
+    subprocess.run(["pytest", "--nbmake", "./sibyl/test_apis_on_database.ipynb"], check=True)
 
 
 @ task
