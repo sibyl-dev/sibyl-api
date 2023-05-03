@@ -30,7 +30,7 @@ Sibylapp is an online interactive tool built on the top of Sibyl (python library
 
 ## Requirements
 
-**Sibyl-API** has been developed and tested on [Python 3.8, 3.9, and 3.10](https://www.python.org/downloads/)
+**Sibyl-API** has been developed and tested on [Python 3.8, 3.9, and 3.10](https://www.python.org/downloads/), and on [MongoDB version 6](https://www.mongodb.com/try/download/community).
 
 This library uses Poetry for package management.
 
@@ -66,14 +66,14 @@ Load the housing dataset into MongoDB by running the preprocessing script with `
 ```bash
 poetry run python sibyl/db/preprocessing.py sibyl/sample_applications/housing_config.yml
 ```
-Make sure mongodb.db in `sibyl/config.yml` is set to `housing`, and then run  Sibyl-API with:
+Make sure the `db` parameter under `mongodb` in `sibyl/config.yml` is set to `housing`, and then run  Sibyl-API with:
 ```bash
 poetry run sibyl run -v
 ```
 
 ## Preparing database
 Sibyl-API uses a MongoDB-based database system. You can fill the database using the `preprocessing.py` script by
-following these steps:
+following these steps. Be sure to `start` your mongodb service before using the database.
 
 First, if it doesn't already exist, add a `dbdata` directory in the top-level `sibyl-api` directory.
 
