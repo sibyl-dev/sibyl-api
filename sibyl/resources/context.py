@@ -61,7 +61,7 @@ class Context(Resource):
                 "code": 400,
             }, 400
 
-        return get_context(context), 200
+        return {"context": get_context(context)}, 200
 
 
 class Contexts(Resource):

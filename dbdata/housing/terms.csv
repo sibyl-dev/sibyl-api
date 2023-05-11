@@ -1,10 +1,10 @@
 key,term
-positive,beneficial
-negative,detrimental
-feature,factor
-prediction,price
-feature_contributions,details
-counterfactuals,sandbox
-feature_importances,factor importance
-feature_distributions,factor distributions
-contribution,contribution
+Positive,Beneficial
+Negative,Detrimental
+Feature,Factor
+Prediction,Predicted Price
+Feature Contributions,Factor Contributions
+Counterfactuals,Sandbox
+Feature Importance,Factor Importance
+Feature Distributions,Factor Distributions
+Entity,House
