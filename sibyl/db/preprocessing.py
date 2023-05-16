@@ -97,7 +97,7 @@ def insert_entity_groups(filepath):
     schema.EntityGroup.insert_many(items)
 
 
-def insert_terms(filepath):
+def insert_context(filepath):
     context_df = pd.read_csv(filepath)
     items = dict(zip(context_df["key"], context_df["term"]))
     context_dict = {"terms": items}
@@ -334,7 +334,7 @@ if __name__ == "__main__":
         insert_entity_groups(os.path.join(directory, "groups.csv"))
 
     # INSERT CONTEXT
-    insert_terms(os.path.join(directory, "terms.csv"))
+    insert_context(os.path.join(directory, "terms.csv"))
 
     # INSERT ENTITIES
     eids = insert_entities(
