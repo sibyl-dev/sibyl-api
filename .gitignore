@@ -120,3 +120,4 @@ dbdata/*
 !dbdata/housing/*
 sibyl_test/
 screening_log.csv
+sibyl/db/dump/
