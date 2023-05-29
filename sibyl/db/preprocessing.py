@@ -168,7 +168,7 @@ def insert_model(
     importance_fp=None,
     explainer_fp=None,
     shap_type=None,
-    training_size=None
+    training_size=None,
 ):
     model_features = features
 
@@ -225,12 +225,18 @@ def insert_model(
         # TODO: add additional explainers/allow for multiple algorithms
         explainer = RealApp(model, transformers=transformers)
         explainer.prepare_feature_contributions(
-            model_id=0, shap_type=shap_type, x_train_orig=train_dataset, y_train=targets,
-            training_size=training_size
+            model_id=0,
+            shap_type=shap_type,
+            x_train_orig=train_dataset,
+            y_train=targets,
+            training_size=training_size,
         )
         explainer.prepare_feature_importance(
-            model_id=0, shap_type=shap_type, x_train_orig=train_dataset, y_train=targets,
-            training_size=training_size
+            model_id=0,
+            shap_type=shap_type,
+            x_train_orig=train_dataset,
+            y_train=targets,
+            training_size=training_size,
         )
         explainer_serial = pickle.dumps(explainer)
 
@@ -243,7 +249,9 @@ def insert_model(
     else:
         importance_dict = explainer.produce_feature_importance()
         importance_df = pd.DataFrame.from_dict(importance_dict)
-        importance_df = importance_df.rename(columns={"Feature Name": "name", "Importance": "importance"})
+        importance_df = importance_df.rename(
+            columns={"Feature Name": "name", "Importance": "importance"}
+        )
         importance_df.set_index("name")
 
     importances = importance_df.to_dict(orient="dict")["importance"]
@@ -364,7 +372,7 @@ if __name__ == "__main__":
         explainer_fp=_process_fp(cfg.get("explainer_fn")),
         one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
         shap_type=cfg.get("shap_type"),
-        training_size=cfg.get("training_size")
+        training_size=cfg.get("training_size"),
     )
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
