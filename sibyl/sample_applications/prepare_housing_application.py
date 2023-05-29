@@ -1,7 +1,7 @@
 import os
 import pickle
-import pandas as pd
 
+import pandas as pd
 from pyreal import RealApp
 from pyreal.sample_applications import ames_housing
 
@@ -18,8 +18,13 @@ transformers = ames_housing.load_transformers()
 model = ames_housing.load_model()
 
 explainer = RealApp(model, transformers=transformers, id_column="eid")
-explainer.prepare_feature_contributions(x_train_orig=x_orig.drop("eid", axis="columns"), y_train=y_orig)
-explainer.prepare_feature_importance(x_train_orig=x_orig.drop("eid", axis="columns"), y_train=y_orig,)
+explainer.prepare_feature_contributions(
+    x_train_orig=x_orig.drop("eid", axis="columns"), y_train=y_orig
+)
+explainer.prepare_feature_importance(
+    x_train_orig=x_orig.drop("eid", axis="columns"),
+    y_train=y_orig,
+)
 
 pickle.dump(model, open(os.path.join(DIRECTORY, "model.pkl"), "wb"))
 pickle.dump(explainer, open(os.path.join(DIRECTORY, "explainer.pkl"), "wb"))
