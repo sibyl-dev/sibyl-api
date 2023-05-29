@@ -98,7 +98,57 @@ class Models(Resource):
 class Importance(Resource):
     def get(self):
         """
-        Get a Model by ID
+        Get a model feature importance scores
+        ---
+        tags:
+          - model
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: model_id
+            in: path
+            schema:
+              type: string
+            required: true
+            description: ID of the model to get importances for
+        responses:
+          200:
+            description: Feature importance for the model
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    importances:
+                      type: array
+                      items:
+                        importance:
+                            feature:
+                                type: string
+                            importance:
+                                type: float
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/importance-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+        model_id = request.args.get("model_id", None)
+        model = schema.Model.find_one(id=model_id)
+        if model is None:
+            LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
+            return {"message": "Model {} does not exist".format(model_id)}, 400
+
+        importances = model.importances
+        return {"importances": importances}
+
+
+class Contribution(Resource):
+    def get(self):
+        """
+        Get a model feature contribution scores
+            (contributions for each feature across full database)
         ---
         tags:
           - model

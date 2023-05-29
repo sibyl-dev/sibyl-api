@@ -182,6 +182,7 @@ class Model(SibylDocument):
     description = fields.StringField()
     performance = fields.StringField()
     importances = fields.DictField()  # {feature_name:importance}
+    contributions = fields.DictField() # {feauture_name:[contribution1, contribution2, ...]}
 
     explainer = fields.BinaryField()  # trained contribution explainer
     training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)

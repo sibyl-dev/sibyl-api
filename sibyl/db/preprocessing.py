@@ -166,6 +166,7 @@ def insert_model(
     one_hot_encode_fp=None,
     model_transformers_fp=None,
     importance_fp=None,
+    contribution_fp=None,
     explainer_fp=None,
     shap_type=None,
     training_size=None
@@ -246,7 +247,19 @@ def insert_model(
         importance_df = importance_df.rename(columns={"Feature Name": "name", "Importance": "importance"})
         importance_df.set_index("name")
 
+    if contribution_fp is not None:
+        contribution_df = pd.read_csv(contribution_fp)
+        contribution_df = contribution_df.set_index("name").T
+    else:
+        if training_size is not None:
+            contribution_dict = explainer.produce_feature_contributions(train_dataset.sample(training_size))
+        else:
+            contribution_dict = explainer.produce_feature_contributions(train_dataset)
+        contributions = [contribution_dict[eid][["Feature Name", "Contribution"]].set_index("Feature Name") for eid in contribution_dict]
+        contribution_df = pd.concat(contributions, axis=1).T
+
     importances = importance_df.to_dict(orient="dict")["importance"]
+    contributions = contribution_df.to_dict(orient="list")
 
     items = {
         "model": model_serial,
@@ -254,6 +267,7 @@ def insert_model(
         "description": description,
         "performance": performance,
         "importances": importances,
+        "contributions": contributions,
         "explainer": explainer_serial,
         "training_set": set_doc,
     }
