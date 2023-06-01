@@ -221,9 +221,10 @@ def insert_model(
         with open(explainer_fp, "rb") as f:
             explainer_serial = f.read()
             explainer = pickle.loads(explainer_serial)
+            explainer.id_column = "eid"
     else:
         # TODO: add additional explainers/allow for multiple algorithms
-        explainer = RealApp(model, transformers=transformers)
+        explainer = RealApp(model, transformers=transformers, id_column="eid")
         explainer.prepare_feature_contributions(
             model_id=0,
             shap_type=shap_type,

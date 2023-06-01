@@ -551,3 +551,78 @@ class FeatureContributions(Resource):
         keys = list(contributions["Feature Name"])
         contribution_dict = dict(zip(keys, contributions["Contribution"]))
         return {"contributions": contribution_dict}, 200
+
+
+class MultiFeatureContributions(Resource):
+    def post(self):
+        """
+        Get feature contributions for multiple eids
+        ---
+        tags:
+          - computing
+        security:
+          - tokenAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  eids:
+                    type: array
+                    items:
+                        type: string
+                  model_id:
+                    type: string
+                required: ['eids', 'model_id']
+        responses:
+          200:
+            description: Feature contributions
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    contributions:
+                        type: array
+                        items:
+                            type: number
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+
+        # LOAD IN AND CHECK ATTRIBUTES:
+        attrs = ["eids", "model_id"]
+        d = dict()
+        body = request.json
+        for attr in attrs:
+            d[attr] = None
+            if body is not None:
+                d[attr] = body.get(attr)
+            else:
+                if attr in request.form:
+                    d[attr] = request.form[attr]
+
+        eids = d["eids"]
+        model_id = d["model_id"]
+
+        entities = [
+            dict(entity.features, **{"eid": entity.eid})
+            for entity in schema.Entity.objects(eid__in=eids)
+        ]
+        entities = pd.DataFrame(entities)
+        success, payload = helpers.load_model(model_id, include_explainer=True)
+        if success:
+            _, explainer = payload
+        else:
+            message, error_code = payload
+            return message, error_code
+
+        contributions = explainer.produce_feature_contributions(entities)
+        contributions_json = {
+            eid: contributions[eid].set_index("Feature Name").to_json(orient="index")
+            for eid in contributions
+        }
+
+        return {"contributions": contributions_json}, 200

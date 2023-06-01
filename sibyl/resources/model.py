@@ -1,6 +1,8 @@
 import logging
 import pickle
+from json import JSONEncoder
 
+import numpy as np
 import pandas as pd
 from flask import request
 from flask_restful import Resource
@@ -205,3 +207,83 @@ class Prediction(Resource):
 
         prediction = explainer.predict(entity_features)[0].tolist()
         return {"output": prediction}, 200
+
+
+class MultiPrediction(Resource):
+    def post(self):
+        """
+        Get multiple predictions
+        ---
+        tags:
+          - model
+        security:
+          - tokenAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  eids:
+                    type: array
+                    items:
+                        type: string
+                  model_id:
+                    type: string
+                required: ['eids', 'model_id']
+        responses:
+          200:
+            description: Model predictions
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    contributions:
+                        type: array
+                        items:
+                            type: number
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+
+        def numpy_decoder(obj):
+            if isinstance(obj, np.integer):
+                return int(obj)
+            if isinstance(obj, np.floating):
+                return float(obj)
+            if isinstance(obj, np.ndarray):
+                return obj.tolist()
+            return obj
+
+        # LOAD IN AND CHECK ATTRIBUTES:
+        attrs = ["eids", "model_id"]
+        d = dict()
+        body = request.json
+        for attr in attrs:
+            d[attr] = None
+            if body is not None:
+                d[attr] = body.get(attr)
+            else:
+                if attr in request.form:
+                    d[attr] = request.form[attr]
+
+        eids = d["eids"]
+        model_id = d["model_id"]
+
+        entities = [
+            dict(entity.features, **{"eid": entity.eid})
+            for entity in schema.Entity.objects(eid__in=eids)
+        ]
+        entities = pd.DataFrame(entities)
+        success, payload = helpers.load_model(model_id, include_explainer=True)
+        if success:
+            _, explainer = payload
+        else:
+            message, error_code = payload
+            return message, error_code
+
+        predictions = explainer.predict(entities)
+        predictions = {key: numpy_decoder(predictions[key]) for key in predictions}
+        return {"predictions": predictions}, 200
