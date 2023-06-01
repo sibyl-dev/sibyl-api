@@ -1,14 +1,14 @@
 import logging
 import pickle
+from json import JSONEncoder
 
+import numpy as np
 import pandas as pd
 from flask import request
 from flask_restful import Resource
 
 from sibyl import helpers
 from sibyl.db import schema
-from json import JSONEncoder
-import numpy as np
 
 LOGGER = logging.getLogger(__name__)
 
@@ -272,7 +272,10 @@ class MultiPrediction(Resource):
         eids = d["eids"]
         model_id = d["model_id"]
 
-        entities = [dict(entity.features, **{"eid": entity.eid}) for entity in schema.Entity.objects(eid__in=eids)]
+        entities = [
+            dict(entity.features, **{"eid": entity.eid})
+            for entity in schema.Entity.objects(eid__in=eids)
+        ]
         entities = pd.DataFrame(entities)
         success, payload = helpers.load_model(model_id, include_explainer=True)
         if success:
