@@ -42,6 +42,7 @@ def add_routes(app):
     api.add_resource(ctrl.context.Contexts, API_VERSION + "contexts/")
 
     api.add_resource(ctrl.computing.FeatureContributions, API_VERSION + "contributions/")
+    api.add_resource(ctrl.computing.MultiFeatureContributions, API_VERSION + "multi_contributions/")
     api.add_resource(ctrl.computing.FeatureDistributions, API_VERSION + "feature_distributions/")
     api.add_resource(ctrl.computing.PredictionCount, API_VERSION + "prediction_count/")
     api.add_resource(ctrl.computing.OutcomeCount, API_VERSION + "outcome_count/")
