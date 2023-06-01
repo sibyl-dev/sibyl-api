@@ -618,40 +618,5 @@ class MultiFeatureContributions(Resource):
 
         contributions = explainer.produce_feature_contributions(entities)
         contributions_json = {eid: contributions[eid].set_index("Feature Name").to_json(orient="index") for eid in contributions}
-        print(contributions_json)
-        return contributions_json, 200
-        '''
-        # LOAD IN AND VALIDATE ENTITY
 
-        t0 = time.time()
-        entity_values = []
-        for eid in eids:
-            entity_values.append(schema.Entity.find(as_df_=True, eid=eid).features[0])
-        t1 = time.time()
-        print("Loading eids:", t1-t0)
-        entity_values = pd.concat(entity_values, axis=0)
-        print("ENTITY VALUES:", entity_values)
-        t2 = time.time()
-        print("To dataframe:", t2 - t1)
-
-        #entity_values = [pd.DataFrame(schema.Entity.find_one(eid=eid).features, index=[0]) for eid in eids]
-
-        # LOAD IN AND VALIDATE MODEL DATA
-        success, payload = helpers.load_model(model_id, include_explainer=True)
-        if success:
-            model, explainer = payload
-        else:
-            message, error_code = payload
-            return message, error_code
-
-        t3 = time.time()
-        print("Loading model:", t3-t2)
-        print(entity_values)
-        contributions = explainer.produce_feature_contributions(entity_values)
-        t4 = time.time()
-        print("Produce:", t4-t3)
-
-        contributions = {eid: contributions[eid].set_index("Feature Name").to_json(orient="index") for eid in contributions}
-        t5 = time.time()
-        print("Formatting:", t5-t4)
-        return {"contributions": contributions}, 200'''
+        return {"contributions": contributions_json}, 200
