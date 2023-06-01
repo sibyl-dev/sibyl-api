@@ -607,7 +607,7 @@ class MultiFeatureContributions(Resource):
         eids = d["eids"]
         model_id = d["model_id"]
 
-        entities = [entity.features for entity in schema.Entity.objects(eid__in=eids)]
+        entities = [dict(entity.features, **{"eid": entity.eid}) for entity in schema.Entity.objects(eid__in=eids)]
         entities = pd.DataFrame(entities)
         success, payload = helpers.load_model(model_id, include_explainer=True)
         if success:

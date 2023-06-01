@@ -37,6 +37,7 @@ def add_routes(app):
     api.add_resource(ctrl.model.Models, API_VERSION + "models/")
     api.add_resource(ctrl.model.Importance, API_VERSION + "importance/")
     api.add_resource(ctrl.model.Prediction, API_VERSION + "prediction/")
+    api.add_resource(ctrl.model.MultiPrediction, API_VERSION + "multi_prediction/")
 
     api.add_resource(ctrl.context.Context, API_VERSION + "context/<string:context_id>/")
     api.add_resource(ctrl.context.Contexts, API_VERSION + "contexts/")
