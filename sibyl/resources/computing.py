@@ -552,7 +552,7 @@ class FeatureContributions(Resource):
         contribution_dict = dict(zip(keys, contributions["Contribution"]))
         return {"contributions": contribution_dict}, 200
 
-import time
+
 class MultiFeatureContributions(Resource):
     def post(self):
         """
@@ -617,6 +617,9 @@ class MultiFeatureContributions(Resource):
             return message, error_code
 
         contributions = explainer.produce_feature_contributions(entities)
-        contributions_json = {eid: contributions[eid].set_index("Feature Name").to_json(orient="index") for eid in contributions}
+        contributions_json = {
+            eid: contributions[eid].set_index("Feature Name").to_json(orient="index")
+            for eid in contributions
+        }
 
         return {"contributions": contributions_json}, 200

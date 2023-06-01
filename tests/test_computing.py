@@ -3,6 +3,8 @@
 
 """Tests for `sibylapp` package."""
 
+import pandas as pd
+
 from sibyl.db import schema
 
 
@@ -26,6 +28,18 @@ def test_post_contributions(client, models, entities):
     for col in ["num_feat", "cat_feat", "bin_feat"]:
         assert col in contributions
         assert abs(contributions[col]) < 0.0001
+
+
+def test_post_multi_contributions(client, models, entities):
+    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    response = client.post(
+        "/api/v1/multi_contributions/",
+        json={"eids": [entity["eid"] for entity in entities], "model_id": model_id},
+    ).json
+    contributions = response["contributions"]
+    assert len(contributions) == len(entities)
+    for eid in contributions:  # Assert no error
+        pd.read_json(contributions[eid], orient="index")
 
 
 def test_post_feature_distributions(client, models):
