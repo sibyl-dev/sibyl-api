@@ -25,6 +25,11 @@ explainer.prepare_feature_importance(
     x_train_orig=x_orig.drop("eid", axis="columns"),
     y_train=y_orig,
 )
+explainer.prepare_similar_examples(
+    x_train_orig=x_orig.drop("eid", axis="columns"),
+    y_train=y_orig,
+)
 
+print("Dumping model and explainer...")
 pickle.dump(model, open(os.path.join(DIRECTORY, "model.pkl"), "wb"))
 pickle.dump(explainer, open(os.path.join(DIRECTORY, "explainer.pkl"), "wb"))

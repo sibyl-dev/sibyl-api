@@ -239,6 +239,12 @@ def insert_model(
             y_train=targets,
             training_size=training_size,
         )
+        explainer.prepare_similar_examples(
+            model_id=0,
+            x_train_orig=train_dataset,
+            y_train=targets,
+            training_size=training_size,
+        )
         explainer_serial = pickle.dumps(explainer)
 
     # Check that everything is working correctly
