@@ -169,6 +169,7 @@ def insert_model(
     explainer_fp=None,
     shap_type=None,
     training_size=None,
+    impute=None
 ):
     model_features = features
 
@@ -191,7 +192,13 @@ def insert_model(
         thresholds = threshold_df["thresholds"].tolist()
         model = ModelWrapperThresholds(model, thresholds, features=model_features)
 
+    train_dataset, targets = _load_data(features, dataset_fp, target)
     transformers = []
+
+    if impute:
+        imputer = MultiTypeImputer()
+        imputer = imputer.fit(train_dataset)
+        transformers.append(imputer)
 
     if one_hot_encode_fp is not None:
         mappings = pd.read_csv(one_hot_encode_fp)
@@ -202,8 +209,6 @@ def insert_model(
 
     if model_transformers_fp is not None:
         transformers = pickle.load(open(model_transformers_fp, "rb"))
-
-    train_dataset, targets = _load_data(features, dataset_fp, target)
 
     model_serial = pickle.dumps(model)
 
@@ -268,7 +273,6 @@ def insert_model(
         "name": name,
         "description": description,
         "performance": performance,
-        "importances": importances,
         "explainer": explainer_serial,
         "training_set": set_doc,
     }
@@ -380,6 +384,7 @@ if __name__ == "__main__":
         one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
         shap_type=cfg.get("shap_type"),
         training_size=cfg.get("training_size"),
+        impute=cfg.get("impute", False)
     )
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
