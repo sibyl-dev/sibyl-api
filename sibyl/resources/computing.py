@@ -687,14 +687,18 @@ class SimilarEntities(Resource):
             for entity in schema.Entity.objects(eid__in=eids)
         ]
         entities = pd.DataFrame(entities)
-        success, payload = helpers.load_model(model_id, include_explainer=True)
+        success, payload = helpers.load_model(model_id, include_dataset=True,
+                                              include_explainer=True)
         if success:
-            _, explainer = payload
+            _, dataset, explainer = payload
         else:
             message, error_code = payload
             return message, error_code
 
-        similar_entities = explainer.produce_similar_examples(entities)
+        target = schema.Model.find_one(id=model_id).training_set.target
+        y = dataset[target]
+        X = dataset.drop(target, axis=1)
+        similar_entities = explainer.produce_similar_examples(entities, x_train_orig=X, y_orig=y)
         for eid in similar_entities:
             similar_entities[eid]["X"] = similar_entities[eid]["X"].to_json(orient="index")
             similar_entities[eid]["y"] = similar_entities[eid]["y"].to_json(orient="index")

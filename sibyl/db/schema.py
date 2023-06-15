@@ -142,6 +142,7 @@ class TrainingSet(SibylDocument):
     """
 
     entities = fields.ListField(fields.ReferenceField(Entity, reverse_delete_rule=PULL))
+    target = fields.StringField()
     neighbors = fields.BinaryField()  # trained NN classifier
 
     def to_dataframe(self):

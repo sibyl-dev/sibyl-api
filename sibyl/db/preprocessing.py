@@ -148,9 +148,9 @@ def insert_entities(
     return eids
 
 
-def insert_training_set(eids):
+def insert_training_set(eids, target):
     references = [schema.Entity.find_one(eid=str(eid)) for eid in eids]
-    training_set = {"entities": references}
+    training_set = {"entities": references, "target": target}
 
     set_doc = schema.TrainingSet.insert(**training_set)
     return set_doc
@@ -240,12 +240,6 @@ def insert_model(
         explainer.prepare_feature_importance(
             model_id=0,
             shap_type=shap_type,
-            x_train_orig=train_dataset,
-            y_train=targets,
-            training_size=training_size,
-        )
-        explainer.prepare_similar_examples(
-            model_id=0,
             x_train_orig=train_dataset,
             y_train=targets,
             training_size=training_size,
@@ -368,10 +362,10 @@ if __name__ == "__main__":
     dataset_fp = _process_fp(cfg.get("dataset_fn"))
     if cfg.get("include_database", False) and os.path.exists(dataset_fp):
         eids = insert_entities(dataset_fp, feature_names, num=cfg.get("num_from_database"))
-    set_doc = insert_training_set(eids)
+    target = cfg.get("target")
+    set_doc = insert_training_set(eids, target)
 
     # INSERT MODEL
-    target = cfg.get("target")
     explainer = insert_model(
         feature_names,
         dataset_fp,
