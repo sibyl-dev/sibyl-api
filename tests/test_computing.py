@@ -122,3 +122,16 @@ def test_single_change_predictions(client, models, entities):
 
     entity_in_db = client.get("/api/v1/entities/" + entity["eid"] + "/").json
     assert entity_in_db["features"] == entity["features"]
+
+
+def test_post_similar_entities(client, models, entities):
+    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    response = client.post(
+        "/api/v1/similar_entities/",
+        json={"eids": [entity["eid"] for entity in entities], "model_id": model_id},
+    ).json
+    similar_entities = response["similar_entities"]
+    assert len(similar_entities) == len(entities)
+    for eid in similar_entities:  # Assert no error
+        pd.read_json(similar_entities[eid]["X"], orient="index")
+        pd.read_json(similar_entities[eid]["y"], orient="index")
