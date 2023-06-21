@@ -379,8 +379,9 @@ if __name__ == "__main__":
     # INSERT FULL DATASET
     dataset_fp = _process_fp(cfg.get("dataset_fn"))
     if cfg.get("include_database", False) and os.path.exists(dataset_fp):
-        eids = insert_entities(dataset_fp, feature_names, target=cfg.get("target"),
-                               num=cfg.get("num_from_database"))
+        eids = insert_entities(
+            dataset_fp, feature_names, target=cfg.get("target"), num=cfg.get("num_from_database")
+        )
     target = cfg.get("target")
     set_doc = insert_training_set(eids, target)
 
@@ -398,7 +399,7 @@ if __name__ == "__main__":
         shap_type=cfg.get("shap_type"),
         training_size=cfg.get("training_size"),
         impute=cfg.get("impute", False),
-        prefit_nn=cfg.get("prefit_nn", True)
+        prefit_nn=cfg.get("prefit_nn", True),
     )
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
