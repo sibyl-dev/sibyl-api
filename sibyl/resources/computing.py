@@ -687,8 +687,9 @@ class SimilarEntities(Resource):
             for entity in schema.Entity.objects(eid__in=eids)
         ]
         entities = pd.DataFrame(entities)
-        success, payload = helpers.load_model(model_id, include_dataset=True,
-                                              include_explainer=True)
+        success, payload = helpers.load_model(
+            model_id, include_dataset=True, include_explainer=True
+        )
         if success:
             _, dataset, explainer = payload
         else:

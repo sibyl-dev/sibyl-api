@@ -107,12 +107,17 @@ def insert_context(filepath):
 def insert_entities(
     feature_values_filepath,
     features_names,
+    target=None,
     pre_transformers_fp=None,
     one_hot_decode_fp=None,
     impute=False,
     num=None,
 ):
-    values_df = pd.read_csv(feature_values_filepath)[features_names + ["eid"]]
+    if target is not None:
+        features_to_extract = ["eid"] + features_names + target
+    else:
+        features_to_extract = ["eid"] + features_names
+    values_df = pd.read_csv(feature_values_filepath)[features_to_extract]
     transformers = []
     if impute is not None and impute:
         transformer = MultiTypeImputer()
@@ -169,7 +174,7 @@ def insert_model(
     explainer_fp=None,
     shap_type=None,
     training_size=None,
-    impute=None
+    impute=None,
 ):
     model_features = features
 
@@ -361,7 +366,8 @@ if __name__ == "__main__":
     # INSERT FULL DATASET
     dataset_fp = _process_fp(cfg.get("dataset_fn"))
     if cfg.get("include_database", False) and os.path.exists(dataset_fp):
-        eids = insert_entities(dataset_fp, feature_names, num=cfg.get("num_from_database"))
+        eids = insert_entities(dataset_fp, feature_names, target=cfg.get("target"),
+                               num=cfg.get("num_from_database"))
     target = cfg.get("target")
     set_doc = insert_training_set(eids, target)
 
@@ -378,7 +384,7 @@ if __name__ == "__main__":
         one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
         shap_type=cfg.get("shap_type"),
         training_size=cfg.get("training_size"),
-        impute=cfg.get("impute", False)
+        impute=cfg.get("impute", False),
     )
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
