@@ -113,11 +113,11 @@ def insert_entities(
     impute=False,
     num=None,
 ):
-    if target is not None:
-        features_to_extract = ["eid"] + features_names + target
-    else:
-        features_to_extract = ["eid"] + features_names
-    values_df = pd.read_csv(feature_values_filepath)[features_to_extract]
+    values_df = pd.read_csv(feature_values_filepath)
+    features_to_extract = ["eid"] + features_names
+    if target in values_df:
+        features_to_extract += [target]
+    values_df = values_df[features_to_extract]
     transformers = []
     if impute is not None and impute:
         transformer = MultiTypeImputer()
@@ -148,6 +148,9 @@ def insert_entities(
         entity["eid"] = str(raw_entity["eid"])
         del raw_entity["eid"]
         entity["features"] = raw_entity
+        if target in raw_entity:
+            entity["label"] = str(raw_entity[target])
+            del raw_entity[target]
         entities.append(entity)
     schema.Entity.insert_many(entities)
     return eids
@@ -358,6 +361,7 @@ if __name__ == "__main__":
     eids = insert_entities(
         os.path.join(directory, "entities.csv"),
         feature_names,
+        target=cfg.get("target"),
         pre_transformers_fp=_process_fp(cfg.get("pre_transformers_fn")),
         one_hot_decode_fp=_process_fp(cfg.get("one_hot_decode_fn")),
         impute=cfg.get("impute", False),
