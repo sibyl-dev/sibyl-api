@@ -178,6 +178,7 @@ def insert_model(
     shap_type=None,
     training_size=None,
     impute=None,
+    prefit_nn=True,
 ):
     model_features = features
 
@@ -252,6 +253,13 @@ def insert_model(
             y_train=targets,
             training_size=training_size,
         )
+        if prefit_nn:
+            explainer.prepare_similar_examples(
+                model_id=0,
+                x_train_orig=train_dataset,
+                y_train=targets,
+                training_size=training_size,
+            )
         explainer_serial = pickle.dumps(explainer)
 
     # Check that everything is working correctly
@@ -273,6 +281,7 @@ def insert_model(
     items = {
         "model": model_serial,
         "name": name,
+        "importances": importances,
         "description": description,
         "performance": performance,
         "explainer": explainer_serial,
@@ -389,6 +398,7 @@ if __name__ == "__main__":
         shap_type=cfg.get("shap_type"),
         training_size=cfg.get("training_size"),
         impute=cfg.get("impute", False),
+        prefit_nn=cfg.get("prefit_nn", True)
     )
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
