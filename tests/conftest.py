@@ -190,7 +190,7 @@ def models():
     dataset = pd.DataFrame(np.random.randint(0, 5, size=(100, 6)), columns=columns)
     transformer = FeatureSelectTransformer(columns=["A", "B", "C"]).fit(dataset)
 
-    explainer = RealApp(model, dataset, transformers=transformer)
+    explainer = RealApp(model, dataset, transformers=transformer, id_column="eid")
     explainer_serial = pickle.dumps(explainer)
 
     models = [
