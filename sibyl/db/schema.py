@@ -75,6 +75,7 @@ class Entity(SibylDocument):
 
     features = fields.DictField()  # {feature:value}
     property = fields.DictField()  # {property:value}
+    label = fields.StringField()  # ground-truth label, if provided
 
     events = fields.ListField(fields.ReferenceField(Event, reverse_delete_rule=PULL))
 
@@ -142,6 +143,7 @@ class TrainingSet(SibylDocument):
     """
 
     entities = fields.ListField(fields.ReferenceField(Entity, reverse_delete_rule=PULL))
+    target = fields.StringField()
     neighbors = fields.BinaryField()  # trained NN classifier
 
     def to_dataframe(self):
@@ -150,7 +152,9 @@ class TrainingSet(SibylDocument):
         :return: dataframe
         """
         features = [entity.features for entity in self.entities]
+        labels = [entity.label for entity in self.entities]
         training_set_df = pd.DataFrame(features)
+        training_set_df["y"] = labels
         return training_set_df
 
 

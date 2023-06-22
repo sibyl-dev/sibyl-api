@@ -626,3 +626,81 @@ class MultiFeatureContributions(Resource):
         }
 
         return {"contributions": contributions_json}, 200
+
+
+class SimilarEntities(Resource):
+    def post(self):
+        """
+        Get nearest neighbors for list of eids
+        ---
+        tags:
+          - computing
+        security:
+          - tokenAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  eids:
+                    type: array
+                    items:
+                        type: string
+                  model_id:
+                    type: string
+                required: ['eids', 'model_id']
+        responses:
+          200:
+            description: Feature contributions
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    contributions:
+                        type: array
+                        items:
+                            type: number
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+
+        # LOAD IN AND CHECK ATTRIBUTES:
+        attrs = ["eids", "model_id"]
+        d = dict()
+        body = request.json
+        for attr in attrs:
+            d[attr] = None
+            if body is not None:
+                d[attr] = body.get(attr)
+            else:
+                if attr in request.form:
+                    d[attr] = request.form[attr]
+
+        eids = d["eids"]
+        model_id = d["model_id"]
+
+        entities = [
+            dict(entity.features, **{"eid": entity.eid})
+            for entity in schema.Entity.objects(eid__in=eids)
+        ]
+        entities = pd.DataFrame(entities)
+        success, payload = helpers.load_model(
+            model_id, include_dataset=True, include_explainer=True
+        )
+        if success:
+            _, dataset, explainer = payload
+        else:
+            message, error_code = payload
+            return message, error_code
+
+        y = dataset["y"]
+        X = dataset.drop("y", axis=1)
+        similar_entities = explainer.produce_similar_examples(entities, x_train_orig=X, y_train=y)
+        for eid in similar_entities:
+            similar_entities[eid]["X"] = similar_entities[eid]["X"].to_json(orient="index")
+            similar_entities[eid]["y"] = similar_entities[eid]["y"].to_json(orient="index")
+
+        return {"similar_entities": similar_entities}, 200

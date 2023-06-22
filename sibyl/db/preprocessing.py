@@ -107,12 +107,17 @@ def insert_context(filepath):
 def insert_entities(
     feature_values_filepath,
     features_names,
+    target=None,
     pre_transformers_fp=None,
     one_hot_decode_fp=None,
     impute=False,
     num=None,
 ):
-    values_df = pd.read_csv(feature_values_filepath)[features_names + ["eid"]]
+    values_df = pd.read_csv(feature_values_filepath)
+    features_to_extract = ["eid"] + features_names
+    if target in values_df:
+        features_to_extract += [target]
+    values_df = values_df[features_to_extract]
     transformers = []
     if impute is not None and impute:
         transformer = MultiTypeImputer()
@@ -143,14 +148,17 @@ def insert_entities(
         entity["eid"] = str(raw_entity["eid"])
         del raw_entity["eid"]
         entity["features"] = raw_entity
+        if target in raw_entity:
+            entity["label"] = str(raw_entity[target])
+            del raw_entity[target]
         entities.append(entity)
     schema.Entity.insert_many(entities)
     return eids
 
 
-def insert_training_set(eids):
+def insert_training_set(eids, target):
     references = [schema.Entity.find_one(eid=str(eid)) for eid in eids]
-    training_set = {"entities": references}
+    training_set = {"entities": references, "target": target}
 
     set_doc = schema.TrainingSet.insert(**training_set)
     return set_doc
@@ -169,6 +177,8 @@ def insert_model(
     explainer_fp=None,
     shap_type=None,
     training_size=None,
+    impute=None,
+    prefit_nn=True,
 ):
     model_features = features
 
@@ -191,7 +201,13 @@ def insert_model(
         thresholds = threshold_df["thresholds"].tolist()
         model = ModelWrapperThresholds(model, thresholds, features=model_features)
 
+    train_dataset, targets = _load_data(features, dataset_fp, target)
     transformers = []
+
+    if impute:
+        imputer = MultiTypeImputer()
+        imputer = imputer.fit(train_dataset)
+        transformers.append(imputer)
 
     if one_hot_encode_fp is not None:
         mappings = pd.read_csv(one_hot_encode_fp)
@@ -202,8 +218,6 @@ def insert_model(
 
     if model_transformers_fp is not None:
         transformers = pickle.load(open(model_transformers_fp, "rb"))
-
-    train_dataset, targets = _load_data(features, dataset_fp, target)
 
     model_serial = pickle.dumps(model)
 
@@ -239,6 +253,13 @@ def insert_model(
             y_train=targets,
             training_size=training_size,
         )
+        if prefit_nn:
+            explainer.prepare_similar_examples(
+                model_id=0,
+                x_train_orig=train_dataset,
+                y_train=targets,
+                training_size=training_size,
+            )
         explainer_serial = pickle.dumps(explainer)
 
     # Check that everything is working correctly
@@ -260,9 +281,9 @@ def insert_model(
     items = {
         "model": model_serial,
         "name": name,
+        "importances": importances,
         "description": description,
         "performance": performance,
-        "importances": importances,
         "explainer": explainer_serial,
         "training_set": set_doc,
     }
@@ -349,6 +370,7 @@ if __name__ == "__main__":
     eids = insert_entities(
         os.path.join(directory, "entities.csv"),
         feature_names,
+        target=cfg.get("target"),
         pre_transformers_fp=_process_fp(cfg.get("pre_transformers_fn")),
         one_hot_decode_fp=_process_fp(cfg.get("one_hot_decode_fn")),
         impute=cfg.get("impute", False),
@@ -357,11 +379,13 @@ if __name__ == "__main__":
     # INSERT FULL DATASET
     dataset_fp = _process_fp(cfg.get("dataset_fn"))
     if cfg.get("include_database", False) and os.path.exists(dataset_fp):
-        eids = insert_entities(dataset_fp, feature_names, num=cfg.get("num_from_database"))
-    set_doc = insert_training_set(eids)
+        eids = insert_entities(
+            dataset_fp, feature_names, target=cfg.get("target"), num=cfg.get("num_from_database")
+        )
+    target = cfg.get("target")
+    set_doc = insert_training_set(eids, target)
 
     # INSERT MODEL
-    target = cfg.get("target")
     explainer = insert_model(
         feature_names,
         dataset_fp,
@@ -374,6 +398,8 @@ if __name__ == "__main__":
         one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
         shap_type=cfg.get("shap_type"),
         training_size=cfg.get("training_size"),
+        impute=cfg.get("impute", False),
+        prefit_nn=cfg.get("prefit_nn", True),
     )
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
