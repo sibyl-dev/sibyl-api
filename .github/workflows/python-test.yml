@@ -37,6 +37,9 @@ jobs:
         if: steps.cache-primes.outputs.cache-hit != 'true' # Only run if the cache is old
         run: poetry install --no-interaction
 
+      - name: Populate DB
+        run: poetry run invoke load-housing-data
+
       - name: Lint
         run: poetry run invoke lint
 
