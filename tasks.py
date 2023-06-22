@@ -7,8 +7,6 @@ from invoke import task
 from sys import executable
 import os
 
-from pyreal.benchmark import main as benchmark_script
-
 
 def print_red(s):
     print("\033[91m {}\033[00m" .format(s), end="")

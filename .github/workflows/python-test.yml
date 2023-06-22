@@ -33,3 +33,6 @@ jobs:
 
       - name: Lint
         run: poetry run invoke lint
+
+      - name: Test
+        run: poetry run invoke test
