@@ -7,15 +7,13 @@ from invoke import task
 from sys import executable
 import os
 
-from pyreal.benchmark import main as benchmark_script
-
 
 def print_red(s):
-    print("\033[91m {}\033[00m" .format(s), end="")
+    print("\033[91m {}\033[00m".format(s), end="")
 
 
 def print_green(s):
-    print("\033[92m {}\033[00m" .format(s), end="")
+    print("\033[92m {}\033[00m".format(s), end="")
 
 
 def _rm_recursive(path: Path, pattern: str):
@@ -58,7 +56,6 @@ def clean_coverage(context):
 
 @task
 def clean_docs(context):
-
     for path in Path("docs/api").glob("*.rst"):
         path.unlink(missing_ok=True)
 
@@ -128,7 +125,6 @@ def lint(context):
     Runs the linting and import sort process on all library files and tests and prints errors.
         Skips init.py files for import sorts
     """
-    #subprocess.run(["flake8", "sibyl", "tests"], check=True)
     subprocess.run(["isort", "-c", "sibyl", "tests"], check=True)
 
 
@@ -157,12 +153,14 @@ def test(context):
         for i in failures_in:
             print_red(i + ", ")
 
-@ task
+
+@task
 def test_unit(context):
     """
     Runs all unit tests and outputs results and coverage
     """
     subprocess.run(["pytest", "--cov=sibyl"], check=True)
+
 
 @task
 def test_scripts(context):
@@ -173,7 +171,28 @@ def test_scripts(context):
     subprocess.run(["pytest", "--nbmake", "./sibyl/test_apis_on_database.ipynb"], check=True)
 
 
-@ task
+@task
+def load_housing_data(context):
+    """
+    Load the housing sample application into the currently connect mongo database
+    """
+    subprocess.run(
+        ["poetry", "run", "python", "./sibyl/sample_applications/prepare_housing_application.py"],
+        check=True,
+    )
+    subprocess.run(
+        [
+            "poetry",
+            "run",
+            "python",
+            "./sibyl/db/preprocessing.py",
+            "./sibyl/sample_applications/housing_config.yml",
+        ],
+        check=True,
+    )
+
+
+@task
 def view_docs(context):
     """
     Opens the docs in a browser window
