@@ -53,23 +53,34 @@ cd sibyl-api
 poetry install
 ```
 
-Sibyl-API runs using MongoDB. To install, follow the instructions
+Sibyl-API runs using MongoDB, tested for versions 5 and 6. To install, follow the instructions
 [here](https://www.mongodb.com/docs/manual/administration/install-community/).
 
 ## Quickstart
-Follow these steps to get started with the built-in Ames Housing dataset example
-Update the model and explainer if needed by running
+Follow these steps to get started with the built-in Ames Housing dataset example.
+You can prepare and load the Ames Housing dataset by running:
 ```bash
-poetry run python sibyl/sample_applications/prepare_housing_application.py
+poetry run invoke load-housing-data
 ```
-Load the housing dataset into MongoDB by running the preprocessing script with `housing_config.yml`:
+
+Alternatively, you can manually prepare and load the database by running teh following two commands:
 ```bash
-poetry run python sibyl/db/preprocessing.py sibyl/sample_applications/housing_config.yml
+poetry run python sibyl/sample_applications/prepare_housing_application.py   # Prepare model and explainer
+poetry run python sibyl/db/preprocessing.py sibyl/sample_applications/housing_config.yml   # Load in database
 ```
-Make sure the `db` parameter under `mongodb` in `sibyl/config.yml` is set to `housing`, and then run  Sibyl-API with:
+
+You can test your APIs with the housing dataset by running `sibyl/test_apis_on_database.ipynb`.
+You can also automatically run all unit tests and the testing script with:
+```bash
+poetry run invoke test
+```
+
+To run Sibyl-API, make sure the `db` parameter under `mongodb` in `sibyl/config.yml` is set to `housing`, and then run  Sibyl-API with:
 ```bash
 poetry run sibyl run -v
 ```
+
+Once Sibyl-API is running, you can access and test your APIs manually at `localhost:3000/apidocs`
 
 ## Preparing database
 Sibyl-API uses a MongoDB-based database system. You can fill the database using the `preprocessing.py` script by
