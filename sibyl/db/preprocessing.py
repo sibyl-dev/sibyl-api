@@ -259,6 +259,7 @@ def insert_model(
                 x_train_orig=train_dataset,
                 y_train=targets,
                 training_size=training_size,
+                standardize=True
             )
         explainer_serial = pickle.dumps(explainer)
 
