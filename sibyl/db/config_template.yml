@@ -48,4 +48,4 @@ explainer_fn:
 # shap type to use for explainer if not provided
 shap_type: # TODO: make this process smoother
 # If False, do not prefit the similar entities explainer. Reduces objects sizes for database, but increases runtime
-prefit_nn: True
+prefit_se: True

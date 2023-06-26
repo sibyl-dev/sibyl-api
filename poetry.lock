@@ -2977,21 +2977,25 @@ version = "0.4.2"
 description = "Library for evaluating and deploying human readable machine learning explanations."
 category = "main"
 optional = false
-python-versions = ">=3.8,<3.11"
-files = [
-    {file = "pyreal-0.4.2-py3-none-any.whl", hash = "sha256:dd6802e6d121bcb3f873c3ae68e685995ca327f341d3e4260fda035cdf8e6f4f"},
-    {file = "pyreal-0.4.2.tar.gz", hash = "sha256:3ce56ebe03ef561251475827ba5de08dde73b24e2b3ceb4736bcaa2f035ce4f5"},
-]
+python-versions = "^3.8, <3.11"
+files = []
+develop = false
 
 [package.dependencies]
-lime = ">=0.2.0.1,<0.3.0.0"
-matplotlib = ">=3.6.0,<4.0.0"
-numba = ">=0.56.2,<0.57.0"
-numpy = ">=1.23.3,<2.0.0"
+lime = "^0.2.0.1"
+matplotlib = "^3.6.0"
+numba = "^0.56.2"
+numpy = "^1.23.3"
 pandas = ">=1.5,<3.0"
-scikit-learn = ">=1.1.2,<2.0.0"
-seaborn = ">=0.12.2,<0.13.0"
-shap = "0.40.0"
+scikit-learn = "^1.1.2"
+seaborn = "^0.12.2"
+shap = "=0.40.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/sibyl-dev/pyreal"
+reference = "dev"
+resolved_reference = "f8d7a2e83561838baa3f82be0b6a163774d4a567"
 
 [[package]]
 name = "pyrsistent"
@@ -4261,4 +4265,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8, <3.11"
-content-hash = "16288e2736a592d48f7088a356f12f4db5e97e19205ca746205d48403c0706d7"
+content-hash = "a59325120dde254cb784cc1e1ea46dbf945e34a8952f9a36d5954c8ce687b856"

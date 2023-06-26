@@ -30,7 +30,7 @@ sibyl = "sibyl.cli:main"
 python = "^3.8, <3.11"
 
 click = "^8.1.3"
-pyreal = "^0.4.2"
+pyreal = {git = "https://github.com/sibyl-dev/pyreal", rev = "dev"}
 
 [tool.poetry.group.general.dependencies]
 PyYAML= "^6.0"

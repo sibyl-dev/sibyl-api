@@ -698,7 +698,8 @@ class SimilarEntities(Resource):
 
         y = dataset["y"]
         X = dataset.drop("y", axis=1)
-        similar_entities = explainer.produce_similar_examples(entities, x_train_orig=X, y_train=y)
+        similar_entities = explainer.produce_similar_examples(entities, x_train_orig=X, y_train=y,
+                                                              standardize=True)
         for eid in similar_entities:
             similar_entities[eid]["X"] = similar_entities[eid]["X"].to_json(orient="index")
             similar_entities[eid]["y"] = similar_entities[eid]["y"].to_json(orient="index")

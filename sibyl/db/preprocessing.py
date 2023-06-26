@@ -178,7 +178,7 @@ def insert_model(
     shap_type=None,
     training_size=None,
     impute=None,
-    prefit_nn=True,
+    prefit_se=True,
 ):
     model_features = features
 
@@ -253,12 +253,13 @@ def insert_model(
             y_train=targets,
             training_size=training_size,
         )
-        if prefit_nn:
+        if prefit_se:
             explainer.prepare_similar_examples(
                 model_id=0,
                 x_train_orig=train_dataset,
                 y_train=targets,
                 training_size=training_size,
+                standardize=True
             )
         explainer_serial = pickle.dumps(explainer)
 
@@ -399,7 +400,7 @@ if __name__ == "__main__":
         shap_type=cfg.get("shap_type"),
         training_size=cfg.get("training_size"),
         impute=cfg.get("impute", False),
-        prefit_nn=cfg.get("prefit_nn", True),
+        prefit_se=cfg.get("prefit_se", True),
     )
 
     # PRE-COMPUTE DISTRIBUTION INFORMATION
