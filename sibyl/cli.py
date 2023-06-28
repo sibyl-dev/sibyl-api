@@ -23,6 +23,7 @@ def get_parser():
     )
 
     common.add_argument("--docker", action="store_true", help="deployed in docker environment")
+    common.add_argument("--dbhost", action="store", help="deployed in docker environment")
 
     parser = argparse.ArgumentParser(description="sibyl Command Line Interface.")
     parser.set_defaults(function=None)
@@ -53,6 +54,6 @@ def main():
 
     setup_logging(args.verbose, args.logfile)
     config = read_config("./sibyl/config.yml")
-    sibyl = Sibyl(config, args.docker)
+    sibyl = Sibyl(config, args.docker, args.dbhost)
 
     args.function(sibyl, args)

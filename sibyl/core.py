@@ -55,13 +55,15 @@ class Sibyl:
 
         return app
 
-    def __init__(self, conf: dict, docker: bool):
+    def __init__(self, conf: dict, docker: bool, dbhost=None):
         self._conf = conf.copy()
 
         if not docker:
             kargs = {
                 key: conf["mongodb"][key] for key in ["db", "host", "port", "username", "password"]
             }
+            if dbhost is not None:
+                kargs["host"] = dbhost
             self._db = connect(**kargs)
         else:
             kargs = {
