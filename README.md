@@ -140,5 +140,5 @@ poetry run invoke fix-lint
 # Ensure no linting errors remain
 poetry run invoke lint
 ```
-You can also manually run `sibyl/test_apis_on_database.ipynb` on your database(s) to test further.
-5. Once all tests/linting pass, push all code and make a pull request. One all checks pass and the PR has been approved, merge your code and delete the branch.
+5. You can manually run `sibyl/test_apis_on_database.ipynb` on your database(s) to test further.
+6. Once all tests/linting pass, push all code and make a pull request. One all checks pass and the PR has been approved, merge your code and delete the branch.
