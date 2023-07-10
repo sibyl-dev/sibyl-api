@@ -10,14 +10,11 @@
 [![Travis CI Shield](https://travis-ci.org/HDI-Project/sibylapp.svg?branch=master)](https://travis-ci.org/HDI-Project/sibylapp)
 [![Coverage Status](https://codecov.io/gh/HDI-Project/sibylapp/branch/master/graph/badge.svg)](https://codecov.io/gh/HDI-Project/sibylapp)
 
-# sibylapp
+# Sibyl-API
 
-Explanation tool for machine learning
+APIs for explainable ML.
 
-<!-- - Documentation: https://HDI-Project.github.io/sibylapp -->
-
--   The Restful APIs documentation: http://18.223.186.158/
--   Homepage: https://github.com/DAI-Lab/sibylapp
+-   Homepage: https://github.com/sibyl-dev/sibyl-api
 
 # Overview
 
@@ -118,7 +115,30 @@ poetry run sibyl run -v
 Or, to run in development mode:
 ```bash
 poetry shell
+
 sibyl run -E development -v
 ```
 
 You can then access your APIs locally at http://localhost:3000/apidocs
+
+# Contributing Guide
+We appreciate contributions of all kinds! To contribute code to the repo please follow these steps:
+1. Clone and install the library and load in your test database(s) following the instructions above.
+2. Make a new branch off of `dev` with a descriptive name describing your change.
+3. Make changes to that branch, committing and pushing code as you go.
+4. Run the following commands to ensure your code passed required code style guidelines and tests:
+```
+# Run all tests
+poetry run invoke test
+
+# Run unit tests only
+poetry run invoke test-unit
+
+# Fix most linting errors
+poetry run invoke fix-lint
+
+# Ensure no linting errors remain
+poetry run invoke lint
+```
+You can also manually run `sibyl/test_apis_on_database.ipynb` on your database(s) to test further.
+5. Once all tests/linting pass, push all code and make a pull request. One all checks pass and the PR has been approved, merge your code and delete the branch.
