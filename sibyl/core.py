@@ -55,22 +55,28 @@ class Sibyl:
 
         return app
 
-    def __init__(self, conf: dict, docker: bool, dbhost=None):
+    def __init__(self, conf: dict, docker: bool, dbhost=None, dbport=None, db=None):
         self._conf = conf.copy()
 
         if not docker:
             kargs = {
                 key: conf["mongodb"][key] for key in ["db", "host", "port", "username", "password"]
             }
-            if dbhost is not None:
-                kargs["host"] = dbhost
-            self._db = connect(**kargs)
         else:
             kargs = {
                 key: conf["docker"]["mongodb"][key]
                 for key in ["db", "host", "port", "username", "password"]
             }
-            self._db = connect(**kargs)
+        if dbhost is not None:
+            kargs["host"] = dbhost
+        if dbport is not None:
+            if not dbport.isdigit():
+                LOGGER.exception("dbport is not a valid integer")
+                raise ValueError
+            kargs["port"] = int(dbport)
+        if db is not None:
+            kargs["db"] = db
+        self._db = connect(**kargs)
         # TODO - using testing datasets in test env
 
     def run_server(self, env=None, port=None):
