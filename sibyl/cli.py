@@ -22,10 +22,18 @@ def get_parser():
         help="Be verbose. Use -vv for increased verbosity.",
     )
 
-    common.add_argument("--docker", action="store_true", help="deployed in docker environment")
-    common.add_argument("--dbhost", action="store", help="deployed in docker environment")
+    common.add_argument("--docker", action="store_true", help="Deploy in docker environment")
+    common.add_argument(
+        "--dbhost", action="store", help="Host address to access database. Overrides config"
+    )
+    common.add_argument(
+        "--dbport", action="store", help="Port to access database. Overrides config"
+    )
+    common.add_argument(
+        "-D", "--db", action="store", help="Database name to use. Overrides config"
+    )
 
-    parser = argparse.ArgumentParser(description="sibyl Command Line Interface.")
+    parser = argparse.ArgumentParser(description="Sibyl Command Line Interface.")
     parser.set_defaults(function=None)
 
     # sibyl [action]
@@ -54,6 +62,6 @@ def main():
 
     setup_logging(args.verbose, args.logfile)
     config = read_config("./sibyl/config.yml")
-    sibyl = Sibyl(config, args.docker, args.dbhost)
+    sibyl = Sibyl(config, args.docker, args.dbhost, args.dbport, args.db)
 
     args.function(sibyl, args)
