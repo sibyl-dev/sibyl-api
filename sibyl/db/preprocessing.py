@@ -285,7 +285,7 @@ def insert_model(
     return explainer
 
 
-def load_database(config_file, directory=None):
+def prepare_database(config_file, directory=None):
     def _process_fp(fn):
         if fn is not None:
             return os.path.join(directory, fn)
@@ -361,8 +361,8 @@ def load_database(config_file, directory=None):
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
-        load_database(sys.argv[1])
+        prepare_database(sys.argv[1])
     elif len(sys.argv) == 3:
-        load_database(sys.argv[1], sys.argv[2])
+        prepare_database(sys.argv[1], sys.argv[2])
     else:
         print("Invalid arguments. Usage: python preprocessing.py CONFIG_FILE [DIRECTORY]")

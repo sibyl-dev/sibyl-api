@@ -3,7 +3,7 @@ import argparse
 from sibyl.core import Sibyl
 from sibyl.utils import read_config, setup_logging
 
-from sibyl.db.preprocessing import load_database
+from sibyl.db.preprocessing import prepare_database
 
 
 def _run(args):
@@ -13,8 +13,8 @@ def _run(args):
     sibyl.run_server(args.env, args.port)
 
 
-def _load_db(args):
-    load_database(args.config)
+def _prepare_db(args):
+    prepare_database(args.config)
 
 
 def get_parser():
@@ -63,9 +63,9 @@ def get_parser():
     )
 
     # sibyl load-db
-    load_db = action.add_parser("load-db", help="Load database from config", parents=[common])
-    load_db.add_argument("config", action="store", help="Path to config file to use")
-    load_db.set_defaults(function=_load_db)
+    prepare_db = action.add_parser("prepare-db", help="Prepare database from config", parents=[common])
+    prepare_db.add_argument("config", action="store", help="Path to config file to use")
+    prepare_db.set_defaults(function=_prepare_db)
 
     return parser
 
