@@ -14,7 +14,7 @@ def _run(args):
 
 
 def _prepare_db(args):
-    prepare_database(args.config)
+    prepare_database(args.config, args.dir)
 
 
 def get_parser():
@@ -64,8 +64,10 @@ def get_parser():
 
     # sibyl load-db
     prepare_db = action.add_parser("prepare-db", help="Prepare database from config", parents=[common])
-    prepare_db.add_argument("config", action="store", help="Path to config file to use")
     prepare_db.set_defaults(function=_prepare_db)
+
+    prepare_db.add_argument("config", action="store", help="Path to config file to use")
+    prepare_db.add_argument("--dir", "--directory", action="store", help="Path of directory containing data")
 
     return parser
 
