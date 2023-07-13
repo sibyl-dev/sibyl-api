@@ -285,7 +285,7 @@ def insert_model(
     return explainer
 
 
-def load_database(config_file, directory):
+def load_database(config_file, directory=None):
     def _process_fp(fn):
         if fn is not None:
             return os.path.join(directory, fn)
@@ -295,14 +295,15 @@ def load_database(config_file, directory):
         cfg = yaml.safe_load(f)
 
     # Begin database loading ---------------------------
-    client = MongoClient("localhost", 27017)
     database_name = cfg["database_name"]
-    if cfg.get("directory") is None:
-        directory = os.path.join(directory, database_name)
-    else:
-        directory = os.path.join(directory, cfg["directory"])
+    if directory is None:
+        if cfg.get("directory") is None:
+            directory = os.path.join(get_project_root(), "dbdata", database_name)
+        else:
+            directory = os.path.join(get_project_root(), "dbdata", cfg["directory"])
 
     if cfg.get("DROP_OLD", False):
+        client = MongoClient("localhost", 27017)
         client.drop_database(database_name)
     connect(database_name, host="localhost", port=27017)
 
@@ -359,4 +360,9 @@ def load_database(config_file, directory):
 
 
 if __name__ == "__main__":
-    load_database(sys.argv[1], directory=os.path.join(get_project_root(), "dbdata"))
+    if len(sys.argv) == 2:
+        load_database(sys.argv[1])
+    elif len(sys.argv) == 3:
+        load_database(sys.argv[1], sys.argv[2])
+    else:
+        print("Invalid arguments. Usage: python preprocessing.py CONFIG_FILE [DIRECTORY]")
