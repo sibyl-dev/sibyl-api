@@ -1,4 +1,3 @@
-import json
 import os
 import pickle
 import sys
@@ -18,16 +17,9 @@ from pyreal.transformers import (
 )
 from sklearn.linear_model import LinearRegression
 
-import sibyl.global_explanation as ge
 from sibyl.db import schema
 from sibyl.db.utils import ModelWrapperThresholds
 from sibyl.utils import get_project_root
-
-
-def _process_fp(fn):
-    if fn is not None:
-        return os.path.join(directory, fn)
-    return None
 
 
 def _load_data(features, dataset_filepath, target):
@@ -168,6 +160,7 @@ def insert_model(
     features,
     dataset_fp,
     target,
+    set_doc,
     pickle_model_fp=None,
     weights_fp=None,
     threshold_fp=None,
@@ -292,52 +285,12 @@ def insert_model(
     return explainer
 
 
-def generate_feature_distribution_doc(
-    save_path, explainer, target, dataset_filepath, features_filepath
-):
-    features = pd.read_csv(features_filepath)
-    feature_names = features["name"]
-    dataset, targets = _load_data(feature_names, dataset_filepath, target)
+def load_database(config_file, directory):
+    def _process_fp(fn):
+        if fn is not None:
+            return os.path.join(directory, fn)
+        return None
 
-    boolean_features = features[features["type"].isin(["binary", "categorical"])]["name"]
-    dataset_cat = dataset[boolean_features]
-
-    numeric_features = features[features["type"] == "numeric"]["name"]
-    dataset_num = dataset[numeric_features]
-
-    summary_dict = {}
-    # TODO: generalize list of outputs
-    for output in range(1, 21):
-        row_details = {}
-        rows = ge.get_rows_by_output(output, explainer.model_predict, dataset, row_labels=None)
-
-        count_total = len(rows)
-
-        count_removed = sum(targets.iloc[rows])
-        row_details["total cases"] = count_total
-        row_details["total removed"] = count_removed
-
-        cat_summary = ge.summary_categorical(dataset_cat.iloc[rows].applymap(str))
-        num_summary = ge.summary_numeric(dataset_num.iloc[rows])
-
-        distributions = {}
-        for i, name in enumerate(boolean_features):
-            distributions[name] = {
-                "type": "categorical",
-                "metrics": [cat_summary[0][i].tolist(), cat_summary[1][i].tolist()],
-            }
-        for i, name in enumerate(numeric_features):
-            distributions[name] = {"type": "numeric", "metrics": num_summary[i]}
-        row_details["distributions"] = distributions
-
-        summary_dict[output] = row_details
-
-    with open(save_path, "w") as f:
-        json.dump(summary_dict, f, indent=4, sort_keys=True)
-
-
-if __name__ == "__main__":
-    config_file = sys.argv[1]
     with open(config_file, "r") as f:
         cfg = yaml.safe_load(f)
 
@@ -345,9 +298,9 @@ if __name__ == "__main__":
     client = MongoClient("localhost", 27017)
     database_name = cfg["database_name"]
     if cfg.get("directory") is None:
-        directory = os.path.join(get_project_root(), "dbdata", database_name)
+        directory = os.path.join(directory, database_name)
     else:
-        directory = os.path.join(get_project_root(), "dbdata", cfg["directory"])
+        directory = os.path.join(directory, cfg["directory"])
 
     if cfg.get("DROP_OLD", False):
         client.drop_database(database_name)
@@ -387,10 +340,11 @@ if __name__ == "__main__":
     set_doc = insert_training_set(eids, target)
 
     # INSERT MODEL
-    explainer = insert_model(
+    insert_model(
         feature_names,
         dataset_fp,
         target,
+        set_doc,
         pickle_model_fp=_process_fp(cfg.get("pickle_model_fn")),
         weights_fp=_process_fp(cfg.get("weights_fn")),
         threshold_fp=_process_fp(cfg.get("threshold_fn")),
@@ -403,7 +357,6 @@ if __name__ == "__main__":
         prefit_se=cfg.get("prefit_se", True),
     )
 
-    # PRE-COMPUTE DISTRIBUTION INFORMATION
-    # generate_feature_distribution_doc("precomputed/agg_distributions.json", explainer, target,
-    #                                   dataset_fp, os.path.join(directory, "features.csv"))
-    # test_validation()
+
+if __name__ == "__main__":
+    load_database(sys.argv[1], directory=os.path.join(get_project_root(), "dbdata"))
