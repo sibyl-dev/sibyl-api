@@ -3,6 +3,7 @@ import argparse
 from sibyl.core import Sibyl
 from sibyl.db.preprocessing import prepare_database
 from sibyl.utils import read_config, setup_logging
+from sibyl.sample_applications import prepare_housing_application
 
 
 def _run(args):
@@ -14,6 +15,11 @@ def _run(args):
 
 def _prepare_db(args):
     prepare_database(args.config, args.dir)
+
+
+def _prepare_housing_db(args):
+    prepare_housing_application.run()
+    prepare_database("./sibyl/sample_applications/housing_config.yml")
 
 
 def get_parser():
@@ -64,7 +70,7 @@ def get_parser():
         "-D", "--db", action="store", help="Database name to use. Overrides config", type=str
     )
 
-    # sibyl load-db
+    # sibyl prepare-db
     prepare_db = action.add_parser(
         "prepare-db", help="Prepare database from config", parents=[common]
     )
@@ -74,6 +80,12 @@ def get_parser():
     prepare_db.add_argument(
         "--dir", "--directory", action="store", help="Path of directory containing data"
     )
+
+    # sibyl prepare-sample-db
+    prepare_sample_db = action.add_parser(
+        "prepare-sample-db", help="Prepare sample database (housing)", parents=[common]
+    )
+    prepare_sample_db.set_defaults(function=_prepare_housing_db)
 
     return parser
 
