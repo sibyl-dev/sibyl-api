@@ -1,9 +1,8 @@
 import argparse
 
 from sibyl.core import Sibyl
-from sibyl.utils import read_config, setup_logging
-
 from sibyl.db.preprocessing import prepare_database
+from sibyl.utils import read_config, setup_logging
 
 
 def _run(args):
@@ -53,7 +52,10 @@ def get_parser():
         choices=["development", "production", "test"],
     )
     run.add_argument(
-        "--dbhost", action="store", help="Host address to access database. Overrides config", type=str
+        "--dbhost",
+        action="store",
+        help="Host address to access database. Overrides config",
+        type=str,
     )
     run.add_argument(
         "--dbport", action="store", help="Port to access database. Overrides config", type=int
@@ -63,11 +65,15 @@ def get_parser():
     )
 
     # sibyl load-db
-    prepare_db = action.add_parser("prepare-db", help="Prepare database from config", parents=[common])
+    prepare_db = action.add_parser(
+        "prepare-db", help="Prepare database from config", parents=[common]
+    )
     prepare_db.set_defaults(function=_prepare_db)
 
     prepare_db.add_argument("config", action="store", help="Path to config file to use")
-    prepare_db.add_argument("--dir", "--directory", action="store", help="Path of directory containing data")
+    prepare_db.add_argument(
+        "--dir", "--directory", action="store", help="Path of directory containing data"
+    )
 
     return parser
 
