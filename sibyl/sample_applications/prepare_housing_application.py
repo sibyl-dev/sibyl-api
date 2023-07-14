@@ -7,29 +7,35 @@ from pyreal.sample_applications import ames_housing
 
 from sibyl.utils import get_project_root
 
-DIRECTORY = os.path.join(get_project_root(), "dbdata", "housing")
 
-x_orig, y_orig = ames_housing.load_data(include_targets=True)
-x_orig = x_orig.rename({"Id": "eid"}, axis="columns")
-entities = pd.concat([x_orig, y_orig], axis=1)
-entities.to_csv(os.path.join(DIRECTORY, "entities.csv"), index=False)
+def run():
+    directory = os.path.join(get_project_root(), "dbdata", "housing")
 
-transformers = ames_housing.load_transformers()
-model = ames_housing.load_model()
+    x_orig, y_orig = ames_housing.load_data(include_targets=True)
+    x_orig = x_orig.rename({"Id": "eid"}, axis="columns")
+    entities = pd.concat([x_orig, y_orig], axis=1)
+    entities.to_csv(os.path.join(directory, "entities.csv"), index=False)
 
-explainer = RealApp(model, transformers=transformers, id_column="eid")
-explainer.prepare_feature_contributions(
-    x_train_orig=x_orig.drop("eid", axis="columns"), y_train=y_orig
-)
-explainer.prepare_feature_importance(
-    x_train_orig=x_orig.drop("eid", axis="columns"),
-    y_train=y_orig,
-)
-explainer.prepare_similar_examples(
-    x_train_orig=x_orig.drop("eid", axis="columns"),
-    y_train=y_orig,
-)
+    transformers = ames_housing.load_transformers()
+    model = ames_housing.load_model()
 
-print("Dumping model and explainer...")
-pickle.dump(model, open(os.path.join(DIRECTORY, "model.pkl"), "wb"))
-pickle.dump(explainer, open(os.path.join(DIRECTORY, "explainer.pkl"), "wb"))
+    explainer = RealApp(model, transformers=transformers, id_column="eid")
+    explainer.prepare_feature_contributions(
+        x_train_orig=x_orig.drop("eid", axis="columns"), y_train=y_orig
+    )
+    explainer.prepare_feature_importance(
+        x_train_orig=x_orig.drop("eid", axis="columns"),
+        y_train=y_orig,
+    )
+    explainer.prepare_similar_examples(
+        x_train_orig=x_orig.drop("eid", axis="columns"),
+        y_train=y_orig,
+    )
+
+    print("Dumping model and explainer...")
+    pickle.dump(model, open(os.path.join(directory, "model.pkl"), "wb"))
+    pickle.dump(explainer, open(os.path.join(directory, "explainer.pkl"), "wb"))
+
+
+if __name__ == "__main__":
+    run()

@@ -1,11 +1,25 @@
 import argparse
 
 from sibyl.core import Sibyl
+from sibyl.db.preprocessing import prepare_database
+from sibyl.sample_applications import prepare_housing_application
 from sibyl.utils import read_config, setup_logging
 
 
-def _run(sibyl, args):
+def _run(args):
+    config = read_config("./sibyl/config.yml")
+    sibyl = Sibyl(config, args.docker, args.dbhost, args.dbport, args.db)
+
     sibyl.run_server(args.env, args.port)
+
+
+def _prepare_db(args):
+    prepare_database(args.config, args.dir)
+
+
+def _prepare_housing_db(args):
+    prepare_housing_application.run()
+    prepare_database("./sibyl/sample_applications/housing_config.yml")
 
 
 def get_parser():
@@ -23,15 +37,6 @@ def get_parser():
     )
 
     common.add_argument("--docker", action="store_true", help="Deploy in docker environment")
-    common.add_argument(
-        "--dbhost", action="store", help="Host address to access database. Overrides config"
-    )
-    common.add_argument(
-        "--dbport", action="store", help="Port to access database. Overrides config"
-    )
-    common.add_argument(
-        "-D", "--db", action="store", help="Database name to use. Overrides config"
-    )
 
     parser = argparse.ArgumentParser(description="Sibyl Command Line Interface.")
     parser.set_defaults(function=None)
@@ -52,6 +57,35 @@ def get_parser():
         help="Flask environment",
         choices=["development", "production", "test"],
     )
+    run.add_argument(
+        "--dbhost",
+        action="store",
+        help="Host address to access database. Overrides config",
+        type=str,
+    )
+    run.add_argument(
+        "--dbport", action="store", help="Port to access database. Overrides config", type=int
+    )
+    run.add_argument(
+        "-D", "--db", action="store", help="Database name to use. Overrides config", type=str
+    )
+
+    # sibyl prepare-db
+    prepare_db = action.add_parser(
+        "prepare-db", help="Prepare database from config", parents=[common]
+    )
+    prepare_db.set_defaults(function=_prepare_db)
+
+    prepare_db.add_argument("config", action="store", help="Path to config file to use")
+    prepare_db.add_argument(
+        "--dir", "--directory", action="store", help="Path of directory containing data"
+    )
+
+    # sibyl prepare-sample-db
+    prepare_sample_db = action.add_parser(
+        "prepare-sample-db", help="Prepare sample database (housing)", parents=[common]
+    )
+    prepare_sample_db.set_defaults(function=_prepare_housing_db)
 
     return parser
 
@@ -61,7 +95,5 @@ def main():
     args = parser.parse_args()
 
     setup_logging(args.verbose, args.logfile)
-    config = read_config("./sibyl/config.yml")
-    sibyl = Sibyl(config, args.docker, args.dbhost, args.dbport, args.db)
 
-    args.function(sibyl, args)
+    args.function(args)
