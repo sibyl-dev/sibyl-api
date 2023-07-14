@@ -9,12 +9,12 @@ from sibyl.utils import get_project_root
 
 
 def run():
-    DIRECTORY = os.path.join(get_project_root(), "dbdata", "housing")
+    directory = os.path.join(get_project_root(), "dbdata", "housing")
 
     x_orig, y_orig = ames_housing.load_data(include_targets=True)
     x_orig = x_orig.rename({"Id": "eid"}, axis="columns")
     entities = pd.concat([x_orig, y_orig], axis=1)
-    entities.to_csv(os.path.join(DIRECTORY, "entities.csv"), index=False)
+    entities.to_csv(os.path.join(directory, "entities.csv"), index=False)
 
     transformers = ames_housing.load_transformers()
     model = ames_housing.load_model()
@@ -33,8 +33,8 @@ def run():
     )
 
     print("Dumping model and explainer...")
-    pickle.dump(model, open(os.path.join(DIRECTORY, "model.pkl"), "wb"))
-    pickle.dump(explainer, open(os.path.join(DIRECTORY, "explainer.pkl"), "wb"))
+    pickle.dump(model, open(os.path.join(directory, "model.pkl"), "wb"))
+    pickle.dump(explainer, open(os.path.join(directory, "explainer.pkl"), "wb"))
 
 
 if __name__ == "__main__":
