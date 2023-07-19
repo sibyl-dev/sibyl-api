@@ -30,8 +30,8 @@ sibyl = "sibyl.cli:main"
 python = "^3.8, <3.11"
 
 click = "^8.1.3"
-pyreal = {git = "https://github.com/sibyl-dev/pyreal", rev = "dev"}
 pyyaml = "^6.0"
+pyreal = "^0.4.3"
 
 [tool.poetry.group.general.dependencies]
 passlib = "^1.7.4"
