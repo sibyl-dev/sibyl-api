@@ -2845,13 +2845,13 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyreal"
-version = "0.4.3"
+version = "0.4.4"
 description = "Library for evaluating and deploying human readable machine learning explanations."
 optional = false
 python-versions = ">=3.8,<3.11"
 files = [
-    {file = "pyreal-0.4.3-py3-none-any.whl", hash = "sha256:0cd56859f41497955b5f493203005231d799cee56cdb42d2e42943651c451c0a"},
-    {file = "pyreal-0.4.3.tar.gz", hash = "sha256:6ec91cb76578714e9824a9153eac363bff1ae937fca958360ef2861101a74486"},
+    {file = "pyreal-0.4.4-py3-none-any.whl", hash = "sha256:6889d03f07179dd6ced32489250532f9e9b481791f9f01de211f6457c6d96059"},
+    {file = "pyreal-0.4.4.tar.gz", hash = "sha256:75bd46b4da9364b968155073a3b75cdc2d0cd9cbf197b1bc2d25c08064498d17"},
 ]
 
 [package.dependencies]
@@ -4074,4 +4074,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8, <3.11"
-content-hash = "81671ad574dd975361fc9db1ce4915c7aa59244f8f4ae41c06741ae5e98f0e42"
+content-hash = "495cf2693dd05c529c5a5a58163e4b6f81162ba5365ef0c998766bf3f31a043c"
