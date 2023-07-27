@@ -32,12 +32,12 @@ def format_message(event):
     return s
 
 
-class Logging(Resource):
+class Logger(Resource):
     def post(self):
         """
         @api {post} /logging/ Save a log message
         @apiName PostLogging
-        @apiGroup Logging
+        @apiGroup Logger
         @apiVersion 1.0.0
         @apiDescription Save information to the log.
 

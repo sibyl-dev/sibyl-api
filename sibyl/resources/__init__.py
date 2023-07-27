@@ -8,10 +8,11 @@ from sibyl.resources import (
     entity,
     feature,
     group,
-    logging,
+    logger,
     model,
     test,
 )
+
 
 __all__ = (
     "entity",
@@ -19,7 +20,7 @@ __all__ = (
     "model",
     "computing",
     "test",
-    "logging",
-    "group.py",
-    "context.py",
+    "logger",
+    "group",
+    "context",
 )

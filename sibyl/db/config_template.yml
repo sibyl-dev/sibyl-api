@@ -49,3 +49,21 @@ explainer_fn:
 shap_type: # TODO: make this process smoother
 # If False, do not prefit the similar entities explainer. Reduces objects sizes for database, but increases runtime
 prefit_se: True
+
+# GUI configurations
+# =================================================================================================
+# Preset term for gui config, used to automatically fill in some configurations. Overridden by other configs
+# Sibyl-API preprocessing currently supports:
+#   cost_usd, profit_usd, success, failure
+gui_preset:
+# If true, increases in model predictions correspond to a negative outcome. If False, increases in model predictions
+#   correspond to a positive outcome. If None, no statement is made either way
+negative_model_prediction:
+# Python f-string for formatting model predictions
+prediction_format_string:
+# Color to use for positive contributions
+pos_color:
+# Color to use for negative contributions
+neg_color: 
+
+

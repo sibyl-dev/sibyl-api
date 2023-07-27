@@ -124,7 +124,7 @@ def setup_logging(verbosity=1, logfile=None, logger_name=None):
     # INFO	    20
     # DEBUG	    10
     # NOTSET	0
-    # Logging messages which are less severe than level will be ignored
+    # Logger messages which are less severe than level will be ignored
     log_level = (3 - verbosity) * 10
 
     fmt = "%(asctime)s - %(process)d - %(levelname)s" + " - %(module)s - %(message)s"

@@ -1,18 +1,18 @@
-import logging
+from logging import getLogger
 
 from flask_restful import Resource, reqparse
 
 from sibyl.db import schema
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = getLogger(__name__)
 
 
 def get_context(context_doc):
     context = {
         "id": str(context_doc.id),
         "terms": context_doc.terms,
-        "pos_color": context_doc.pos_color,
-        "neg_color": context_doc.neg_color,
+        "gui_preset": context_doc.gui_preset,
+        "gui_config": context_doc.gui_config,
     }
     return context
 
@@ -67,7 +67,7 @@ class Context(Resource):
 class Contexts(Resource):
     def get(self):
         """
-        Get all Contexts
+        Get all Context ids
         ---
         tags:
           - context

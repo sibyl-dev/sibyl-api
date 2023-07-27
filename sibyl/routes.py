@@ -56,6 +56,6 @@ def add_routes(app):
     api.add_resource(ctrl.computing.ModifiedPrediction, API_VERSION + "modified_prediction/")
     api.add_resource(ctrl.computing.SimilarEntities, API_VERSION + "similar_entities/")
 
-    api.add_resource(ctrl.logging.Logging, API_VERSION + "logging/")
+    api.add_resource(ctrl.logging.Logger, API_VERSION + "logging/")
 
     api.add_resource(ctrl.test.Test, API_VERSION + "test/")
