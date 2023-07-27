@@ -12,7 +12,8 @@ def test_get_models(client, models):
     for expected_item in models:
         found = False
         for response_item in response["models"]:
-            schema.Model.find(response_item["id"])  # ensure no error
+            model = schema.Model.find_one(id=response_item["id"])  # assert no error
+            # assert model in models
             if response_item["name"] == expected_item["name"]:
                 found = True
         assert found

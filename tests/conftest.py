@@ -49,6 +49,21 @@ def categories():
 
 
 @pytest.fixture(scope="session")
+def contexts():
+    context_1 = {
+        "terms": {"A": "a", "B": "b"},
+        "gui_preset": "abc",
+        "gui_config": {"ab": "cd", "ef": "gh"},
+    }
+    context_2 = {
+        "terms": {"C": "c", "D": "d"},
+        "gui_preset": "def",
+        "gui_config": {"12": "34", "56": "78"},
+    }
+    return [context_1, context_2]
+
+
+@pytest.fixture(scope="session")
 def features():
     features = [
         {
@@ -208,7 +223,7 @@ def models():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def testdb(categories, features, entities, groups, models):
+def testdb(categories, features, entities, groups, models, contexts):
     client = MongoClient("localhost", 27017)
     client.drop_database(test_database_name)
     connect(test_database_name, host=test_host, port=test_port)
@@ -237,6 +252,9 @@ def testdb(categories, features, entities, groups, models):
     for model in models:
         model["training_set"] = dataset
         schema.Model.insert(**model)
+
+    for context in contexts:
+        schema.Context.insert(**context)
 
     yield client
 
