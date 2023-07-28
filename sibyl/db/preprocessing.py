@@ -89,10 +89,21 @@ def insert_entity_groups(filepath):
     schema.EntityGroup.insert_many(items)
 
 
-def insert_context(filepath):
-    context_df = pd.read_csv(filepath)
-    items = dict(zip(context_df["key"], context_df["term"]))
-    context_dict = {"terms": items}
+def insert_context(terms_fp, gui_preset, gui_config):
+    def set_config(config_values):
+        for config_name in config_values:
+            if config_name not in gui_config:
+                gui_config[config_name] = config_values[config_name]
+
+    terms_df = pd.read_csv(terms_fp)
+    items = dict(zip(terms_df["key"], terms_df["term"]))
+    if gui_config is None:
+        gui_config = {}
+    with open(os.path.join(get_project_root(), "sibyl", "db", "gui_presets.yml"), "r") as f:
+        gui_preset_dict = yaml.safe_load(f)
+    if gui_preset in gui_preset_dict:
+        set_config(gui_preset_dict[gui_preset])
+    context_dict = {"terms": items, "gui_config": gui_config, "gui_preset": gui_preset}
     schema.Context.insert(**context_dict)
 
 
@@ -136,8 +147,7 @@ def insert_entities(
     raw_entities = values_df.to_dict(orient="records")
     entities = []
     for raw_entity in raw_entities:
-        entity = {}
-        entity["eid"] = str(raw_entity["eid"])
+        entity = {"eid": str(raw_entity["eid"])}
         del raw_entity["eid"]
         entity["features"] = raw_entity
         if target in raw_entity:
@@ -319,7 +329,9 @@ def prepare_database(config_file, directory=None):
         insert_entity_groups(os.path.join(directory, "groups.csv"))
 
     # INSERT CONTEXT
-    insert_context(os.path.join(directory, "terms.csv"))
+    insert_context(
+        os.path.join(directory, "terms.csv"), cfg.get("gui_preset"), cfg.get("gui_config")
+    )
 
     # INSERT ENTITIES
     eids = insert_entities(

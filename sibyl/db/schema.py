@@ -1,13 +1,6 @@
 """Sibyl Database Schema.
 
-This module contains the classes that define the Sibyl Database Schema:
-    * Event
-    * Entitiy
-    * Category
-    * Feature
-    * TrainingSet
-    * Model
-    * Case
+This module contains the classes that define the Sibyl Database Schema
 """
 
 import logging
@@ -212,14 +205,15 @@ class Context(SibylDocument):
     context.
     Attributes
     ----------
-    term_dict : dict {key : term}
+    terms : dict {key : term}
         dictionary of application-specific terms to use
-    pos_color : str
-        color to use for positive contribution bars
-    neg_color : str
-        color to use for negative contribution bars
+    gui_config : dict {key : value}
+        dictionary of application-specific GUI configurations
+    gui_preset : string
+        name of gui_preset to use, which may be used by front-end code to fill in missing
+        gui_config values
     """
 
     terms = fields.DictField()
-    pos_color = fields.StringField()
-    neg_color = fields.StringField()
+    gui_config = fields.DictField()
+    gui_preset = fields.StringField()

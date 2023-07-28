@@ -1,0 +1,24 @@
+# GUI presets supported by Sibyl-API
+# External GUI programs may support additional presets
+# =================================================================
+cost_usd:
+  pred_type: "numeric"
+  model_pred_bad_outcome: True
+  pred_format_string: "${:,.2f}"
+
+profit_usd:
+  pred_type: "numeric"
+  model_pred_bad_outcome: False
+  pred_format_string: "${:,.2f}"
+
+success:
+  pred_type: "boolean"
+  pos_pred_name: "success"
+  neg_pred_name: "failure"
+  model_pred_bad_outcome: False
+
+failure:
+  pred_type: "boolean"
+  pos_pred_name: "failure"
+  neg_pred_name: "success"
+  model_pred_bad_outcome: True

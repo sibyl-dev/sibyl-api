@@ -28,3 +28,8 @@ pickle_model_fn: "model.pkl"
 explainer_fn: "explainer.pkl"
 # shap type to use for explainer if not provided
 shap_type: "linear" # TODO: make this process smoother
+
+# GUI configurations
+# =================================================================================================
+# Preset term for gui config, used to automatically fill in some configurations. Overridden by other configs
+gui_preset: "profit_usd"
