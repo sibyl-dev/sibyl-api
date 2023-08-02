@@ -628,6 +628,121 @@ class MultiFeatureContributions(Resource):
         return {"contributions": contributions_json}, 200
 
 
+class ModifiedFeatureContributions(Resource):
+    def post(self):
+        """
+        Get the feature contributions of an entity modified by changes
+        ---
+        tags:
+          - computing
+        security:
+          - tokenAuth: []
+        requestBody:
+           required: true
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   eid:
+                     type: string
+                   model_id:
+                     type: string
+                   changes:
+                     type: array
+                     items:
+                       type: array
+                       items:
+                         oneOf:
+                           type: string
+                           type: number
+                 required: ['eid', 'model_id', 'changes']
+        responses:
+          200:
+            description: Resulting feature contributions after making changes to entity
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    contributions:
+                        type: array
+                        items:
+                            type: number
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+        attrs = ["eid", "model_id", "changes"]
+        d = {}
+        body = request.json
+        for attr in attrs:
+            d[attr] = None
+            if body is not None:
+                d[attr] = body.get(attr)
+            else:
+                if attr in request.form:
+                    d[attr] = request.form[attr]
+        # validate data type
+        try:
+            d["eid"] = str(d["eid"])
+            d["model_id"] = str(d["model_id"])
+            for change in d["changes"]:
+                change[0] = str(change[0])
+                try:
+                    change[1] = float(change[1])
+                except:
+                    pass
+                if schema.Feature.find_one(name=change[0]) is None:
+                    LOGGER.exception("Invalid feature %s" % change[0])
+                    return {"message": "Invalid feature {}".format(change[0])}, 400
+                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [
+                    0,
+                    1,
+                ]:
+                    LOGGER.exception(
+                        "Feature %s is binary, change value of %s is invalid."
+                        % (change[0], change[1])
+                    )
+                    return {
+                        "message": "Feature {} is binary, invalid change value".format(change[0])
+                    }, 400
+        except Exception as e:
+            LOGGER.exception(e)
+            return {"message": str(e)}, 400
+
+        eid = d["eid"]
+        model_id = d["model_id"]
+        changes = d["changes"]
+        entity = schema.Entity.find_one(eid=eid)
+        if entity is None:
+            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
+            return {"message": "Entity {} does not exist".format(eid)}, 400
+        entity_features = pd.DataFrame(entity.features, index=[0])
+
+        model_doc = schema.Model.find_one(id=model_id)
+        if model_doc is None:
+            LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
+            return {"message": "Model {} does not exist".format(model_id)}, 400
+        explainer_bytes = model_doc.explainer
+        if explainer_bytes is None:
+            LOGGER.exception("Model %s explainer has not been trained. ", model_id)
+            return {"message": "Model {} does not have trained explainer".format(model_id)}, 400
+
+        try:
+            explainer = pickle.loads(explainer_bytes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {"message": str(e)}, 500
+
+        modified = entity_features.copy()
+        for change in changes:
+            feature = change[0]
+            value = change[1]
+            modified[feature] = value
+        prediction = explainer.predict(modified)[0].tolist()
+        return {"prediction": prediction}
+
+
 class SimilarEntities(Resource):
     def post(self):
         """
