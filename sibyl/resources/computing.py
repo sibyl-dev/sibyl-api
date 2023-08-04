@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import pickle
 
 import pandas as pd
 from flask import request
@@ -13,6 +12,29 @@ from sibyl import helpers
 from sibyl.db import schema
 
 LOGGER = logging.getLogger(__name__)
+
+
+def validate_changes(changes):
+    """
+    Helper function for validating changes to entity.
+    """
+    for change in changes:
+        change[0] = str(change[0])
+        if schema.Feature.find_one(name=change[0]) is None:
+            LOGGER.exception("Invalid feature %s" % change[0])
+            return {"message": "Invalid feature {}".format(change[0])}, 400
+
+        if isinstance(change[1], (int, float)):
+            change[1] = float(change[1])
+
+        if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [
+            0,
+            1,
+        ]:
+            LOGGER.exception(
+                "Feature %s is binary, change value of %s is invalid." % (change[0], change[1])
+            )
+            return {"message": "Feature {} is binary, invalid change value".format(change[0])}, 400
 
 
 class SingleChangePredictions(Resource):
@@ -60,7 +82,7 @@ class SingleChangePredictions(Resource):
                 examples:
                   externalJson:
                     summary: external example
-                    externalValue: '/examples/entity-get-200.json'
+                    externalValue: '/examples/singlechangepredictions-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -76,55 +98,25 @@ class SingleChangePredictions(Resource):
                     d[attr] = request.form[attr]
         # validate data type
         try:
-            d["eid"] = str(d["eid"])
-            d["model_id"] = str(d["model_id"])
-            for change in d["changes"]:
-                change[0] = str(change[0])
-                try:
-                    change[1] = float(change[1])
-                except:
-                    pass
-                if schema.Feature.find_one(name=change[0]) is None:
-                    LOGGER.exception("Invalid feature %s" % change[0])
-                    return {"message": "Invalid feature {}".format(change[0])}, 400
-                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [
-                    0,
-                    1,
-                ]:
-                    LOGGER.exception(
-                        "Feature %s is binary, change value of %s is invalid."
-                        % (change[0], change[1])
-                    )
-                    return {
-                        "message": "Feature {} is binary, invalid change value".format(change[0])
-                    }, 400
+            eid = str(d["eid"])
+            model_id = str(d["model_id"])
+            changes = d["changes"]
+            validate_changes(changes)
         except Exception as e:
             LOGGER.exception(e)
             return {"message": str(e)}, 400
 
-        eid = d["eid"]
-        model_id = d["model_id"]
-        changes = d["changes"]
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
             LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
             return {"message": "Entity {} does not exist".format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        model_doc = schema.Model.find_one(id=model_id)
-        if model_doc is None:
-            LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
-            return {"message": "Model {} does not exist".format(model_id)}, 400
-        explainer_bytes = model_doc.explainer
-        if explainer_bytes is None:
-            LOGGER.exception("Model %s explainer has not been trained. ", model_id)
-            return {"message": "Model {} does not have trained explainer".format(model_id)}, 400
-
-        try:
-            explainer = pickle.loads(explainer_bytes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 500
+        success, payload = helpers.load_explainer(model_id)
+        if success:
+            explainer = payload[0]
+        else:
+            return payload
 
         predictions = []
         for change in changes:
@@ -195,55 +187,25 @@ class ModifiedPrediction(Resource):
                     d[attr] = request.form[attr]
         # validate data type
         try:
-            d["eid"] = str(d["eid"])
-            d["model_id"] = str(d["model_id"])
-            for change in d["changes"]:
-                change[0] = str(change[0])
-                try:
-                    change[1] = float(change[1])
-                except:
-                    pass
-                if schema.Feature.find_one(name=change[0]) is None:
-                    LOGGER.exception("Invalid feature %s" % change[0])
-                    return {"message": "Invalid feature {}".format(change[0])}, 400
-                if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [
-                    0,
-                    1,
-                ]:
-                    LOGGER.exception(
-                        "Feature %s is binary, change value of %s is invalid."
-                        % (change[0], change[1])
-                    )
-                    return {
-                        "message": "Feature {} is binary, invalid change value".format(change[0])
-                    }, 400
+            eid = str(d["eid"])
+            model_id = str(d["model_id"])
+            changes = d["changes"]
+            validate_changes(changes)
         except Exception as e:
             LOGGER.exception(e)
             return {"message": str(e)}, 400
 
-        eid = d["eid"]
-        model_id = d["model_id"]
-        changes = d["changes"]
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
             LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
             return {"message": "Entity {} does not exist".format(eid)}, 400
         entity_features = pd.DataFrame(entity.features, index=[0])
 
-        model_doc = schema.Model.find_one(id=model_id)
-        if model_doc is None:
-            LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
-            return {"message": "Model {} does not exist".format(model_id)}, 400
-        explainer_bytes = model_doc.explainer
-        if explainer_bytes is None:
-            LOGGER.exception("Model %s explainer has not been trained. ", model_id)
-            return {"message": "Model {} does not have trained explainer".format(model_id)}, 400
-
-        try:
-            explainer = pickle.loads(explainer_bytes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 500
+        success, payload = helpers.load_explainer(model_id)
+        if success:
+            explainer = payload[0]
+        else:
+            return payload
 
         modified = entity_features.copy()
         for change in changes:
@@ -305,14 +267,11 @@ class FeatureDistributions(Resource):
             return {"distributions": all_distributions[str(prediction)]["distributions"]}
 
         # LOAD IN AND VALIDATE MODEL DATA
-        success, payload = helpers.load_model(
-            model_id, include_explainer=True, include_dataset=True
-        )
+        success, payload = helpers.load_explainer(model_id, include_dataset=True)
         if success:
-            model, dataset, explainer = payload
+            explainer, dataset = payload
         else:
-            message, error_code = payload
-            return message, error_code
+            return payload
 
         # LOAD IN FEATURES
         feature_docs = schema.Feature.find()
@@ -392,17 +351,13 @@ class PredictionCount(Resource):
             return {"count:": all_distributions[str(prediction)]["total cases"]}
 
         # LOAD IN AND VALIDATE MODEL DATA
-        success, payload = helpers.load_model(
-            model_id, include_explainer=True, include_dataset=True
-        )
+        success, payload = helpers.load_explainer(model_id, include_dataset=True)
         if success:
-            model, dataset, explainer = payload
+            explainer, dataset = payload
         else:
-            message, error_code = payload
-            return message, error_code
+            return payload
 
         rows = ge.get_rows_by_output(prediction, explainer.predict, dataset, row_labels=None)
-
         count = len(rows)
 
         return {"count": count}
@@ -541,12 +496,11 @@ class FeatureContributions(Resource):
             return {"message": "Entity {} does not have features.".format(eid)}, 400
 
         # LOAD IN AND VALIDATE MODEL DATA
-        success, payload = helpers.load_model(model_id, include_explainer=True)
+        success, payload = helpers.load_explainer(model_id)
         if success:
-            model, explainer = payload
+            explainer = payload[0]
         else:
-            message, error_code = payload
-            return message, error_code
+            return payload
 
         contributions = explainer.produce_feature_contributions(entity_features)[0]
         keys = list(contributions["Feature Name"])
@@ -586,9 +540,26 @@ class MultiFeatureContributions(Resource):
                   type: object
                   properties:
                     contributions:
-                        type: array
+                      type: dictionary
+                      keys:
+                        type: string
+                      items:
+                        type: dictionary
+                        keys:
+                          type: string
                         items:
-                            type: number
+                          type: object
+                          properties:
+                            Feature Value:
+                              oneOf:
+                                type: string
+                                type: number
+                            Contribution:
+                              type: number
+                            Average\\/Mode:
+                              oneOf:
+                                type: string
+                                type: number
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -613,12 +584,11 @@ class MultiFeatureContributions(Resource):
             for entity in schema.Entity.objects(eid__in=eids)
         ]
         entities = pd.DataFrame(entities)
-        success, payload = helpers.load_model(model_id, include_explainer=True)
+        success, payload = helpers.load_explainer(model_id)
         if success:
-            _, explainer = payload
+            explainer = payload[0]
         else:
-            message, error_code = payload
-            return message, error_code
+            return payload
 
         contributions = explainer.produce_feature_contributions(entities)
         contributions_json = {
@@ -627,6 +597,108 @@ class MultiFeatureContributions(Resource):
         }
 
         return {"contributions": contributions_json}, 200
+
+
+class ModifiedFeatureContribution(Resource):
+    def post(self):
+        """
+        Get the feature contribution of an entity modified by changes
+        ---
+        tags:
+          - computing
+        security:
+          - tokenAuth: []
+        requestBody:
+           required: true
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   eid:
+                     type: string
+                   model_id:
+                     type: string
+                   changes:
+                     type: array
+                     items:
+                       type: array
+                       items:
+                         oneOf:
+                           type: string
+                           type: number
+                 required: ['eid', 'model_id', 'changes']
+        responses:
+          200:
+            description: Resulting feature contribution after making changes to entity
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    contribution:
+                      type: dictionary
+                      keys:
+                        type: string
+                      items:
+                        type: object
+                        properties:
+                          Feature Value:
+                            oneOf:
+                              type: string
+                              type: number
+                          Contribution:
+                            type: number
+                          Average\\/Mode:
+                            oneOf:
+                              type: string
+                              type: number
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/modifiedcontribution-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+        attrs = ["eid", "model_id", "changes"]
+        d = {}
+        body = request.json
+        for attr in attrs:
+            d[attr] = None
+            if body is not None:
+                d[attr] = body.get(attr)
+            else:
+                if attr in request.form:
+                    d[attr] = request.form[attr]
+        # validate data type
+        try:
+            eid = str(d["eid"])
+            model_id = str(d["model_id"])
+            changes = d["changes"]
+            validate_changes(changes)
+        except Exception as e:
+            LOGGER.exception(e)
+            return {"message": str(e)}, 400
+
+        entity = schema.Entity.find_one(eid=eid)
+        if entity is None:
+            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
+            return {"message": "Entity {} does not exist".format(eid)}, 400
+        entity_features = pd.DataFrame(entity.features, index=[0])
+        success, payload = helpers.load_explainer(model_id)
+        if success:
+            explainer = payload[0]
+        else:
+            return payload
+
+        modified = entity_features.copy()
+        for change in changes:
+            feature = change[0]
+            value = change[1]
+            modified[feature] = value
+        contribution = explainer.produce_feature_contributions(modified)[0]
+        contribution_json = contribution.set_index("Feature Name").to_json(orient="index")
+        return {"contribution": contribution_json}
 
 
 class SimilarEntities(Resource):
@@ -688,14 +760,11 @@ class SimilarEntities(Resource):
             for entity in schema.Entity.objects(eid__in=eids)
         ]
         entities = pd.DataFrame(entities)
-        success, payload = helpers.load_model(
-            model_id, include_dataset=True, include_explainer=True
-        )
+        success, payload = helpers.load_explainer(model_id, include_dataset=True)
         if success:
-            _, dataset, explainer = payload
+            explainer, dataset = payload
         else:
-            message, error_code = payload
-            return message, error_code
+            return payload
 
         y = dataset["y"]
         X = dataset.drop("y", axis=1)

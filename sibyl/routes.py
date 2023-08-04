@@ -54,6 +54,9 @@ def add_routes(app):
         API_VERSION + "single_change_predictions/",
     )
     api.add_resource(ctrl.computing.ModifiedPrediction, API_VERSION + "modified_prediction/")
+    api.add_resource(
+        ctrl.computing.ModifiedFeatureContribution, API_VERSION + "modified_contribution/"
+    )
     api.add_resource(ctrl.computing.SimilarEntities, API_VERSION + "similar_entities/")
 
     api.add_resource(ctrl.logger.Logger, API_VERSION + "logging/")

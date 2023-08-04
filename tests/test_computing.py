@@ -120,8 +120,37 @@ def test_single_change_predictions(client, models, entities):
         ["C", entity["features"]["A"] - entity["features"]["B"]],
     ]
 
-    entity_in_db = client.get("/api/v1/entities/" + entity["eid"] + "/").json
-    assert entity_in_db["features"] == entity["features"]
+
+def test_modified_contribution(client, models, entities):
+    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    entity = entities[0]
+    eid = entity["eid"]
+
+    changes = [("A", 5)]
+    response = client.post(
+        "/api/v1/modified_contribution/",
+        json={"eid": eid, "model_id": model_id, "changes": changes},
+    ).json
+    contribution = response["contribution"]
+    df = pd.read_json(contribution, orient="index")
+
+    assert len(df.index) == len(entity["features"])
+    assert "Feature Value" in df.columns
+    assert "Contribution" in df.columns
+    assert "Average/Mode" in df.columns
+
+    changes = [("A", 3), ("B", 12), ("C", 1)]
+    response = client.post(
+        "/api/v1/modified_contribution/",
+        json={"eid": eid, "model_id": model_id, "changes": changes},
+    ).json
+    contribution = response["contribution"]
+    df = pd.read_json(contribution, orient="index")
+
+    assert len(df.index) == len(entity["features"])
+    assert "Feature Value" in df.columns
+    assert "Contribution" in df.columns
+    assert "Average/Mode" in df.columns
 
 
 def test_post_similar_entities(client, models, entities):

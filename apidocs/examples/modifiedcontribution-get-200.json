@@ -1,0 +1,14 @@
+{
+    "contribution": {
+        "feature 1": {
+            "Feature Value": 15.1,
+            "Contribution": 0.13,
+            "Average\\/Mode": 16.5
+        },
+        "feature 2": {
+            "Feature Value": "a",
+            "Contribution": -0.22,
+            "Average\\/Mode": "c"
+        }
+    }
+}
