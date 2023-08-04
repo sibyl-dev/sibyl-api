@@ -126,7 +126,7 @@ class SingleChangePredictions(Resource):
             modified[feature] = value
             prediction = explainer.predict(modified)[0].tolist()
             predictions.append([feature, prediction])
-        return {"predictions": predictions}
+        return {"predictions": predictions}, 200
 
 
 class ModifiedPrediction(Resource):
@@ -213,7 +213,7 @@ class ModifiedPrediction(Resource):
             value = change[1]
             modified[feature] = value
         prediction = explainer.predict(modified)[0].tolist()
-        return {"prediction": prediction}
+        return {"prediction": prediction}, 200
 
 
 class FeatureDistributions(Resource):
@@ -264,7 +264,7 @@ class FeatureDistributions(Resource):
             distribution_filepath = os.path.normpath(distribution_filepath)
             with open(distribution_filepath, "r") as f:
                 all_distributions = json.load(f)
-            return {"distributions": all_distributions[str(prediction)]["distributions"]}
+            return {"distributions": all_distributions[str(prediction)]["distributions"]}, 200
 
         # LOAD IN AND VALIDATE MODEL DATA
         success, payload = helpers.load_explainer(model_id, include_dataset=True)
@@ -304,7 +304,7 @@ class FeatureDistributions(Resource):
         for i, name in enumerate(numeric_features):
             distributions[name] = {"type": "numeric", "metrics": num_summary[i]}
 
-        return {"distributions": distributions}
+        return {"distributions": distributions}, 200
 
 
 class PredictionCount(Resource):
@@ -348,7 +348,7 @@ class PredictionCount(Resource):
             distribution_filepath = os.path.normpath(distribution_filepath)
             with open(distribution_filepath, "r") as f:
                 all_distributions = json.load(f)
-            return {"count:": all_distributions[str(prediction)]["total cases"]}
+            return {"count:": all_distributions[str(prediction)]["total cases"]}, 200
 
         # LOAD IN AND VALIDATE MODEL DATA
         success, payload = helpers.load_explainer(model_id, include_dataset=True)
@@ -360,7 +360,7 @@ class PredictionCount(Resource):
         rows = ge.get_rows_by_output(prediction, explainer.predict, dataset, row_labels=None)
         count = len(rows)
 
-        return {"count": count}
+        return {"count": count}, 200
 
 
 class OutcomeCount(Resource):
@@ -414,7 +414,7 @@ class OutcomeCount(Resource):
             outcome_metrics = all_distributions[str(prediction)]["distributions"][
                 "PRO_PLSM_NEXT730_DUMMY"
             ]
-            return {"distributions": {"PRO_PLSM_NEXT730_DUMMY": outcome_metrics}}
+            return {"distributions": {"PRO_PLSM_NEXT730_DUMMY": outcome_metrics}}, 200
         else:
             LOGGER.exception("Not implemented - Please provide precomputed document")
             return {"message": "Not implemented - Please provide precomputed document"}, 501
@@ -698,7 +698,7 @@ class ModifiedFeatureContribution(Resource):
             modified[feature] = value
         contribution = explainer.produce_feature_contributions(modified)[0]
         contribution_json = contribution.set_index("Feature Name").to_json(orient="index")
-        return {"contribution": contribution_json}
+        return {"contribution": contribution_json}, 200
 
 
 class SimilarEntities(Resource):
