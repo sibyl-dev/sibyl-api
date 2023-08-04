@@ -40,7 +40,8 @@ def validate_changes(changes):
 class SingleChangePredictions(Resource):
     def post(self):
         """
-        Get the resulting model prediction after making changes, one at a time, to an entity
+        Get the resulting model predictions after changing the value of a single feature
+        of an entity for each feature-value pair provided in the request.
         ---
         tags:
           - computing
@@ -74,7 +75,7 @@ class SingleChangePredictions(Resource):
                 schema:
                   type: object
                   properties:
-                    changes:
+                    predictions:
                         type: array
                         items:
                             type: number
