@@ -139,6 +139,19 @@ def test_modified_contribution(client, models, entities):
     assert "Contribution" in df.columns
     assert "Average/Mode" in df.columns
 
+    changes = [("A", 3), ("B", 12), ("C", 1)]
+    response = client.post(
+        "/api/v1/modified_contribution/",
+        json={"eid": eid, "model_id": model_id, "changes": changes},
+    ).json
+    contribution = response["contribution"]
+    df = pd.read_json(contribution, orient="index")
+
+    assert len(df.index) == len(entity["features"])
+    assert "Feature Value" in df.columns
+    assert "Contribution" in df.columns
+    assert "Average/Mode" in df.columns
+
 
 def test_post_similar_entities(client, models, entities):
     model_id = str(schema.Model.find_one(name=models[0]["name"]).id)

@@ -20,13 +20,13 @@ def validate_changes(changes):
     """
     for change in changes:
         change[0] = str(change[0])
-        try:
-            change[1] = float(change[1])
-        except:
-            pass
         if schema.Feature.find_one(name=change[0]) is None:
             LOGGER.exception("Invalid feature %s" % change[0])
             return {"message": "Invalid feature {}".format(change[0])}, 400
+
+        if isinstance(change[1], (int, float)):
+            change[1] = float(change[1])
+
         if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [
             0,
             1,
