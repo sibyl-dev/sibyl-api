@@ -18,7 +18,8 @@ LOGGER = logging.getLogger(__name__)
 class SingleChangePredictions(Resource):
     def post(self):
         """
-        Get the resulting model prediction after making changes, one at a time, to an entity
+        Get the resulting model predictions after changing the value of a single feature
+        of an entity for each feature-value pair provided in the request.
         ---
         tags:
           - computing
@@ -52,7 +53,7 @@ class SingleChangePredictions(Resource):
                 schema:
                   type: object
                   properties:
-                    changes:
+                    predictions:
                         type: array
                         items:
                             type: number
@@ -133,7 +134,7 @@ class SingleChangePredictions(Resource):
             modified[feature] = value
             prediction = explainer.predict(modified)[0].tolist()
             predictions.append([feature, prediction])
-        return {"changes": predictions}
+        return {"predictions": predictions}
 
 
 class ModifiedPrediction(Resource):

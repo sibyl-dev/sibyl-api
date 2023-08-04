@@ -107,14 +107,14 @@ def test_single_change_predictions(client, models, entities):
         "/api/v1/single_change_predictions/",
         json={"eid": eid, "model_id": model_id, "changes": changes},
     ).json
-    assert response["changes"] == [["A", 5 - entity["features"]["B"]]]
+    assert response["predictions"] == [["A", 5 - entity["features"]["B"]]]
 
     changes = [("A", 6), ("B", 10), ("C", 5)]
     response = client.post(
         "/api/v1/single_change_predictions/",
         json={"eid": eid, "model_id": model_id, "changes": changes},
     ).json
-    assert response["changes"] == [
+    assert response["predictions"] == [
         ["A", 6 - entity["features"]["B"]],
         ["B", entity["features"]["A"] - 10],
         ["C", entity["features"]["A"] - entity["features"]["B"]],
