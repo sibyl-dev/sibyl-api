@@ -143,7 +143,7 @@ class Importance(Resource):
             return {"message": "Model {} does not exist".format(model_id)}, 400
 
         importances = model.importances
-        return {"importances": importances}
+        return {"importances": importances}, 200
 
 
 class Prediction(Resource):
