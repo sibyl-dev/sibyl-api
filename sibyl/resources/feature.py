@@ -145,4 +145,4 @@ class Categories(Resource):
             LOGGER.exception(e)
             return {"message": str(e)}, 500
         else:
-            return {"categories": categories}
+            return {"categories": categories}, 200
