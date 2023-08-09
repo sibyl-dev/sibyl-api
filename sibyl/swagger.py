@@ -80,12 +80,8 @@ schemas = {
         "required": ["name"],
     },
     "Changes": {
-        "type": "array",
-        "items": {
-            "type": "object",
-            "properties": {"feature_name": "string", "new_feature_value": "object"},
-        },
-        "required": ["name"],
+        "type": "object",
+        "additionalProperties": {"oneOf": [{"type": "string"}, {"type": "number"}]},
     },
     "Message": {
         "type": "object",

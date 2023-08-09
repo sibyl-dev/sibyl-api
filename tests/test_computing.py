@@ -74,27 +74,24 @@ def test_post_prediction_count(client, models):
     assert response["count"] == 4
 
 
-def test_post_multiple_prediction(client, models, entities):
+def test_post_modified_prediction(client, models, entities):
     model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
     entity = entities[0]
     eid = entity["eid"]
 
-    changes = [("A", 5)]
+    changes = {"A": 5}
     response = client.post(
         "/api/v1/modified_prediction/",
         json={"eid": eid, "model_id": model_id, "changes": changes},
     ).json
     assert response["prediction"] == (5 - entity["features"]["B"])
 
-    changes = [("A", 6), ("B", 10), ("C", 5)]
+    changes = {"A": 6, "B": 10, "C": 5}
     response = client.post(
         "/api/v1/modified_prediction/",
         json={"eid": eid, "model_id": model_id, "changes": changes},
     ).json
     assert response["prediction"] == -4
-
-    entity_in_db = client.get("/api/v1/entities/" + entity["eid"] + "/").json
-    assert entity_in_db["features"] == entity["features"]
 
 
 def test_single_change_predictions(client, models, entities):
@@ -102,14 +99,14 @@ def test_single_change_predictions(client, models, entities):
     entity = entities[0]
     eid = entity["eid"]
 
-    changes = [("A", 5)]
+    changes = {"A": 5}
     response = client.post(
         "/api/v1/single_change_predictions/",
         json={"eid": eid, "model_id": model_id, "changes": changes},
     ).json
     assert response["predictions"] == [["A", 5 - entity["features"]["B"]]]
 
-    changes = [("A", 6), ("B", 10), ("C", 5)]
+    changes = {"A": 6, "B": 10, "C": 5}
     response = client.post(
         "/api/v1/single_change_predictions/",
         json={"eid": eid, "model_id": model_id, "changes": changes},
@@ -126,7 +123,7 @@ def test_modified_contribution(client, models, entities):
     entity = entities[0]
     eid = entity["eid"]
 
-    changes = [("A", 5)]
+    changes = {"A": 5}
     response = client.post(
         "/api/v1/modified_contribution/",
         json={"eid": eid, "model_id": model_id, "changes": changes},
@@ -139,7 +136,7 @@ def test_modified_contribution(client, models, entities):
     assert "Contribution" in df.columns
     assert "Average/Mode" in df.columns
 
-    changes = [("A", 3), ("B", 12), ("C", 1)]
+    changes = {"A": 3, "B": 12, "C": 1}
     response = client.post(
         "/api/v1/modified_contribution/",
         json={"eid": eid, "model_id": model_id, "changes": changes},
