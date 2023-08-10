@@ -18,23 +18,20 @@ def validate_changes(changes):
     """
     Helper function for validating changes to entity.
     """
-    for change in changes:
-        change[0] = str(change[0])
-        if schema.Feature.find_one(name=change[0]) is None:
-            LOGGER.exception("Invalid feature %s" % change[0])
-            return {"message": "Invalid feature {}".format(change[0])}, 400
+    for feature, change in changes.items():
+        if schema.Feature.find_one(name=feature) is None:
+            LOGGER.exception(f"Invalid feature {feature}")
+            return {"message": f"Invalid feature {feature}"}, 400
 
-        if isinstance(change[1], (int, float)):
-            change[1] = float(change[1])
+        if isinstance(change, (int, float)):
+            change = float(change)
 
-        if schema.Feature.find_one(name=change[0]).type == "binary" and change[1] not in [
+        if schema.Feature.find_one(name=feature).type == "binary" and change not in [
             0,
             1,
         ]:
-            LOGGER.exception(
-                "Feature %s is binary, change value of %s is invalid." % (change[0], change[1])
-            )
-            return {"message": "Feature {} is binary, invalid change value".format(change[0])}, 400
+            LOGGER.exception(f"Feature {feature} is binary, change value of {change} is invalid.")
+            return {"message": f"Feature {feature} is binary, invalid change value"}, 400
 
 
 class SingleChangePredictions(Resource):
@@ -59,13 +56,7 @@ class SingleChangePredictions(Resource):
                    model_id:
                      type: string
                    changes:
-                     type: array
-                     items:
-                       type: array
-                       items:
-                         oneOf:
-                           type: string
-                           type: number
+                     $ref: '#/components/schemas/Changes'
                  required: ['eid', 'model_id', 'changes']
         responses:
           200:
@@ -76,8 +67,12 @@ class SingleChangePredictions(Resource):
                   type: object
                   properties:
                     predictions:
+                      type: array
+                      items:
                         type: array
                         items:
+                          oneOf:
+                            type: string
                             type: number
                 examples:
                   externalJson:
@@ -119,11 +114,9 @@ class SingleChangePredictions(Resource):
             return payload
 
         predictions = []
-        for change in changes:
-            feature = change[0]
-            value = change[1]
+        for feature, change in changes.items():
             modified = entity_features.copy()
-            modified[feature] = value
+            modified[feature] = change
             prediction = explainer.predict(modified)[0].tolist()
             predictions.append([feature, prediction])
         return {"predictions": predictions}, 200
@@ -150,13 +143,7 @@ class ModifiedPrediction(Resource):
                    model_id:
                      type: string
                    changes:
-                     type: array
-                     items:
-                       type: array
-                       items:
-                         oneOf:
-                           type: string
-                           type: number
+                     $ref: '#/components/schemas/Changes'
                  required: ['eid', 'model_id', 'changes']
         responses:
           200:
@@ -166,12 +153,12 @@ class ModifiedPrediction(Resource):
                 schema:
                   type: object
                   properties:
-                    changes:
-                        type: number
+                    prediction:
+                      type: number
                 examples:
                   externalJson:
                     summary: external example
-                    externalValue: '/examples/entity-get-200.json'
+                    externalValue: '/examples/modifiedprediction-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -208,10 +195,8 @@ class ModifiedPrediction(Resource):
             return payload
 
         modified = entity_features.copy()
-        for change in changes:
-            feature = change[0]
-            value = change[1]
-            modified[feature] = value
+        for feature, change in changes.items():
+            modified[feature] = change
         prediction = explainer.predict(modified)[0].tolist()
         return {"prediction": prediction}, 200
 
@@ -450,13 +435,13 @@ class FeatureContributions(Resource):
                   type: object
                   properties:
                     contributions:
-                        type: array
-                        items:
-                            type: number
+                      type: object
+                      additionalProperties:
+                        type: number
                 examples:
                   externalJson:
                     summary: external example
-                    externalValue: '/examples/entity-get-200.json'
+                    externalValue: '/examples/contributions-post-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -527,7 +512,7 @@ class MultiFeatureContributions(Resource):
                   eids:
                     type: array
                     items:
-                        type: string
+                      type: string
                   model_id:
                     type: string
                 required: ['eids', 'model_id']
@@ -540,14 +525,10 @@ class MultiFeatureContributions(Resource):
                   type: object
                   properties:
                     contributions:
-                      type: dictionary
-                      keys:
-                        type: string
-                      items:
-                        type: dictionary
-                        keys:
-                          type: string
-                        items:
+                      type: object
+                      additionalProperties:
+                        type: object
+                        additionalProperties:
                           type: object
                           properties:
                             Feature Value:
@@ -620,13 +601,7 @@ class ModifiedFeatureContribution(Resource):
                    model_id:
                      type: string
                    changes:
-                     type: array
-                     items:
-                       type: array
-                       items:
-                         oneOf:
-                           type: string
-                           type: number
+                     $ref: '#/components/schemas/Changes'
                  required: ['eid', 'model_id', 'changes']
         responses:
           200:
@@ -637,10 +612,8 @@ class ModifiedFeatureContribution(Resource):
                   type: object
                   properties:
                     contribution:
-                      type: dictionary
-                      keys:
-                        type: string
-                      items:
+                      type: object
+                      additionalProperties:
                         type: object
                         properties:
                           Feature Value:
@@ -656,7 +629,7 @@ class ModifiedFeatureContribution(Resource):
                 examples:
                   externalJson:
                     summary: external example
-                    externalValue: '/examples/modifiedcontribution-get-200.json'
+                    externalValue: '/examples/modifiedcontribution-post-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -692,10 +665,8 @@ class ModifiedFeatureContribution(Resource):
             return payload
 
         modified = entity_features.copy()
-        for change in changes:
-            feature = change[0]
-            value = change[1]
-            modified[feature] = value
+        for feature, change in changes.items():
+            modified[feature] = change
         contribution = explainer.produce_feature_contributions(modified)[0]
         contribution_json = contribution.set_index("Feature Name").to_json(orient="index")
         return {"contribution": contribution_json}, 200
