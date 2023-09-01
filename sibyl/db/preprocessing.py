@@ -117,7 +117,7 @@ def insert_entities(
     num=None,
 ):
     values_df = pd.read_csv(feature_values_filepath)
-    features_to_extract = ["eid"] + features_names
+    features_to_extract = ["eid", "row_id"] + features_names
     if target in values_df:
         features_to_extract += [target]
     values_df = values_df[features_to_extract]
@@ -147,7 +147,7 @@ def insert_entities(
     raw_entities = values_df.to_dict(orient="records")
     entities = []
     for raw_entity in raw_entities:
-        entity = {"eid": str(raw_entity["eid"])}
+        entity = {"eid": str(raw_entity["eid"]), "row_id": str(raw_entity["row_id"])}
         del raw_entity["eid"]
         entity["features"] = raw_entity
         if target in raw_entity:

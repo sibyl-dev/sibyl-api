@@ -65,14 +65,13 @@ class Entity(SibylDocument):
     """
 
     eid = fields.StringField(validation=_valid_id)
+    row_id = fields.StringField(validation=_valid_id, unique_with="eid")
 
     features = fields.DictField()  # {feature:value}
     property = fields.DictField()  # {property:value}
     label = fields.StringField()  # ground-truth label, if provided
 
     events = fields.ListField(fields.ReferenceField(Event, reverse_delete_rule=PULL))
-
-    unique_key_fields = ["eid"]
 
 
 class Category(SibylDocument):
@@ -86,7 +85,7 @@ class Category(SibylDocument):
     color : str
         Hexidecimal color that should be used for the category
     abbreviation : str
-        Two or three character abbreviation of the category
+        Two- or three-character abbreviation of the category
     """
 
     name = fields.StringField(required=True)
