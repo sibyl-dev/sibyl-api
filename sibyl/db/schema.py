@@ -18,6 +18,19 @@ def _valid_id(val):
         raise ValidationError("eid must be type string, given %s" % val)
 
 
+def _valid_row_ids(val):
+    if isinstance(val, str):
+        raise ValidationError("row_ids must be list of strings")
+    try:
+        for row_id in val:
+            if not isinstance(row_id, str):
+                raise ValidationError("all row_ids must be type string, given %s" % row_id)
+    except TypeError:
+        raise ValidationError("val must be a list of valid row_ids")
+    if len(val) != len(set(val)):
+        raise ValidationError("all row_ids for a given eid must be unique")
+
+
 def _eid_exists(val):
     if Entity.find_one(eid=val) is None:
         raise ValidationError("eid provided (%s) does not exist" % val)
@@ -64,12 +77,12 @@ class Entity(SibylDocument):
         List of events this entity was involved in
     """
 
-    eid = fields.StringField(validation=_valid_id)
-    row_id = fields.StringField(validation=_valid_id, unique_with="eid")
+    eid = fields.StringField(validation=_valid_id, unique=True)
+    row_ids = fields.ListField(validation=_valid_row_ids)
 
-    features = fields.DictField()  # {feature:value}
+    features = fields.DictField()  # {row_id: {feature:value}}
     property = fields.DictField()  # {property:value}
-    label = fields.StringField()  # ground-truth label, if provided
+    labels = fields.DictField()  # {row_id: ground_truth_label}, as provided
 
     events = fields.ListField(fields.ReferenceField(Event, reverse_delete_rule=PULL))
 

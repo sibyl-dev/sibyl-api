@@ -144,15 +144,19 @@ def insert_entities(
     # TODO: add groups to entities
     # groups = schema.EntityGroup.find()
 
-    raw_entities = values_df.to_dict(orient="records")
+    values_df["row_id"] = values_df["row_id"].astype(str)
+    values_df = values_df.set_index(["eid", "row_id"])
+    raw_entities = {
+        level: values_df.xs(level).to_dict("index") for level in values_df.index.levels[0]
+    }
     entities = []
-    for raw_entity in raw_entities:
-        entity = {"eid": str(raw_entity["eid"]), "row_id": str(raw_entity["row_id"])}
-        del raw_entity["eid"]
-        entity["features"] = raw_entity
-        if target in raw_entity:
-            entity["label"] = str(raw_entity[target])
-            del raw_entity[target]
+    for eid in raw_entities:
+        entity = {"eid": str(eid), "row_ids": list(raw_entities[eid].keys())}
+        targets = {}
+        for row_id in raw_entities[eid]:
+            if target in raw_entities[eid][row_id]:
+                targets[row_id] = raw_entities[eid][row_id].pop(target)
+        entity["features"] = raw_entities[eid]
         entities.append(entity)
     schema.Entity.insert_many(entities)
     return eids
