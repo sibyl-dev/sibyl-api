@@ -117,7 +117,9 @@ def insert_entities(
     num=None,
 ):
     values_df = pd.read_csv(feature_values_filepath)
-    features_to_extract = ["eid", "row_id"] + features_names
+    features_to_extract = ["eid"] + features_names
+    if "row_id" in values_df:
+        features_to_extract = features_to_extract + ["row_id"]
     if target in values_df:
         features_to_extract += [target]
     values_df = values_df[features_to_extract]
@@ -144,6 +146,8 @@ def insert_entities(
     # TODO: add groups to entities
     # groups = schema.EntityGroup.find()
 
+    if "row_id" not in values_df:
+        values_df["row_id"] = np.arange(0, values_df.shape[0])
     values_df["row_id"] = values_df["row_id"].astype(str)
     values_df = values_df.set_index(["eid", "row_id"])
     raw_entities = {
