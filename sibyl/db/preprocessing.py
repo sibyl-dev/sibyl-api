@@ -149,6 +149,7 @@ def insert_entities(
     for raw_entity in raw_entities:
         entity = {"eid": str(raw_entity["eid"]), "row_id": str(raw_entity["row_id"])}
         del raw_entity["eid"]
+        del raw_entity["row_id"]
         entity["features"] = raw_entity
         if target in raw_entity:
             entity["label"] = str(raw_entity[target])

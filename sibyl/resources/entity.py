@@ -1,8 +1,10 @@
 import logging
 
 from flask_restful import Resource, reqparse
+from flask import request
 
 from sibyl.db import schema
+from mongoengine.queryset.visitor import Q
 
 LOGGER = logging.getLogger(__name__)
 
@@ -48,6 +50,11 @@ class Entity(Resource):
               type: string
             required: true
             description: ID of the entity to get
+          - name: row_id
+            in: query
+            schema:
+              type: string
+            description: ID of the row to get
         responses:
           200:
             description: Entity to be returned
@@ -81,10 +88,20 @@ class Entity(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        entity = schema.Entity.find_one(eid=str(eid))
+        row_id = request.args.get("row_id", None)
+
+        if row_id is not None:
+            entity = schema.Entity.objects(Q(eid=str(eid)) & Q(row_id=str(row_id))).first()
+        else:
+            entity = schema.Entity.objects(eid=str(eid)).first()
         if entity is None:
-            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
-            return {"message": "Entity {} does not exist".format(eid), "code": 400}, 400
+            LOGGER.exception(
+                "Error getting entity. Entity %s or row id %s does not exist.", (eid, row_id)
+            )
+            return {
+                "message": "Entity {} or row id {} does not exist".format(eid, row_id),
+                "code": 400,
+            }, 400
 
         return get_entity(entity, features=True), 200
 
@@ -95,7 +112,7 @@ class Entities(Resource):
         parser_get.add_argument("group_id", type=str, default=None, location="args")
         self.parser_get = parser_get
 
-    def get(self):
+    def get(self, include_row_ids=True):
         """
         Get all Entities
         If group ID is specified, return entities of that group.
@@ -111,6 +128,9 @@ class Entities(Resource):
               type: string
             required: false
             description: ID of the group to filter entities
+          - name: include_row_ids
+            schema:
+              type: boolean
         responses:
           200:
             description: All entities
@@ -136,7 +156,7 @@ class Entities(Resource):
         except Exception as e:
             LOGGER.exception(str(e))
             return {"message", str(e)}, 400
-
+        print(include_row_ids)
         group_id = args["group_id"]
         if group_id is None:
             # no referral filter applied
