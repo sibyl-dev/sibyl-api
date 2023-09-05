@@ -13,6 +13,10 @@ from sibyl.db import schema
 LOGGER = logging.getLogger(__name__)
 
 
+def first(dict_):
+    return dict_[next(iter(dict_))]
+
+
 def get_model(model_doc, basic=True):
     model = {"id": str(model_doc.id), "name": model_doc.name}
     if not basic:
@@ -203,7 +207,7 @@ class Prediction(Resource):
                 }, 400
             entity_features = pd.DataFrame(entity.features[row_id], index=[0])
         else:
-            entity_features = pd.DataFrame(entity.features[next(iter(entity.features))], index=[0])
+            entity_features = pd.DataFrame(first(entity.features), index=[0])
 
         model_doc = schema.Model.find_one(id=model_id)
         if model_doc is None:
@@ -226,7 +230,8 @@ class Prediction(Resource):
 class MultiPrediction(Resource):
     def post(self):
         """
-        Get multiple predictions
+        Get multiple predictions. If given multiple eids, return one prediction per eid
+        (first row). If given one eid, return one prediction per row_id
         ---
         tags:
           - model
@@ -286,10 +291,16 @@ class MultiPrediction(Resource):
         eids = d["eids"]
         model_id = d["model_id"]
 
-        entities = [
-            dict(entity.features, **{"eid": entity.eid})
-            for entity in schema.Entity.objects(eid__in=eids)
-        ]
+        if len(eids) > 1:
+            entities = [
+                dict(first(entity.features), **{"eid": entity.eid})
+                for entity in schema.Entity.objects(eid__in=eids)
+            ]
+        else:
+            feature_dict = schema.Entity.objects(eid=eids[0]).first().features
+            # We mislabel the row_ids as eids intentionally here to take advantage of the
+            #  underlying RealApp object having the id column set to "eid"
+            entities = [dict(feature_dict[row_id], **{"eid": row_id}) for row_id in feature_dict]
         entities = pd.DataFrame(entities)
         success, payload = helpers.load_model(model_id, include_explainer=True)
         if success:
