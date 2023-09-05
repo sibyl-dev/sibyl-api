@@ -24,13 +24,32 @@ def get_events(entity_doc):
     return events
 
 
-def get_entity(entity_doc, features=True):
+def get_entity_row(entity_doc, features=True):
     entity = {
         "eid": entity_doc.eid,
+        "row_id": entity_doc.row_id,
         "property": entity_doc.property,
+        "label": entity_doc.label,
     }
     if features:
         entity["features"] = entity_doc.features
+    return entity
+
+
+def get_entity(queryset, features=True):
+    entity = {"eid": queryset.first().eid}
+    row_ids = []
+    feature_dict = {}
+    label_dict = {}
+    for entity_doc in queryset:
+        row_ids.append(entity_doc.row_id)
+        label_dict[entity_doc.row_id] = entity_doc.label
+        if features:
+            feature_dict[entity_doc.row_id] = entity_doc.features
+    entity["row_ids"] = row_ids
+    entity["labels"] = label_dict
+    if features:
+        entity["features"] = feature_dict
     return entity
 
 
@@ -93,7 +112,7 @@ class Entity(Resource):
         if row_id is not None:
             entity = schema.Entity.objects(Q(eid=str(eid)) & Q(row_id=str(row_id))).first()
         else:
-            entity = schema.Entity.objects(eid=str(eid)).first()
+            entity = schema.Entity.objects(eid=str(eid))
         if entity is None:
             LOGGER.exception(
                 "Error getting entity. Entity %s or row id %s does not exist.", (eid, row_id)
@@ -102,8 +121,9 @@ class Entity(Resource):
                 "message": "Entity {} or row id {} does not exist".format(eid, row_id),
                 "code": 400,
             }, 400
-
-        return get_entity(entity, features=True), 200
+        if row_id is None:
+            return get_entity(entity), 200
+        return get_entity_row(entity, features=True), 200
 
 
 class Entities(Resource):
@@ -112,7 +132,7 @@ class Entities(Resource):
         parser_get.add_argument("group_id", type=str, default=None, location="args")
         self.parser_get = parser_get
 
-    def get(self, include_row_ids=True):
+    def get(self):
         """
         Get all Entities
         If group ID is specified, return entities of that group.
@@ -128,9 +148,6 @@ class Entities(Resource):
               type: string
             required: false
             description: ID of the group to filter entities
-          - name: include_row_ids
-            schema:
-              type: boolean
         responses:
           200:
             description: All entities
@@ -156,7 +173,6 @@ class Entities(Resource):
         except Exception as e:
             LOGGER.exception(str(e))
             return {"message", str(e)}, 400
-        print(include_row_ids)
         group_id = args["group_id"]
         if group_id is None:
             # no referral filter applied
