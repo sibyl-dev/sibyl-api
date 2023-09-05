@@ -48,16 +48,45 @@ class Event(SibylDocument):
     unique_key_fields = ["event_id"]
 
 
+class EntityRow(SibylDocument):
+    """
+    An **EntityRow** holds the feature values and details for one model input
+
+    Attributes
+    ----------
+    eid : str
+        Entity this row belongs to
+    row_id : str
+        ID of this row
+    features : dict {feature_name : feature_value}
+        Feature values for the entity
+    label : str
+        Ground-truth label for this row
+    property : dict {property : value}
+        Domain-specific properties
+    """
+
+    eid = fields.StringField(validation=_valid_id)
+    row_id = fields.StringField(validation=_valid_id, unique_with="eid")
+
+    features = fields.DictField()  # {feature:value}
+    label = fields.StringField()
+
+    property = fields.DictField()
+
+
 class Entity(SibylDocument):
     """
-    An **Entity** holds the feature values and details for one model input
+    An **Entity** holds properties and EntityRows for one entity in the dataset
 
     Attributes
     ----------
     eid : str
         Unique ID of the entity
-    features : dict {feature_name : feature_value}
-        Feature values for the entity
+    rows: list [EntityRow object]
+        Data rows (feature values/labels) for this entity
+    groups: list [EntityGroup object]
+        EntityGroups this entity belongs to
     property : dict {property : value}
         Domain-specific properties
     events : list [Event object]
@@ -65,11 +94,9 @@ class Entity(SibylDocument):
     """
 
     eid = fields.StringField(validation=_valid_id)
-    row_id = fields.StringField(validation=_valid_id, unique_with="eid")
+    rows = fields.ListField(fields.ReferenceField(EntityRow, reverse_delete_rule=PULL))
 
-    features = fields.DictField()  # {feature:value}
     property = fields.DictField()  # {property:value}
-    label = fields.StringField()  # ground-truth label, if provided
 
     events = fields.ListField(fields.ReferenceField(Event, reverse_delete_rule=PULL))
 
@@ -128,7 +155,7 @@ class TrainingSet(SibylDocument):
 
     Attributes
     ----------
-    entities : list [Entity object[
+    entities : list [Entity object]
         List of entities in the dataset
     neighbors : trained NN classifier
         Trained nearest neighbors classifier for the dataset
