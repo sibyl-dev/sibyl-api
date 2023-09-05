@@ -168,6 +168,11 @@ class Prediction(Resource):
               type: string
             required: true
             description: ID of the entity to predict on
+          - name: row_id
+            in: query
+            schema:
+              type: string
+            description: ID of row to predict on (defaults to first row)
         responses:
           200:
             description: Prediction
@@ -184,12 +189,21 @@ class Prediction(Resource):
         """
         model_id = request.args.get("model_id", None)
         eid = request.args.get("eid", None)
+        row_id = request.args.get("row_id", None)
 
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
             LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
             return {"message": "Entity {} does not exist".format(eid)}, 400
-        entity_features = pd.DataFrame(entity.features, index=[0])
+        if row_id is not None:
+            if row_id not in entity.features:
+                LOGGER.exception("row_id %s does not exist for entity %s", (row_id, eid))
+                return {
+                    "message": "row_id {} does not exist for entity {}".format(row_id, eid)
+                }, 400
+            entity_features = pd.DataFrame(entity.features[row_id], index=[0])
+        else:
+            entity_features = pd.DataFrame(entity.features[next(iter(entity.features))], index=[0])
 
         model_doc = schema.Model.find_one(id=model_id)
         if model_doc is None:
