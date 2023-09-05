@@ -33,7 +33,7 @@ def get_entity(entity_doc, features=True):
 
 
 class Entity(Resource):
-    def get(self, eid):
+    def get(self, eid, row_id=None):
         """
         Get an Entity by ID
         ---
@@ -48,6 +48,10 @@ class Entity(Resource):
               type: string
             required: true
             description: ID of the entity to get
+          - name: row_id
+            schema:
+              type: string
+            description: ID of the row to get for the entity
         responses:
           200:
             description: Entity to be returned
