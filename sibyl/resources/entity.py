@@ -1,6 +1,7 @@
 import logging
 
 from flask_restful import Resource, reqparse
+from flask import request
 
 from sibyl.db import schema
 
@@ -25,6 +26,7 @@ def get_events(entity_doc):
 def get_entity(entity_doc, features=True):
     entity = {
         "eid": entity_doc.eid,
+        "row_ids": entity_doc.row_ids,
         "property": entity_doc.property,
     }
     if features:
@@ -32,8 +34,18 @@ def get_entity(entity_doc, features=True):
     return entity
 
 
+def get_entity_row(entity_doc, row_id=None, features=True):
+    entity = {
+        "eid": entity_doc.eid,
+        "property": entity_doc.property,
+    }
+    if features:
+        entity["features"] = entity_doc.features[row_id]
+    return entity
+
+
 class Entity(Resource):
-    def get(self, eid, row_id=None):
+    def get(self, eid):
         """
         Get an Entity by ID
         ---
@@ -49,6 +61,7 @@ class Entity(Resource):
             required: true
             description: ID of the entity to get
           - name: row_id
+            in: query
             schema:
               type: string
             description: ID of the row to get for the entity
@@ -85,12 +98,16 @@ class Entity(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
+        row_id = request.args.get("row_id", None)
+
         entity = schema.Entity.find_one(eid=str(eid))
         if entity is None:
             LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
             return {"message": "Entity {} does not exist".format(eid), "code": 400}, 400
 
-        return get_entity(entity, features=True), 200
+        if row_id is None:
+            return get_entity(entity, features=True), 200
+        return get_entity_row(entity, row_id, features=True), 200
 
 
 class Entities(Resource):
