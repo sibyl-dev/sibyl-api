@@ -18,7 +18,7 @@ def _prepare_db(args):
 
 
 def _prepare_housing_db(args):
-    # prepare_housing_application.run()
+    prepare_housing_application.run()
     prepare_database("./sibyl/sample_applications/housing_config.yml")
 
 

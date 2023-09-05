@@ -123,6 +123,7 @@ def insert_entities(
     if target in values_df:
         features_to_extract += [target]
     values_df = values_df[features_to_extract]
+    print("put together values_df")
     transformers = []
     if impute is not None and impute:
         transformer = MultiTypeImputer()
@@ -142,17 +143,24 @@ def insert_entities(
     if num is not None:
         values_df = values_df.sample(num, random_state=100)
     eids = values_df["eid"]
+    values_df = values_df.copy()
+    print('ran transformers')
 
     # TODO: add groups to entities
     # groups = schema.EntityGroup.find()
 
     if "row_id" not in values_df:
-        values_df["row_id"] = np.arange(0, values_df.shape[0])
-    values_df["row_id"] = values_df["row_id"].astype(str)
+        values_df["row_id"] = pd.Series(np.arange(0, values_df.shape[0])).astype(str)
+        print("added row_id")
+    else:
+        values_df["row_id"] = values_df["row_id"].astype(str)
+    values_df = values_df.copy()
+    print("set row_id")
     values_df = values_df.set_index(["eid", "row_id"])
     raw_entities = {
         level: values_df.xs(level).to_dict("index") for level in values_df.index.levels[0]
     }
+    print("made raw_entities")
     entities = []
     for eid in raw_entities:
         entity = {"eid": str(eid), "row_ids": list(raw_entities[eid].keys())}
@@ -162,6 +170,7 @@ def insert_entities(
                 targets[row_id] = raw_entities[eid][row_id].pop(target)
         entity["features"] = raw_entities[eid]
         entities.append(entity)
+    print("filled db for entities")
     schema.Entity.insert_many(entities)
     return eids
 

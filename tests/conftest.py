@@ -9,7 +9,7 @@ from mongoengine.connection import disconnect
 from pymongo import MongoClient
 from pyreal import RealApp
 from pyreal.transformers import FeatureSelectTransformer
-from pyreal.types.explanations.feature_based import FeatureContributionExplanation
+from pyreal.explanation_types.explanations.feature_based import FeatureContributionExplanation
 from sklearn.linear_model import LinearRegression
 
 from sibyl.core import Sibyl
