@@ -76,6 +76,13 @@ def test_post_modified_prediction(client, models, entities):
     ).json
     assert response["prediction"] == -4
 
+    changes = {"A": 6, "C": 5}
+    response = client.post(
+        "/api/v1/modified_prediction/",
+        json={"eid": eid, "model_id": model_id, "changes": changes, "row_id": "row_b"},
+    ).json
+    assert response["prediction"] == (6 - entity["features"]["row_b"]["B"])
+
 
 def test_single_change_predictions(client, models, entities):
     model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
@@ -99,6 +106,13 @@ def test_single_change_predictions(client, models, entities):
         ["B", entity["features"]["row_a"]["A"] - 10],
         ["C", entity["features"]["row_a"]["A"] - entity["features"]["row_a"]["B"]],
     ]
+
+    changes = {"A": 5}
+    response = client.post(
+        "/api/v1/single_change_predictions/",
+        json={"eid": eid, "model_id": model_id, "changes": changes, "row_id": "row_b"},
+    ).json
+    assert response["predictions"] == [["A", 5 - entity["features"]["row_b"]["B"]]]
 
 
 def test_modified_contribution(client, models, entities):
