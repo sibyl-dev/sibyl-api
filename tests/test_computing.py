@@ -58,11 +58,15 @@ def test_post_multi_contributions(client, models, entities):
 
     response = client.post(
         "/api/v1/multi_contributions/",
-        json={"eids": [entities[0]["eid"]], "model_id": model_id},
+        json={
+            "eids": [entities[0]["eid"], entities[1]["eid"]],
+            "model_id": model_id,
+            "row_id": "row_b",
+        },
     ).json
     contributions = response["contributions"]
-    for row_id in entities[0]["row_ids"]:  # Assert no error
-        pd.read_json(contributions[row_id], orient="index")
+    for eid in [entities[0]["eid"], entities[1]["eid"]]:  # Assert no error
+        pd.read_json(contributions[eid], orient="index")
 
 
 def test_post_modified_prediction(client, models, entities):
@@ -174,11 +178,12 @@ def test_post_similar_entities(client, models, entities):
     response = client.post(
         "/api/v1/similar_entities/",
         json={
-            "eids": [entities[0]["eid"]],
+            "eids": ["ent1", "ent2"],
             "model_id": model_id,
+            "row_id": "row_b",
         },
     ).json
     similar_entities = response["similar_entities"]
-    for row_id in entities[0]["row_ids"]:  # Assert no error
-        pd.read_json(similar_entities[row_id]["X"], orient="index")
-        pd.read_json(similar_entities[row_id]["y"], orient="index")
+    for eid in ["ent1", "ent2"]:  # Assert no error
+        pd.read_json(similar_entities[eid]["X"], orient="index")
+        pd.read_json(similar_entities[eid]["y"], orient="index")

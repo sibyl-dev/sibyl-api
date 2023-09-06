@@ -9,6 +9,7 @@ from flask_restful import Resource
 
 from sibyl import helpers
 from sibyl.db import schema
+from sibyl.resources.computing import get_entities_table, get_and_validate_params, Attrs
 
 LOGGER = logging.getLogger(__name__)
 
@@ -276,32 +277,15 @@ class MultiPrediction(Resource):
                 return obj.tolist()
             return obj
 
-        # LOAD IN AND CHECK ATTRIBUTES:
-        attrs = ["eids", "model_id"]
-        d = dict()
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
+        attr_info = [
+            Attrs("eid"),
+            Attrs("model_id"),
+            Attrs("row_id", False),
+        ]
 
-        eids = d["eids"]
-        model_id = d["model_id"]
+        eids, model_id, row_id = get_and_validate_params(attr_info)
 
-        if len(eids) > 1:
-            entities = [
-                dict(first(entity.features), **{"eid": entity.eid})
-                for entity in schema.Entity.objects(eid__in=eids)
-            ]
-        else:
-            entity_dict = schema.Entity.objects(eid=eids[0]).first().features
-            # We mislabel the row_ids as eids intentionally here to take advantage of the
-            #  underlying RealApp object having the id column set to "eid"
-            entities = [dict(entity_dict[row_id], **{"eid": row_id}) for row_id in entity_dict]
-        entities = pd.DataFrame(entities)
+        entities = get_entities_table(eids, row_id)
         success, payload = helpers.load_model(model_id, include_explainer=True)
         if success:
             _, explainer = payload

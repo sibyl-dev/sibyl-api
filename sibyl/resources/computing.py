@@ -20,7 +20,7 @@ def get_features_for_row(features, row_id):
         return features[next(iter(features))]
     else:
         if row_id not in features:
-            LOGGER.exception("row_id %s does not exist for entity", (row_id))
+            LOGGER.exception("row_id %s does not exist for entity", row_id)
             return {"message": "row_id {} does not exist for entity".format(row_id)}, 400
         return features[row_id]
 
@@ -92,6 +92,28 @@ def validate_changes(changes):
             return {"message": f"Feature {feature} is binary, invalid change value"}, 400
 
 
+def get_entity_table(eid, row_id):
+    entity = schema.Entity.find_one(eid=eid)
+    if entity is None:
+        LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
+        return {"message": "Entity {} does not exist".format(eid)}, 400
+    return pd.DataFrame(get_features_for_row(entity.features, row_id), index=[0])
+
+
+def get_entities_table(eids, row_id, all_rows=False):
+    if not all_rows:
+        entities = [
+            dict(get_features_for_row(entity.features, row_id), **{"eid": entity.eid})
+            for entity in schema.Entity.objects(eid__in=eids)
+        ]
+    else:
+        entity_dict = schema.Entity.objects(eid=eids[0]).first().features
+        # We mislabel the row_ids as eids intentionally here to take advantage of the
+        #  underlying RealApp object having the id column set to "eid"
+        entities = [dict(entity_dict[row_id], **{"eid": row_id}) for row_id in entity_dict]
+    return pd.DataFrame(entities)
+
+
 class SingleChangePredictions(Resource):
     def post(self):
         """
@@ -150,11 +172,7 @@ class SingleChangePredictions(Resource):
 
         eid, model_id, row_id, changes = get_and_validate_params(attr_info)
 
-        entity = schema.Entity.find_one(eid=eid)
-        if entity is None:
-            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
-            return {"message": "Entity {} does not exist".format(eid)}, 400
-        entity_features = pd.DataFrame(get_features_for_row(entity.features, row_id), index=[0])
+        entity_features = get_entity_table(eid, row_id)
 
         success, payload = helpers.load_explainer(model_id)
         if success:
@@ -222,11 +240,7 @@ class ModifiedPrediction(Resource):
 
         eid, model_id, row_id, changes = get_and_validate_params(attr_info)
 
-        entity = schema.Entity.find_one(eid=eid)
-        if entity is None:
-            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
-            return {"message": "Entity {} does not exist".format(eid)}, 400
-        entity_features = pd.DataFrame(get_features_for_row(entity.features, row_id), index=[0])
+        entity_features = get_entity_table(eid, row_id)
 
         success, payload = helpers.load_explainer(model_id)
         if success:
@@ -287,15 +301,7 @@ class FeatureContributions(Resource):
         attr_info = [Attrs("eid"), Attrs("model_id"), Attrs("row_id", False)]
         eid, model_id, row_id = get_and_validate_params(attr_info)
 
-        # LOAD IN AND VALIDATE ENTITY
-        entity = schema.Entity.find_one(eid=str(eid))
-        if entity is None:
-            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
-            return {"message": "Entity {} does not exist".format(eid)}, 400
-        entity_features = pd.DataFrame(get_features_for_row(entity.features, row_id), index=[0])
-        if entity_features is None:
-            LOGGER.exception("Entity %s has no features. ", eid)
-            return {"message": "Entity {} does not have features.".format(eid)}, 400
+        entity_features = get_entity_table(eid, row_id)
 
         # LOAD IN AND VALIDATE MODEL DATA
         success, payload = helpers.load_explainer(model_id)
@@ -332,6 +338,9 @@ class MultiFeatureContributions(Resource):
                       type: string
                   model_id:
                     type: string
+                  row_id:
+                    type: string
+                    description: row_id to use for all entities
                 required: ['eids', 'model_id']
         responses:
           200:
@@ -362,20 +371,14 @@ class MultiFeatureContributions(Resource):
             $ref: '#/components/responses/ErrorMessage'
         """
 
-        attr_info = [Attrs("eids", type=None), Attrs("model_id"), Attrs("row_id", False)]
+        attr_info = [
+            Attrs("eids", type=None),
+            Attrs("model_id"),
+            Attrs("row_id", required=False),
+        ]
         eids, model_id, row_id = get_and_validate_params(attr_info)
 
-        if len(eids) > 1:
-            entities = [
-                dict(get_features_for_row(entity.features, None), **{"eid": entity.eid})
-                for entity in schema.Entity.objects(eid__in=eids)
-            ]
-        else:
-            entity_dict = schema.Entity.objects(eid=eids[0]).first().features
-            # We mislabel the row_ids as eids intentionally here to take advantage of the
-            #  underlying RealApp object having the id column set to "eid"
-            entities = [dict(entity_dict[row_id], **{"eid": row_id}) for row_id in entity_dict]
-        entities = pd.DataFrame(entities)
+        entities = get_entities_table(eids, row_id)
         success, payload = helpers.load_explainer(model_id)
         if success:
             explainer = payload[0]
@@ -455,11 +458,7 @@ class ModifiedFeatureContribution(Resource):
 
         eid, model_id, row_id, changes = get_and_validate_params(attr_info)
 
-        entity = schema.Entity.find_one(eid=eid)
-        if entity is None:
-            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
-            return {"message": "Entity {} does not exist".format(eid)}, 400
-        entity_features = pd.DataFrame(get_features_for_row(entity.features, row_id), index=[0])
+        entity_features = get_entity_table(eid, row_id)
         success, payload = helpers.load_explainer(model_id)
         if success:
             explainer = payload[0]
@@ -513,20 +512,10 @@ class SimilarEntities(Resource):
             $ref: '#/components/responses/ErrorMessage'
         """
 
-        attr_info = [Attrs("eids", type=None), Attrs("model_id")]
-        eids, model_id = get_and_validate_params(attr_info)
+        attr_info = [Attrs("eids", type=None), Attrs("model_id"), Attrs("row_id", required=False)]
+        eids, model_id, row_id = get_and_validate_params(attr_info)
 
-        if len(eids) > 1:
-            entities = [
-                dict(get_features_for_row(entity.features, None), **{"eid": entity.eid})
-                for entity in schema.Entity.objects(eid__in=eids)
-            ]
-        else:
-            entity_dict = schema.Entity.objects(eid=eids[0]).first().features
-            # We mislabel the row_ids as eids intentionally here to take advantage of the
-            #  underlying RealApp object having the id column set to "eid"
-            entities = [dict(entity_dict[row_id], **{"eid": row_id}) for row_id in entity_dict]
-        entities = pd.DataFrame(entities)
+        entities = get_entities_table(eids, row_id)
         success, payload = helpers.load_explainer(model_id, include_dataset=True)
         if success:
             explainer, dataset = payload
