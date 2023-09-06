@@ -284,25 +284,8 @@ class FeatureContributions(Resource):
             $ref: '#/components/responses/ErrorMessage'
         """
 
-        # LOAD IN AND CHECK ATTRIBUTES:
-        attrs = ["eid", "model_id", "row_id"]
-        d = dict()
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-
-        try:
-            eid = str(d["eid"])
-            model_id = str(d["model_id"])
-            row_id = str_convert(d["row_id"])
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
+        attr_info = [Attrs("eid"), Attrs("model_id"), Attrs("row_id", False)]
+        eid, model_id, row_id = get_and_validate_params(attr_info)
 
         # LOAD IN AND VALIDATE ENTITY
         entity = schema.Entity.find_one(eid=str(eid))
@@ -379,20 +362,8 @@ class MultiFeatureContributions(Resource):
             $ref: '#/components/responses/ErrorMessage'
         """
 
-        # LOAD IN AND CHECK ATTRIBUTES:
-        attrs = ["eids", "model_id", "row_id"]
-        d = dict()
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-
-        eids = d["eids"]
-        model_id = d["model_id"]
+        attr_info = [Attrs("eids", type=None), Attrs("model_id"), Attrs("row_id", False)]
+        eids, model_id, row_id = get_and_validate_params(attr_info)
 
         if len(eids) > 1:
             entities = [
@@ -475,29 +446,14 @@ class ModifiedFeatureContribution(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        attrs = ["eid", "model_id", "changes"]
-        d = {}
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-        # validate data type
-        try:
-            eid = str(d["eid"])
-            model_id = str(d["model_id"])
-            changes = d["changes"]
-            if "row_id" in d:
-                row_id = d["row_id"]
-            else:
-                row_id = None
-            validate_changes(changes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
+        attr_info = [
+            Attrs("eid"),
+            Attrs("model_id"),
+            Attrs("row_id", False),
+            Attrs("changes", type=None, validation=validate_changes),
+        ]
+
+        eid, model_id, row_id, changes = get_and_validate_params(attr_info)
 
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
@@ -557,20 +513,8 @@ class SimilarEntities(Resource):
             $ref: '#/components/responses/ErrorMessage'
         """
 
-        # LOAD IN AND CHECK ATTRIBUTES:
-        attrs = ["eids", "model_id"]
-        d = dict()
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-
-        eids = d["eids"]
-        model_id = d["model_id"]
+        attr_info = [Attrs("eids", type=None), Attrs("model_id")]
+        eids, model_id = get_and_validate_params(attr_info)
 
         if len(eids) > 1:
             entities = [
