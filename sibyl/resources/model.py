@@ -297,10 +297,10 @@ class MultiPrediction(Resource):
                 for entity in schema.Entity.objects(eid__in=eids)
             ]
         else:
-            feature_dict = schema.Entity.objects(eid=eids[0]).first().features
+            entity_dict = schema.Entity.objects(eid=eids[0]).first().features
             # We mislabel the row_ids as eids intentionally here to take advantage of the
             #  underlying RealApp object having the id column set to "eid"
-            entities = [dict(feature_dict[row_id], **{"eid": row_id}) for row_id in feature_dict]
+            entities = [dict(entity_dict[row_id], **{"eid": row_id}) for row_id in entity_dict]
         entities = pd.DataFrame(entities)
         success, payload = helpers.load_model(model_id, include_explainer=True)
         if success:

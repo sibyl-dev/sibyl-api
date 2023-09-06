@@ -46,9 +46,6 @@ def add_routes(app):
     api.add_resource(
         ctrl.computing.MultiFeatureContributions, API_VERSION + "multi_contributions/"
     )
-    api.add_resource(ctrl.computing.FeatureDistributions, API_VERSION + "feature_distributions/")
-    api.add_resource(ctrl.computing.PredictionCount, API_VERSION + "prediction_count/")
-    api.add_resource(ctrl.computing.OutcomeCount, API_VERSION + "outcome_count/")
     api.add_resource(
         ctrl.computing.SingleChangePredictions,
         API_VERSION + "single_change_predictions/",
