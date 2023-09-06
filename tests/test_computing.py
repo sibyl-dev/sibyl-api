@@ -9,25 +9,40 @@ from sibyl.db import schema
 
 
 def test_post_contributions(client, models, entities):
+    def helper(conts, b_neg):
+        assert len(conts) == 6
+        assert "A" in conts
+        assert conts["A"] > 0.01
+
+        assert "B" in conts
+        if b_neg:
+            assert conts["B"] < -0.01
+        else:
+            assert conts["B"] > 0.01
+
+        assert "C" in conts
+        assert abs(conts["C"]) < 0.0001
+
+        for col in ["num_feat", "cat_feat", "bin_feat"]:
+            assert col in conts
+            assert abs(conts[col]) < 0.0001
+
     entity = entities[0]
     model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+
     response = client.post(
         "/api/v1/contributions/", json={"eid": entity["eid"], "model_id": model_id}
     ).json
     contributions = response["contributions"]
-    assert len(contributions) == 6
-    assert "A" in contributions
-    assert contributions["A"] > 0.0001
+    helper(contributions, True)
 
-    assert "B" in contributions
-    assert contributions["B"] < 0.0001
-
-    assert "C" in contributions
-    assert abs(contributions["C"]) < 0.0001
-
-    for col in ["num_feat", "cat_feat", "bin_feat"]:
-        assert col in contributions
-        assert abs(contributions[col]) < 0.0001
+    row_id = "row_b"
+    response = client.post(
+        "/api/v1/contributions/",
+        json={"eid": entity["eid"], "model_id": model_id, "row_id": row_id},
+    ).json
+    contributions = response["contributions"]
+    helper(contributions, False)
 
 
 def test_post_multi_contributions(client, models, entities):

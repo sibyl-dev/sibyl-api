@@ -6,12 +6,13 @@ import pandas as pd
 from flask import request
 from flask_restful import Resource
 
-from sibyl import g
-from sibyl import global_explanation as ge
 from sibyl import helpers
 from sibyl.db import schema
+from collections import namedtuple
 
 LOGGER = logging.getLogger(__name__)
+
+Attrs = namedtuple("Attrs", ["name", "required", "type", "validation"], defaults=[True, str, None])
 
 
 def get_features_for_row(features, row_id):
@@ -22,6 +23,53 @@ def get_features_for_row(features, row_id):
             LOGGER.exception("row_id %s does not exist for entity", (row_id))
             return {"message": "row_id {} does not exist for entity".format(row_id)}, 400
         return features[row_id]
+
+
+def str_convert(s):
+    return str(s) if s is not None else None
+
+
+def get_and_validate_params(attr_info):
+    """
+    Get the parameters from the request body
+    Args:
+        attr_info (Attr named tuple):
+            ("name" (string), "required" (boolean), "type" (type), "validation" (function))
+            attr_type defaults to string
+            required defaults to true
+            validation defaults to none
+    Returns:
+        **args
+            All parameters in attr (None if not required and not given)
+    """
+    d = {}
+    body = request.json
+    results = []
+    for attr in attr_info:
+        if body is not None:
+            result = body.get(attr.name)
+        elif attr.name in request.form:
+            result = request.form[attr.name]
+        elif not attr.required:
+            result = None
+        else:
+            LOGGER.exception("Missing required parameter %s", attr.name)
+            return {"message: Missing required parameter {}".format(attr.name)}, 400
+
+        if result is not None:
+            if attr.type is not None:
+                try:
+                    result = attr.type(result)
+                except ValueError as e:
+                    LOGGER.exception(e)
+                    return {
+                        "message: Error converting attr {} ({})".format(attr.name, str(e))
+                    }, 400
+            if attr.validation is not None:
+                attr.validation(result)
+        results.append(result)
+
+    return results
 
 
 def validate_changes(changes):
@@ -93,28 +141,14 @@ class SingleChangePredictions(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        attrs = ["eid", "model_id", "row_id", "changes"]
-        d = {}
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-        # validate data type
-        try:
-            eid = str(d["eid"])
-            model_id = str(d["model_id"])
-            row_id = d["row_id"]
-            if row_id is not None:
-                row_id = str(row_id)
-            changes = d["changes"]
-            validate_changes(changes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
+        attr_info = [
+            Attrs("eid"),
+            Attrs("model_id"),
+            Attrs("row_id", False),
+            Attrs("changes", type=None, validation=validate_changes),
+        ]
+
+        eid, model_id, row_id, changes = get_and_validate_params(attr_info)
 
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
@@ -179,29 +213,14 @@ class ModifiedPrediction(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        attrs = ["eid", "model_id", "changes"]
-        d = {}
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-        # validate data type
-        try:
-            eid = str(d["eid"])
-            model_id = str(d["model_id"])
-            changes = d["changes"]
-            if "row_id" in d:
-                row_id = str(d["row_id"])
-            else:
-                row_id = None
-            validate_changes(changes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
+        attr_info = [
+            Attrs("eid"),
+            Attrs("model_id"),
+            Attrs("row_id", False),
+            Attrs("changes", type=None, validation=validate_changes),
+        ]
+
+        eid, model_id, row_id, changes = get_and_validate_params(attr_info)
 
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
@@ -266,8 +285,7 @@ class FeatureContributions(Resource):
         """
 
         # LOAD IN AND CHECK ATTRIBUTES:
-        attrs = ["eid", "model_id"]
-        attrs_type = [str, str]
+        attrs = ["eid", "model_id", "row_id"]
         d = dict()
         body = request.json
         for attr in attrs:
@@ -278,21 +296,13 @@ class FeatureContributions(Resource):
                 if attr in request.form:
                     d[attr] = request.form[attr]
 
-        # validate data type
         try:
-            for i, attr in enumerate(attrs):
-                d[attr] = attrs_type[i](d[attr])
+            eid = str(d["eid"])
+            model_id = str(d["model_id"])
+            row_id = str_convert(d["row_id"])
         except Exception as e:
             LOGGER.exception(e)
             return {"message": str(e)}, 400
-
-        eid = d["eid"]
-        model_id = d["model_id"]
-
-        if "row_id" in d:
-            row_id = str(d["row_id"])
-        else:
-            row_id = None
 
         # LOAD IN AND VALIDATE ENTITY
         entity = schema.Entity.find_one(eid=str(eid))
@@ -370,7 +380,7 @@ class MultiFeatureContributions(Resource):
         """
 
         # LOAD IN AND CHECK ATTRIBUTES:
-        attrs = ["eids", "model_id"]
+        attrs = ["eids", "model_id", "row_id"]
         d = dict()
         body = request.json
         for attr in attrs:

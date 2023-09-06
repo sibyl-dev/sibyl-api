@@ -162,8 +162,8 @@ def entities():
         "bin_feat": False,
     }
     features3 = {
-        "A": 2,
-        "B": 5,
+        "A": 3,
+        "B": -5,
         "C": 4,
         "num_feat": 5,
         "cat_feat": "something",
