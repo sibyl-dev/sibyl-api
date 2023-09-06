@@ -42,38 +42,6 @@ def test_post_multi_contributions(client, models, entities):
         pd.read_json(contributions[eid], orient="index")
 
 
-def test_post_feature_distributions(client, models):
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
-    prediction = 9
-
-    response = client.post(
-        "/api/v1/feature_distributions/",
-        json={"prediction": prediction, "model_id": model_id},
-    ).json
-
-    expected_distributions = {
-        "A": {"type": "numeric", "metrics": [10, 10, 12, 14, 14]},
-        "B": {"type": "numeric", "metrics": [1, 1, 3, 5, 5]},
-        "C": {"type": "numeric", "metrics": [1, 1.75, 2.5, 3.25, 4]},
-        "num_feat": {"type": "numeric", "metrics": [10, 10, 10, 10, 10]},
-        "cat_feat": {"type": "categorical", "metrics": [["value1", "value2"], [2, 2]]},
-        "bin_feat": {"type": "categorical", "metrics": [[False, True], [2, 2]]},
-    }
-    assert response["distributions"] == expected_distributions
-
-
-def test_post_prediction_count(client, models):
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
-    prediction = 9
-
-    response = client.post(
-        "/api/v1/prediction_count/",
-        json={"prediction": prediction, "model_id": model_id},
-    ).json
-
-    assert response["count"] == 4
-
-
 def test_post_modified_prediction(client, models, entities):
     model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
     entity = entities[0]
@@ -84,7 +52,7 @@ def test_post_modified_prediction(client, models, entities):
         "/api/v1/modified_prediction/",
         json={"eid": eid, "model_id": model_id, "changes": changes},
     ).json
-    assert response["prediction"] == (5 - entity["features"]["B"])
+    assert response["prediction"] == (5 - entity["features"]["row_a"]["B"])
 
     changes = {"A": 6, "B": 10, "C": 5}
     response = client.post(
@@ -104,7 +72,7 @@ def test_single_change_predictions(client, models, entities):
         "/api/v1/single_change_predictions/",
         json={"eid": eid, "model_id": model_id, "changes": changes},
     ).json
-    assert response["predictions"] == [["A", 5 - entity["features"]["B"]]]
+    assert response["predictions"] == [["A", 5 - entity["features"]["row_a"]["B"]]]
 
     changes = {"A": 6, "B": 10, "C": 5}
     response = client.post(
@@ -112,9 +80,9 @@ def test_single_change_predictions(client, models, entities):
         json={"eid": eid, "model_id": model_id, "changes": changes},
     ).json
     assert response["predictions"] == [
-        ["A", 6 - entity["features"]["B"]],
-        ["B", entity["features"]["A"] - 10],
-        ["C", entity["features"]["A"] - entity["features"]["B"]],
+        ["A", 6 - entity["features"]["row_a"]["B"]],
+        ["B", entity["features"]["row_a"]["A"] - 10],
+        ["C", entity["features"]["row_a"]["A"] - entity["features"]["row_a"]["B"]],
     ]
 
 

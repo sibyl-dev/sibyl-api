@@ -20,9 +20,7 @@ def get_features_for_row(features, row_id):
     else:
         if row_id not in features:
             LOGGER.exception("row_id %s does not exist for entity", (row_id))
-            return {
-                "message": "row_id {} does not exist for entity".format(row_id)
-            }, 400
+            return {"message": "row_id {} does not exist for entity".format(row_id)}, 400
         return features[row_id]
 
 
@@ -95,7 +93,7 @@ class SingleChangePredictions(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        attrs = ["eid", "row_id" "model_id", "changes"]
+        attrs = ["eid", "row_idmodel_id", "changes"]
         d = {}
         body = request.json
         for attr in attrs:
@@ -113,6 +111,7 @@ class SingleChangePredictions(Resource):
                 row_id = str(d["row_id"])
             else:
                 row_id = None
+            print(row_id)
             changes = d["changes"]
             validate_changes(changes)
         except Exception as e:
