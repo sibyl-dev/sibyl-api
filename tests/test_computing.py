@@ -53,8 +53,16 @@ def test_post_multi_contributions(client, models, entities):
     ).json
     contributions = response["contributions"]
     assert len(contributions) == len(entities)
-    for eid in contributions:  # Assert no error
+    for eid in [entity["eid"] for entity in entities]:  # Assert no error
         pd.read_json(contributions[eid], orient="index")
+
+    response = client.post(
+        "/api/v1/multi_contributions/",
+        json={"eids": [entities[0]["eid"]], "model_id": model_id},
+    ).json
+    contributions = response["contributions"]
+    for row_id in entities[0]["row_ids"]:  # Assert no error
+        pd.read_json(contributions[row_id], orient="index")
 
 
 def test_post_modified_prediction(client, models, entities):
@@ -116,6 +124,15 @@ def test_single_change_predictions(client, models, entities):
 
 
 def test_modified_contribution(client, models, entities):
+    def helper(resp, row_id):
+        contribution = resp["contribution"]
+        df = pd.read_json(contribution, orient="index")
+
+        assert len(df.index) == len(entity["features"][row_id])
+        assert "Feature Value" in df.columns
+        assert "Contribution" in df.columns
+        assert "Average/Mode" in df.columns
+
     model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
     entity = entities[0]
     eid = entity["eid"]
@@ -125,26 +142,21 @@ def test_modified_contribution(client, models, entities):
         "/api/v1/modified_contribution/",
         json={"eid": eid, "model_id": model_id, "changes": changes},
     ).json
-    contribution = response["contribution"]
-    df = pd.read_json(contribution, orient="index")
-
-    assert len(df.index) == len(entity["features"]["row_a"])
-    assert "Feature Value" in df.columns
-    assert "Contribution" in df.columns
-    assert "Average/Mode" in df.columns
+    helper(response, "row_a")
 
     changes = {"A": 3, "B": 12, "C": 1}
     response = client.post(
         "/api/v1/modified_contribution/",
         json={"eid": eid, "model_id": model_id, "changes": changes},
     ).json
-    contribution = response["contribution"]
-    df = pd.read_json(contribution, orient="index")
+    helper(response, "row_a")
 
-    assert len(df.index) == len(entity["features"]["row_a"])
-    assert "Feature Value" in df.columns
-    assert "Contribution" in df.columns
-    assert "Average/Mode" in df.columns
+    changes = {"A": 3, "B": 12, "C": 1}
+    response = client.post(
+        "/api/v1/modified_contribution/",
+        json={"eid": eid, "model_id": model_id, "changes": changes, "row_id": "row_b"},
+    ).json
+    helper(response, "row_b")
 
 
 def test_post_similar_entities(client, models, entities):
@@ -154,7 +166,19 @@ def test_post_similar_entities(client, models, entities):
         json={"eids": [entity["eid"] for entity in entities], "model_id": model_id},
     ).json
     similar_entities = response["similar_entities"]
-    assert len(similar_entities) == len(entities)
-    for eid in similar_entities:  # Assert no error
+
+    for eid in [entity["eid"] for entity in entities]:  # Assert no error
         pd.read_json(similar_entities[eid]["X"], orient="index")
         pd.read_json(similar_entities[eid]["y"], orient="index")
+
+    response = client.post(
+        "/api/v1/similar_entities/",
+        json={
+            "eids": [entities[0]["eid"]],
+            "model_id": model_id,
+        },
+    ).json
+    similar_entities = response["similar_entities"]
+    for row_id in entities[0]["row_ids"]:  # Assert no error
+        pd.read_json(similar_entities[row_id]["X"], orient="index")
+        pd.read_json(similar_entities[row_id]["y"], orient="index")
