@@ -251,6 +251,9 @@ class MultiPrediction(Resource):
                         type: string
                   model_id:
                     type: string
+                  row_id:
+                    type: string
+                    description: row_id to use for all entities
                 required: ['eids', 'model_id']
         responses:
           200:
@@ -278,7 +281,7 @@ class MultiPrediction(Resource):
             return obj
 
         attr_info = [
-            Attrs("eid"),
+            Attrs("eids", type=None),
             Attrs("model_id"),
             Attrs("row_id", False),
         ]
