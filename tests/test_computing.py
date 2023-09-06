@@ -45,7 +45,7 @@ def test_post_contributions(client, models, entities):
     helper(contributions, False)
 
 
-def test_post_multi_contributions(client, models, entities):
+def test_post_multi_contributions(client, models, entities, multirow_entities):
     model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
     response = client.post(
         "/api/v1/multi_contributions/",
@@ -59,13 +59,13 @@ def test_post_multi_contributions(client, models, entities):
     response = client.post(
         "/api/v1/multi_contributions/",
         json={
-            "eids": [entities[0]["eid"], entities[1]["eid"]],
+            "eids": [entity["eid"] for entity in multirow_entities],
             "model_id": model_id,
             "row_id": "row_b",
         },
     ).json
     contributions = response["contributions"]
-    for eid in [entities[0]["eid"], entities[1]["eid"]]:  # Assert no error
+    for eid in [entity["eid"] for entity in multirow_entities]:  # Assert no error
         pd.read_json(contributions[eid], orient="index")
 
 
@@ -163,7 +163,7 @@ def test_modified_contribution(client, models, entities):
     helper(response, "row_b")
 
 
-def test_post_similar_entities(client, models, entities):
+def test_post_similar_entities(client, models, entities, multirow_entities):
     model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
     response = client.post(
         "/api/v1/similar_entities/",
@@ -178,12 +178,12 @@ def test_post_similar_entities(client, models, entities):
     response = client.post(
         "/api/v1/similar_entities/",
         json={
-            "eids": ["ent1", "ent2"],
+            "eids": [entity["eid"] for entity in multirow_entities],
             "model_id": model_id,
             "row_id": "row_b",
         },
     ).json
     similar_entities = response["similar_entities"]
-    for eid in ["ent1", "ent2"]:  # Assert no error
+    for eid in [entity["eid"] for entity in multirow_entities]:  # Assert no error
         pd.read_json(similar_entities[eid]["X"], orient="index")
         pd.read_json(similar_entities[eid]["y"], orient="index")

@@ -210,6 +210,11 @@ def entities():
 
 
 @pytest.fixture(scope="session")
+def multirow_entities(entities):
+    return entities[0:2]
+
+
+@pytest.fixture(scope="session")
 def groups():
     groups = [{"group_id": "101", "property": {"date": "today"}}, {"group_id": "102"}]
     return groups
