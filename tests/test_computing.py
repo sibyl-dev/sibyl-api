@@ -99,7 +99,7 @@ def test_modified_contribution(client, models, entities):
     contribution = response["contribution"]
     df = pd.read_json(contribution, orient="index")
 
-    assert len(df.index) == len(entity["features"])
+    assert len(df.index) == len(entity["features"]["row_a"])
     assert "Feature Value" in df.columns
     assert "Contribution" in df.columns
     assert "Average/Mode" in df.columns
@@ -112,7 +112,7 @@ def test_modified_contribution(client, models, entities):
     contribution = response["contribution"]
     df = pd.read_json(contribution, orient="index")
 
-    assert len(df.index) == len(entity["features"])
+    assert len(df.index) == len(entity["features"]["row_a"])
     assert "Feature Value" in df.columns
     assert "Contribution" in df.columns
     assert "Average/Mode" in df.columns

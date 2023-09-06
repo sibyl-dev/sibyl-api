@@ -9,7 +9,6 @@ from mongoengine.connection import disconnect
 from pymongo import MongoClient
 from pyreal import RealApp
 from pyreal.transformers import FeatureSelectTransformer
-from pyreal.explanation_types.explanations.feature_based import FeatureContributionExplanation
 from sklearn.linear_model import LinearRegression
 
 from sibyl.core import Sibyl
@@ -177,30 +176,33 @@ def entities():
             "row_ids": ["row_a", "row_b"],
             "property": {"group_ids": ["101", "102"]},
             "features": {"row_a": features1, "row_b": features3},
+            "labels": {"row_b": 1, "row_a": 0},
             "events": [events[0], events[1]],
         },
         {
             "eid": "ent2",
-            "row_ids": ["row_0"],
+            "row_ids": ["row_a"],
             "property": {"group_ids": ["101"]},
-            "features": {"row_0": features1_b},
+            "features": {"row_a": features1_b},
+            "labels": {"row_a": 2},
         },
         {
             "eid": "ent3",
-            "row_ids": ["row_0"],
+            "row_ids": ["row_a"],
             "property": {"name": "First Last"},
-            "features": {"row_0": features2},
+            "features": {"row_a": features2},
+            "labels": {"row_a": 3},
         },
         {
             "eid": "ent4",
-            "row_ids": ["row_0"],
+            "row_ids": ["row_a"],
             "property": {"name": "First Last"},
-            "features": {"row_0": features2_b},
+            "features": {"row_a": features2_b},
         },
         {
             "eid": "ent5",
-            "row_ids": ["row_0"],
-            "features": {"row_0": features3},
+            "row_ids": ["row_a"],
+            "features": {"row_a": features3},
             "events": [events[2]],
         },
     ]
@@ -269,7 +271,9 @@ def testdb(categories, features, entities, groups, models, contexts):
 
     schema.EntityGroup.insert_many(groups)
 
-    dataset = schema.TrainingSet.insert(entities=schema.Entity.find())
+    dataset = schema.TrainingSet.insert(
+        entities=schema.Entity.find(eid__in=["ent1", "ent2", "ent3"])
+    )
     for model in models:
         model["training_set"] = dataset
         schema.Model.insert(**model)

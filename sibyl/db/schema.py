@@ -156,10 +156,12 @@ class TrainingSet(SibylDocument):
         Returns this dataset as a Pandas dataframe
         :return: dataframe
         """
-        features = [entity.features for entity in self.entities]
-        labels = [entity.label for entity in self.entities]
+        features = [
+            dict(entity.features[row_id], **{"y": entity.labels[row_id]})
+            for entity in self.entities
+            for row_id in entity.features
+        ]
         training_set_df = pd.DataFrame(features)
-        training_set_df["y"] = labels
         return training_set_df
 
 

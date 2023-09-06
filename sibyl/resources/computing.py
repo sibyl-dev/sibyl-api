@@ -93,7 +93,7 @@ class SingleChangePredictions(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        attrs = ["eid", "row_idmodel_id", "changes"]
+        attrs = ["eid", "model_id", "row_id", "changes"]
         d = {}
         body = request.json
         for attr in attrs:
@@ -107,11 +107,9 @@ class SingleChangePredictions(Resource):
         try:
             eid = str(d["eid"])
             model_id = str(d["model_id"])
-            if "row_id" in d:
-                row_id = str(d["row_id"])
-            else:
-                row_id = None
-            print(row_id)
+            row_id = d["row_id"]
+            if row_id is not None:
+                row_id = str(row_id)
             changes = d["changes"]
             validate_changes(changes)
         except Exception as e:
@@ -589,5 +587,6 @@ class SimilarEntities(Resource):
         for eid in similar_entities:
             similar_entities[eid]["X"] = similar_entities[eid]["X"].to_json(orient="index")
             similar_entities[eid]["y"] = similar_entities[eid]["y"].to_json(orient="index")
+            similar_entities[eid]["Input"] = similar_entities[eid]["Input"].to_json(orient="index")
 
         return {"similar_entities": similar_entities}, 200
