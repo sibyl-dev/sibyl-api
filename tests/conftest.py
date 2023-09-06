@@ -174,14 +174,30 @@ def entities():
     entities = [
         {
             "eid": "ent1",
+            "row_ids": ["A", "B"],
             "property": {"group_ids": ["101", "102"]},
-            "features": features1,
+            "features": {"A": features1, "B": features1_b},
             "events": [events[0], events[1]],
         },
-        {"eid": "ent2", "property": {"group_ids": ["101"]}, "features": features1_b},
-        {"eid": "ent3", "property": {"name": "First Last"}, "features": features2},
-        {"eid": "ent4", "property": {"name": "First Last"}, "features": features2_b},
-        {"eid": "ent5", "features": features3, "events": [events[2]]},
+        {
+            "eid": "ent2",
+            "row_ids": ["0"],
+            "property": {"group_ids": ["101"]},
+            "features": {"0": features1_b},
+        },
+        {
+            "eid": "ent3",
+            "row_ids": ["0"],
+            "property": {"name": "First Last"},
+            "features": {"0": features2},
+        },
+        {
+            "eid": "ent4",
+            "row_ids": ["0"],
+            "property": {"name": "First Last"},
+            "features": {"0": features2_b},
+        },
+        {"eid": "ent5", "row_ids": ["0"], "features": {"0": features3}, "events": [events[2]]},
     ]
     return entities
 
