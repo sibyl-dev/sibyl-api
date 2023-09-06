@@ -164,6 +164,7 @@ def insert_entities(
             if target in raw_entities[eid][row_id]:
                 targets[row_id] = raw_entities[eid][row_id].pop(target)
         entity["features"] = raw_entities[eid]
+        entity["labels"] = targets
         entities.append(entity)
     schema.Entity.insert_many(entities)
     return eids

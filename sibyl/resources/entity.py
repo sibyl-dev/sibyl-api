@@ -1,7 +1,7 @@
 import logging
 
-from flask_restful import Resource, reqparse
 from flask import request
+from flask_restful import Resource, reqparse
 
 from sibyl.db import schema
 

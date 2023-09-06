@@ -14,7 +14,7 @@ def run():
     x_orig, y_orig = ames_housing.load_data(include_targets=True)
     x_orig = x_orig.rename({"Id": "eid"}, axis="columns")
     entities = pd.concat([x_orig, y_orig], axis=1)
-    #entities.to_csv(os.path.join(directory, "entities.csv"), index=False)
+    entities.to_csv(os.path.join(directory, "entities.csv"), index=False)
 
     transformers = ames_housing.load_transformers()
     model = ames_housing.load_model()
