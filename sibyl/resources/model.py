@@ -9,7 +9,7 @@ from flask_restful import Resource
 
 from sibyl import helpers
 from sibyl.db import schema
-from sibyl.resources.computing import get_entities_table, get_and_validate_params, Attrs
+from sibyl.resources.computing import Attrs, get_and_validate_params, get_entities_table
 
 LOGGER = logging.getLogger(__name__)
 

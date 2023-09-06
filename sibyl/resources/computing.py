@@ -1,6 +1,4 @@
-import json
 import logging
-import os
 from collections import namedtuple
 
 import pandas as pd
