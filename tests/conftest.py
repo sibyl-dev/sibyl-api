@@ -174,30 +174,35 @@ def entities():
     entities = [
         {
             "eid": "ent1",
-            "row_ids": ["A", "B"],
+            "row_ids": ["row_a", "row_b"],
             "property": {"group_ids": ["101", "102"]},
-            "features": {"A": features1, "B": features1_b},
+            "features": {"row_a": features1, "row_b": features3},
             "events": [events[0], events[1]],
         },
         {
             "eid": "ent2",
-            "row_ids": ["0"],
+            "row_ids": ["row_0"],
             "property": {"group_ids": ["101"]},
-            "features": {"0": features1_b},
+            "features": {"row_0": features1_b},
         },
         {
             "eid": "ent3",
-            "row_ids": ["0"],
+            "row_ids": ["row_0"],
             "property": {"name": "First Last"},
-            "features": {"0": features2},
+            "features": {"row_0": features2},
         },
         {
             "eid": "ent4",
-            "row_ids": ["0"],
+            "row_ids": ["row_0"],
             "property": {"name": "First Last"},
-            "features": {"0": features2_b},
+            "features": {"row_0": features2_b},
         },
-        {"eid": "ent5", "row_ids": ["0"], "features": {"0": features3}, "events": [events[2]]},
+        {
+            "eid": "ent5",
+            "row_ids": ["row_0"],
+            "features": {"row_0": features3},
+            "events": [events[2]],
+        },
     ]
     return entities
 
