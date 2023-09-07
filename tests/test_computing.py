@@ -8,25 +8,26 @@ import pandas as pd
 from sibyl.db import schema
 
 
+def contribution_helper(contributions, b_neg):
+    assert len(contributions) == 6
+    assert "A" in contributions
+    assert contributions["A"] > 0.01
+
+    assert "B" in contributions
+    if b_neg:
+        assert contributions["B"] < -0.01
+    else:
+        assert contributions["B"] > 0.01
+
+    assert "C" in contributions
+    assert abs(contributions["C"]) < 0.0001
+
+    for col in ["num_feat", "cat_feat", "bin_feat"]:
+        assert col in contributions
+        assert abs(contributions[col]) < 0.0001
+
+
 def test_post_contributions(client, models, entities):
-    def helper(conts, b_neg):
-        assert len(conts) == 6
-        assert "A" in conts
-        assert conts["A"] > 0.01
-
-        assert "B" in conts
-        if b_neg:
-            assert conts["B"] < -0.01
-        else:
-            assert conts["B"] > 0.01
-
-        assert "C" in conts
-        assert abs(conts["C"]) < 0.0001
-
-        for col in ["num_feat", "cat_feat", "bin_feat"]:
-            assert col in conts
-            assert abs(conts[col]) < 0.0001
-
     entity = entities[0]
     model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
 
@@ -34,7 +35,7 @@ def test_post_contributions(client, models, entities):
         "/api/v1/contributions/", json={"eid": entity["eid"], "model_id": model_id}
     ).json
     contributions = response["contributions"]
-    helper(contributions, True)
+    contribution_helper(contributions, True)
 
     row_id = "row_b"
     response = client.post(
@@ -42,7 +43,7 @@ def test_post_contributions(client, models, entities):
         json={"eid": entity["eid"], "model_id": model_id, "row_id": row_id},
     ).json
     contributions = response["contributions"]
-    helper(contributions, False)
+    contribution_helper(contributions, False)
 
 
 def test_post_multi_contributions(client, models, entities, multirow_entities):
@@ -54,7 +55,11 @@ def test_post_multi_contributions(client, models, entities, multirow_entities):
     contributions = response["contributions"]
     assert len(contributions) == len(entities)
     for eid in [entity["eid"] for entity in entities]:  # Assert no error
-        pd.read_json(contributions[eid], orient="index")
+        pd.DataFrame.from_dict(contributions[eid], orient="index")
+    conts_0 = contributions[entities[0]["eid"]]
+    assert conts_0.keys() == next(iter(entities[0]["features"].values())).keys()
+    assert conts_0["A"]["Contribution"] > 0.01
+    assert conts_0["B"]["Contribution"] < -0.01
 
     response = client.post(
         "/api/v1/multi_contributions/",
@@ -66,7 +71,11 @@ def test_post_multi_contributions(client, models, entities, multirow_entities):
     ).json
     contributions = response["contributions"]
     for eid in [entity["eid"] for entity in multirow_entities]:  # Assert no error
-        pd.read_json(contributions[eid], orient="index")
+        pd.DataFrame.from_dict(contributions[eid], orient="index")
+    conts_0 = contributions[multirow_entities[0]["eid"]]
+    assert conts_0.keys() == next(iter(multirow_entities[0]["features"].values())).keys()
+    assert conts_0["A"]["Contribution"] > 0.01
+    assert conts_0["B"]["Contribution"] > 0.01
 
 
 def test_post_modified_prediction(client, models, entities):
@@ -172,8 +181,9 @@ def test_post_similar_entities(client, models, entities, multirow_entities):
     similar_entities = response["similar_entities"]
 
     for eid in [entity["eid"] for entity in entities]:  # Assert no error
-        pd.read_json(similar_entities[eid]["X"], orient="index")
-        pd.read_json(similar_entities[eid]["y"], orient="index")
+        pd.DataFrame.from_dict(similar_entities[eid]["X"], orient="index")
+        pd.Series(similar_entities[eid]["y"])
+        pd.Series(similar_entities[eid]["Input"])
 
     response = client.post(
         "/api/v1/similar_entities/",
@@ -185,5 +195,6 @@ def test_post_similar_entities(client, models, entities, multirow_entities):
     ).json
     similar_entities = response["similar_entities"]
     for eid in [entity["eid"] for entity in multirow_entities]:  # Assert no error
-        pd.read_json(similar_entities[eid]["X"], orient="index")
-        pd.read_json(similar_entities[eid]["y"], orient="index")
+        pd.DataFrame.from_dict(similar_entities[eid]["X"], orient="index")
+        pd.Series(similar_entities[eid]["y"])
+        pd.Series(similar_entities[eid]["Input"])
