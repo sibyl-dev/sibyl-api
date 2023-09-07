@@ -385,7 +385,7 @@ class MultiFeatureContributions(Resource):
 
         contributions = explainer.produce_feature_contributions(entities)
         contributions_json = {
-            eid: contributions[eid].set_index("Feature Name").to_json(orient="index")
+            eid: contributions[eid].set_index("Feature Name").to_dict(orient="index")
             for eid in contributions
         }
 
@@ -525,9 +525,10 @@ class SimilarEntities(Resource):
         similar_entities = explainer.produce_similar_examples(
             entities, x_train_orig=X, y_train=y, standardize=True
         )
+
         for eid in similar_entities:
-            similar_entities[eid]["X"] = similar_entities[eid]["X"].to_json(orient="index")
-            similar_entities[eid]["y"] = similar_entities[eid]["y"].to_json(orient="index")
-            similar_entities[eid]["Input"] = similar_entities[eid]["Input"].to_json(orient="index")
+            similar_entities[eid]["X"] = similar_entities[eid]["X"].to_dict(orient="index")
+            similar_entities[eid]["y"] = similar_entities[eid]["y"].to_dict()
+            similar_entities[eid]["Input"] = similar_entities[eid]["Input"].to_dict()
 
         return {"similar_entities": similar_entities}, 200
