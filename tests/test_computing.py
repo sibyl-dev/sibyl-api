@@ -139,7 +139,7 @@ def test_single_change_predictions(client, models, entities):
 def test_modified_contribution(client, models, entities):
     def helper(resp, row_id):
         contribution = resp["contribution"]
-        df = pd.read_json(contribution, orient="index")
+        df = pd.DataFrame.from_dict(contribution, orient="index")
 
         assert len(df.index) == len(entity["features"][row_id])
         assert "Feature Value" in df.columns
