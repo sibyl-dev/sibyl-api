@@ -36,6 +36,15 @@ def _eid_exists(val):
         raise ValidationError("eid provided (%s) does not exist" % val)
 
 
+def _validate_training_set(entities):
+    for entity in entities:
+        if entity.labels is None or entity.labels.keys() != entity.features.keys():
+            raise ValidationError(
+                "All training set entries must have one label per row. Incorrect labels on eid {}"
+                .format(entity.eid)
+            )
+
+
 class Event(SibylDocument):
     """
     An **Event** holds information about an event an entity was involved with
@@ -147,7 +156,9 @@ class TrainingSet(SibylDocument):
         Trained nearest neighbors classifier for the dataset
     """
 
-    entities = fields.ListField(fields.ReferenceField(Entity, reverse_delete_rule=PULL))
+    entities = fields.ListField(
+        fields.ReferenceField(Entity, reverse_delete_rule=PULL), validation=_validate_training_set
+    )
     target = fields.StringField()
     neighbors = fields.BinaryField()  # trained NN classifier
 
