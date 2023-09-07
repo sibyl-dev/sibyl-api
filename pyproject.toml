@@ -39,7 +39,7 @@ gevent = "^23.9.0.post1"
 [tool.poetry.group.general.dependencies]
 passlib = "^1.7.4"
 termcolor = "^2.0.1"
-xgboost = "0.90"
+xgboost = "1.7.6"
 
 [tool.poetry.group.math.dependencies]
 numpy = "^1.23.3"
