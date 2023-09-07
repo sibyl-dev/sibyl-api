@@ -18,6 +18,8 @@ def test_get_entities(client, entities):
                     assert response_item["property"] == expected_item["property"]
                 else:
                     assert len(response_item["property"]) == 0
+                if "row_ids" in expected_item:
+                    assert response_item["row_ids"] == expected_item["row_ids"]
         assert found
 
 
@@ -27,7 +29,21 @@ def test_get_entity(client, entities):
     assert response["eid"] == entity["eid"]
     assert response["features"] == entity["features"]
     assert response["property"] == entity["property"]
-    assert len(response) == 3
+    # We may remove row_ids from the response as they can be found in features, but if they are
+    #   there they should be correct
+    if "row_ids" in response:
+        assert response["row_ids"] == entity["row_ids"]
+
+
+def test_get_entity_with_row(client, entities):
+    entity = entities[0]
+    row_id = entity["row_ids"][1]
+    print(row_id)
+    response = client.get("/api/v1/entities/" + entity["eid"] + "/?row_id=" + row_id).json
+
+    assert response["eid"] == entity["eid"]
+    assert response["features"] == entity["features"][row_id]
+    assert response["property"] == entity["property"]
 
 
 def test_get_events(client, entities):

@@ -1,17 +1,73 @@
-import json
 import logging
-import os
+from collections import namedtuple
 
 import pandas as pd
 from flask import request
 from flask_restful import Resource
 
-from sibyl import g
-from sibyl import global_explanation as ge
 from sibyl import helpers
 from sibyl.db import schema
 
 LOGGER = logging.getLogger(__name__)
+
+Attrs = namedtuple("Attrs", ["name", "required", "type", "validation"], defaults=[True, str, None])
+
+
+def get_features_for_row(features, row_id):
+    if row_id is None:
+        return features[next(iter(features))]
+    else:
+        if row_id not in features:
+            LOGGER.exception("row_id %s does not exist for entity", row_id)
+            return {"message": "row_id {} does not exist for entity".format(row_id)}, 400
+        return features[row_id]
+
+
+def str_convert(s):
+    return str(s) if s is not None else None
+
+
+def get_and_validate_params(attr_info):
+    """
+    Get the parameters from the request body
+    Args:
+        attr_info (Attr named tuple):
+            ("name" (string), "required" (boolean), "type" (type), "validation" (function))
+            attr_type defaults to string
+            required defaults to true
+            validation defaults to none
+    Returns:
+        **args
+            All parameters in attr (None if not required and not given)
+    """
+    d = {}
+    body = request.json
+    results = []
+    for attr in attr_info:
+        if body is not None:
+            result = body.get(attr.name)
+        elif attr.name in request.form:
+            result = request.form[attr.name]
+        elif not attr.required:
+            result = None
+        else:
+            LOGGER.exception("Missing required parameter %s", attr.name)
+            return {"message: Missing required parameter {}".format(attr.name)}, 400
+
+        if result is not None:
+            if attr.type is not None:
+                try:
+                    result = attr.type(result)
+                except ValueError as e:
+                    LOGGER.exception(e)
+                    return {
+                        "message: Error converting attr {} ({})".format(attr.name, str(e))
+                    }, 400
+            if attr.validation is not None:
+                attr.validation(result)
+        results.append(result)
+
+    return results
 
 
 def validate_changes(changes):
@@ -34,6 +90,28 @@ def validate_changes(changes):
             return {"message": f"Feature {feature} is binary, invalid change value"}, 400
 
 
+def get_entity_table(eid, row_id):
+    entity = schema.Entity.find_one(eid=eid)
+    if entity is None:
+        LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
+        return {"message": "Entity {} does not exist".format(eid)}, 400
+    return pd.DataFrame(get_features_for_row(entity.features, row_id), index=[0])
+
+
+def get_entities_table(eids, row_id, all_rows=False):
+    if not all_rows:
+        entities = [
+            dict(get_features_for_row(entity.features, row_id), **{"eid": entity.eid})
+            for entity in schema.Entity.objects(eid__in=eids)
+        ]
+    else:
+        entity_dict = schema.Entity.objects(eid=eids[0]).first().features
+        # We mislabel the row_ids as eids intentionally here to take advantage of the
+        #  underlying RealApp object having the id column set to "eid"
+        entities = [dict(entity_dict[row_id], **{"eid": row_id}) for row_id in entity_dict]
+    return pd.DataFrame(entities)
+
+
 class SingleChangePredictions(Resource):
     def post(self):
         """
@@ -52,6 +130,8 @@ class SingleChangePredictions(Resource):
                  type: object
                  properties:
                    eid:
+                     type: string
+                   row_id:
                      type: string
                    model_id:
                      type: string
@@ -81,31 +161,16 @@ class SingleChangePredictions(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        attrs = ["eid", "model_id", "changes"]
-        d = {}
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-        # validate data type
-        try:
-            eid = str(d["eid"])
-            model_id = str(d["model_id"])
-            changes = d["changes"]
-            validate_changes(changes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
+        attr_info = [
+            Attrs("eid"),
+            Attrs("model_id"),
+            Attrs("row_id", False),
+            Attrs("changes", type=None, validation=validate_changes),
+        ]
 
-        entity = schema.Entity.find_one(eid=eid)
-        if entity is None:
-            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
-            return {"message": "Entity {} does not exist".format(eid)}, 400
-        entity_features = pd.DataFrame(entity.features, index=[0])
+        eid, model_id, row_id, changes = get_and_validate_params(attr_info)
+
+        entity_features = get_entity_table(eid, row_id)
 
         success, payload = helpers.load_explainer(model_id)
         if success:
@@ -140,6 +205,8 @@ class ModifiedPrediction(Resource):
                  properties:
                    eid:
                      type: string
+                   row_id:
+                     type: string
                    model_id:
                      type: string
                    changes:
@@ -162,31 +229,16 @@ class ModifiedPrediction(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        attrs = ["eid", "model_id", "changes"]
-        d = {}
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-        # validate data type
-        try:
-            eid = str(d["eid"])
-            model_id = str(d["model_id"])
-            changes = d["changes"]
-            validate_changes(changes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
+        attr_info = [
+            Attrs("eid"),
+            Attrs("model_id"),
+            Attrs("row_id", False),
+            Attrs("changes", type=None, validation=validate_changes),
+        ]
 
-        entity = schema.Entity.find_one(eid=eid)
-        if entity is None:
-            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
-            return {"message": "Entity {} does not exist".format(eid)}, 400
-        entity_features = pd.DataFrame(entity.features, index=[0])
+        eid, model_id, row_id, changes = get_and_validate_params(attr_info)
+
+        entity_features = get_entity_table(eid, row_id)
 
         success, payload = helpers.load_explainer(model_id)
         if success:
@@ -199,210 +251,6 @@ class ModifiedPrediction(Resource):
             modified[feature] = change
         prediction = explainer.predict(modified)[0].tolist()
         return {"prediction": prediction}, 200
-
-
-class FeatureDistributions(Resource):
-    def post(self):
-        """
-        @api {post} /feature_distributions/ Get feature distributions
-        @apiName PostFeatureDistributions
-        @apiGroup Computing
-        @apiVersion 1.0.0
-        @apiDescription Get the distributions of all features
-        @apiParam {Number} prediction Prediction Prediction to look at distributions for.
-        @apiParam {String} model_id ID of model to use for predictions.
-        @apiSuccess {Object} distributions Information about the distributions of each
-            feature for each feature.
-        @apiSuccess {String} distributions.key Feature name
-        @apiSuccess {String="numeric","categorical"} distributions.type Feature type
-        @apiSuccess {5-tuple} distributions.metrics If type is "numeric":[min, 1st quartile,
-            median, 3rd quartile, max] <br>. If type is "categorical":
-            [[values],[counts]]
-        """
-        # LOAD IN PARAMETERS
-        attrs = ["prediction", "model_id"]
-        attrs_type = [int, str]
-        d = dict()
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-
-        # VALIDATE DATA TYPES
-        try:
-            for i, attr in enumerate(attrs):
-                d[attr] = attrs_type[i](d[attr])
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
-
-        prediction = d["prediction"]
-        model_id = d["model_id"]
-
-        # CHECK FOR PRECOMPUTED VALUES
-        distribution_filepath = g["config"]["feature_distribution_location"]
-        if distribution_filepath is not None:
-            distribution_filepath = os.path.normpath(distribution_filepath)
-            with open(distribution_filepath, "r") as f:
-                all_distributions = json.load(f)
-            return {"distributions": all_distributions[str(prediction)]["distributions"]}, 200
-
-        # LOAD IN AND VALIDATE MODEL DATA
-        success, payload = helpers.load_explainer(model_id, include_dataset=True)
-        if success:
-            explainer, dataset = payload
-        else:
-            return payload
-
-        # LOAD IN FEATURES
-        feature_docs = schema.Feature.find()
-        features = [
-            {"name": feature_doc.name, "type": feature_doc.type} for feature_doc in feature_docs
-        ]
-        features = pd.DataFrame(features)
-
-        # FIND CATEGORICAL FEATURES
-        boolean_features = features[features["type"].isin(["binary", "categorical"])]["name"]
-        categorical_dataset = dataset[boolean_features]
-
-        numeric_features = features[features["type"] == "numeric"]["name"]
-        numeric_dataset = dataset[numeric_features]
-
-        distributions = {}
-        rows = ge.get_rows_by_output(prediction, explainer.predict, dataset, row_labels=None)
-        if len(rows) == 0:
-            LOGGER.exception("No data with that prediction: %s", prediction)
-            return {"message": "No data with that prediction: {}".format(prediction)}, 400
-
-        cat_summary = ge.summary_categorical(categorical_dataset.iloc[rows])
-        num_summary = ge.summary_numeric(numeric_dataset.iloc[rows])
-
-        for i, name in enumerate(boolean_features):
-            distributions[name] = {
-                "type": "categorical",
-                "metrics": [cat_summary[0][i].tolist(), cat_summary[1][i].tolist()],
-            }
-        for i, name in enumerate(numeric_features):
-            distributions[name] = {"type": "numeric", "metrics": num_summary[i]}
-
-        return {"distributions": distributions}, 200
-
-
-class PredictionCount(Resource):
-    def post(self):
-        """
-        @api {post} /prediction_count/ Get prediction count
-        @apiName PostPredictionCount
-        @apiGroup Computing
-        @apiVersion 1.0.0
-        @apiDescription Get the number of entities that were predicted as a certain value
-        @apiParam {Number} prediction Prediction to look at counts for
-        @apiParam {String} model_id ID of model to use for predictions.
-        @apiSuccess {Number} count Number of entities who are predicted as prediction in
-            the training set
-        """
-        attrs = ["prediction", "model_id"]
-        attrs_type = [int, str]
-        d = dict()
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-
-        # validate data type
-        try:
-            for i, attr in enumerate(attrs):
-                d[attr] = attrs_type[i](d[attr])
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
-
-        prediction = d["prediction"]
-        model_id = d["model_id"]
-
-        distribution_filepath = g["config"]["feature_distribution_location"]
-        if distribution_filepath is not None:
-            distribution_filepath = os.path.normpath(distribution_filepath)
-            with open(distribution_filepath, "r") as f:
-                all_distributions = json.load(f)
-            return {"count:": all_distributions[str(prediction)]["total cases"]}, 200
-
-        # LOAD IN AND VALIDATE MODEL DATA
-        success, payload = helpers.load_explainer(model_id, include_dataset=True)
-        if success:
-            explainer, dataset = payload
-        else:
-            return payload
-
-        rows = ge.get_rows_by_output(prediction, explainer.predict, dataset, row_labels=None)
-        count = len(rows)
-
-        return {"count": count}, 200
-
-
-class OutcomeCount(Resource):
-    def post(self):
-        """
-        @api {post} /outcome_count/ Get outcome count
-        @apiName PostOutcomeCount
-        @apiGroup Computing
-        @apiVersion 1.0.0
-        @apiDescription Get the distributions of entity outcomes
-                        that were predicted as a certain value
-        @apiParam {Number} prediction Prediction Prediction to look at counts for
-        @apiParam {String} model_id ID of model to use for predictions.
-        @apiSuccess {Object} distributions Information about the distributions of each
-                                           outcome.
-        @apiSuccess {String} distributions.key Outcome name
-        @apiSuccess {String="numeric","category"} distributions.type Outcome type
-        @apiSuccess {5-tuple} distributions.metrics If type is "numeric":
-                                                        [min, 1st quartile, median,
-                                                        3rd quartile, max] <br>
-                                                    If type is "categorical" or "binary":
-                                                        [[values],[counts]]
-        """
-        attrs = ["prediction", "model_id"]
-        attrs_type = [int, str]
-        d = dict()
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-
-        # validate data type
-        try:
-            for i, attr in enumerate(attrs):
-                d[attr] = attrs_type[i](d[attr])
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
-
-        prediction = d["prediction"]
-
-        distribution_filepath = g["config"]["feature_distribution_location"]
-        if distribution_filepath is not None:
-            distribution_filepath = os.path.normpath(distribution_filepath)
-            with open(distribution_filepath, "r") as f:
-                all_distributions = json.load(f)
-            outcome_metrics = all_distributions[str(prediction)]["distributions"][
-                "PRO_PLSM_NEXT730_DUMMY"
-            ]
-            return {"distributions": {"PRO_PLSM_NEXT730_DUMMY": outcome_metrics}}, 200
-        else:
-            LOGGER.exception("Not implemented - Please provide precomputed document")
-            return {"message": "Not implemented - Please provide precomputed document"}, 501
 
 
 class FeatureContributions(Resource):
@@ -422,6 +270,8 @@ class FeatureContributions(Resource):
                 type: object
                 properties:
                   eid:
+                    type: string
+                  row_id:
                     type: string
                   model_id:
                     type: string
@@ -446,39 +296,10 @@ class FeatureContributions(Resource):
             $ref: '#/components/responses/ErrorMessage'
         """
 
-        # LOAD IN AND CHECK ATTRIBUTES:
-        attrs = ["eid", "model_id"]
-        attrs_type = [str, str]
-        d = dict()
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
+        attr_info = [Attrs("eid"), Attrs("model_id"), Attrs("row_id", False)]
+        eid, model_id, row_id = get_and_validate_params(attr_info)
 
-        # validate data type
-        try:
-            for i, attr in enumerate(attrs):
-                d[attr] = attrs_type[i](d[attr])
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
-
-        eid = d["eid"]
-        model_id = d["model_id"]
-
-        # LOAD IN AND VALIDATE ENTITY
-        entity = schema.Entity.find_one(eid=str(eid))
-        if entity is None:
-            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
-            return {"message": "Entity {} does not exist".format(eid)}, 400
-        entity_features = pd.DataFrame(entity.features, index=[0])
-        if entity_features is None:
-            LOGGER.exception("Entity %s has no features. ", eid)
-            return {"message": "Entity {} does not have features.".format(eid)}, 400
+        entity_features = get_entity_table(eid, row_id)
 
         # LOAD IN AND VALIDATE MODEL DATA
         success, payload = helpers.load_explainer(model_id)
@@ -496,7 +317,7 @@ class FeatureContributions(Resource):
 class MultiFeatureContributions(Resource):
     def post(self):
         """
-        Get feature contributions for multiple eids
+        Get feature contributions for multiple eids, or for all rows in a single entity
         ---
         tags:
           - computing
@@ -515,6 +336,9 @@ class MultiFeatureContributions(Resource):
                       type: string
                   model_id:
                     type: string
+                  row_id:
+                    type: string
+                    description: row_id to use for all entities
                 required: ['eids', 'model_id']
         responses:
           200:
@@ -545,26 +369,14 @@ class MultiFeatureContributions(Resource):
             $ref: '#/components/responses/ErrorMessage'
         """
 
-        # LOAD IN AND CHECK ATTRIBUTES:
-        attrs = ["eids", "model_id"]
-        d = dict()
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-
-        eids = d["eids"]
-        model_id = d["model_id"]
-
-        entities = [
-            dict(entity.features, **{"eid": entity.eid})
-            for entity in schema.Entity.objects(eid__in=eids)
+        attr_info = [
+            Attrs("eids", type=None),
+            Attrs("model_id"),
+            Attrs("row_id", required=False),
         ]
-        entities = pd.DataFrame(entities)
+        eids, model_id, row_id = get_and_validate_params(attr_info)
+
+        entities = get_entities_table(eids, row_id)
         success, payload = helpers.load_explainer(model_id)
         if success:
             explainer = payload[0]
@@ -597,6 +409,8 @@ class ModifiedFeatureContribution(Resource):
                  type: object
                  properties:
                    eid:
+                     type: string
+                   row_id:
                      type: string
                    model_id:
                      type: string
@@ -633,31 +447,16 @@ class ModifiedFeatureContribution(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        attrs = ["eid", "model_id", "changes"]
-        d = {}
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-        # validate data type
-        try:
-            eid = str(d["eid"])
-            model_id = str(d["model_id"])
-            changes = d["changes"]
-            validate_changes(changes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
+        attr_info = [
+            Attrs("eid"),
+            Attrs("model_id"),
+            Attrs("row_id", False),
+            Attrs("changes", type=None, validation=validate_changes),
+        ]
 
-        entity = schema.Entity.find_one(eid=eid)
-        if entity is None:
-            LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
-            return {"message": "Entity {} does not exist".format(eid)}, 400
-        entity_features = pd.DataFrame(entity.features, index=[0])
+        eid, model_id, row_id, changes = get_and_validate_params(attr_info)
+
+        entity_features = get_entity_table(eid, row_id)
         success, payload = helpers.load_explainer(model_id)
         if success:
             explainer = payload[0]
@@ -675,7 +474,7 @@ class ModifiedFeatureContribution(Resource):
 class SimilarEntities(Resource):
     def post(self):
         """
-        Get nearest neighbors for list of eids
+        Get nearest neighbors for list of eids, or for all rows in a single eid
         ---
         tags:
           - computing
@@ -711,26 +510,10 @@ class SimilarEntities(Resource):
             $ref: '#/components/responses/ErrorMessage'
         """
 
-        # LOAD IN AND CHECK ATTRIBUTES:
-        attrs = ["eids", "model_id"]
-        d = dict()
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
+        attr_info = [Attrs("eids", type=None), Attrs("model_id"), Attrs("row_id", required=False)]
+        eids, model_id, row_id = get_and_validate_params(attr_info)
 
-        eids = d["eids"]
-        model_id = d["model_id"]
-
-        entities = [
-            dict(entity.features, **{"eid": entity.eid})
-            for entity in schema.Entity.objects(eid__in=eids)
-        ]
-        entities = pd.DataFrame(entities)
+        entities = get_entities_table(eids, row_id)
         success, payload = helpers.load_explainer(model_id, include_dataset=True)
         if success:
             explainer, dataset = payload
@@ -745,5 +528,6 @@ class SimilarEntities(Resource):
         for eid in similar_entities:
             similar_entities[eid]["X"] = similar_entities[eid]["X"].to_json(orient="index")
             similar_entities[eid]["y"] = similar_entities[eid]["y"].to_json(orient="index")
+            similar_entities[eid]["Input"] = similar_entities[eid]["Input"].to_json(orient="index")
 
         return {"similar_entities": similar_entities}, 200

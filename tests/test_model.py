@@ -37,11 +37,46 @@ def test_get_importance(client, models):
 
 def test_get_prediction(client, models, entities):
     model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
-    entity = entities[0]
-    expected_output = entity["features"]["A"] - entity["features"]["B"]
+    entity = entities[1]
+    expected_output = entity["features"]["row_a"]["A"] - entity["features"]["row_a"]["B"]
 
     response = client.get(
         "/api/v1/prediction/?model_id=" + model_id + "&eid=" + entity["eid"]
     ).json
-    print(response)
     assert response["output"] == expected_output
+
+    entity = entities[0]
+    row_id = "row_b"
+    expected_output = entity["features"][row_id]["A"] - entity["features"][row_id]["B"]
+
+    response = client.get(
+        "/api/v1/prediction/?model_id=" + model_id + "&eid=" + entity["eid"] + "&row_id=" + row_id
+    ).json
+    assert response["output"] == expected_output
+
+
+def test_multi_prediction(client, models, entities, multirow_entities):
+    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+
+    response = client.post(
+        "/api/v1/multi_prediction/",
+        json={"eids": [entity["eid"] for entity in entities], "model_id": model_id},
+    ).json
+
+    for entity in entities:
+        features = next(iter(entity["features"].values()))
+        assert response["predictions"][entity["eid"]] == features["A"] - features["B"]
+
+    row_id = "row_b"
+    response = client.post(
+        "/api/v1/multi_prediction/",
+        json={
+            "eids": [entity["eid"] for entity in multirow_entities],
+            "model_id": model_id,
+            "row_id": row_id,
+        },
+    ).json
+
+    for entity in multirow_entities:
+        features = entity["features"][row_id]
+        assert response["predictions"][entity["eid"]] == features["A"] - features["B"]

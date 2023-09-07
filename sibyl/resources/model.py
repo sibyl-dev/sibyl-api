@@ -9,8 +9,13 @@ from flask_restful import Resource
 
 from sibyl import helpers
 from sibyl.db import schema
+from sibyl.resources.computing import Attrs, get_and_validate_params, get_entities_table
 
 LOGGER = logging.getLogger(__name__)
+
+
+def first(dict_):
+    return dict_[next(iter(dict_))]
 
 
 def get_model(model_doc, basic=True):
@@ -168,6 +173,11 @@ class Prediction(Resource):
               type: string
             required: true
             description: ID of the entity to predict on
+          - name: row_id
+            in: query
+            schema:
+              type: string
+            description: ID of row to predict on (defaults to first row)
         responses:
           200:
             description: Prediction
@@ -184,12 +194,21 @@ class Prediction(Resource):
         """
         model_id = request.args.get("model_id", None)
         eid = request.args.get("eid", None)
+        row_id = request.args.get("row_id", None)
 
         entity = schema.Entity.find_one(eid=eid)
         if entity is None:
             LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
             return {"message": "Entity {} does not exist".format(eid)}, 400
-        entity_features = pd.DataFrame(entity.features, index=[0])
+        if row_id is not None:
+            if row_id not in entity.features:
+                LOGGER.exception("row_id %s does not exist for entity %s", (row_id, eid))
+                return {
+                    "message": "row_id {} does not exist for entity {}".format(row_id, eid)
+                }, 400
+            entity_features = pd.DataFrame(entity.features[row_id], index=[0])
+        else:
+            entity_features = pd.DataFrame(first(entity.features), index=[0])
 
         model_doc = schema.Model.find_one(id=model_id)
         if model_doc is None:
@@ -212,7 +231,8 @@ class Prediction(Resource):
 class MultiPrediction(Resource):
     def post(self):
         """
-        Get multiple predictions
+        Get multiple predictions. If given multiple eids, return one prediction per eid
+        (first row). If given one eid, return one prediction per row_id
         ---
         tags:
           - model
@@ -231,6 +251,9 @@ class MultiPrediction(Resource):
                         type: string
                   model_id:
                     type: string
+                  row_id:
+                    type: string
+                    description: row_id to use for all entities
                 required: ['eids', 'model_id']
         responses:
           200:
@@ -257,26 +280,15 @@ class MultiPrediction(Resource):
                 return obj.tolist()
             return obj
 
-        # LOAD IN AND CHECK ATTRIBUTES:
-        attrs = ["eids", "model_id"]
-        d = dict()
-        body = request.json
-        for attr in attrs:
-            d[attr] = None
-            if body is not None:
-                d[attr] = body.get(attr)
-            else:
-                if attr in request.form:
-                    d[attr] = request.form[attr]
-
-        eids = d["eids"]
-        model_id = d["model_id"]
-
-        entities = [
-            dict(entity.features, **{"eid": entity.eid})
-            for entity in schema.Entity.objects(eid__in=eids)
+        attr_info = [
+            Attrs("eids", type=None),
+            Attrs("model_id"),
+            Attrs("row_id", False),
         ]
-        entities = pd.DataFrame(entities)
+
+        eids, model_id, row_id = get_and_validate_params(attr_info)
+
+        entities = get_entities_table(eids, row_id)
         success, payload = helpers.load_model(model_id, include_explainer=True)
         if success:
             _, explainer = payload

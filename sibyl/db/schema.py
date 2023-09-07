@@ -18,9 +18,31 @@ def _valid_id(val):
         raise ValidationError("eid must be type string, given %s" % val)
 
 
+def _valid_row_ids(val):
+    if isinstance(val, str):
+        raise ValidationError("row_ids must be list of strings")
+    try:
+        for row_id in val:
+            if not isinstance(row_id, str):
+                raise ValidationError("all row_ids must be type string, given %s" % row_id)
+    except TypeError:
+        raise ValidationError("val must be a list of valid row_ids")
+    if len(val) != len(set(val)):
+        raise ValidationError("all row_ids for a given eid must be unique")
+
+
 def _eid_exists(val):
     if Entity.find_one(eid=val) is None:
         raise ValidationError("eid provided (%s) does not exist" % val)
+
+
+def _validate_training_set(entities):
+    for entity in entities:
+        if entity.labels is None or entity.labels.keys() != entity.features.keys():
+            raise ValidationError(
+                "All training set entries must have one label per row. Incorrect labels on eid {}"
+                .format(entity.eid)
+            )
 
 
 class Event(SibylDocument):
@@ -64,15 +86,14 @@ class Entity(SibylDocument):
         List of events this entity was involved in
     """
 
-    eid = fields.StringField(validation=_valid_id)
+    eid = fields.StringField(validation=_valid_id, unique=True)
+    row_ids = fields.ListField(validation=_valid_row_ids)
 
-    features = fields.DictField()  # {feature:value}
+    features = fields.DictField()  # {row_id: {feature:value}}
     property = fields.DictField()  # {property:value}
-    label = fields.StringField()  # ground-truth label, if provided
+    labels = fields.DictField()  # {row_id: ground_truth_label}, as provided
 
     events = fields.ListField(fields.ReferenceField(Event, reverse_delete_rule=PULL))
-
-    unique_key_fields = ["eid"]
 
 
 class Category(SibylDocument):
@@ -86,7 +107,7 @@ class Category(SibylDocument):
     color : str
         Hexidecimal color that should be used for the category
     abbreviation : str
-        Two or three character abbreviation of the category
+        Two- or three-character abbreviation of the category
     """
 
     name = fields.StringField(required=True)
@@ -135,7 +156,9 @@ class TrainingSet(SibylDocument):
         Trained nearest neighbors classifier for the dataset
     """
 
-    entities = fields.ListField(fields.ReferenceField(Entity, reverse_delete_rule=PULL))
+    entities = fields.ListField(
+        fields.ReferenceField(Entity, reverse_delete_rule=PULL), validation=_validate_training_set
+    )
     target = fields.StringField()
     neighbors = fields.BinaryField()  # trained NN classifier
 
@@ -144,10 +167,12 @@ class TrainingSet(SibylDocument):
         Returns this dataset as a Pandas dataframe
         :return: dataframe
         """
-        features = [entity.features for entity in self.entities]
-        labels = [entity.label for entity in self.entities]
+        features = [
+            dict(entity.features[row_id], **{"y": entity.labels[row_id]})
+            for entity in self.entities
+            for row_id in entity.features
+        ]
         training_set_df = pd.DataFrame(features)
-        training_set_df["y"] = labels
         return training_set_df
 
 

@@ -118,6 +118,8 @@ def insert_entities(
 ):
     values_df = pd.read_csv(feature_values_filepath)
     features_to_extract = ["eid"] + features_names
+    if "row_id" in values_df:
+        features_to_extract = features_to_extract + ["row_id"]
     if target in values_df:
         features_to_extract += [target]
     values_df = values_df[features_to_extract]
@@ -140,19 +142,29 @@ def insert_entities(
     if num is not None:
         values_df = values_df.sample(num, random_state=100)
     eids = values_df["eid"]
+    values_df = values_df.copy()  # Fixing fragmentation if transforming resulted in any
 
     # TODO: add groups to entities
     # groups = schema.EntityGroup.find()
 
-    raw_entities = values_df.to_dict(orient="records")
+    if "row_id" not in values_df:
+        values_df["row_id"] = pd.Series(np.arange(0, values_df.shape[0])).astype(str)
+    else:
+        values_df["row_id"] = values_df["row_id"].astype(str)
+    values_df = values_df.copy()
+    values_df = values_df.set_index(["eid", "row_id"])
+    raw_entities = {
+        level: values_df.xs(level).to_dict("index") for level in values_df.index.levels[0]
+    }
     entities = []
-    for raw_entity in raw_entities:
-        entity = {"eid": str(raw_entity["eid"])}
-        del raw_entity["eid"]
-        entity["features"] = raw_entity
-        if target in raw_entity:
-            entity["label"] = str(raw_entity[target])
-            del raw_entity[target]
+    for eid in raw_entities:
+        entity = {"eid": str(eid), "row_ids": list(raw_entities[eid].keys())}
+        targets = {}
+        for row_id in raw_entities[eid]:
+            if target in raw_entities[eid][row_id]:
+                targets[row_id] = raw_entities[eid][row_id].pop(target)
+        entity["features"] = raw_entities[eid]
+        entity["labels"] = targets
         entities.append(entity)
     schema.Entity.insert_many(entities)
     return eids
