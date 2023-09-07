@@ -525,6 +525,7 @@ class SimilarEntities(Resource):
         similar_entities = explainer.produce_similar_examples(
             entities, x_train_orig=X, y_train=y, standardize=True
         )
+
         for eid in similar_entities:
             similar_entities[eid]["X"] = similar_entities[eid]["X"].to_dict(orient="index")
             similar_entities[eid]["y"] = similar_entities[eid]["y"].to_dict()

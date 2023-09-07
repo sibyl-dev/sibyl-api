@@ -180,10 +180,11 @@ def test_post_similar_entities(client, models, entities, multirow_entities):
     ).json
     similar_entities = response["similar_entities"]
 
-    for eid in [entity["eid"] for entity in entities]:  # Assert no error
-        pd.DataFrame.from_dict(similar_entities[eid]["X"], orient="index")
-        pd.Series(similar_entities[eid]["y"])
-        pd.Series(similar_entities[eid]["Input"])
+    for i, eid in enumerate([entity["eid"] for entity in entities]):
+        assert next(iter(similar_entities[eid]["X"].values())) == entities[i]["features"]["row_a"]
+        pd.DataFrame.from_dict(similar_entities[eid]["X"], orient="index")  # Assert no error
+        pd.Series(similar_entities[eid]["y"])  # Assert no error
+        pd.Series(similar_entities[eid]["Input"])  # Assert no error
 
     response = client.post(
         "/api/v1/similar_entities/",
@@ -194,7 +195,8 @@ def test_post_similar_entities(client, models, entities, multirow_entities):
         },
     ).json
     similar_entities = response["similar_entities"]
-    for eid in [entity["eid"] for entity in multirow_entities]:  # Assert no error
-        pd.DataFrame.from_dict(similar_entities[eid]["X"], orient="index")
-        pd.Series(similar_entities[eid]["y"])
-        pd.Series(similar_entities[eid]["Input"])
+    for i, eid in enumerate([entity["eid"] for entity in multirow_entities]):
+        assert next(iter(similar_entities[eid]["X"].values())) == entities[i]["features"]["row_b"]
+        pd.DataFrame.from_dict(similar_entities[eid]["X"], orient="index")  # Assert no error
+        pd.Series(similar_entities[eid]["y"])  # Assert no error
+        pd.Series(similar_entities[eid]["Input"])  # Assert no error
