@@ -467,7 +467,7 @@ class ModifiedFeatureContribution(Resource):
         for feature, change in changes.items():
             modified[feature] = change
         contribution = explainer.produce_feature_contributions(modified)[0]
-        contribution_json = contribution.set_index("Feature Name").to_json(orient="index")
+        contribution_json = contribution.set_index("Feature Name").to_dict(orient="index")
         return {"contribution": contribution_json}, 200
 
 
