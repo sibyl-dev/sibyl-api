@@ -110,7 +110,7 @@ def get_entities_table(eids, row_ids, all_rows=False):
             ]
         elif len(row_ids) > 1:
             entity = schema.Entity.find_one(eid=eids[0])
-            entities = [dict(entity.features[row_id], **{"eid": eids[0]}) for row_id in row_ids]
+            entities = [dict(entity.features[row_id], **{"eid": row_id}) for row_id in row_ids]
 
         else:
             entities = [

@@ -79,3 +79,21 @@ def test_multi_prediction(client, models, entities, multirow_entities):
     for entity in multirow_entities:
         features = entity["features"]["row_b"]
         assert response["predictions"][entity["eid"]] == features["A"] - features["B"]
+
+
+def test_multi_prediction_multi_rows(client, models, multirow_entities):
+    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    entity = multirow_entities[0]
+
+    response = client.post(
+        "/api/v1/multi_prediction/",
+        json={
+            "eids": [entity["eid"]],
+            "model_id": model_id,
+            "row_ids": entity["row_ids"],
+        },
+    ).json
+    print(response)
+    for row in entity["row_ids"]:
+        features = entity["features"][row]
+        assert response["predictions"][row] == features["A"] - features["B"]

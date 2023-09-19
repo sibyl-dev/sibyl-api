@@ -181,7 +181,7 @@ def entities():
         },
         {
             "eid": "ent2",
-            "row_ids": ["row_a"],
+            "row_ids": ["row_a", "row_b"],
             "property": {"group_ids": ["101"]},
             "features": {"row_a": features1_b, "row_b": features2_b},
             "labels": {"row_a": 2, "row_b": 2},
