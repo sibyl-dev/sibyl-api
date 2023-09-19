@@ -66,10 +66,11 @@ def test_post_multi_contributions(client, models, entities, multirow_entities):
         json={
             "eids": [entity["eid"] for entity in multirow_entities],
             "model_id": model_id,
-            "row_id": "row_b",
+            "row_ids": ["row_b"],
         },
     ).json
     contributions = response["contributions"]
+    print(contributions)
     for eid in [entity["eid"] for entity in multirow_entities]:  # Assert no error
         pd.DataFrame.from_dict(contributions[eid], orient="index")
     conts_0 = contributions[multirow_entities[0]["eid"]]

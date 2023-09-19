@@ -67,16 +67,15 @@ def test_multi_prediction(client, models, entities, multirow_entities):
         features = next(iter(entity["features"].values()))
         assert response["predictions"][entity["eid"]] == features["A"] - features["B"]
 
-    row_id = "row_b"
     response = client.post(
         "/api/v1/multi_prediction/",
         json={
             "eids": [entity["eid"] for entity in multirow_entities],
             "model_id": model_id,
-            "row_id": row_id,
+            "row_ids": ["row_b"],
         },
     ).json
 
     for entity in multirow_entities:
-        features = entity["features"][row_id]
+        features = entity["features"]["row_b"]
         assert response["predictions"][entity["eid"]] == features["A"] - features["B"]
