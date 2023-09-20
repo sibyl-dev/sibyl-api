@@ -23,6 +23,10 @@ def get_features_for_row(features, row_id):
         return features[row_id]
 
 
+def get_features_for_rows(features, row_ids):
+    return [features[row_id] for row_id in row_ids]
+
+
 def str_convert(s):
     return str(s) if s is not None else None
 
@@ -40,7 +44,6 @@ def get_and_validate_params(attr_info):
         **args
             All parameters in attr (None if not required and not given)
     """
-    d = {}
     body = request.json
     results = []
     for attr in attr_info:
@@ -98,12 +101,25 @@ def get_entity_table(eid, row_id):
     return pd.DataFrame(get_features_for_row(entity.features, row_id), index=[0])
 
 
-def get_entities_table(eids, row_id, all_rows=False):
+def get_entities_table(eids, row_ids, all_rows=False):
     if not all_rows:
-        entities = [
-            dict(get_features_for_row(entity.features, row_id), **{"eid": entity.eid})
-            for entity in schema.Entity.objects(eid__in=eids)
-        ]
+        if row_ids is None:
+            entities = [
+                dict(get_features_for_row(entity.features, row_ids), **{"eid": entity.eid})
+                for entity in schema.Entity.objects(eid__in=eids)
+            ]
+        elif len(eids) > 1 and len(row_ids) > 1:
+            LOGGER.exception("Only one of eids and row_ids can have more than one element")
+            return {"message": "Only one of eids and row_ids can have more than one element"}, 400
+        elif len(eids) > 1:
+            entities = [
+                dict(get_features_for_row(entity.features, row_ids[0]), **{"eid": entity.eid})
+                for entity in schema.Entity.objects(eid__in=eids)
+            ]
+        else:
+            entity = schema.Entity.find_one(eid=eids[0])
+            entities = [dict(entity.features[row_id], **{"eid": row_id}) for row_id in row_ids]
+
     else:
         entity_dict = schema.Entity.objects(eid=eids[0]).first().features
         # We mislabel the row_ids as eids intentionally here to take advantage of the
@@ -317,7 +333,7 @@ class FeatureContributions(Resource):
 class MultiFeatureContributions(Resource):
     def post(self):
         """
-        Get feature contributions for multiple eids, or for all rows in a single entity
+        Get feature contributions for multiple eids, or for multiple row_ids in a single entity
         ---
         tags:
           - computing
@@ -336,9 +352,10 @@ class MultiFeatureContributions(Resource):
                       type: string
                   model_id:
                     type: string
-                  row_id:
-                    type: string
-                    description: row_id to use for all entities
+                  row_ids:
+                    type: array
+                    items:
+                      type: string
                 required: ['eids', 'model_id']
         responses:
           200:
@@ -372,11 +389,11 @@ class MultiFeatureContributions(Resource):
         attr_info = [
             Attrs("eids", type=None),
             Attrs("model_id"),
-            Attrs("row_id", required=False),
+            Attrs("row_ids", type=None, required=False),
         ]
-        eids, model_id, row_id = get_and_validate_params(attr_info)
+        eids, model_id, row_ids = get_and_validate_params(attr_info)
 
-        entities = get_entities_table(eids, row_id)
+        entities = get_entities_table(eids, row_ids)
         success, payload = helpers.load_explainer(model_id)
         if success:
             explainer = payload[0]
@@ -490,7 +507,7 @@ class SimilarEntities(Resource):
                   eids:
                     type: array
                     items:
-                        type: string
+                      type: string
                   model_id:
                     type: string
                 required: ['eids', 'model_id']
@@ -513,7 +530,7 @@ class SimilarEntities(Resource):
         attr_info = [Attrs("eids", type=None), Attrs("model_id"), Attrs("row_id", required=False)]
         eids, model_id, row_id = get_and_validate_params(attr_info)
 
-        entities = get_entities_table(eids, row_id)
+        entities = get_entities_table(eids, [row_id])
         success, payload = helpers.load_explainer(model_id, include_dataset=True)
         if success:
             explainer, dataset = payload

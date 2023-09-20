@@ -66,13 +66,36 @@ def test_post_multi_contributions(client, models, entities, multirow_entities):
         json={
             "eids": [entity["eid"] for entity in multirow_entities],
             "model_id": model_id,
-            "row_id": "row_b",
+            "row_ids": ["row_b"],
         },
     ).json
     contributions = response["contributions"]
     for eid in [entity["eid"] for entity in multirow_entities]:  # Assert no error
         pd.DataFrame.from_dict(contributions[eid], orient="index")
     conts_0 = contributions[multirow_entities[0]["eid"]]
+    assert conts_0.keys() == next(iter(multirow_entities[0]["features"].values())).keys()
+    assert conts_0["A"]["Contribution"] > 0.01
+    assert conts_0["B"]["Contribution"] > 0.01
+
+
+def test_post_multi_contributions_multiple_rows(client, models, multirow_entities):
+    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    entity = multirow_entities[0]
+    response = client.post(
+        "/api/v1/multi_contributions/",
+        json={
+            "eids": [entity["eid"]],
+            "model_id": model_id,
+            "row_ids": entity["row_ids"],
+        },
+    ).json
+    contributions = response["contributions"]
+    for row_id in entity["row_ids"]:  # Assert no error
+        assert row_id in contributions.keys()
+        pd.DataFrame.from_dict(contributions[row_id], orient="index")
+
+    conts_0 = contributions["row_b"]
+
     assert conts_0.keys() == next(iter(multirow_entities[0]["features"].values())).keys()
     assert conts_0["A"]["Contribution"] > 0.01
     assert conts_0["B"]["Contribution"] > 0.01

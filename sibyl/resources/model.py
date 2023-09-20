@@ -232,7 +232,8 @@ class MultiPrediction(Resource):
     def post(self):
         """
         Get multiple predictions. If given multiple eids, return one prediction per eid
-        (first row). If given one eid, return one prediction per row_id
+        (first row). If given one eid, return one prediction per row_id. Only one of
+        eids and row_ids can contain more than one element.
         ---
         tags:
           - model
@@ -248,12 +249,14 @@ class MultiPrediction(Resource):
                   eids:
                     type: array
                     items:
-                        type: string
+                      type: string
                   model_id:
                     type: string
-                  row_id:
-                    type: string
-                    description: row_id to use for all entities
+                  row_ids:
+                    type: array
+                    items:
+                      type: string
+                    description: row_ids to select from the given eid
                 required: ['eids', 'model_id']
         responses:
           200:
@@ -283,12 +286,11 @@ class MultiPrediction(Resource):
         attr_info = [
             Attrs("eids", type=None),
             Attrs("model_id"),
-            Attrs("row_id", False),
+            Attrs("row_ids", type=None, required=False),
         ]
 
-        eids, model_id, row_id = get_and_validate_params(attr_info)
-
-        entities = get_entities_table(eids, row_id)
+        eids, model_id, row_ids = get_and_validate_params(attr_info)
+        entities = get_entities_table(eids, row_ids)
         success, payload = helpers.load_model(model_id, include_explainer=True)
         if success:
             _, explainer = payload
