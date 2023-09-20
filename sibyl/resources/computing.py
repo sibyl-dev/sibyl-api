@@ -529,8 +529,10 @@ class SimilarEntities(Resource):
 
         attr_info = [Attrs("eids", type=None), Attrs("model_id"), Attrs("row_id", required=False)]
         eids, model_id, row_id = get_and_validate_params(attr_info)
-
-        entities = get_entities_table(eids, [row_id])
+        if row_id is None:
+            entities = get_entities_table(eids, row_id)
+        else:
+            entities = get_entities_table(eids, [row_id])
         success, payload = helpers.load_explainer(model_id, include_dataset=True)
         if success:
             explainer, dataset = payload
