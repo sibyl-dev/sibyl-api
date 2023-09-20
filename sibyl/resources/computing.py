@@ -108,15 +108,18 @@ def get_entities_table(eids, row_ids, all_rows=False):
                 dict(get_features_for_row(entity.features, row_ids), **{"eid": entity.eid})
                 for entity in schema.Entity.objects(eid__in=eids)
             ]
-        elif len(row_ids) > 1:
-            entity = schema.Entity.find_one(eid=eids[0])
-            entities = [dict(entity.features[row_id], **{"eid": row_id}) for row_id in row_ids]
-
-        else:
+        elif len(eids) > 1 and len(row_ids) > 1:
+            LOGGER.exception("Only one of eids and row_ids can have more than one element")
+            return {"message": "Only one of eids and row_ids can have more than one element"}, 400
+        elif len(eids) > 1:
             entities = [
                 dict(get_features_for_row(entity.features, row_ids[0]), **{"eid": entity.eid})
                 for entity in schema.Entity.objects(eid__in=eids)
             ]
+        else:
+            entity = schema.Entity.find_one(eid=eids[0])
+            entities = [dict(entity.features[row_id], **{"eid": row_id}) for row_id in row_ids]
+
     else:
         entity_dict = schema.Entity.objects(eid=eids[0]).first().features
         # We mislabel the row_ids as eids intentionally here to take advantage of the

@@ -290,15 +290,7 @@ class MultiPrediction(Resource):
         ]
 
         eids, model_id, row_ids = get_and_validate_params(attr_info)
-        if row_ids is None:
-            entities = get_entities_table(eids, row_ids)
-        elif len(eids) > 1 and len(row_ids) > 1:
-            LOGGER.exception("Only one of eids and row_ids can have more than one element")
-            return {"message": "Only one of eids and row_ids can have more than one element"}, 400
-        elif len(eids) > 1:
-            entities = get_entities_table(eids, row_ids)
-        else:
-            entities = get_entities_table(eids, row_ids)
+        entities = get_entities_table(eids, row_ids)
         success, payload = helpers.load_model(model_id, include_explainer=True)
         if success:
             _, explainer = payload
