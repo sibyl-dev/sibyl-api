@@ -27,7 +27,7 @@ Sibylapp is an online interactive tool built on the top of Sibyl (python library
 
 ## Requirements
 
-**Sibyl-API** has been developed and tested on [Python 3.8, 3.9, and 3.10](https://www.python.org/downloads/), and on [MongoDB version 6](https://www.mongodb.com/try/download/community).
+**Sibyl-API** has been developed and tested on [Python 3.9, 3.10, and 3.11](https://www.python.org/downloads/), and on [MongoDB version 6](https://www.mongodb.com/try/download/community).
 
 This library uses Poetry for package management.
 
