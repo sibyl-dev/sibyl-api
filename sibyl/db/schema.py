@@ -205,7 +205,7 @@ class Model(SibylDocument):
     performance = fields.StringField()
     importances = fields.DictField()  # {feature_name:importance}
 
-    explainer = fields.BinaryField()  # trained contribution explainer
+    explainer = fields.BinaryField(required=True)  # trained contribution explainer
     training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
 
 
