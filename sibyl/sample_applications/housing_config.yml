@@ -22,11 +22,10 @@ impute: True
 # =================================================================================================
 # Name of target column in database
 target: "SalePrice"
-explainer_directory_name: "explainers"
 # filename of pickled model
-pickle_model_fn:
+pickle_model_fn: "model.pkl"
 # filename of pickled explainer
-explainer_fn:
+explainer_fn: "explainer.pkl"
 # shap type to use for explainer if not provided
 shap_type: "linear" # TODO: make this process smoother
 
