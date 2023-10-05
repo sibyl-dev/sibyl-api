@@ -386,6 +386,25 @@ def prepare_database(config_file, directory=None):
                     impute=cfg.get("impute", False),
                     prefit_se=cfg.get("prefit_se", True),
                 )
+    elif cfg.get("model_directory_name") is not None:
+        model_directory = _process_fp(cfg.get("model_directory_name"))
+        for model_file in os.listdir(model_directory):
+            if model_file.endswith(".pkl"):
+                insert_model(
+                    feature_names,
+                    dataset_fp,
+                    target,
+                    set_doc,
+                    model_id=model_file[:-4],  # remove .pkl
+                    pickle_model_fp=os.path.join(model_directory, model_file),
+                    importance_fp=_process_fp(cfg.get("importance_fn")),
+                    explainer_fp=_process_fp(cfg.get("explainer_fn")),
+                    one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
+                    shap_type=cfg.get("shap_type"),
+                    training_size=cfg.get("training_size"),
+                    impute=cfg.get("impute", False),
+                    prefit_se=cfg.get("prefit_se", True),
+                )
     else:
         insert_model(
             feature_names,
