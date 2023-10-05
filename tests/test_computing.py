@@ -29,7 +29,7 @@ def contribution_helper(contributions, b_neg):
 
 def test_post_contributions(client, models, entities):
     entity = entities[0]
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
 
     response = client.post(
         "/api/v1/contributions/", json={"eid": entity["eid"], "model_id": model_id}
@@ -47,7 +47,7 @@ def test_post_contributions(client, models, entities):
 
 
 def test_post_multi_contributions(client, models, entities, multirow_entities):
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     response = client.post(
         "/api/v1/multi_contributions/",
         json={"eids": [entity["eid"] for entity in entities], "model_id": model_id},
@@ -79,7 +79,7 @@ def test_post_multi_contributions(client, models, entities, multirow_entities):
 
 
 def test_post_multi_contributions_multiple_rows(client, models, multirow_entities):
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     entity = multirow_entities[0]
     response = client.post(
         "/api/v1/multi_contributions/",
@@ -102,7 +102,7 @@ def test_post_multi_contributions_multiple_rows(client, models, multirow_entitie
 
 
 def test_post_modified_prediction(client, models, entities):
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     entity = entities[0]
     eid = entity["eid"]
 
@@ -129,7 +129,7 @@ def test_post_modified_prediction(client, models, entities):
 
 
 def test_single_change_predictions(client, models, entities):
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     entity = entities[0]
     eid = entity["eid"]
 
@@ -169,7 +169,7 @@ def test_modified_contribution(client, models, entities):
         assert "Contribution" in df.columns
         assert "Average/Mode" in df.columns
 
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     entity = entities[0]
     eid = entity["eid"]
 
@@ -196,7 +196,7 @@ def test_modified_contribution(client, models, entities):
 
 
 def test_post_similar_entities(client, models, entities, multirow_entities):
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     response = client.post(
         "/api/v1/similar_entities/",
         json={"eids": [entity["eid"] for entity in entities], "model_id": model_id},

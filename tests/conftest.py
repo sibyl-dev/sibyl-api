@@ -239,13 +239,13 @@ def models():
     models = [
         {
             "model": model_serial,
-            "name": "test model",
+            "model_id": "test model",
             "description": "a model",
             "performance": "does well",
             "importances": {"A": 100, "B": 0, "C": 0, "D": 0, "E": 0, "F": 0},
             "explainer": explainer_serial,
         },
-        {"model": model_serial, "name": "filler", "explainer": explainer_serial},
+        {"model": model_serial, "model_id": "filler", "explainer": explainer_serial},
     ]
     return models
 

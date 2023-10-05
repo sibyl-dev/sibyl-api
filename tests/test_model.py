@@ -12,31 +12,31 @@ def test_get_models(client, models):
     for expected_item in models:
         found = False
         for response_item in response["models"]:
-            model = schema.Model.find_one(id=response_item["id"])  # assert no error
+            schema.Model.find_one(model_id=response_item["model_id"])  # assert no error
             # assert model in models
-            if response_item["name"] == expected_item["name"]:
+            if response_item["model_id"] == expected_item["model_id"]:
                 found = True
         assert found
 
 
 def test_get_model(client, models):
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     response = client.get("/api/v1/models/" + model_id + "/").json
-    assert len(response) == 4
-    assert response["id"] == model_id
-    for key in ["name", "description", "performance"]:
+    assert len(response) == 3
+    assert response["model_id"] == model_id
+    for key in ["model_id", "description", "performance"]:
         assert response[key] == models[0][key]
 
 
 def test_get_importance(client, models):
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     response = client.get("/api/v1/importance/?model_id=" + model_id).json
 
     assert response["importances"] == models[0]["importances"]
 
 
 def test_get_prediction(client, models, entities):
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     entity = entities[1]
     expected_output = entity["features"]["row_a"]["A"] - entity["features"]["row_a"]["B"]
 
@@ -56,7 +56,7 @@ def test_get_prediction(client, models, entities):
 
 
 def test_multi_prediction(client, models, entities, multirow_entities):
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
 
     response = client.post(
         "/api/v1/multi_prediction/",
@@ -82,7 +82,7 @@ def test_multi_prediction(client, models, entities, multirow_entities):
 
 
 def test_multi_prediction_multi_rows(client, models, multirow_entities):
-    model_id = str(schema.Model.find_one(name=models[0]["name"]).id)
+    model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     entity = multirow_entities[0]
 
     response = client.post(
