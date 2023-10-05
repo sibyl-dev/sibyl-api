@@ -198,14 +198,14 @@ class Model(SibylDocument):
         Training set for the model
     """
 
-    model = fields.BinaryField(required=True)  # the model (must have model.predict())
+    model = fields.BinaryField()  # the model (must have model.predict())
 
-    name = fields.StringField()
+    name = fields.StringField(required=True, unique=True)
     description = fields.StringField()
     performance = fields.StringField()
     importances = fields.DictField()  # {feature_name:importance}
 
-    explainer = fields.BinaryField()  # trained contribution explainer
+    explainer = fields.BinaryField(required=True)  # trained contribution explainer
     training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
 
 
