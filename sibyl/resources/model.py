@@ -257,6 +257,8 @@ class MultiPrediction(Resource):
                     items:
                       type: string
                     description: row_ids to select from the given eid
+                  return_proba:
+                    type: boolean
                 required: ['eids', 'model_id']
         responses:
           200:
@@ -287,9 +289,10 @@ class MultiPrediction(Resource):
             Attrs("eids", type=None),
             Attrs("model_id"),
             Attrs("row_ids", type=None, required=False),
+            Attrs("return_proba", type=None, required=False),
         ]
 
-        eids, model_id, row_ids = get_and_validate_params(attr_info)
+        eids, model_id, row_ids, return_proba = get_and_validate_params(attr_info)
         entities = get_entities_table(eids, row_ids)
         success, payload = helpers.load_model(model_id, include_explainer=True)
         if success:
@@ -297,7 +300,9 @@ class MultiPrediction(Resource):
         else:
             message, error_code = payload
             return message, error_code
-
-        predictions = explainer.predict(entities)
+        if return_proba:
+            predictions = explainer.predict_proba(entities)
+        else:
+            predictions = explainer.predict(entities)
         predictions = {key: numpy_decoder(predictions[key]) for key in predictions}
         return {"predictions": predictions}, 200
