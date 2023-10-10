@@ -377,7 +377,6 @@ def prepare_database(config_file, directory=None):
                     target,
                     set_doc,
                     model_id=explainer_file[:-4],  # remove .pkl
-                    pickle_model_fp=_process_fp(cfg.get("pickle_model_fn")),
                     importance_fp=_process_fp(cfg.get("importance_fn")),
                     explainer_fp=os.path.join(explainer_directory, explainer_file),
                     one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),

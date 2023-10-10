@@ -98,7 +98,6 @@ def get_entity_table(eid, row_id):
     if entity is None:
         LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
         return {"message": "Entity {} does not exist".format(eid)}, 400
-    row = get_features_for_row(entity.features, row_id)
     return pd.DataFrame(get_features_for_row(entity.features, row_id), index=[0])
 
 
