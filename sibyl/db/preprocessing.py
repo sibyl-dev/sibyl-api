@@ -183,6 +183,7 @@ def insert_model(
     dataset_fp,
     target,
     set_doc,
+    name=None,
     pickle_model_fp=None,
     weights_fp=None,
     threshold_fp=None,
@@ -196,6 +197,7 @@ def insert_model(
     prefit_se=True,
 ):
     model_features = features
+    model = None
 
     # Base model options
     if pickle_model_fp is not None:
@@ -206,11 +208,9 @@ def insert_model(
         # Load from list of weights
         print("Loading model from weights")
         model, model_features = _load_model_from_weights_sklearn(weights_fp, LinearRegression())
-    else:
-        raise ValueError("Must provide at least one model format")
 
     # Model wrapping options
-    if threshold_fp is not None:
+    if threshold_fp is not None and model is not None:
         # Bin output based on thresholds
         threshold_df = pd.read_csv(threshold_fp)
         thresholds = threshold_df["thresholds"].tolist()
@@ -234,16 +234,18 @@ def insert_model(
     if model_transformers_fp is not None:
         transformers = pickle.load(open(model_transformers_fp, "rb"))
 
-    model_serial = pickle.dumps(model)
+    model_serial = None
+    if model is not None:
+        model_serial = pickle.dumps(model)
 
     texts = {
-        "name": "placeholder",
         "description": "placeholder",
         "performance": "placeholder",
     }
-    name = texts["name"]
     description = texts["description"]
     performance = texts["performance"]
+    if name is None:
+        name = "model"
 
     if explainer_fp is not None:
         print("Loading explainer from file")
@@ -365,22 +367,42 @@ def prepare_database(config_file, directory=None):
     set_doc = insert_training_set(eids, target)
 
     # INSERT MODEL
-    insert_model(
-        feature_names,
-        dataset_fp,
-        target,
-        set_doc,
-        pickle_model_fp=_process_fp(cfg.get("pickle_model_fn")),
-        weights_fp=_process_fp(cfg.get("weights_fn")),
-        threshold_fp=_process_fp(cfg.get("threshold_fn")),
-        importance_fp=_process_fp(cfg.get("importance_fn")),
-        explainer_fp=_process_fp(cfg.get("explainer_fn")),
-        one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
-        shap_type=cfg.get("shap_type"),
-        training_size=cfg.get("training_size"),
-        impute=cfg.get("impute", False),
-        prefit_se=cfg.get("prefit_se", True),
-    )
+    if cfg.get("explainer_directory_name") is not None:
+        explainer_directory = _process_fp(cfg.get("explainer_directory_name"))
+        for explainer_file in os.listdir(explainer_directory):
+            if explainer_file.endswith(".pkl"):
+                insert_model(
+                    feature_names,
+                    dataset_fp,
+                    target,
+                    set_doc,
+                    name=explainer_file[:-4],  # remove .pkl
+                    pickle_model_fp=_process_fp(cfg.get("pickle_model_fn")),
+                    importance_fp=_process_fp(cfg.get("importance_fn")),
+                    explainer_fp=os.path.join(explainer_directory, explainer_file),
+                    one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
+                    shap_type=cfg.get("shap_type"),
+                    training_size=cfg.get("training_size"),
+                    impute=cfg.get("impute", False),
+                    prefit_se=cfg.get("prefit_se", True),
+                )
+    else:
+        insert_model(
+            feature_names,
+            dataset_fp,
+            target,
+            set_doc,
+            pickle_model_fp=_process_fp(cfg.get("pickle_model_fn")),
+            weights_fp=_process_fp(cfg.get("weights_fn")),
+            threshold_fp=_process_fp(cfg.get("threshold_fn")),
+            importance_fp=_process_fp(cfg.get("importance_fn")),
+            explainer_fp=_process_fp(cfg.get("explainer_fn")),
+            one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
+            shap_type=cfg.get("shap_type"),
+            training_size=cfg.get("training_size"),
+            impute=cfg.get("impute", False),
+            prefit_se=cfg.get("prefit_se", True),
+        )
 
 
 if __name__ == "__main__":
