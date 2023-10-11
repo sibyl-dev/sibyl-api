@@ -32,8 +32,7 @@ def run():
         y_train=y_orig,
     )
 
-    print("Dumping model and explainer...")
-    pickle.dump(model, open(os.path.join(directory, "model.pkl"), "wb"))
+    print("Dumping explainer...")
     pickle.dump(explainer, open(os.path.join(directory, "explainer.pkl"), "wb"))
 
 
