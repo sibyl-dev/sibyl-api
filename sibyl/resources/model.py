@@ -1,6 +1,4 @@
 import logging
-import pickle
-from json import JSONEncoder
 
 import numpy as np
 import pandas as pd
@@ -130,10 +128,10 @@ class Importance(Resource):
                       type: array
                       items:
                         importance:
-                            feature:
-                                type: string
-                            importance:
-                                type: float
+                          feature:
+                            type: string
+                          importance:
+                            type: float
                 examples:
                   externalJson:
                     summary: external example
@@ -210,19 +208,12 @@ class Prediction(Resource):
         else:
             entity_features = pd.DataFrame(first(entity.features), index=[0])
 
-        model_doc = schema.Model.find_one(model_id=model_id)
-        if model_doc is None:
-            LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
-            return {"message": "Model {} does not exist".format(model_id)}, 400
-        explainer_bytes = model_doc.explainer
-        if explainer_bytes is None:
-            LOGGER.exception("Model %s explainer has not been trained. ", model_id)
-            return {"message": "Model {} does not have trained explainer".format(model_id)}, 400
-        try:
-            explainer = pickle.loads(explainer_bytes)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 500
+        success, payload = helpers.load_explainer(model_id)
+        if success:
+            explainer = payload[0]
+        else:
+            message, error_code = payload
+            return message, error_code
 
         prediction = explainer.predict(entity_features)[0].tolist()
         return {"output": prediction}, 200
@@ -257,6 +248,8 @@ class MultiPrediction(Resource):
                     items:
                       type: string
                     description: row_ids to select from the given eid
+                  return_proba:
+                    type: boolean
                 required: ['eids', 'model_id']
         responses:
           200:
@@ -267,9 +260,9 @@ class MultiPrediction(Resource):
                   type: object
                   properties:
                     contributions:
-                        type: array
-                        items:
-                            type: number
+                      type: array
+                      items:
+                        type: number
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -287,17 +280,24 @@ class MultiPrediction(Resource):
             Attrs("eids", type=None),
             Attrs("model_id"),
             Attrs("row_ids", type=None, required=False),
+            Attrs("return_proba", type=bool, required=False, default=False),
         ]
 
-        eids, model_id, row_ids = get_and_validate_params(attr_info)
+        eids, model_id, row_ids, return_proba = get_and_validate_params(attr_info)
         entities = get_entities_table(eids, row_ids)
-        success, payload = helpers.load_model(model_id, include_explainer=True)
+        success, payload = helpers.load_explainer(model_id)
         if success:
-            _, explainer = payload
+            explainer = payload[0]
         else:
             message, error_code = payload
             return message, error_code
-
-        predictions = explainer.predict(entities)
-        predictions = {key: numpy_decoder(predictions[key]) for key in predictions}
+        if return_proba:
+            prediction_probs = explainer.predict_proba(entities)
+            # the probability of the predicted class is the largest in the output probabilities
+            predictions = {
+                key: numpy_decoder(np.max(prediction_probs[key])) for key in prediction_probs
+            }
+        else:
+            predictions = explainer.predict(entities)
+            predictions = {key: numpy_decoder(predictions[key]) for key in predictions}
         return {"predictions": predictions}, 200

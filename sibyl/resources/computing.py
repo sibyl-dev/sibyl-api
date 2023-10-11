@@ -10,7 +10,11 @@ from sibyl.db import schema
 
 LOGGER = logging.getLogger(__name__)
 
-Attrs = namedtuple("Attrs", ["name", "required", "type", "validation"], defaults=[True, str, None])
+Attrs = namedtuple(
+    "Attrs",
+    ["name", "required", "type", "validation", "default"],
+    defaults=[True, str, None, None],
+)
 
 
 def get_features_for_row(features, row_id):
@@ -52,7 +56,7 @@ def get_and_validate_params(attr_info):
         elif attr.name in request.form:
             result = request.form[attr.name]
         elif not attr.required:
-            result = None
+            result = attr.default
         else:
             LOGGER.exception("Missing required parameter %s", attr.name)
             return {"message: Missing required parameter {}".format(attr.name)}, 400
@@ -153,6 +157,8 @@ class SingleChangePredictions(Resource):
                      type: string
                    changes:
                      $ref: '#/components/schemas/Changes'
+                   return_proba:
+                     type: boolean
                  required: ['eid', 'model_id', 'changes']
         responses:
           200:
@@ -182,9 +188,10 @@ class SingleChangePredictions(Resource):
             Attrs("model_id"),
             Attrs("row_id", False),
             Attrs("changes", type=None, validation=validate_changes),
+            Attrs("return_proba", required=False, type=bool, default=False),
         ]
 
-        eid, model_id, row_id, changes = get_and_validate_params(attr_info)
+        eid, model_id, row_id, changes, return_proba = get_and_validate_params(attr_info)
 
         entity_features = get_entity_table(eid, row_id)
 
@@ -198,7 +205,10 @@ class SingleChangePredictions(Resource):
         for feature, change in changes.items():
             modified = entity_features.copy()
             modified[feature] = change
-            prediction = explainer.predict(modified)[0].tolist()
+            if return_proba:
+                prediction = explainer.predict_proba(modified)[0].max().tolist()
+            else:
+                prediction = explainer.predict(modified)[0].tolist()
             predictions.append([feature, prediction])
         return {"predictions": predictions}, 200
 
@@ -227,6 +237,8 @@ class ModifiedPrediction(Resource):
                      type: string
                    changes:
                      $ref: '#/components/schemas/Changes'
+                   return_proba:
+                     type: boolean
                  required: ['eid', 'model_id', 'changes']
         responses:
           200:
@@ -250,9 +262,10 @@ class ModifiedPrediction(Resource):
             Attrs("model_id"),
             Attrs("row_id", False),
             Attrs("changes", type=None, validation=validate_changes),
+            Attrs("return_proba", required=False, type=bool, default=False),
         ]
 
-        eid, model_id, row_id, changes = get_and_validate_params(attr_info)
+        eid, model_id, row_id, changes, return_proba = get_and_validate_params(attr_info)
 
         entity_features = get_entity_table(eid, row_id)
 
@@ -265,7 +278,10 @@ class ModifiedPrediction(Resource):
         modified = entity_features.copy()
         for feature, change in changes.items():
             modified[feature] = change
-        prediction = explainer.predict(modified)[0].tolist()
+        if return_proba:
+            prediction = explainer.predict_proba(modified)[0].max().tolist()
+        else:
+            prediction = explainer.predict(modified)[0].tolist()
         return {"prediction": prediction}, 200
 
 
