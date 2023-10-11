@@ -2972,7 +2972,7 @@ shap = "=0.42.1"
 
 [package.source]
 type = "git"
-url = "git@github.com:sibyl-dev/pyreal.git"
+url = "https://github.com/sibyl-dev/pyreal.git"
 reference = "dev"
 resolved_reference = "4f986f8685bc449a369a46540649fbf5e0daa46f"
 
@@ -4260,4 +4260,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9, <3.12"
-content-hash = "07aa56c78f0769e01ca1cfff4e26d5bad69c9a106f0ba9a77fb69175535b678d"
+content-hash = "eeb16e4ec8dc8657176c2e365850e8e239a5a20b0f38f17823f1658ae37d08d4"
