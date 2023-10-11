@@ -184,8 +184,8 @@ class Model(SibylDocument):
     ----------
     model : pickle-saved model
         The model object. Must have a model.predict() function
-    name : str
-        Name of the model
+    model_id : str
+        Unique ID (name) of the model
     description : str
         Description of the model
     performance : str
@@ -200,7 +200,7 @@ class Model(SibylDocument):
 
     model = fields.BinaryField()  # the model (must have model.predict())
 
-    name = fields.StringField(required=True, unique=True)
+    model_id = fields.StringField(required=True, unique=True)
     description = fields.StringField()
     performance = fields.StringField()
     importances = fields.DictField()  # {feature_name:importance}

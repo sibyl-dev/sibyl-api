@@ -22,8 +22,8 @@ impute: True
 # =================================================================================================
 # Name of target column in database
 target: "SalePrice"
-# filename of pickled model
-pickle_model_fn: "model.pkl"
+# Name of model
+model_name: "housing_model"
 # filename of pickled explainer
 explainer_fn: "explainer.pkl"
 # shap type to use for explainer if not provided

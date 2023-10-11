@@ -33,6 +33,8 @@ impute: True
 target:
 # Name of directory containing pickled explainers. The name of the model docs will be set to the file name
 explainer_directory_name:
+# Name of directory containing pickled models. The name of the model docs will be set to the file names. Only one of model_directory_name and explainer_directory_name should be given
+model_directory_name:
 # filename of pickled model
 pickle_model_fn:
 # filename of csv with weights for linear model

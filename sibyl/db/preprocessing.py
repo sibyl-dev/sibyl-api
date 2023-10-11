@@ -183,7 +183,7 @@ def insert_model(
     dataset_fp,
     target,
     set_doc,
-    name=None,
+    model_id=None,
     pickle_model_fp=None,
     weights_fp=None,
     threshold_fp=None,
@@ -244,8 +244,8 @@ def insert_model(
     }
     description = texts["description"]
     performance = texts["performance"]
-    if name is None:
-        name = "model"
+    if model_id is None:
+        model_id = "model"
 
     if explainer_fp is not None:
         print("Loading explainer from file")
@@ -298,7 +298,7 @@ def insert_model(
 
     items = {
         "model": model_serial,
-        "name": name,
+        "model_id": model_id,
         "importances": importances,
         "description": description,
         "performance": performance,
@@ -376,10 +376,28 @@ def prepare_database(config_file, directory=None):
                     dataset_fp,
                     target,
                     set_doc,
-                    name=explainer_file[:-4],  # remove .pkl
-                    pickle_model_fp=_process_fp(cfg.get("pickle_model_fn")),
+                    model_id=explainer_file[:-4],  # remove .pkl
                     importance_fp=_process_fp(cfg.get("importance_fn")),
                     explainer_fp=os.path.join(explainer_directory, explainer_file),
+                    one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
+                    shap_type=cfg.get("shap_type"),
+                    training_size=cfg.get("training_size"),
+                    impute=cfg.get("impute", False),
+                    prefit_se=cfg.get("prefit_se", True),
+                )
+    elif cfg.get("model_directory_name") is not None:
+        model_directory = _process_fp(cfg.get("model_directory_name"))
+        for model_file in os.listdir(model_directory):
+            if model_file.endswith(".pkl"):
+                insert_model(
+                    feature_names,
+                    dataset_fp,
+                    target,
+                    set_doc,
+                    model_id=model_file[:-4],  # remove .pkl
+                    pickle_model_fp=os.path.join(model_directory, model_file),
+                    importance_fp=_process_fp(cfg.get("importance_fn")),
+                    explainer_fp=_process_fp(cfg.get("explainer_fn")),
                     one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
                     shap_type=cfg.get("shap_type"),
                     training_size=cfg.get("training_size"),
@@ -392,6 +410,7 @@ def prepare_database(config_file, directory=None):
             dataset_fp,
             target,
             set_doc,
+            model_id=cfg.get("model_name"),
             pickle_model_fp=_process_fp(cfg.get("pickle_model_fn")),
             weights_fp=_process_fp(cfg.get("weights_fn")),
             threshold_fp=_process_fp(cfg.get("threshold_fn")),
