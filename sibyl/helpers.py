@@ -12,12 +12,13 @@ def load_explainer(model_id, include_dataset=False):
     :param model_id: string
            Database id of the explainer wanted
     :param include_dataset: boolean
+    :param include_dataset: boolean
            If true, return the model dataset as well
     :return: success->boolean, payload->object
              If success is True, payload is (explainer, [dataset])
              Else, payload is (error message, error code)
     """
-    model_doc = schema.Model.find_one(id=model_id)
+    model_doc = schema.Model.find_one(model_id=model_id)
     if model_doc is None:
         LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
         return False, ({"message": "Model {} does not exist".format(model_id)}, 400)
@@ -64,7 +65,7 @@ def load_model(model_id, include_dataset=False, include_explainer=False):
              If success is True, payload is (model, [dataset], [explainer])
              Else, payload is (error message, error code)
     """
-    model_doc = schema.Model.find_one(id=model_id)
+    model_doc = schema.Model.find_one(model_id=model_id)
     if model_doc is None:
         LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
         return False, ({"message": "Model {} does not exist".format(model_id)}, 400)

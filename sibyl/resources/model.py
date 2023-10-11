@@ -17,7 +17,7 @@ def first(dict_):
 
 
 def get_model(model_doc, basic=True):
-    model = {"id": str(model_doc.id), "name": model_doc.name}
+    model = {"model_id": model_doc.model_id}
     if not basic:
         model["description"] = model_doc.description
         model["performance"] = model_doc.performance
@@ -34,7 +34,7 @@ class Model(Resource):
         security:
           - tokenAuth: []
         parameters:
-          - name: model_id
+          - name: model_name
             in: path
             schema:
               type: string
@@ -54,7 +54,7 @@ class Model(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        model = schema.Model.find_one(id=model_id)
+        model = schema.Model.find_one(model_id=model_id)
         if model is None:
             LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
             return {"message": "Model {} does not exist".format(model_id)}, 400
@@ -140,7 +140,7 @@ class Importance(Resource):
             $ref: '#/components/responses/ErrorMessage'
         """
         model_id = request.args.get("model_id", None)
-        model = schema.Model.find_one(id=model_id)
+        model = schema.Model.find_one(model_id=model_id)
         if model is None:
             LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
             return {"message": "Model {} does not exist".format(model_id)}, 400
