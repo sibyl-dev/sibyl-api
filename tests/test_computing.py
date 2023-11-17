@@ -52,13 +52,17 @@ def test_post_multi_contributions(client, models, entities, multirow_entities):
         json={"eids": [entity["eid"] for entity in entities], "model_id": model_id},
     ).json
     contributions = response["contributions"]
+    values = response["values"]
     assert len(contributions) == len(entities)
+    assert len(values) == len(entities)
+
     for eid in [entity["eid"] for entity in entities]:  # Assert no error
         pd.DataFrame.from_dict(contributions[eid], orient="index")
+        pd.DataFrame.from_dict(values[eid], orient="index")
     conts_0 = contributions[entities[0]["eid"]]
     assert conts_0.keys() == next(iter(entities[0]["features"].values())).keys()
-    assert conts_0["A"]["Contribution"] > 0.01
-    assert conts_0["B"]["Contribution"] < -0.01
+    assert conts_0["A"] > 0.01
+    assert conts_0["B"] < -0.01
 
     response = client.post(
         "/api/v1/multi_contributions/",
@@ -73,8 +77,8 @@ def test_post_multi_contributions(client, models, entities, multirow_entities):
         pd.DataFrame.from_dict(contributions[eid], orient="index")
     conts_0 = contributions[multirow_entities[0]["eid"]]
     assert conts_0.keys() == next(iter(multirow_entities[0]["features"].values())).keys()
-    assert conts_0["A"]["Contribution"] > 0.01
-    assert conts_0["B"]["Contribution"] > 0.01
+    assert conts_0["A"] > 0.01
+    assert conts_0["B"] > 0.01
 
 
 def test_post_multi_contributions_multiple_rows(client, models, multirow_entities):
@@ -96,8 +100,8 @@ def test_post_multi_contributions_multiple_rows(client, models, multirow_entitie
     conts_0 = contributions["row_b"]
 
     assert conts_0.keys() == next(iter(multirow_entities[0]["features"].values())).keys()
-    assert conts_0["A"]["Contribution"] > 0.01
-    assert conts_0["B"]["Contribution"] > 0.01
+    assert conts_0["A"] > 0.01
+    assert conts_0["B"] > 0.01
 
 
 def test_post_modified_prediction(client, models, entities):
