@@ -341,9 +341,8 @@ class FeatureContributions(Resource):
             return payload
 
         contributions = explainer.produce_feature_contributions(entity_features)[0]
-        keys = list(contributions["Feature Name"])
-        contribution_dict = dict(zip(keys, contributions["Contribution"]))
-        return {"contributions": contribution_dict}, 200
+        contributions_json = contributions.set_index("Feature Name").to_dict(orient="index")
+        return {"contributions": contributions_json}, 200
 
 
 class MultiFeatureContributions(Resource):

@@ -11,20 +11,19 @@ from sibyl.db import schema
 def contribution_helper(contributions, b_neg):
     assert len(contributions) == 6
     assert "A" in contributions
-    assert contributions["A"] > 0.01
+    assert contributions["A"]["Contribution"] > 0.01
 
     assert "B" in contributions
     if b_neg:
-        assert contributions["B"] < -0.01
+        assert contributions["B"]["Contribution"] < -0.01
     else:
-        assert contributions["B"] > 0.01
+        assert contributions["B"]["Contribution"] > 0.01
 
     assert "C" in contributions
-    assert abs(contributions["C"]) < 0.0001
-
+    assert abs(contributions["C"]["Contribution"]) < 0.0001
     for col in ["num_feat", "cat_feat", "bin_feat"]:
         assert col in contributions
-        assert abs(contributions[col]) < 0.0001
+        assert abs(contributions[col]["Contribution"]) < 0.0001
 
 
 def test_post_contributions(client, models, entities):
