@@ -416,13 +416,13 @@ class MultiFeatureContributions(Resource):
         else:
             return payload
 
-        contributions = explainer.produce_feature_contributions(entities)
-        contributions_json = {
-            eid: contributions[eid].set_index("Feature Name").to_dict(orient="index")
-            for eid in contributions
-        }
+        contributions, values = explainer.produce_feature_contributions(
+            entities, format_output=False
+        )
+        contributions_json = contributions.to_dict(orient="index")
+        values_json = values.to_dict(orient="index")
 
-        return {"contributions": contributions_json}, 200
+        return {"contributions": contributions_json, "values": values_json}, 200
 
 
 class ModifiedFeatureContribution(Resource):
