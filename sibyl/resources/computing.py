@@ -342,7 +342,7 @@ class FeatureContributions(Resource):
 
         contributions = explainer.produce_feature_contributions(entity_features)[0]
         contributions_json = contributions.set_index("Feature Name").to_dict(orient="index")
-        return {"contributions": contributions_json}, 200
+        return {"result": contributions_json}, 200
 
 
 class MultiFeatureContributions(Resource):

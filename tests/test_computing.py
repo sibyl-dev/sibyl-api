@@ -8,22 +8,22 @@ import pandas as pd
 from sibyl.db import schema
 
 
-def contribution_helper(contributions, b_neg):
-    assert len(contributions) == 6
-    assert "A" in contributions
-    assert contributions["A"]["Contribution"] > 0.01
+def contribution_helper(result, b_neg):
+    assert len(result) == 6
+    assert "A" in result
+    assert result["A"]["Contribution"] > 0.01
 
-    assert "B" in contributions
+    assert "B" in result
     if b_neg:
-        assert contributions["B"]["Contribution"] < -0.01
+        assert result["B"]["Contribution"] < -0.01
     else:
-        assert contributions["B"]["Contribution"] > 0.01
+        assert result["B"]["Contribution"] > 0.01
 
-    assert "C" in contributions
-    assert abs(contributions["C"]["Contribution"]) < 0.0001
+    assert "C" in result
+    assert abs(result["C"]["Contribution"]) < 0.0001
     for col in ["num_feat", "cat_feat", "bin_feat"]:
-        assert col in contributions
-        assert abs(contributions[col]["Contribution"]) < 0.0001
+        assert col in result
+        assert abs(result[col]["Contribution"]) < 0.0001
 
 
 def test_post_contributions(client, models, entities):
@@ -33,16 +33,16 @@ def test_post_contributions(client, models, entities):
     response = client.post(
         "/api/v1/contributions/", json={"eid": entity["eid"], "model_id": model_id}
     ).json
-    contributions = response["contributions"]
-    contribution_helper(contributions, True)
+    result = response["result"]
+    contribution_helper(result, True)
 
     row_id = "row_b"
     response = client.post(
         "/api/v1/contributions/",
         json={"eid": entity["eid"], "model_id": model_id, "row_id": row_id},
     ).json
-    contributions = response["contributions"]
-    contribution_helper(contributions, False)
+    result = response["result"]
+    contribution_helper(result, False)
 
 
 def test_post_multi_contributions(client, models, entities, multirow_entities):
