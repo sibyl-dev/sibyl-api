@@ -279,9 +279,13 @@ class ModifiedPrediction(Resource):
         for feature, change in changes.items():
             modified[feature] = change
         if return_proba:
-            prediction = explainer.predict_proba(modified)[0].max().tolist()
+            prediction = (
+                next(iter(explainer.predict_proba(modified).predict(modified).values()))
+                .max()
+                .tolist()
+            )
         else:
-            prediction = explainer.predict(modified)[0].tolist()
+            prediction = next(iter(explainer.predict(modified).values())).tolist()
         return {"prediction": prediction}, 200
 
 
