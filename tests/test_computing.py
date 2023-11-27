@@ -164,13 +164,11 @@ def test_single_change_predictions(client, models, entities):
 
 def test_modified_contribution(client, models, entities):
     def helper(resp, row_id):
-        contribution = resp["contribution"]
-        df = pd.DataFrame.from_dict(contribution, orient="index")
+        contribution_df = pd.DataFrame.from_dict(resp["contributions"], orient="index")
+        value_df = pd.DataFrame.from_dict(resp["values"], orient="index")
 
-        assert len(df.index) == len(entity["features"][row_id])
-        assert "Feature Value" in df.columns
-        assert "Contribution" in df.columns
-        assert "Average/Mode" in df.columns
+        assert len(contribution_df.columns) == len(entity["features"][row_id])
+        assert len(value_df.columns) == len(entity["features"][row_id])
 
     model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     entity = entities[0]

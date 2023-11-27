@@ -345,6 +345,14 @@ class FeatureContributions(Resource):
         return {"result": contributions_json}, 200
 
 
+def get_contributions(explainer, entities):
+    contributions, values = explainer.produce_feature_contributions(entities, format_output=False)
+    contributions_json = contributions.to_dict(orient="index")
+    values_json = values.to_dict(orient="index")
+
+    return {"contributions": contributions_json, "values": values_json}, 200
+
+
 class MultiFeatureContributions(Resource):
     def post(self):
         """
@@ -415,13 +423,7 @@ class MultiFeatureContributions(Resource):
         else:
             return payload
 
-        contributions, values = explainer.produce_feature_contributions(
-            entities, format_output=False
-        )
-        contributions_json = contributions.to_dict(orient="index")
-        values_json = values.to_dict(orient="index")
-
-        return {"contributions": contributions_json, "values": values_json}, 200
+        return get_contributions(explainer, entities)
 
 
 class ModifiedFeatureContribution(Resource):
@@ -498,9 +500,7 @@ class ModifiedFeatureContribution(Resource):
         modified = entity_features.copy()
         for feature, change in changes.items():
             modified[feature] = change
-        contribution = explainer.produce_feature_contributions(modified)[0]
-        contribution_json = contribution.set_index("Feature Name").to_dict(orient="index")
-        return {"contribution": contribution_json}, 200
+        return get_contributions(explainer, modified)
 
 
 class SimilarEntities(Resource):
