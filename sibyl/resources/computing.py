@@ -206,9 +206,9 @@ class SingleChangePredictions(Resource):
             modified = entity_features.copy()
             modified[feature] = change
             if return_proba:
-                prediction = explainer.predict_proba(modified)[0].max().tolist()
+                prediction = explainer.predict_proba(modified, as_dict=False).max().tolist()[0]
             else:
-                prediction = explainer.predict(modified)[0].tolist()
+                prediction = explainer.predict(modified, as_dict=False).tolist()[0]
             predictions.append([feature, prediction])
         return {"predictions": predictions}, 200
 
