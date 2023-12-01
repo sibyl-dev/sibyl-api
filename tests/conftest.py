@@ -50,14 +50,18 @@ def categories():
 @pytest.fixture(scope="session")
 def contexts():
     context_1 = {
-        "terms": {"A": "a", "B": "b"},
-        "gui_preset": "abc",
-        "gui_config": {"ab": "cd", "ef": "gh"},
+        "config": {
+            "terms": {"A": "a", "B": "b"},
+            "A": "abc",
+            "B": {"ab": "cd", "ef": "gh"},
+        }
     }
     context_2 = {
-        "terms": {"C": "c", "D": "d"},
-        "gui_preset": "def",
-        "gui_config": {"12": "34", "56": "78"},
+        "config": {
+            "terms": {"C": "c", "D": "d"},
+            "A": "def",
+            "B": {"12": "34", "56": "78"},
+        }
     }
     return [context_1, context_2]
 
@@ -228,7 +232,6 @@ def models():
     model.fit(dummy_x, dummy_y)
     model.coef_ = np.array([1, -1, 0])
     model.intercept_ = 0
-    model_serial = pickle.dumps(model)
     columns = ["A", "B", "C", "num_feat", "cat_feat", "bin_feat"]
     dataset = pd.DataFrame(np.random.randint(0, 5, size=(100, 6)), columns=columns)
     transformer = FeatureSelectTransformer(columns=["A", "B", "C"]).fit(dataset)
@@ -238,14 +241,13 @@ def models():
 
     models = [
         {
-            "model": model_serial,
             "model_id": "test model",
             "description": "a model",
             "performance": "does well",
             "importances": {"A": 100, "B": 0, "C": 0, "D": 0, "E": 0, "F": 0},
             "explainer": explainer_serial,
         },
-        {"model": model_serial, "model_id": "filler", "explainer": explainer_serial},
+        {"model_id": "filler", "explainer": explainer_serial},
     ]
     return models
 
@@ -258,11 +260,7 @@ def testdb(categories, features, entities, groups, models, contexts):
 
     schema.Category.insert_many(categories)
 
-    for item in features:
-        item_with_ref = item.copy()
-        reference = schema.Category.find_one(name=item["category"])
-        item_with_ref["category"] = reference
-        schema.Feature.insert(**item_with_ref)
+    schema.Feature.insert_many(features)
 
     for item in entities:
         item_with_ref = item.copy()

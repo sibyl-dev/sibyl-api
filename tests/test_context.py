@@ -13,7 +13,7 @@ def test_get_contexts(client, contexts):
         found = False
         for response_item in response["contexts"]:
             found_context = schema.Context.find_one(id=response_item["id"])
-            if found_context["terms"] == expected_item["terms"]:
+            if found_context["config"] == expected_item["config"]:
                 found = True
         assert found
 
