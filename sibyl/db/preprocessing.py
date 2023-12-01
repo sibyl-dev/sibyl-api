@@ -1,7 +1,6 @@
 import os
 import pickle
 import sys
-from tqdm import tqdm
 
 import numpy as np
 import pandas as pd
@@ -17,6 +16,7 @@ from pyreal.transformers import (
     run_transformers,
 )
 from sklearn.linear_model import LinearRegression
+from tqdm import tqdm
 
 from sibyl.db import schema
 from sibyl.db.utils import ModelWrapperThresholds

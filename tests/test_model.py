@@ -93,7 +93,7 @@ def test_multi_prediction_multi_rows(client, models, multirow_entities):
             "row_ids": entity["row_ids"],
         },
     ).json
-    print(response)
+
     for row in entity["row_ids"]:
         features = entity["features"][row]
         assert response["predictions"][row] == features["A"] - features["B"]
