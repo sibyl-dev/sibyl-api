@@ -7,23 +7,13 @@ import pandas as pd
 import yaml
 from mongoengine import connect
 from pymongo import MongoClient
-from pyreal import RealApp
-from pyreal.transformers import (
-    Mappings,
-    MappingsOneHotDecoder,
-    MappingsOneHotEncoder,
-    MultiTypeImputer,
-    run_transformers,
-)
-from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
 
 from sibyl.db import schema
-from sibyl.db.utils import ModelWrapperThresholds
 from sibyl.utils import get_project_root
 
 
-def _load_data(training_entity_filepath, target):
+def _load_data(training_entity_filepath, target, features):
     try:
         data = pd.read_csv(training_entity_filepath)
     except FileNotFoundError:
@@ -33,29 +23,8 @@ def _load_data(training_entity_filepath, target):
 
     y = data[target]
     X = data.drop(target, axis="columns")
-    if "row_id" in X:
-        X = X.drop("row_id", axis="columns")
 
     return X, y
-
-
-def _load_model_from_weights_sklearn(weights_filepath, model_base):
-    """
-    Load the model
-    :return: (model, model features)
-    """
-    model_weights = pd.read_csv(weights_filepath)
-
-    model = model_base
-    dummy_X = pd.DataFrame(
-        np.zeros((1, model_weights.shape[0] - 1)), columns=model_weights["weight"][1:]
-    )
-    dummy_y = np.zeros(1)
-    model.fit(dummy_X, dummy_y)
-
-    model.coef_ = np.array(model_weights["weight"][1:])
-    model.intercept_ = model_weights["weight"][0]
-    return model, model_weights["name"][1:]
 
 
 def _validate_model_and_explainer(explainer, train_dataset):
@@ -171,6 +140,7 @@ def insert_model(
     target,
     set_doc,
     explainer_fp,
+    features,
     model_id=None,
     training_size=None,
     fit_explainers=False,
@@ -189,7 +159,7 @@ def insert_model(
     except FileNotFoundError:
         raise FileNotFoundError(f"Explainer file {explainer_fp} not found. ")
 
-    train_dataset, targets = _load_data(training_data_fp, target)
+    train_dataset, targets = _load_data(training_data_fp, target, features)
 
     if fit_explainers:
         explainer.prepare_feature_contributions(
@@ -276,7 +246,7 @@ def prepare_database(config_file, directory=None):
 
     # INSERT FEATURES
     pbar.set_description("Inserting features...")
-    insert_features(_process_fp(cfg.get("features_fn", "features.csv")))
+    features = insert_features(_process_fp(cfg.get("features_fn", "features.csv")))
     pbar.update(times["Features"])
 
     # INSERT ENTITIES
@@ -324,6 +294,7 @@ def prepare_database(config_file, directory=None):
                     cfg.get("target", "target"),
                     set_doc,
                     explainer_fp=os.path.join(explainer_directory, explainer_file),
+                    features=features,
                     model_id=explainer_file[:-4],
                     training_size=cfg.get("training_size"),
                     fit_explainers=cfg.get("fit_explainers", False),
@@ -336,6 +307,7 @@ def prepare_database(config_file, directory=None):
             cfg.get("target", "target"),
             set_doc,
             explainer_fp=_process_fp(cfg.get("explainer_fn")),
+            features=features,
             model_id=cfg.get("model_name"),
             training_size=cfg.get("training_size"),
             fit_explainers=cfg.get("fit_explainers", False),
