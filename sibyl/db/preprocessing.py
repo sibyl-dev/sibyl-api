@@ -33,6 +33,8 @@ def _load_data(training_entity_filepath, target):
 
     y = data[target]
     X = data.drop(target, axis="columns")
+    if "row_id" in X:
+        X = X.drop("row_id", axis="columns")
 
     return X, y
 
@@ -95,13 +97,16 @@ def insert_categories(filepath):
     schema.Category.insert_many(items)
 
 
-def insert_context(context_config_fp):
+def insert_context(context_config_fp, use_rows=None):
     if context_config_fp is None:
         return
     try:
         context_config = yaml.safe_load(open(context_config_fp, "r"))
     except FileNotFoundError:
         raise FileNotFoundError(f"Context config file {context_config_fp} not found. ")
+
+    if context_config.get("use_rows") is None:
+        context_config["use_rows"] = use_rows
 
     if "output_preset" in context_config:
         with open(os.path.join(get_project_root(), "sibyl", "db", "output_presets.yml"), "r") as f:
@@ -274,11 +279,6 @@ def prepare_database(config_file, directory=None):
     insert_features(_process_fp(cfg.get("features_fn", "features.csv")))
     pbar.update(times["Features"])
 
-    # INSERT CONTEXT
-    pbar.set_description("Inserting context...")
-    insert_context(_process_fp(cfg.get("context_config_fn")))
-    pbar.update(times["Context"])
-
     # INSERT ENTITIES
     pbar.set_description("Inserting entities...")
     eids, use_rows = insert_entities(
@@ -288,10 +288,15 @@ def prepare_database(config_file, directory=None):
         total_time=times["Entities"],
     )
 
+    # INSERT CONTEXT
+    pbar.set_description("Inserting context...")
+    insert_context(_process_fp(cfg.get("context_config_fn")), use_rows=use_rows)
+    pbar.update(times["Context"])
+
     # INSERT FULL DATASET
     pbar.set_description("Inserting training set...")
     if cfg.get("include_database", False) and cfg.get("training_entities_fn"):
-        eids = insert_entities(
+        eids, use_rows = insert_entities(
             _process_fp(cfg.get("training_entities_fn")),
             target=cfg.get("target", "target"),
             pbar=pbar,
@@ -302,6 +307,7 @@ def prepare_database(config_file, directory=None):
     set_doc = insert_training_set(eids, cfg.get("target"))
 
     # INSERT MODEL
+    pbar.set_description("Inserting model...")
     if cfg.get("explainer_directory_name"):
         explainer_directory = _process_fp(cfg.get("explainer_directory_name"))
         if not os.path.isdir(explainer_directory):
@@ -325,7 +331,6 @@ def prepare_database(config_file, directory=None):
                 )
             pbar.update(times["Model"] / number_of_explainers)
     else:
-        pbar.set_description("Inserting model...")
         insert_model(
             _process_fp(cfg.get("training_entities_fn") or cfg.get("entity_fn") or "entities.csv"),
             cfg.get("target", "target"),

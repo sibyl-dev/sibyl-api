@@ -21,7 +21,6 @@ explainer_directory_name:
 training_entities_fn:
 # Name of context config file. If not given, all context defaults will be used
 context_config_fn: "context_config.yml"
-category_fn: "categories.csv"
 
 # Model processing configurations
 # =================================================================================================
