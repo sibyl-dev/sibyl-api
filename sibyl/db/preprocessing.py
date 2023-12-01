@@ -62,7 +62,6 @@ def _validate_model_and_explainer(explainer, train_dataset):
     """
     explainer.predict(train_dataset.iloc[0:2])
     explainer.produce_feature_contributions(train_dataset.iloc[0:2])
-    print("Model predict and produce validated")
 
 
 def insert_features(filepath):
@@ -71,6 +70,14 @@ def insert_features(filepath):
     except FileNotFoundError:
         raise FileNotFoundError(
             f"Features file {filepath} not found. Must provide valid features file"
+        )
+    if "category" in features_df:
+        categories = set(features_df["category"])
+        already_inserted_categories = set(
+            schema.Category.find(as_df_=True, only_=["name"])["name"]
+        )
+        schema.Category.insert_many(
+            [{"name": cat} for cat in categories if cat not in already_inserted_categories]
         )
     items = features_df.to_dict(orient="records")
     schema.Feature.insert_many(items)
@@ -131,7 +138,7 @@ def insert_entities(entity_fp, target=None, num=None, pbar=None, total_time=30):
         entity["features"] = raw_entities[eid]
         entity["labels"] = targets
         entities.append(entity)
-        if pbar:
+        if pbar is not None:
             pbar.update(total_time / len(raw_entities))
     schema.Entity.insert_many(entities)
     return eids, use_rows
@@ -154,8 +161,6 @@ def insert_model(
     training_size=None,
     fit_explainers=False,
     fit_se=True,
-    pbar=None,
-    total_time=10,
 ):
     description = "placeholder"
     performance = "placeholder"
@@ -169,12 +174,10 @@ def insert_model(
             explainer.id_column = "eid"
     except FileNotFoundError:
         raise FileNotFoundError(f"Explainer file {explainer_fp} not found. ")
-    pbar.update(total_time // 5)
 
     train_dataset, targets = _load_data(training_data_fp, target)
 
     if fit_explainers:
-        pbar.set_description("Fitting explainers...")
         explainer.prepare_feature_contributions(
             x_train_orig=train_dataset,
             y_train=targets,
@@ -195,14 +198,10 @@ def insert_model(
                 standardize=True,
             )
         explainer_serial = pickle.dumps(explainer)
-    pbar.update(total_time // 5)
 
     # Check that everything is working correctly
-    pbar.set_description("Validating explainer...")
     _validate_model_and_explainer(explainer, train_dataset)
-    pbar.update(total_time // 5)
 
-    pbar.set_description("Computing importances...")
     importance_dict = explainer.produce_feature_importance()
     importance_df = pd.DataFrame.from_dict(importance_dict)
     importance_df = importance_df.rename(
@@ -211,7 +210,6 @@ def insert_model(
     importance_df.set_index("name")
 
     importances = importance_df.to_dict(orient="dict")["importance"]
-    pbar.update(total_time // 5)
 
     items = {
         "model_id": model_id,
@@ -222,7 +220,6 @@ def insert_model(
         "training_set": set_doc,
     }
     schema.Model.insert(**items)
-    pbar.update(total_time // 5)
     return explainer
 
 
@@ -296,56 +293,41 @@ def prepare_database(config_file, directory=None):
     set_doc = insert_training_set(eids, cfg.get("target"))
 
     # INSERT MODEL
-    """if cfg.get("explainer_directory_name") is not None:
+    if cfg.get("explainer_directory_name"):
         explainer_directory = _process_fp(cfg.get("explainer_directory_name"))
-        for explainer_file in os.listdir(explainer_directory):
-            if explainer_file.endswith(".pkl"):
+        if not os.path.isdir(explainer_directory):
+            raise FileNotFoundError(
+                f"Explainer directory {explainer_directory} is not a valid directory."
+            )
+        number_of_explainers = len(os.listdir(explainer_directory))
+        for i, explainer_file in enumerate(os.listdir(explainer_directory)):
+            if explainer_file.endswith(".pkl"):  # Ignore other files in the directory
                 insert_model(
-                    feature_names,
-                    dataset_fp,
-                    target,
+                    _process_fp(
+                        cfg.get("training_entities_fn") or cfg.get("entity_fn") or "entities.csv"
+                    ),
+                    cfg.get("target", "target"),
                     set_doc,
-                    model_id=explainer_file[:-4],  # remove .pkl
-                    importance_fp=_process_fp(cfg.get("importance_fn")),
                     explainer_fp=os.path.join(explainer_directory, explainer_file),
-                    one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
-                    shap_type=cfg.get("shap_type"),
+                    model_id=explainer_file[:-4],
                     training_size=cfg.get("training_size"),
-                    impute=cfg.get("impute", False),
-                    prefit_se=cfg.get("prefit_se", True),
+                    fit_explainers=cfg.get("fit_explainers", False),
+                    fit_se=cfg.get("fit_se", True),
                 )
-    elif cfg.get("model_directory_name") is not None:
-        model_directory = _process_fp(cfg.get("model_directory_name"))
-        for model_file in os.listdir(model_directory):
-            if model_file.endswith(".pkl"):
-                insert_model(
-                    feature_names,
-                    dataset_fp,
-                    target,
-                    set_doc,
-                    model_id=model_file[:-4],  # remove .pkl
-                    pickle_model_fp=os.path.join(model_directory, model_file),
-                    importance_fp=_process_fp(cfg.get("importance_fn")),
-                    explainer_fp=_process_fp(cfg.get("explainer_fn")),
-                    one_hot_encode_fp=_process_fp(cfg.get("one_hot_encode_fn")),
-                    shap_type=cfg.get("shap_type"),
-                    training_size=cfg.get("training_size"),
-                    impute=cfg.get("impute", False),
-                    prefit_se=cfg.get("prefit_se", True),
-                )
-    else:"""
-    insert_model(
-        _process_fp(cfg.get("training_entities_fn", cfg.get("entity_fn", "entities.csv"))),
-        cfg.get("target", "target"),
-        set_doc,
-        explainer_fp=_process_fp(cfg.get("explainer_fn")),
-        model_id=cfg.get("model_name"),
-        training_size=cfg.get("training_size"),
-        fit_explainers=cfg.get("fit_explainers", False),
-        fit_se=cfg.get("fit_se", True),
-        pbar=pbar,
-        total_time=times["Model"],
-    )
+            pbar.update(times["Model"] / number_of_explainers)
+    else:
+        pbar.set_description("Inserting model...")
+        insert_model(
+            _process_fp(cfg.get("training_entities_fn") or cfg.get("entity_fn") or "entities.csv"),
+            cfg.get("target", "target"),
+            set_doc,
+            explainer_fp=_process_fp(cfg.get("explainer_fn")),
+            model_id=cfg.get("model_name"),
+            training_size=cfg.get("training_size"),
+            fit_explainers=cfg.get("fit_explainers", False),
+            fit_se=cfg.get("fit_se", True),
+        )
+        pbar.update(times["Model"])
 
 
 if __name__ == "__main__":
