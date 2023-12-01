@@ -1,6 +1,7 @@
 import os
 import pickle
 import sys
+from tqdm import tqdm
 
 import numpy as np
 import pandas as pd
@@ -93,57 +94,30 @@ def insert_context(context_config_fp):
     schema.Context.insert(configs=context_config)
 
 
-def insert_entities(
-    feature_values_filepath,
-    features_names,
-    target=None,
-    pre_transformers_fp=None,
-    one_hot_decode_fp=None,
-    impute=False,
-    num=None,
-):
-    values_df = pd.read_csv(feature_values_filepath)
-    features_to_extract = ["eid"] + features_names
-    if "row_id" in values_df:
-        features_to_extract = features_to_extract + ["row_id"]
-    if target in values_df:
-        features_to_extract += [target]
-    values_df = values_df[features_to_extract]
-    transformers = []
-    if impute is not None and impute:
-        transformer = MultiTypeImputer()
-        transformer.fit(values_df)
-        transformers.append(transformer)
-    if one_hot_decode_fp is not None:
-        # Mappings from one-hot encoded columns to categorical data
-        mappings = pd.read_csv(one_hot_decode_fp)
-        if "include" in mappings:
-            mappings = mappings[mappings["include"]]
-        transformer = MappingsOneHotDecoder(Mappings.generate_mappings(dataframe=mappings))
-        transformers.append(transformer)
-    if pre_transformers_fp is not None:
-        transformers = pickle.load(open(pre_transformers_fp, "rb"))
-    values_df = run_transformers(transformers, values_df)
+def insert_entities(entity_fp, target=None, num=None, pbar=None, total_time=30):
+    try:
+        entity_df = pd.read_csv(entity_fp)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Entities file {entity_fp} not found. Must provide valid file.")
 
     if num is not None:
-        values_df = values_df.sample(num, random_state=100)
-    eids = values_df["eid"]
-    values_df = values_df.copy()  # Fixing fragmentation if transforming resulted in any
+        entity_df = entity_df.sample(num)
+    eids = entity_df["eid"]
 
-    # TODO: add groups to entities
-    # groups = schema.EntityGroup.find()
-
-    if "row_id" not in values_df:
-        values_df["row_id"] = pd.Series(np.arange(0, values_df.shape[0])).astype(str)
+    if "row_id" not in entity_df:
+        entity_df["row_id"] = pd.Series(np.arange(0, entity_df.shape[0])).astype(str)
+        use_rows = False
     else:
-        values_df["row_id"] = values_df["row_id"].astype(str)
-    values_df = values_df.copy()
-    values_df = values_df.set_index(["eid", "row_id"])
+        entity_df["row_id"] = entity_df["row_id"].astype(str)
+        use_rows = True
+
+    entity_df = entity_df.set_index(["eid", "row_id"])
     raw_entities = {
-        level: values_df.xs(level).to_dict("index") for level in values_df.index.levels[0]
+        level: entity_df.xs(level).to_dict("index") for level in entity_df.index.levels[0]
     }
+
     entities = []
-    for eid in raw_entities:
+    for i, eid in enumerate(raw_entities):
         entity = {"eid": str(eid), "row_ids": list(raw_entities[eid].keys())}
         targets = {}
         for row_id in raw_entities[eid]:
@@ -152,8 +126,10 @@ def insert_entities(
         entity["features"] = raw_entities[eid]
         entity["labels"] = targets
         entities.append(entity)
+        if pbar:
+            pbar.update(total_time / len(raw_entities))
     schema.Entity.insert_many(entities)
-    return eids
+    return eids, use_rows
 
 
 def insert_training_set(eids, target):
@@ -301,6 +277,15 @@ def prepare_database(config_file, directory=None):
             return os.path.join(directory, fn)
         return None
 
+    times = {
+        "Categories": 2,
+        "Features": 3,
+        "Context": 2,
+        "Entities": 20,
+        "Training Set": 20,
+    }
+    pbar = tqdm(total=sum(times.values()))
+
     with open(config_file, "r") as f:
         cfg = yaml.safe_load(f)
 
@@ -318,34 +303,45 @@ def prepare_database(config_file, directory=None):
     connect(database_name, host="localhost", port=27017)
 
     # INSERT CATEGORIES, IF PROVIDED
-    insert_categories(_process_fp(cfg.get("categories_fn", None)))
+    pbar.set_description("Inserting categories...")
+    insert_categories(_process_fp(cfg.get("categories_fn")))
+    pbar.update(times["Categories"])
 
     # INSERT FEATURES
-    feature_names = insert_features(_process_fp(cfg.get("features_fn", "features.csv")))
+    pbar.set_description("Inserting features...")
+    insert_features(_process_fp(cfg.get("features_fn", "features.csv")))
+    pbar.update(times["Features"])
 
     # INSERT CONTEXT
-    insert_context(_process_fp(cfg.get("context_config_fn", None)))
+    pbar.set_description("Inserting context...")
+    insert_context(_process_fp(cfg.get("context_config_fn")))
+    pbar.update(times["Context"])
 
-
-"""
     # INSERT ENTITIES
-    eids = insert_entities(
-        os.path.join(directory, "entities.csv"),
-        feature_names,
-        target=cfg.get("target"),
-        pre_transformers_fp=_process_fp(cfg.get("pre_transformers_fn")),
-        one_hot_decode_fp=_process_fp(cfg.get("one_hot_decode_fn")),
-        impute=cfg.get("impute", False),
+    pbar.set_description("Inserting entities...")
+    eids, use_rows = insert_entities(
+        _process_fp(cfg.get("entity_fn", "entities.csv")),
+        target=cfg.get("target", "target"),
+        pbar=pbar,
+        total_time=times["Entities"],
     )
 
     # INSERT FULL DATASET
-    dataset_fp = _process_fp(cfg.get("dataset_fn"))
-    if cfg.get("include_database", False) and os.path.exists(dataset_fp):
+    pbar.set_description("Inserting training set...")
+    if cfg.get("include_database", False) and cfg.get("training_entities_fn"):
         eids = insert_entities(
-            dataset_fp, feature_names, target=cfg.get("target"), num=cfg.get("num_from_database")
+            _process_fp(cfg.get("training_entities_fn")),
+            target=cfg.get("target", "target"),
+            pbar=pbar,
+            total_time=times["Training Set"],
         )
-    target = cfg.get("target")
-    set_doc = insert_training_set(eids, target)
+    else:
+        pbar.update(times["Training Set"])
+
+    set_doc = insert_training_set(eids, cfg.get("target"))
+
+
+"""
 
     # INSERT MODEL
     if cfg.get("explainer_directory_name") is not None:
