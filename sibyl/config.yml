@@ -28,10 +28,3 @@ flask:
 # LOGGING
 #===================================
 log_filename: "screening_log.csv"
-
-# PRE-SAVED INFORMATION
-#===================================
-# Location of pre-computed feature distribution information
-# Useful in cases where the dataset cannot be shared
-# null if this information should be calculated at runtime
-feature_distribution_location: "sibyl/db/precomputed/agg_distributions.json"
