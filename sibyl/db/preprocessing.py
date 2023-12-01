@@ -73,9 +73,9 @@ def insert_features(filepath):
         )
     if "category" in features_df:
         categories = set(features_df["category"])
-        already_inserted_categories = set(
-            schema.Category.find(as_df_=True, only_=["name"])["name"]
-        )
+        already_inserted_categories = schema.Category.find(as_df_=True, only_=["name"])
+        if not already_inserted_categories.empty:
+            already_inserted_categories = set(already_inserted_categories["name"])
         schema.Category.insert_many(
             [{"name": cat} for cat in categories if cat not in already_inserted_categories]
         )
@@ -103,7 +103,16 @@ def insert_context(context_config_fp):
     except FileNotFoundError:
         raise FileNotFoundError(f"Context config file {context_config_fp} not found. ")
 
-    schema.Context.insert(configs=context_config)
+    if "output_preset" in context_config:
+        with open(os.path.join(get_project_root(), "sibyl", "db", "output_presets.yml"), "r") as f:
+            output_preset_dict = yaml.safe_load(f)
+        if context_config["output_preset"] in output_preset_dict:
+            config_values = output_preset_dict[context_config["output_preset"]]
+            for config_name in config_values:
+                if config_name not in output_preset_dict:
+                    context_config[config_name] = config_values[config_name]
+
+    schema.Context.insert(config=context_config)
 
 
 def insert_entities(entity_fp, target=None, num=None, pbar=None, total_time=30):
@@ -257,7 +266,7 @@ def prepare_database(config_file, directory=None):
 
     # INSERT CATEGORIES, IF PROVIDED
     pbar.set_description("Inserting categories...")
-    insert_categories(_process_fp(cfg.get("categories_fn")))
+    insert_categories(_process_fp(cfg.get("category_fn")))
     pbar.update(times["Categories"])
 
     # INSERT FEATURES

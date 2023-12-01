@@ -229,4 +229,4 @@ class Context(SibylDocument):
         dictionary of application-specific configurations
     """
 
-    configs = fields.DictField()
+    config = fields.DictField()
