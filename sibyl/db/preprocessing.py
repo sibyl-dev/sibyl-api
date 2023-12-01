@@ -60,51 +60,37 @@ def _validate_model_and_explainer(explainer, train_dataset):
 
 
 def insert_features(filepath):
-    features_df = pd.read_csv(filepath)
-
-    if "category" in features_df:
-        references = [schema.Category.find_one(name=cat) for cat in features_df["category"]]
-        features_df = features_df.drop("category", axis="columns")
-        features_df["category"] = references
-
+    try:
+        features_df = pd.read_csv(filepath)
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"Features file {filepath} not found. Must provide valid features file"
+        )
     items = features_df.to_dict(orient="records")
     schema.Feature.insert_many(items)
     return features_df["name"].tolist()
 
 
 def insert_categories(filepath):
-    cat_df = pd.read_csv(filepath)
+    if filepath is None:
+        return
+    try:
+        cat_df = pd.read_csv(filepath)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Categories file {filepath} not found. ")
     items = cat_df.to_dict(orient="records")
     schema.Category.insert_many(items)
 
 
-def insert_entity_groups(filepath):
-    group_df = pd.read_csv(filepath)
-    items_raw = group_df.to_dict(orient="records")
-    items = []
-    for item_raw in items_raw:
-        properties = {key: val for key, val in item_raw.items() if key != "group_id"}
-        item = {"group_id": str(item_raw["group_id"]), "property": properties}
-        items.append(item)
-    schema.EntityGroup.insert_many(items)
+def insert_context(context_config_fp):
+    if context_config_fp is None:
+        return
+    try:
+        context_config = yaml.safe_load(open(context_config_fp, "r"))
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Context config file {context_config_fp} not found. ")
 
-
-def insert_context(terms_fp, gui_preset, gui_config):
-    def set_config(config_values):
-        for config_name in config_values:
-            if config_name not in gui_config:
-                gui_config[config_name] = config_values[config_name]
-
-    terms_df = pd.read_csv(terms_fp)
-    items = dict(zip(terms_df["key"], terms_df["term"]))
-    if gui_config is None:
-        gui_config = {}
-    with open(os.path.join(get_project_root(), "sibyl", "db", "gui_presets.yml"), "r") as f:
-        gui_preset_dict = yaml.safe_load(f)
-    if gui_preset in gui_preset_dict:
-        set_config(gui_preset_dict[gui_preset])
-    context_dict = {"terms": items, "gui_config": gui_config, "gui_preset": gui_preset}
-    schema.Context.insert(**context_dict)
+    schema.Context.insert(configs=context_config)
 
 
 def insert_entities(
@@ -332,21 +318,16 @@ def prepare_database(config_file, directory=None):
     connect(database_name, host="localhost", port=27017)
 
     # INSERT CATEGORIES, IF PROVIDED
-    if os.path.exists(os.path.join(directory, "categories.csv")):
-        insert_categories(os.path.join(directory, "categories.csv"))
+    insert_categories(_process_fp(cfg.get("categories_fn", None)))
 
     # INSERT FEATURES
-    feature_names = insert_features(os.path.join(directory, "features.csv"))
-
-    # INSERT ENTITY GROUPS
-    if os.path.exists(os.path.join(directory, "groups.csv")):
-        insert_entity_groups(os.path.join(directory, "groups.csv"))
+    feature_names = insert_features(_process_fp(cfg.get("features_fn", "features.csv")))
 
     # INSERT CONTEXT
-    insert_context(
-        os.path.join(directory, "terms.csv"), cfg.get("gui_preset"), cfg.get("gui_config")
-    )
+    insert_context(_process_fp(cfg.get("context_config_fn", None)))
 
+
+"""
     # INSERT ENTITIES
     eids = insert_entities(
         os.path.join(directory, "entities.csv"),
@@ -421,7 +402,7 @@ def prepare_database(config_file, directory=None):
             training_size=cfg.get("training_size"),
             impute=cfg.get("impute", False),
             prefit_se=cfg.get("prefit_se", True),
-        )
+        )"""
 
 
 if __name__ == "__main__":

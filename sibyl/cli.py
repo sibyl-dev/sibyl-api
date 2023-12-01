@@ -19,7 +19,7 @@ def _prepare_db(args):
 
 def _prepare_housing_db(args):
     prepare_housing_application.run()
-    prepare_database("./sibyl/sample_applications/housing_config.yml")
+    prepare_database("./sibyl/sample_applications/housing_prepare_db_config.yml")
 
 
 def get_parser():

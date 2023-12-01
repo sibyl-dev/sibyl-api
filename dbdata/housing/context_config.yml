@@ -1,25 +1,23 @@
 # Context configurations
 # =================================================================================================
-# Context-specific configurations
-context_config:
-  # Preset to use for output (automatically sets output configs). See gui_presets.yml for supported presets
-  output_preset: "profit_usd"
-  # Model prediction output type, one of "numeric", "boolean", "categorical"
-  output_type:
-  # If output type is "boolean", the label corresponding to a positive prediction output
-  output_pos_label:
-  # If prediction type is "boolean", the label corresponding to a negative prediction output
-  output_neg_label:
-  # Python f-string for formatting numeric model outputs
-  output_format_string:
-  # If true, increase in model predictions correspond to a positive outcome. If False, increases in model predictions
-  #   correspond to a negative outcome. If None, no statement is made either way
-  output_sentiment_is_positive:
+# Preset to use for output (automatically sets output configs). See gui_presets.yml for supported presets
+output_preset: "profit_usd"
+# Model prediction output type, one of "numeric", "boolean", "categorical"
+output_type:
+# If output type is "boolean", the label corresponding to a positive prediction output
+output_pos_label:
+# If prediction type is "boolean", the label corresponding to a negative prediction output
+output_neg_label:
+# Python f-string for formatting numeric model outputs
+output_format_string:
+# If true, increase in model predictions correspond to a positive outcome. If False, increases in model predictions
+#   correspond to a negative outcome. If None, no statement is made either way
+output_sentiment_is_positive:
 
-  # Context-specific overrides for common terminology
-  terms:
-    entity: "House"
-    feature: "Factor"
-    prediction: "Sale Price"
-    increasing: "Beneficial"
-    decreasing: "Detrimental"
+# Context-specific overrides for common terminology
+terms:
+  entity: "House"
+  feature: "Factor"
+  prediction: "Sale Price"
+  increasing: "Beneficial"
+  decreasing: "Detrimental"

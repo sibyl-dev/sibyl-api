@@ -138,7 +138,7 @@ class Feature(SibylDocument):
     name = fields.StringField(required=True)
     description = fields.StringField()
     negated_description = fields.StringField()
-    category = fields.ReferenceField(Category, reverse_delete_rule=NULLIFY)
+    category = fields.StringField()  # name of Category
     type = fields.StringField(choices=["binary", "categorical", "numeric"])
 
     unique_key_fields = ["name"]
@@ -229,16 +229,8 @@ class Context(SibylDocument):
     A **Context** contains information about UI configuration options specific to the given
     context.
     Attributes
-    ----------
-    terms : dict {key : term}
-        dictionary of application-specific terms to use
-    gui_config : dict {key : value}
-        dictionary of application-specific GUI configurations
-    gui_preset : string
-        name of gui_preset to use, which may be used by front-end code to fill in missing
-        gui_config values
+    configs : dict {key : value}
+        dictionary of application-specific configurations
     """
 
-    terms = fields.DictField()
-    gui_config = fields.DictField()
-    gui_preset = fields.StringField()
+    configs = fields.DictField()
