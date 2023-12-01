@@ -182,8 +182,6 @@ class Model(SibylDocument):
 
     Attributes
     ----------
-    model : pickle-saved model
-        The model object. Must have a model.predict() function
     model_id : str
         Unique ID (name) of the model
     description : str
@@ -198,14 +196,12 @@ class Model(SibylDocument):
         Training set for the model
     """
 
-    model = fields.BinaryField()  # the model (must have model.predict())
-
     model_id = fields.StringField(required=True, unique=True)
     description = fields.StringField()
     performance = fields.StringField()
     importances = fields.DictField()  # {feature_name:importance}
 
-    explainer = fields.BinaryField(required=True)  # trained contribution explainer
+    explainer = fields.BinaryField(required=True)  # RealApp object
     training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
 
 

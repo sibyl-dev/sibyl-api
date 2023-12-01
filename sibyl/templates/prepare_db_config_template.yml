@@ -27,9 +27,9 @@ categories_fn:
 # Training data configurations
 # =================================================================================================
 # If true, put the full training dataset in the database (set to False if privacy is a concern)
-include_database: False
+include_training_entities: False
 # Number of entries from database to include (if not given, include all)
-num_from_database:
+num_training_entities:
 
 # Model processing configurations
 # =================================================================================================
@@ -37,5 +37,9 @@ num_from_database:
 explainer_name:
 # Name of target column in training dataset. If not given, assume "target"
 target:
-# If False, do not prefit the similar entities explainer. Reduces objects sizes for database, but increases runtime
-prefit_se: True
+# If True, fit all explainers in the explanation app using the provided training data at database creation. If False, this should be done manually before
+fit_explainers: False
+# The similiar entities explainer is especially large, and may not fit in the database. Fitting can be manually turned off for this explainer
+fit_se: True
+# Number of rows to use to fit explainers
+training_size: 1000

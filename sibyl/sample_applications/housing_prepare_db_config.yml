@@ -22,11 +22,6 @@ training_entities_fn:
 # Name of context config file. If not given, all context defaults will be used
 context_config_fn: "context_config.yml"
 
-# Training data configurations
-# =================================================================================================
-# If true, put the full training dataset in the database (set to False if privacy is a concern)
-include_database: True
-
 # Model processing configurations
 # =================================================================================================
 # Name of explainer, if only one is given
