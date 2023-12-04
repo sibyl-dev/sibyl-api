@@ -186,7 +186,7 @@ def load_housing_data(context):
             "run",
             "python",
             "./sibyl/db/preprocessing.py",
-            "./sibyl/sample_applications/housing_config.yml",
+            "./sibyl/sample_applications/housing_prepare_db_config.yml",
         ],
         check=True,
     )
