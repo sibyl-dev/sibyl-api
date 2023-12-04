@@ -168,7 +168,7 @@ def test_scripts(context):
     Runs all scripts in the tutorials directory and checks for exceptions
     """
 
-    subprocess.run(["pytest", "--nbmake", "./sibyl/test_apis_on_database.ipynb"], check=True)
+    subprocess.run(["pytest", "--nbmake", "./tests/test_on_database.ipynb"], check=True)
 
 
 @task
@@ -186,7 +186,7 @@ def load_housing_data(context):
             "run",
             "python",
             "./sibyl/db/preprocessing.py",
-            "./sibyl/sample_applications/housing_config.yml",
+            "./sibyl/sample_applications/housing_prepare_db_config.yml",
         ],
         check=True,
     )

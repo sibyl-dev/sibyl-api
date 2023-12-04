@@ -1,0 +1,24 @@
+# GUI presets supported by Sibyl-API
+# External GUI programs may support additional presets
+# =================================================================
+cost_usd:
+  output_type: "numeric"
+  output_sentiment_is_negative: True
+  output_format_string: "${:,.2f}"
+
+profit_usd:
+  output_type: "numeric"
+  output_sentiment_is_negative: False
+  output_format_string: "${:,.2f}"
+
+success:
+  output_type: "boolean"
+  output_pos_label: "success"
+  output_neg_label: "failure"
+  output_sentiment_is_negative: False
+
+failure:
+  output_type: "boolean"
+  output_pos_label: "failure"
+  output_neg_label: "normal"
+  output_sentiment_is_negative: True

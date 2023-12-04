@@ -1,0 +1,45 @@
+# Configurations for database preprocessing
+# =================================================================================================
+# Name of database to create
+database_name:
+# Name of directory in dbdata with csv and pkl files (if different from database_name)
+directory:
+# If true, automatically drop existing database
+DROP_OLD: False
+
+# Data locations
+# =================================================================================================
+# Name of entity file (one row per entity, one column per feature)
+entity_fn: "entities.csv"
+# Name of feature file (columns: (name, description*, category*, type*) for each feature)
+feature_fn: "features.csv"
+# filename of pickled explainer
+explainer_fn: "explainer.pkl"
+# Name of directory containing pickled explainers. The name of the model docs will be set to the file name. Overrides explainer_fn
+explainer_directory_name:
+# Name of training dataset file. If not given, use entity_fn for training data (one row per entity, one column per feature)
+training_entities_fn:
+# Name of context config file. If not given, all context defaults will be used
+context_config_fn: "context_config.yml"
+# Name of categories property file
+category_fn: "categories.csv"
+
+# Training data configurations
+# =================================================================================================
+# If true, put the full training dataset in the database (set to False if privacy is a concern)
+include_training_entities: False
+# Number of entries from database to include (if not given, include all)
+num_training_entities:
+
+# Model processing configurations
+# =================================================================================================
+# Name of explainer, if only one is given
+explainer_name:
+# Name of target column in training dataset. If not given, assume "target"
+target:
+# If True, fit all explainers in the explanation app using the provided training data at database creation. If False, this should be done manually before
+fit_explainers: False
+# The similiar entities explainer is especially large, and may not fit in the database. Fitting can be manually turned off for this explainer
+fit_se: True
+# Number of rows to use to fit explainers
+training_size: 1000

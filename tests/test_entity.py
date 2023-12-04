@@ -38,7 +38,6 @@ def test_get_entity(client, entities):
 def test_get_entity_with_row(client, entities):
     entity = entities[0]
     row_id = entity["row_ids"][1]
-
     response = client.get("/api/v1/entities/" + entity["eid"] + "/?row_id=" + row_id).json
 
     assert response["eid"] == entity["eid"]

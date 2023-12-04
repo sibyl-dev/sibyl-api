@@ -10,9 +10,7 @@ LOGGER = getLogger(__name__)
 def get_context(context_doc):
     context = {
         "id": str(context_doc.id),
-        "terms": context_doc.terms,
-        "gui_preset": context_doc.gui_preset,
-        "gui_config": context_doc.gui_config,
+        "config": context_doc.config,
     }
     return context
 

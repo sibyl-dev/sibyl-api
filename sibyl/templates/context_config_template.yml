@@ -1,0 +1,30 @@
+# Context configurations
+# =================================================================================================
+# Preset to use for output (automatically sets output configs). See db/gui_presets.yml for supported presets
+output_preset:
+# Model prediction output type, one of "numeric", "boolean", "categorical"
+output_type:
+# If output type is "boolean", the label corresponding to a positive prediction output
+output_pos_label:
+# If prediction type is "boolean", the label corresponding to a negative prediction output
+output_neg_label:
+# Python f-string for formatting numeric model outputs
+output_format_string:
+# If true, increase in model predictions correspond to a negative outcome. If False, increases in model predictions
+#   correspond to a positive outcome. If None, no statement is made either way
+output_sentiment_is_negative:
+
+# Whether to include entity rows in UIs (if False, only show first row).
+use_rows:
+# Label to use for rows
+row_label:
+# Whether to allow users to see prediction probabilities (only set to true if models have .predict_proba() functions)
+show_probs:
+
+# Context-specific overrides for common terminology
+terms:
+  entity:
+  feature:
+  prediction:
+  increasing:  # As in, `increasing features', or features that increase model prediction
+  decreasing:  # As in, `decreasing features', or features that decrease model prediction

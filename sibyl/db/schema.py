@@ -138,7 +138,7 @@ class Feature(SibylDocument):
     name = fields.StringField(required=True)
     description = fields.StringField()
     negated_description = fields.StringField()
-    category = fields.ReferenceField(Category, reverse_delete_rule=NULLIFY)
+    category = fields.StringField()  # name of Category
     type = fields.StringField(choices=["binary", "categorical", "numeric"])
 
     unique_key_fields = ["name"]
@@ -182,8 +182,6 @@ class Model(SibylDocument):
 
     Attributes
     ----------
-    model : pickle-saved model
-        The model object. Must have a model.predict() function
     model_id : str
         Unique ID (name) of the model
     description : str
@@ -198,14 +196,12 @@ class Model(SibylDocument):
         Training set for the model
     """
 
-    model = fields.BinaryField()  # the model (must have model.predict())
-
     model_id = fields.StringField(required=True, unique=True)
     description = fields.StringField()
     performance = fields.StringField()
     importances = fields.DictField()  # {feature_name:importance}
 
-    explainer = fields.BinaryField(required=True)  # trained contribution explainer
+    explainer = fields.BinaryField(required=True)  # RealApp object
     training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
 
 
@@ -229,16 +225,8 @@ class Context(SibylDocument):
     A **Context** contains information about UI configuration options specific to the given
     context.
     Attributes
-    ----------
-    terms : dict {key : term}
-        dictionary of application-specific terms to use
-    gui_config : dict {key : value}
-        dictionary of application-specific GUI configurations
-    gui_preset : string
-        name of gui_preset to use, which may be used by front-end code to fill in missing
-        gui_config values
+    configs : dict {key : value}
+        dictionary of application-specific configurations
     """
 
-    terms = fields.DictField()
-    gui_config = fields.DictField()
-    gui_preset = fields.StringField()
+    config = fields.DictField()
