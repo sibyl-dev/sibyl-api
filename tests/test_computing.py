@@ -8,23 +8,22 @@ import pandas as pd
 from sibyl.db import schema
 
 
-def contribution_helper(contributions, b_neg):
-    assert len(contributions) == 6
-    assert "A" in contributions
-    assert contributions["A"] > 0.01
+def contribution_helper(result, b_neg):
+    assert len(result) == 6
+    assert "A" in result
+    assert result["A"]["Contribution"] > 0.01
 
-    assert "B" in contributions
+    assert "B" in result
     if b_neg:
-        assert contributions["B"] < -0.01
+        assert result["B"]["Contribution"] < -0.01
     else:
-        assert contributions["B"] > 0.01
+        assert result["B"]["Contribution"] > 0.01
 
-    assert "C" in contributions
-    assert abs(contributions["C"]) < 0.0001
-
+    assert "C" in result
+    assert abs(result["C"]["Contribution"]) < 0.0001
     for col in ["num_feat", "cat_feat", "bin_feat"]:
-        assert col in contributions
-        assert abs(contributions[col]) < 0.0001
+        assert col in result
+        assert abs(result[col]["Contribution"]) < 0.0001
 
 
 def test_post_contributions(client, models, entities):
@@ -34,16 +33,16 @@ def test_post_contributions(client, models, entities):
     response = client.post(
         "/api/v1/contributions/", json={"eid": entity["eid"], "model_id": model_id}
     ).json
-    contributions = response["contributions"]
-    contribution_helper(contributions, True)
+    result = response["result"]
+    contribution_helper(result, True)
 
     row_id = "row_b"
     response = client.post(
         "/api/v1/contributions/",
         json={"eid": entity["eid"], "model_id": model_id, "row_id": row_id},
     ).json
-    contributions = response["contributions"]
-    contribution_helper(contributions, False)
+    result = response["result"]
+    contribution_helper(result, False)
 
 
 def test_post_multi_contributions(client, models, entities, multirow_entities):
@@ -53,13 +52,17 @@ def test_post_multi_contributions(client, models, entities, multirow_entities):
         json={"eids": [entity["eid"] for entity in entities], "model_id": model_id},
     ).json
     contributions = response["contributions"]
+    values = response["values"]
     assert len(contributions) == len(entities)
+    assert len(values) == len(entities)
+
     for eid in [entity["eid"] for entity in entities]:  # Assert no error
         pd.DataFrame.from_dict(contributions[eid], orient="index")
+        pd.DataFrame.from_dict(values[eid], orient="index")
     conts_0 = contributions[entities[0]["eid"]]
     assert conts_0.keys() == next(iter(entities[0]["features"].values())).keys()
-    assert conts_0["A"]["Contribution"] > 0.01
-    assert conts_0["B"]["Contribution"] < -0.01
+    assert conts_0["A"] > 0.01
+    assert conts_0["B"] < -0.01
 
     response = client.post(
         "/api/v1/multi_contributions/",
@@ -74,8 +77,8 @@ def test_post_multi_contributions(client, models, entities, multirow_entities):
         pd.DataFrame.from_dict(contributions[eid], orient="index")
     conts_0 = contributions[multirow_entities[0]["eid"]]
     assert conts_0.keys() == next(iter(multirow_entities[0]["features"].values())).keys()
-    assert conts_0["A"]["Contribution"] > 0.01
-    assert conts_0["B"]["Contribution"] > 0.01
+    assert conts_0["A"] > 0.01
+    assert conts_0["B"] > 0.01
 
 
 def test_post_multi_contributions_multiple_rows(client, models, multirow_entities):
@@ -97,8 +100,8 @@ def test_post_multi_contributions_multiple_rows(client, models, multirow_entitie
     conts_0 = contributions["row_b"]
 
     assert conts_0.keys() == next(iter(multirow_entities[0]["features"].values())).keys()
-    assert conts_0["A"]["Contribution"] > 0.01
-    assert conts_0["B"]["Contribution"] > 0.01
+    assert conts_0["A"] > 0.01
+    assert conts_0["B"] > 0.01
 
 
 def test_post_modified_prediction(client, models, entities):
@@ -161,13 +164,11 @@ def test_single_change_predictions(client, models, entities):
 
 def test_modified_contribution(client, models, entities):
     def helper(resp, row_id):
-        contribution = resp["contribution"]
-        df = pd.DataFrame.from_dict(contribution, orient="index")
+        contribution_df = pd.DataFrame.from_dict(resp["contributions"], orient="index")
+        value_df = pd.DataFrame.from_dict(resp["values"], orient="index")
 
-        assert len(df.index) == len(entity["features"][row_id])
-        assert "Feature Value" in df.columns
-        assert "Contribution" in df.columns
-        assert "Average/Mode" in df.columns
+        assert len(contribution_df.columns) == len(entity["features"][row_id])
+        assert len(value_df.columns) == len(entity["features"][row_id])
 
     model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     entity = entities[0]
