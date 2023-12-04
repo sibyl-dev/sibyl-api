@@ -102,7 +102,7 @@ def get_entity_table(eid, row_id):
     if entity is None:
         LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
         return {"message": "Entity {} does not exist".format(eid)}, 400
-    return pd.DataFrame(get_features_for_row(entity.features, row_id), index=[0])
+    return pd.DataFrame(get_features_for_row(entity.features, row_id), index=[eid])
 
 
 def get_entities_table(eids, row_ids, all_rows=False):
@@ -206,9 +206,9 @@ class SingleChangePredictions(Resource):
             modified = entity_features.copy()
             modified[feature] = change
             if return_proba:
-                prediction = explainer.predict_proba(modified)[0].max().tolist()
+                prediction = explainer.predict_proba(modified, as_dict=False).max().tolist()[0]
             else:
-                prediction = explainer.predict(modified)[0].tolist()
+                prediction = explainer.predict(modified, as_dict=False).tolist()[0]
             predictions.append([feature, prediction])
         return {"predictions": predictions}, 200
 
@@ -279,9 +279,9 @@ class ModifiedPrediction(Resource):
         for feature, change in changes.items():
             modified[feature] = change
         if return_proba:
-            prediction = explainer.predict_proba(modified)[0].max().tolist()
+            prediction = explainer.predict_proba(modified, as_dict=False).max().tolist()[0]
         else:
-            prediction = explainer.predict(modified)[0].tolist()
+            prediction = explainer.predict(modified, as_dict=False).tolist()[0]
         return {"prediction": prediction}, 200
 
 
@@ -341,9 +341,16 @@ class FeatureContributions(Resource):
             return payload
 
         contributions = explainer.produce_feature_contributions(entity_features)[0]
-        keys = list(contributions["Feature Name"])
-        contribution_dict = dict(zip(keys, contributions["Contribution"]))
-        return {"contributions": contribution_dict}, 200
+        contributions_json = contributions.set_index("Feature Name").to_dict(orient="index")
+        return {"result": contributions_json}, 200
+
+
+def get_contributions(explainer, entities):
+    contributions, values = explainer.produce_feature_contributions(entities, format_output=False)
+    contributions_json = contributions.to_dict(orient="index")
+    values_json = values.to_dict(orient="index")
+
+    return {"contributions": contributions_json, "values": values_json}, 200
 
 
 class MultiFeatureContributions(Resource):
@@ -416,13 +423,7 @@ class MultiFeatureContributions(Resource):
         else:
             return payload
 
-        contributions = explainer.produce_feature_contributions(entities)
-        contributions_json = {
-            eid: contributions[eid].set_index("Feature Name").to_dict(orient="index")
-            for eid in contributions
-        }
-
-        return {"contributions": contributions_json}, 200
+        return get_contributions(explainer, entities)
 
 
 class ModifiedFeatureContribution(Resource):
@@ -499,9 +500,7 @@ class ModifiedFeatureContribution(Resource):
         modified = entity_features.copy()
         for feature, change in changes.items():
             modified[feature] = change
-        contribution = explainer.produce_feature_contributions(modified)[0]
-        contribution_json = contribution.set_index("Feature Name").to_dict(orient="index")
-        return {"contribution": contribution_json}, 200
+        return get_contributions(explainer, modified)
 
 
 class SimilarEntities(Resource):
