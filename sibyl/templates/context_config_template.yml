@@ -10,9 +10,9 @@ output_pos_label:
 output_neg_label:
 # Python f-string for formatting numeric model outputs
 output_format_string:
-# If true, increase in model predictions correspond to a positive outcome. If False, increases in model predictions
-#   correspond to a negative outcome. If None, no statement is made either way
-output_sentiment_is_positive:
+# If true, increase in model predictions correspond to a negative outcome. If False, increases in model predictions
+#   correspond to a positive outcome. If None, no statement is made either way
+output_sentiment_is_negative:
 
 # Whether to include entity rows in UIs (if False, only show first row).
 use_rows:
