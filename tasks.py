@@ -168,7 +168,7 @@ def test_scripts(context):
     Runs all scripts in the tutorials directory and checks for exceptions
     """
 
-    subprocess.run(["pytest", "--nbmake", "./sibyl/test_apis_on_database.ipynb"], check=True)
+    subprocess.run(["pytest", "--nbmake", "./tests/test_on_database.ipynb"], check=True)
 
 
 @task
