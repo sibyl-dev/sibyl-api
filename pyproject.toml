@@ -31,7 +31,7 @@ python = "^3.9, <3.12"
 
 click = "^8.1.3"
 pyyaml = "^6.0"
-pyreal = {git = "https://github.com/sibyl-dev/pyreal", rev = "dev"}
+pyreal = "^0.4.7"
 black = {extras = ["jupyter"], version = "^23.7.0"}
 greenlet = "^2.0.2"
 gevent = "^23.9.0.post1"
