@@ -228,7 +228,7 @@ def insert_entities_from_csv(filename, label_column=None, max_entities=None):
     return insert_entities_from_dataframe(entity_df, label_column, max_entities)
 
 
-def insert_entities_from_dataframe(entity_df, label_column=None, max_entities=None):
+def insert_entities_from_dataframe(entity_df, label_column="label", max_entities=None):
     """
     Insert entities from a pandas Dataframe into the database.
     Required columns:
@@ -245,9 +245,16 @@ def insert_entities_from_dataframe(entity_df, label_column=None, max_entities=No
     Returns:
         list: List of eids inserted
     """
+    if entity_df.empty:
+        return []
+
+    if "eid" not in entity_df:
+        raise ValueError("Entity dataframe must contain column 'eid' at a minimum.")
+
     if max_entities is not None:
         if max_entities < entity_df.shape[0]:
             entity_df = entity_df.sample(max_entities)
+
     eids = entity_df["eid"]
 
     if "row_id" not in entity_df:
@@ -273,7 +280,7 @@ def insert_entities_from_dataframe(entity_df, label_column=None, max_entities=No
         entity["labels"] = targets
         entities.append(entity)
     schema.Entity.insert_many(entities)
-    return eids
+    return eids.tolist()
 
 
 def insert_training_set(eids, label_column):

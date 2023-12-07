@@ -245,3 +245,148 @@ class TestInsertContextFromDict:
         # Assert
         context = schema.Context.find()[0].to_mongo()
         assert context["config"]["context_config_key"] == "context_config_value"
+
+
+class TestInsertEntitiesFromDataframe:
+    #  Insert entities with required columns and no labels
+    def test_insert_entities_no_labels(self):
+        # Create a sample dataframe with required columns and no labels
+        entity_df = pd.DataFrame(
+            {"eid": ["1", "2", "3"], "feature1": [0.1, 0.2, 0.3], "feature2": [0.4, 0.5, 0.6]}
+        )
+
+        # Call the function under test
+        eids = preprocessing.insert_entities_from_dataframe(entity_df)
+
+        # Assert that the eids returned match the expected values
+        assert eids == ["1", "2", "3"]
+
+        # Check that the database has the inserted entities
+        inserted_entities = schema.Entity.find(as_df_=True)
+        print(inserted_entities)
+        assert inserted_entities.shape[0] == len(eids)
+        assert set(inserted_entities["eid"]) == set(eids)
+
+    #  Insert entities with required columns and labels
+    def test_insert_entities_with_labels(self):
+        # Create a sample dataframe with required columns and labels
+        entity_df = pd.DataFrame(
+            {
+                "eid": ["1", "2", "3"],
+                "feature1": [0.1, 0.2, 0.3],
+                "feature2": [0.4, 0.5, 0.6],
+                "label_col": [1, 0, 1],
+            }
+        )
+
+        # Call the function under test
+        eids = preprocessing.insert_entities_from_dataframe(entity_df, label_column="label_col")
+
+        # Assert that the eids returned match the expected values
+        assert eids == ["1", "2", "3"]
+
+        # Assert that the database has the inserted entities
+        inserted_entities = schema.Entity.find(eid__in=eids)
+        assert len(inserted_entities) == len(eids)
+        for entity in inserted_entities:
+            entity = entity.to_mongo()
+            assert entity["eid"] in eids
+            assert list(entity["labels"].values())[0] in [0, 1]
+            assert list(entity["features"].values())[0]["feature1"] in [0.1, 0.2, 0.3]
+            assert list(entity["features"].values())[0]["feature2"] in [0.4, 0.5, 0.6]
+
+    #  Insert entities with optional row_id column
+    def test_insert_entities_with_row_id(self):
+        # Create a sample dataframe with required columns, labels, and row_id
+        entity_df = pd.DataFrame(
+            {
+                "eid": [1, 2],
+                "feature1": [0.1, 0.2],
+                "feature2": [0.4, 0.5],
+                "row_id": [10, 20],
+            }
+        )
+
+        # Call the function under test
+        eids = preprocessing.insert_entities_from_dataframe(entity_df)
+
+        # Assert that the eids returned match the expected values
+        assert eids == [1, 2]
+
+        # Assert that the database has the correct entities
+        inserted_entities = schema.Entity.find()
+        assert len(inserted_entities) == 2
+        assert inserted_entities[0].to_mongo()["eid"] == "1"
+        assert inserted_entities[0].to_mongo()["row_ids"] == ["10"]
+        assert inserted_entities[0].to_mongo()["features"] == {
+            "10": {"feature1": 0.1, "feature2": 0.4}
+        }
+        assert inserted_entities[0].to_mongo()["labels"] == {}
+        assert inserted_entities[1].to_mongo()["eid"] == "2"
+        assert inserted_entities[1].to_mongo()["row_ids"] == ["20"]
+        assert inserted_entities[1].to_mongo()["features"] == {
+            "20": {"feature1": 0.2, "feature2": 0.5}
+        }
+        assert inserted_entities[1].to_mongo()["labels"] == {}
+
+    #  Raise error if dataframe is empty
+    def test_insert_entities_empty_dataframe(self):
+        # Create an empty dataframe
+        entity_df = pd.DataFrame()
+
+        # Call the function under test and assert that it raises a FileNotFoundError
+        assert len(preprocessing.insert_entities_from_dataframe(entity_df)) == 0
+
+    #  Raise error if eid column is missing
+    def test_insert_entities_missing_eid_column(self):
+        # Create a sample dataframe without the eid column
+        entity_df = pd.DataFrame({"feature1": [0.1, 0.2, 0.3], "feature2": [0.4, 0.5, 0.6]})
+
+        with pytest.raises(ValueError):
+            preprocessing.insert_entities_from_dataframe(entity_df)
+
+    #  Raise error if feature columns are missing
+    def test_insert_entities_missing_feature_columns(self):
+        # Create a sample dataframe without the feature columns
+        entity_df = pd.DataFrame({"eid": [1, 2, 3]})
+
+        preprocessing.insert_entities_from_dataframe(entity_df)
+
+    #  Insert entities with maximum number of entities specified
+    def test_insert_entities_max_entities_specified(self):
+        # Create a sample dataframe with required columns and labels
+        entity_df = pd.DataFrame(
+            {
+                "eid": ["1", "2", "3", "4", "5"],
+                "feature1": [0.1, 0.2, 0.3, 0.4, 0.5],
+                "feature2": [0.4, 0.5, 0.6, 0.7, 0.8],
+                "label": [1, 0, 1, 0, 1],
+            }
+        )
+
+        # Call the function under test with max_entities specified
+        eids = preprocessing.insert_entities_from_dataframe(entity_df, max_entities=3)
+
+        # Assert that the eids returned match the expected values
+        assert len(eids) == 3
+        assert len(schema.Entity.objects) == 3
+
+    #  Insert entities with maximum number of entities greater than number of entities in dataframe
+    def test_insert_entities_max_entities_greater_than_dataframe(self):
+        # Create a sample dataframe with required columns and labels
+        entity_df = pd.DataFrame(
+            {
+                "eid": [1, 2, 3],
+                "feature1": [0.1, 0.2, 0.3],
+                "feature2": [0.4, 0.5, 0.6],
+                "label": [1, 0, 1],
+            }
+        )
+
+        # Call the function under test with max_entities greater than number of entities
+        eids = preprocessing.insert_entities_from_dataframe(entity_df, max_entities=5)
+
+        # Assert that the eids returned match the expected values
+        assert eids == [1, 2, 3]
+
+        assert len(schema.Entity.objects) == 3
