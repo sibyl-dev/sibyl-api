@@ -1,7 +1,7 @@
 import argparse
 
 from sibyl.core import Sibyl
-from sibyl.db.preprocessing import prepare_database
+from sibyl.db.preprocessing import prepare_database_from_config
 from sibyl.sample_applications import prepare_housing_application
 from sibyl.utils import read_config, setup_logging
 
@@ -14,12 +14,12 @@ def _run(args):
 
 
 def _prepare_db(args):
-    prepare_database(args.config, args.dir)
+    prepare_database_from_config(args.config, args.dir)
 
 
 def _prepare_housing_db(args):
     prepare_housing_application.run()
-    prepare_database("./sibyl/sample_applications/housing_prepare_db_config.yml")
+    prepare_database_from_config("./sibyl/sample_applications/housing_prepare_db_config.yml")
 
 
 def get_parser():

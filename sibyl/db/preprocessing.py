@@ -83,9 +83,11 @@ def insert_features_from_dataframe(features_df=None):
         already_inserted_categories = schema.Category.find(as_df_=True, only_=["name"])
         if not already_inserted_categories.empty:
             already_inserted_categories = set(already_inserted_categories["name"])
-        schema.Category.insert_many(
-            [{"name": cat} for cat in categories if cat not in already_inserted_categories]
-        )
+        new_categories = [
+            {"name": cat} for cat in categories if cat not in already_inserted_categories
+        ]
+        if len(new_categories) > 0:
+            schema.Category.insert_many(new_categories)
     items = features_df.to_dict(orient="records")
     schema.Feature.insert_many(items)
     return features_df["name"].tolist()
@@ -173,9 +175,7 @@ def insert_context_from_dict(context_dict):
     schema.Context.insert(config=context_dict)
 
 
-def insert_entities_from_csv(
-    filename, label_column=None, max_entities=None, pbar=None, total_time=30
-):
+def insert_entities_from_csv(filename, label_column=None, max_entities=None):
     """
     Insert entities from a csv file into the database.
     Required columns:
@@ -188,8 +188,6 @@ def insert_entities_from_csv(
         filename (string): Filepath of csv file
         label_column (string): Name of the column containing labels (y-values)
         max_entities (int): Maximum number of entities to insert
-        pbar (tqdm): tqdm progress bar
-        total_time (int): Total ticks to allocate to this function on pbar
 
     Returns:
         list: List of eids inserted
@@ -199,12 +197,10 @@ def insert_entities_from_csv(
     except FileNotFoundError:
         raise FileNotFoundError(f"Entities file {filename} not found. Must provide valid file.")
 
-    return insert_entities_from_dataframe(entity_df, label_column, max_entities, pbar, total_time)
+    return insert_entities_from_dataframe(entity_df, label_column, max_entities)
 
 
-def insert_entities_from_dataframe(
-    entity_df, label_column=None, max_entities=None, pbar=None, total_time=30
-):
+def insert_entities_from_dataframe(entity_df, label_column=None, max_entities=None):
     """
     Insert entities from a pandas Dataframe into the database.
     Required columns:
@@ -217,8 +213,6 @@ def insert_entities_from_dataframe(
         entity_df (Dataframe): Dataframe of entity information
         label_column (string): Name of the column containing labels (y-values)
         max_entities (int): Maximum number of entities to insert
-        pbar (tqdm): tqdm progress bar
-        total_time (int): Total ticks to allocate to this function on pbar
 
     Returns:
         list: List of eids inserted
@@ -250,8 +244,6 @@ def insert_entities_from_dataframe(
         entity["features"] = raw_entities[eid]
         entity["labels"] = targets
         entities.append(entity)
-        if pbar is not None:
-            pbar.update(total_time / len(raw_entities))
     schema.Entity.insert_many(entities)
     return eids
 
@@ -487,7 +479,61 @@ def insert_models_from_directory(
             )
 
 
-def prepare_database(config_file, directory=None):
+def prepare_database_from_config(config_file, directory=None):
+    with open(config_file, "r") as f:
+        cfg = yaml.safe_load(f)
+
+    if "database_name" not in cfg:
+        raise ValueError("Must provide database_name in config file.")
+
+    if directory is None:
+        if cfg.get("directory") is None:
+            directory = os.path.join(get_project_root(), "dbdata", cfg["database_name"])
+        else:
+            directory = os.path.join(get_project_root(), "dbdata", cfg["directory"])
+
+    prepare_database(
+        cfg["database_name"],
+        directory=directory,
+        drop_old=cfg.get("drop_old", False),
+        category_filepath=cfg.get("category_fn"),
+        features_filepath=cfg.get("feature_fn", "features.csv"),
+        entities_filepath=cfg.get("entity_fn", "entities.csv"),
+        label_column=cfg.get("label_column", "label"),
+        context_filepath=cfg.get("context_config_fn"),
+        use_entities_as_training_set=True,
+        realapp_filepath=cfg.get("explainer_fn"),
+        realapp_directory=cfg.get("explainer_directory_name"),
+        model_id=cfg.get("explainer_name"),
+        fit_explainers=cfg.get("fit_explainers", True),
+        training_size=cfg.get("training_size"),
+        fit_se=cfg.get("fit_se", True),
+    )
+
+
+def prepare_database(
+    database_name,
+    directory=None,
+    drop_old=False,
+    category_df=None,
+    category_filepath=None,
+    features_df=None,
+    features_filepath=None,
+    entities_df=None,
+    entities_filepath=None,
+    label_column="label",
+    context_filepath=None,
+    context_dict=None,
+    use_entities_as_training_set=True,
+    training_eids=None,
+    realapp_filepath=None,
+    realapp=None,
+    realapp_directory=None,
+    model_id=None,
+    fit_explainers=True,
+    training_size=None,
+    fit_se=True,
+):
     def _process_fp(fn):
         """
         Process a filename to be relative to the directory
@@ -498,6 +544,8 @@ def prepare_database(config_file, directory=None):
         Returns:
             string: Relative filepath
         """
+        if directory is None:
+            return fn
         return os.path.join(directory, fn)
 
     times = {
@@ -510,91 +558,98 @@ def prepare_database(config_file, directory=None):
     }
     pbar = tqdm(total=sum(times.values()))
 
-    with open(config_file, "r") as f:
-        cfg = yaml.safe_load(f)
-
     # Begin database loading ---------------------------
-    database_name = cfg["database_name"]
-    if directory is None:
-        if cfg.get("directory") is None:
-            directory = os.path.join(get_project_root(), "dbdata", database_name)
-        else:
-            directory = os.path.join(get_project_root(), "dbdata", cfg["directory"])
+    database_name = database_name
 
-    if cfg.get("DROP_OLD", False):
+    if drop_old:
         client = MongoClient("localhost", 27017)
         client.drop_database(database_name)
     connect(database_name, host="localhost", port=27017)
 
     # INSERT CATEGORIES, IF PROVIDED
     pbar.set_description("Inserting categories...")
-    if cfg.get("category_fn"):
-        insert_categories_from_csv(_process_fp(cfg.get("category_fn")))
+    if category_df is not None:
+        insert_categories_from_dataframe(category_df)
+    elif category_filepath is not None:
+        insert_categories_from_csv(_process_fp(category_filepath))
     pbar.update(times["Categories"])
 
     # INSERT FEATURES
     pbar.set_description("Inserting features...")
-    insert_features_from_csv(_process_fp(cfg.get("features_fn", "features.csv")))
+    if features_df is not None:
+        insert_features_from_dataframe(features_df)
+    elif features_filepath is not None:
+        insert_features_from_csv(_process_fp(features_filepath))
     pbar.update(times["Features"])
-
-    # INSERT ENTITIES
-    pbar.set_description("Inserting entities...")
-    eids = insert_entities_from_csv(
-        _process_fp(cfg.get("entity_fn", "entities.csv")),
-        label_column=cfg.get("target", "target"),
-        pbar=pbar,
-        total_time=times["Entities"],
-    )
 
     # INSERT CONTEXT
     pbar.set_description("Inserting context...")
-    insert_context_from_yaml(_process_fp(cfg.get("context_config_fn")))
+    if context_dict is not None:
+        insert_context_from_dict(context_dict)
+    elif context_filepath is not None:
+        insert_context_from_yaml(_process_fp(context_filepath))
     pbar.update(times["Context"])
+
+    # INSERT ENTITIES
+    pbar.set_description("Inserting entities...")
+    eids = None
+    if entities_df is not None:
+        eids = insert_entities_from_dataframe(entities_df, label_column=label_column)
+    elif entities_filepath is not None:
+        eids = insert_entities_from_csv(_process_fp(entities_filepath), label_column=label_column)
+    pbar.update(times["Entities"])
 
     # INSERT FULL DATASET
     pbar.set_description("Inserting training set...")
-    if cfg.get("include_database", False) and cfg.get("training_entities_fn"):
-        eids = insert_entities_from_csv(
-            _process_fp(cfg.get("training_entities_fn")),
-            label_column=cfg.get("target", "target"),
-            pbar=pbar,
-            total_time=times["Training Set"],
-        )
-    else:
-        pbar.update(times["Training Set"])
-    set_doc = insert_training_set(eids, cfg.get("target"))
+    training_set = None
+    if training_eids is not None:
+        training_set = insert_training_set(training_eids, label_column)
+    elif use_entities_as_training_set:
+        if eids is None:
+            raise ValueError("Must provide entities or set use_entities_as_training_set=False")
+        training_set = insert_training_set(eids, label_column)
+    pbar.update(times["Training Set"])
 
     # INSERT MODEL
     pbar.set_description("Inserting model...")
-    if cfg.get("explainer_directory_name"):
-        explainer_directory = _process_fp(cfg.get("explainer_directory_name"))
-        if not os.path.isdir(explainer_directory):
+    if realapp_directory is not None:
+        realapp_directory = _process_fp(realapp_directory)
+        if not os.path.isdir(realapp_directory):
             raise FileNotFoundError(
-                f"Explainer directory {explainer_directory} is not a valid directory."
+                f"Explainer directory {realapp_directory} is not a valid directory."
             )
         insert_models_from_directory(
-            explainer_directory,
-            fit_explainers=cfg.get("fit_explainers", False),
-            training_set=set_doc,
-            training_size=cfg.get("training_size"),
-            fit_se=cfg.get("fit_se", True),
+            realapp_directory,
+            fit_explainers=fit_explainers,
+            training_set=training_set,
+            training_size=training_size,
+            fit_se=fit_se,
         )
-    else:
+    elif realapp is not None:
+        insert_model_from_object(
+            realapp,
+            model_id=model_id,
+            fit_explainers=fit_explainers,
+            training_set=training_set,
+            training_size=training_size,
+            fit_se=fit_se,
+        )
+    elif realapp_filepath is not None:
         insert_model_from_file(
-            _process_fp(cfg.get("explainer_fn")),
-            model_id=cfg.get("model_name"),
-            fit_explainers=cfg.get("fit_explainers", False),
-            training_set=set_doc,
-            training_size=cfg.get("training_size"),
-            fit_se=cfg.get("fit_se", True),
+            _process_fp(realapp_filepath),
+            model_id=model_id,
+            fit_explainers=fit_explainers,
+            training_set=training_set,
+            training_size=training_size,
+            fit_se=fit_se,
         )
     pbar.update(times["Model"])
 
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
-        prepare_database(sys.argv[1])
+        prepare_database_from_config(sys.argv[1])
     elif len(sys.argv) == 3:
-        prepare_database(sys.argv[1], sys.argv[2])
+        prepare_database_from_config(sys.argv[1], sys.argv[2])
     else:
         print("Invalid arguments. Usage: python preprocessing.py CONFIG_FILE [DIRECTORY]")
