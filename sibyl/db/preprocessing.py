@@ -528,25 +528,56 @@ def prepare_database(
     database_name,
     directory=None,
     drop_old=False,
-    category_df=None,
-    category_filepath=None,
     features_df=None,
     features_filepath=None,
     entities_df=None,
     entities_filepath=None,
     label_column="label",
-    context_filepath=None,
-    context_dict=None,
-    use_entities_as_training_set=True,
-    training_eids=None,
     realapp_filepath=None,
     realapp=None,
     realapp_directory=None,
+    training_eids=None,
+    use_entities_as_training_set=True,
     model_id=None,
     fit_explainers=True,
     training_size=None,
     fit_se=True,
+    context_filepath=None,
+    context_dict=None,
+    category_df=None,
+    category_filepath=None,
 ):
+    """
+    Fully prepare a database from files or objects
+
+    Args:
+        database_name (string): Name of database
+        directory (string): Directory where all files provided are located.
+            Not required if full paths are given or filepath parameters are not used.
+        drop_old (bool): If True and database already exists, drop the old database
+        features_df (DataFrame): Dataframe of feature information
+        features_filepath (string): Filepath of csv file containing feature information
+        entities_df (DataFrame): Dataframe of entity information
+        entities_filepath (string): Filepath of csv file containing entity information
+        label_column (string): Name of the column containing labels (y-values) in entities_df
+        realapp_filepath (string): Filepath of pickled RealApp object
+        realapp (RealApp): RealApp object to insert
+        realapp_directory (string): Directory path containing pickled RealApp objects
+        training_eids (list): List of eids to use as the training set
+        use_entities_as_training_set (bool): Whether to use the entities in
+            entities_df/entities_filepath as the training set
+        model_id (string): Name of the model
+        fit_explainers (bool): Whether to fit explainers on the training set.
+        training_size (int): Number of training examples to use for fitting explainers
+        fit_se (bool): Whether to fit similar examples on the training set. The similar examples
+            explainer is very large when fit and may not fit in the database; if this is the case,
+            set fit_se to False.
+        context_filepath (string): Filepath of yaml file containing context information
+        context_dict (dict): dict of {context_config_key : context_config_value}
+        category_df (DataFrame): Dataframe of category information
+        category_filepath (string): Filepath of csv file containing category information
+    """
+
     def _process_fp(fn):
         """
         Process a filename to be relative to the directory
