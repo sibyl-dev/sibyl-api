@@ -28,5 +28,5 @@ context_config_fn: "context_config.yml"
 explainer_name: "housing_model"
 # Name of target column in training dataset. If not given, assume "target"
 target: "SalePrice"
-# If False, do not prefit the similar entities explainer. Reduces objects sizes for database, but increases runtime
+# If False, do not prefit the similar-entities explainer. Reduces object sizes for database, but increases runtime
 prefit_se: True
