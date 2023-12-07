@@ -173,14 +173,59 @@ def insert_context_from_dict(context_dict):
     schema.Context.insert(config=context_dict)
 
 
-def insert_entities(entity_fp, target=None, num=None, pbar=None, total_time=30):
-    try:
-        entity_df = pd.read_csv(entity_fp)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Entities file {entity_fp} not found. Must provide valid file.")
+def insert_entities_from_csv(
+    filename, label_column=None, max_entities=None, pbar=None, total_time=30
+):
+    """
+    Insert entities from a csv file into the database.
+    Required columns:
+        - eid: the entity id
+        - [feature1, feature2, ...]: the feature values of the entity
+    Optional columns:
+        - row_id: the row_ids of each row
+        - [label_column]: the label (y-value) of the row
+    Args:
+        filename (string): Filepath of csv file
+        label_column (string): Name of the column containing labels (y-values)
+        max_entities (int): Maximum number of entities to insert
+        pbar (tqdm): tqdm progress bar
+        total_time (int): Total ticks to allocate to this function on pbar
 
-    if num is not None:
-        entity_df = entity_df.sample(num)
+    Returns:
+        list: List of eids inserted
+    """
+    try:
+        entity_df = pd.read_csv(filename)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Entities file {filename} not found. Must provide valid file.")
+
+    return insert_entities_from_dataframe(entity_df, label_column, max_entities, pbar, total_time)
+
+
+def insert_entities_from_dataframe(
+    entity_df, label_column=None, max_entities=None, pbar=None, total_time=30
+):
+    """
+    Insert entities from a pandas Dataframe into the database.
+    Required columns:
+        - eid: the entity id
+        - [feature1, feature2, ...]: the feature values of the entity
+    Optional columns:
+        - row_id: the row_ids of each row
+        - [label_column]: the label (y-value) of the row
+    Args:
+        filename (string): Filepath of csv file
+        label_column (string): Name of the column containing labels (y-values)
+        max_entities (int): Maximum number of entities to insert
+        pbar (tqdm): tqdm progress bar
+        total_time (int): Total ticks to allocate to this function on pbar
+
+    Returns:
+        list: List of eids inserted
+    """
+    if max_entities is not None:
+        if max_entities < entity_df.shape[0]:
+            entity_df = entity_df.sample(max_entities)
     eids = entity_df["eid"]
 
     if "row_id" not in entity_df:
@@ -200,20 +245,30 @@ def insert_entities(entity_fp, target=None, num=None, pbar=None, total_time=30):
         entity = {"eid": str(eid), "row_ids": list(raw_entities[eid].keys())}
         targets = {}
         for row_id in raw_entities[eid]:
-            if target in raw_entities[eid][row_id]:
-                targets[row_id] = raw_entities[eid][row_id].pop(target)
+            if label_column in raw_entities[eid][row_id]:
+                targets[row_id] = raw_entities[eid][row_id].pop(label_column)
         entity["features"] = raw_entities[eid]
         entity["labels"] = targets
         entities.append(entity)
         if pbar is not None:
             pbar.update(total_time / len(raw_entities))
     schema.Entity.insert_many(entities)
-    return eids, use_rows
+    return eids
 
 
-def insert_training_set(eids, target):
+def insert_training_set(eids, label_column):
+    """
+    Insert a training set (set of eids to train on) into the database.
+
+    Args:
+        eids (list): list of eids
+        label_column (string): Name of the column containing labels (y-values)
+
+    Returns:
+        TrainingSet: TrainingSet object inserted
+    """
     references = [schema.Entity.find_one(eid=str(eid)) for eid in eids]
-    training_set = {"entities": references, "target": target}
+    training_set = {"entities": references, "target": label_column}
 
     set_doc = schema.TrainingSet.insert(**training_set)
     return set_doc
