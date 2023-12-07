@@ -156,7 +156,11 @@ def insert_categories_from_dataframe(category_df=None):
     Returns
         list: List of category names inserted
     """
+    if "name" not in category_df:
+        raise ValueError("Category dataframe must contain column 'name' at a minimum.")
     items = category_df.to_dict(orient="records")
+    if len(items) == 0:
+        return []
     schema.Category.insert_many(items)
     return category_df["name"].tolist()
 

@@ -170,3 +170,78 @@ class TestInsertFeaturesFromDataframe:
         # Assert that no features were inserted into the database
         inserted_features = schema.Feature.find(as_df_=True)
         assert len(inserted_features) == 0
+
+
+class TestInsertCategoriesFromDataframe:
+    #  Insert categories with required columns only
+    def test_insert_categories_required_columns_only(self):
+        # Create a sample dataframe with required columns only
+        category_df = pd.DataFrame({"name": ["Category1", "Category2", "Category3"]})
+
+        # Call the function under test
+        result = preprocessing.insert_categories_from_dataframe(category_df)
+
+        # Assert that the categories were inserted correctly
+        assert result == ["Category1", "Category2", "Category3"]
+
+        inserted_categories = schema.Category.find(as_df_=True)
+        assert len(inserted_categories) == 3
+        assert set(inserted_categories["name"]) == {"Category1", "Category2", "Category3"}
+
+    #  Insert categories with optional columns
+    def test_insert_categories_optional_columns(self):
+        # Create a sample dataframe with optional columns
+        category_df = pd.DataFrame(
+            {
+                "name": ["Category1", "Category2", "Category3"],
+                "color": ["red", "blue", "green"],
+                "abbreviation": ["C1", "C2", "C3"],
+            }
+        )
+
+        # Call the function under test
+        result = preprocessing.insert_categories_from_dataframe(category_df)
+
+        # Assert that the categories were inserted correctly
+        assert result == ["Category1", "Category2", "Category3"]
+        inserted_categories = schema.Category.find(as_df_=True)
+        assert len(inserted_categories) == 3
+        assert set(inserted_categories["name"]) == {"Category1", "Category2", "Category3"}
+        assert set(inserted_categories["color"]) == {"red", "blue", "green"}
+        assert set(inserted_categories["abbreviation"]) == {"C1", "C2", "C3"}
+
+    #  Insert empty dataframe
+    def test_insert_empty_dataframe(self):
+        # Create an empty dataframe
+        category_df = pd.DataFrame(columns=["name", "color", "abbreviation"])
+
+        # Call the function under test
+        result = preprocessing.insert_categories_from_dataframe(category_df)
+
+        # Assert that no categories were inserted
+        assert result == []
+        inserted_categories = schema.Category.find(as_df_=True)
+        assert (len(inserted_categories)) == 0
+
+    #  Insert dataframe with missing required columns
+    def test_insert_missing_required_columns(self):
+        # Create a sample dataframe with missing required columns
+        category_df = pd.DataFrame({"color": ["red", "blue", "green"]})
+
+        # Call the function under test and expect a ValueError
+        with pytest.raises(ValueError):
+            preprocessing.insert_categories_from_dataframe(category_df)
+
+
+class TestInsertContextFromDict:
+    #  Insert a valid context dictionary and verify that it is inserted into the database.
+    def test_valid_context_dictionary_inserted(self):
+        # Arrange
+        context_dict = {"context_config_key": "context_config_value"}
+
+        # Act
+        preprocessing.insert_context_from_dict(context_dict)
+
+        # Assert
+        context = schema.Context.find()[0].to_mongo()
+        assert context["config"]["context_config_key"] == "context_config_value"
