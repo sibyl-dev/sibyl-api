@@ -35,6 +35,19 @@ def _validate_model_and_explainer(explainer, train_dataset):
     explainer.produce_feature_contributions(train_dataset.iloc[0:2])
 
 
+def connect_to_db(database_name, drop_old=True):
+    """
+    Connect to database_name
+    Args:
+        database_name (string): Name of database to connect to
+        drop_old (bool): Whether to drop the database if it already exists
+    """
+    if drop_old:
+        client = MongoClient("localhost", 27017)
+        client.drop_database(database_name)
+    connect(database_name, host="localhost", port=27017)
+
+
 def insert_features_from_csv(filepath=None):
     """
     Insert features from a csv file into the database.
@@ -559,12 +572,7 @@ def prepare_database(
     pbar = tqdm(total=sum(times.values()))
 
     # Begin database loading ---------------------------
-    database_name = database_name
-
-    if drop_old:
-        client = MongoClient("localhost", 27017)
-        client.drop_database(database_name)
-    connect(database_name, host="localhost", port=27017)
+    connect_to_db(database_name, drop_old=drop_old)
 
     # INSERT CATEGORIES, IF PROVIDED
     pbar.set_description("Inserting categories...")
