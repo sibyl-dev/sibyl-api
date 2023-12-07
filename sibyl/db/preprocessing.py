@@ -379,7 +379,7 @@ def prepare_database(config_file, directory=None):
 
     # INSERT CATEGORIES, IF PROVIDED
     pbar.set_description("Inserting categories...")
-    insert_categories(_process_fp(cfg.get("category_fn")))
+    insert_categories_from_csv(_process_fp(cfg.get("category_fn")))
     pbar.update(times["Categories"])
 
     # INSERT FEATURES
@@ -389,24 +389,24 @@ def prepare_database(config_file, directory=None):
 
     # INSERT ENTITIES
     pbar.set_description("Inserting entities...")
-    eids, use_rows = insert_entities(
+    eids = insert_entities_from_csv(
         _process_fp(cfg.get("entity_fn", "entities.csv")),
-        target=cfg.get("target", "target"),
+        label_column=cfg.get("target", "target"),
         pbar=pbar,
         total_time=times["Entities"],
     )
 
     # INSERT CONTEXT
     pbar.set_description("Inserting context...")
-    insert_context(_process_fp(cfg.get("context_config_fn")), use_rows=use_rows)
+    insert_context_from_yaml(_process_fp(cfg.get("context_config_fn")))
     pbar.update(times["Context"])
 
     # INSERT FULL DATASET
     pbar.set_description("Inserting training set...")
     if cfg.get("include_database", False) and cfg.get("training_entities_fn"):
-        eids, use_rows = insert_entities(
+        eids = insert_entities_from_csv(
             _process_fp(cfg.get("training_entities_fn")),
-            target=cfg.get("target", "target"),
+            label_column=cfg.get("target", "target"),
             pbar=pbar,
             total_time=times["Training Set"],
         )
