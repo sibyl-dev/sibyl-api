@@ -252,9 +252,9 @@ def models():
     return models
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def testdb(categories, features, entities, groups, models, contexts):
-    client = MongoClient("localhost", 27017)
+    client = MongoClient(test_host, test_port)
     client.drop_database(test_database_name)
     connect(test_database_name, host=test_host, port=test_port)
 

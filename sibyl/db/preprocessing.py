@@ -79,7 +79,7 @@ def insert_features_from_dataframe(features_df=None):
     Insert features from a pandas dataframe into the database.
     Required columns:
         - name: the name of the feature, as in the entity columns
-        - type: the type of the feature, one of "numeric", "categorical", "text", "boolean"
+        - type: the type of the feature, one of "numeric", "categorical", "boolean"
     Optional columns:
         - description: a description of the feature
         - negated_description: a description of the feature when it is negated
@@ -101,7 +101,18 @@ def insert_features_from_dataframe(features_df=None):
         ]
         if len(new_categories) > 0:
             schema.Category.insert_many(new_categories)
+    if "name" not in features_df or "type" not in features_df:
+        raise ValueError("Features dataframe must contain columns 'name' and 'type' at a minimum.")
+
+    valid_types = ["numeric", "categorical", "boolean"]
+    if not set(features_df["type"]).issubset(valid_types):
+        raise ValueError(
+            f"Features dataframe contains invalid types. Must be one of {valid_types}."
+        )
+
     items = features_df.to_dict(orient="records")
+    if len(items) == 0:
+        return []
     schema.Feature.insert_many(items)
     return features_df["name"].tolist()
 
