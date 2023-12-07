@@ -528,28 +528,22 @@ def prepare_database(config_file, directory=None):
         number_of_explainers = len(os.listdir(explainer_directory))
         for i, explainer_file in enumerate(os.listdir(explainer_directory)):
             if explainer_file.endswith(".pkl"):  # Ignore other files in the directory
-                insert_model(
-                    _process_fp(
-                        cfg.get("training_entities_fn") or cfg.get("entity_fn") or "entities.csv"
-                    ),
-                    cfg.get("target", "target"),
-                    set_doc,
-                    explainer_fp=os.path.join(explainer_directory, explainer_file),
+                insert_model_from_file(
+                    os.path.join(explainer_directory, explainer_file),
                     model_id=explainer_file[:-4],
-                    training_size=cfg.get("training_size"),
                     fit_explainers=cfg.get("fit_explainers", False),
+                    training_set=set_doc,
+                    training_size=cfg.get("training_size"),
                     fit_se=cfg.get("fit_se", True),
                 )
             pbar.update(times["Model"] / number_of_explainers)
     else:
-        insert_model(
-            _process_fp(cfg.get("training_entities_fn") or cfg.get("entity_fn") or "entities.csv"),
-            cfg.get("target", "target"),
-            set_doc,
-            explainer_fp=_process_fp(cfg.get("explainer_fn")),
+        insert_model_from_file(
+            _process_fp(cfg.get("explainer_fn")),
             model_id=cfg.get("model_name"),
-            training_size=cfg.get("training_size"),
             fit_explainers=cfg.get("fit_explainers", False),
+            training_set=set_doc,
+            training_size=cfg.get("training_size"),
             fit_se=cfg.get("fit_se", True),
         )
         pbar.update(times["Model"])
