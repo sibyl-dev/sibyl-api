@@ -13,7 +13,7 @@ from sibyl.db import schema
 from sibyl.utils import get_project_root
 
 
-def _load_data(training_entity_filepath, target, features):
+def _load_data(training_entity_filepath, target):
     try:
         data = pd.read_csv(training_entity_filepath)
     except FileNotFoundError:
@@ -35,13 +35,49 @@ def _validate_model_and_explainer(explainer, train_dataset):
     explainer.produce_feature_contributions(train_dataset.iloc[0:2])
 
 
-def insert_features(filepath):
+def insert_features_from_csv(filepath=None):
+    """
+    Insert features from a csv file into the database.
+    Required columns:
+        - name: the name of the feature, as in the entity columns
+        - type: the type of the feature, one of "numeric", "categorical", "text", "boolean"
+    Optional columns:
+        - description: a description of the feature
+        - negated_description: a description of the feature when it is negated
+        - category: the category of the feature, as in the category table
+
+    Args:
+        filepath (string): Filepath of csv file
+
+    Returns:
+        list: List of feature names inserted
+    """
     try:
         features_df = pd.read_csv(filepath)
     except FileNotFoundError:
         raise FileNotFoundError(
             f"Features file {filepath} not found. Must provide valid features file"
         )
+    return insert_features_from_dataframe(features_df)
+
+
+def insert_features_from_dataframe(features_df=None):
+    """
+    Insert features from a pandas dataframe into the database.
+    Required columns:
+        - name: the name of the feature, as in the entity columns
+        - type: the type of the feature, one of "numeric", "categorical", "text", "boolean"
+    Optional columns:
+        - description: a description of the feature
+        - negated_description: a description of the feature when it is negated
+        - category: the category of the feature, as in the category table
+
+    Args:
+        features_df (DataFrame): Dataframe of feature information
+
+    Returns:
+        list: List of feature names inserted
+    """
     if "category" in features_df:
         categories = set(features_df["category"])
         already_inserted_categories = schema.Category.find(as_df_=True, only_=["name"])
@@ -55,38 +91,86 @@ def insert_features(filepath):
     return features_df["name"].tolist()
 
 
-def insert_categories(filepath):
+def insert_categories_from_csv(filepath):
+    """
+    Insert categories from a csv file into the database.
+    Required columns:
+        - name: the name of the category
+    Optional columns:
+        - color: the color of the category (name, hex, or rgb)
+        - abbreviation: the abbreviation of the category
+
+    Args:
+        filepath (string): Filepath of csv file
+
+    Returns
+        list: List of category names inserted
+    """
     if filepath is None:
         return
     try:
-        cat_df = pd.read_csv(filepath)
+        category_df = pd.read_csv(filepath)
     except FileNotFoundError:
         raise FileNotFoundError(f"Categories file {filepath} not found. ")
-    items = cat_df.to_dict(orient="records")
+    return insert_features_from_dataframe(category_df)
+
+
+def insert_categories_from_dataframe(category_df=None):
+    """
+    Insert categories from a pandas dataframe into the database.
+    Required columns:
+        - name: the name of the category
+    Optional columns:
+        - color: the color of the category (name, hex, or rgb)
+        - abbreviation: the abbreviation of the category
+
+    Args:
+        category_df (DataFrame): Dataframe of category information
+
+    Returns
+        list: List of category names inserted
+    """
+    items = category_df.to_dict(orient="records")
     schema.Category.insert_many(items)
+    return category_df["name"].tolist()
 
 
-def insert_context(context_config_fp, use_rows=None):
-    if context_config_fp is None:
+def insert_context_from_yaml(filepath):
+    """
+    Insert context from a yaml file into the database.
+    See sibyl/templates/context_config_template.yml for an example of the format.
+
+    Args:
+        filepath (string): Filepath of yaml file containing context information
+    """
+    if filepath is None:
         return
     try:
-        context_config = yaml.safe_load(open(context_config_fp, "r"))
+        context_dict = yaml.safe_load(open(filepath, "r"))
     except FileNotFoundError:
-        raise FileNotFoundError(f"Context config file {context_config_fp} not found. ")
+        raise FileNotFoundError(f"Context config file {filepath} not found. ")
 
-    if context_config.get("use_rows") is None:
-        context_config["use_rows"] = use_rows
+    return insert_context_from_dict(context_dict)
 
-    if "output_preset" in context_config:
+
+def insert_context_from_dict(context_dict):
+    """
+    Insert context from a python dictionary into the database.
+    See sibyl/templates/context_config_template.yml for an example of config options.
+
+    Args:
+        context_dict (dict): dict of {context_config_key : context_config_value}
+    """
+    if "output_preset" in context_dict:
         with open(os.path.join(get_project_root(), "sibyl", "db", "output_presets.yml"), "r") as f:
             output_preset_dict = yaml.safe_load(f)
-        if context_config["output_preset"] in output_preset_dict:
-            config_values = output_preset_dict[context_config["output_preset"]]
+        if context_dict["output_preset"] in output_preset_dict:
+            config_values = output_preset_dict[context_dict["output_preset"]]
             for config_name in config_values:
                 if config_name not in output_preset_dict:
-                    context_config[config_name] = config_values[config_name]
+                    context_dict[config_name] = config_values[config_name]
 
-    schema.Context.insert(config=context_config)
+    schema.Context.insert(config=context_dict)
 
 
 def insert_entities(entity_fp, target=None, num=None, pbar=None, total_time=30):
@@ -140,7 +224,6 @@ def insert_model(
     target,
     set_doc,
     explainer_fp,
-    features,
     model_id=None,
     training_size=None,
     fit_explainers=False,
@@ -159,7 +242,7 @@ def insert_model(
     except FileNotFoundError:
         raise FileNotFoundError(f"Explainer file {explainer_fp} not found. ")
 
-    train_dataset, targets = _load_data(training_data_fp, target, features)
+    train_dataset, targets = _load_data(training_data_fp, target)
 
     if fit_explainers:
         explainer.prepare_feature_contributions(
@@ -246,7 +329,7 @@ def prepare_database(config_file, directory=None):
 
     # INSERT FEATURES
     pbar.set_description("Inserting features...")
-    features = insert_features(_process_fp(cfg.get("features_fn", "features.csv")))
+    insert_features_from_csv(_process_fp(cfg.get("features_fn", "features.csv")))
     pbar.update(times["Features"])
 
     # INSERT ENTITIES
@@ -294,7 +377,6 @@ def prepare_database(config_file, directory=None):
                     cfg.get("target", "target"),
                     set_doc,
                     explainer_fp=os.path.join(explainer_directory, explainer_file),
-                    features=features,
                     model_id=explainer_file[:-4],
                     training_size=cfg.get("training_size"),
                     fit_explainers=cfg.get("fit_explainers", False),
@@ -307,7 +389,6 @@ def prepare_database(config_file, directory=None):
             cfg.get("target", "target"),
             set_doc,
             explainer_fp=_process_fp(cfg.get("explainer_fn")),
-            features=features,
             model_id=cfg.get("model_name"),
             training_size=cfg.get("training_size"),
             fit_explainers=cfg.get("fit_explainers", False),
