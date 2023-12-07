@@ -440,6 +440,53 @@ def insert_model_from_object(
     return realApp
 
 
+def insert_models_from_directory(
+    directory,
+    fit_explainers=False,
+    training_set=None,
+    training_df=None,
+    label_column="label",
+    training_size=None,
+    fit_se=True,
+    validate=True,
+):
+    """
+    Insert multiple models (RealApp) into the database from a directory of pickle files.
+    Sets the model names to the filenames
+
+    Args:
+        directory (string): Directory path
+        fit_explainers (bool): Whether to fit explainers on the training set.
+            If True, one of training_set or training_df must be provided
+        training_set (TrainingSet): TrainingSet object to fit explainers with.
+            Must be provided if fit_se=False
+        training_df (DataFrame): Training dataframe to fit explainers with.
+            Not used if training_set is provided
+        label_column (string): Name of the column containing labels (y-values) in training_df
+        training_size (int): Number of training examples to use for fitting explainers
+        fit_se (bool): Whether to fit similar examples on the training set. The similar examples
+            explainer is very large when fit and may not fit in the database; if this is the case,
+            set fit_se to False.
+        validate (bool): Whether to validate the model and explainer by running predict and explain
+
+    Returns:
+        RealApp: the RealApp object inserted, possibly fit
+    """
+    for i, file in enumerate(os.listdir(directory)):
+        if file.endswith(".pkl"):  # Ignore other files in the directory
+            insert_model_from_file(
+                os.path.join(directory, file),
+                model_id=file[:-4],  # remove .pkl
+                fit_explainers=fit_explainers,
+                training_set=training_set,
+                training_df=training_df,
+                label_column=label_column,
+                training_size=training_size,
+                fit_se=fit_se,
+                validate=validate,
+            )
+
+
 def prepare_database(config_file, directory=None):
     def _process_fp(fn):
         """
@@ -525,18 +572,13 @@ def prepare_database(config_file, directory=None):
             raise FileNotFoundError(
                 f"Explainer directory {explainer_directory} is not a valid directory."
             )
-        number_of_explainers = len(os.listdir(explainer_directory))
-        for i, explainer_file in enumerate(os.listdir(explainer_directory)):
-            if explainer_file.endswith(".pkl"):  # Ignore other files in the directory
-                insert_model_from_file(
-                    os.path.join(explainer_directory, explainer_file),
-                    model_id=explainer_file[:-4],
-                    fit_explainers=cfg.get("fit_explainers", False),
-                    training_set=set_doc,
-                    training_size=cfg.get("training_size"),
-                    fit_se=cfg.get("fit_se", True),
-                )
-            pbar.update(times["Model"] / number_of_explainers)
+        insert_models_from_directory(
+            explainer_directory,
+            fit_explainers=cfg.get("fit_explainers", False),
+            training_set=set_doc,
+            training_size=cfg.get("training_size"),
+            fit_se=cfg.get("fit_se", True),
+        )
     else:
         insert_model_from_file(
             _process_fp(cfg.get("explainer_fn")),
@@ -546,7 +588,7 @@ def prepare_database(config_file, directory=None):
             training_size=cfg.get("training_size"),
             fit_se=cfg.get("fit_se", True),
         )
-        pbar.update(times["Model"])
+    pbar.update(times["Model"])
 
 
 if __name__ == "__main__":
