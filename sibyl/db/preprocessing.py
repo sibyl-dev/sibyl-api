@@ -214,7 +214,7 @@ def insert_entities_from_dataframe(
         - row_id: the row_ids of each row
         - [label_column]: the label (y-value) of the row
     Args:
-        filename (string): Filepath of csv file
+        entity_df (Dataframe): Dataframe of entity information
         label_column (string): Name of the column containing labels (y-values)
         max_entities (int): Maximum number of entities to insert
         pbar (tqdm): tqdm progress bar
@@ -274,57 +274,152 @@ def insert_training_set(eids, label_column):
     return set_doc
 
 
-def insert_model(
-    training_data_fp,
-    target,
-    set_doc,
-    explainer_fp,
+def insert_model_from_file(
+    filename,
     model_id=None,
-    training_size=None,
+    model_description="",
+    model_performance="",
     fit_explainers=False,
+    training_set=None,
+    training_df=None,
+    label_column="label",
+    training_size=None,
     fit_se=True,
+    validate=True,
 ):
-    description = "placeholder"
-    performance = "placeholder"
+    """
+    Insert a model (RealApp) into the database from a pickle file.
+
+    Args:
+        filename (string): Filepath of pickled RealApp object
+        fit_explainers (bool): Whether to fit explainers on the training set.
+            If True, one of training_set or training_df must be provided
+        training_set (TrainingSet): TrainingSet object to fit explainers with.
+            Must be provided if fit_se=False
+        training_df (DataFrame): Training dataframe to fit explainers with.
+            Not used if training_set is provided
+        label_column (string): Name of the column containing labels (y-values) in training_df
+        model_id (string): Name of the model
+        model_description (string): Description of the model
+        model_performance (string): Performance description of the model
+        training_size (int): Number of training examples to use for fitting explainers
+        fit_se (bool): Whether to fit similar examples on the training set. The similar examples
+            explainer is very large when fit and may not fit in the database; if this is the case,
+            set fit_se to False.
+        validate (bool): Whether to validate the model and explainer by running predict and explain
+
+    Returns:
+        RealApp: the RealApp object inserted, possibly fit
+    """
+    try:
+        with open(filename, "rb") as realapp_file:
+            realApp = pickle.load(realapp_file)
+            realApp.id_column = "eid"
+    except FileNotFoundError:
+        raise FileNotFoundError(f"RealApp file {filename} not found. ")
+
+    return insert_model_from_object(
+        realApp,
+        model_id=model_id,
+        model_description=model_description,
+        model_performance=model_performance,
+        fit_explainers=fit_explainers,
+        training_set=training_set,
+        training_df=training_df,
+        label_column=label_column,
+        training_size=training_size,
+        fit_se=fit_se,
+        validate=validate,
+    )
+
+
+def insert_model_from_object(
+    realApp,
+    model_id=None,
+    model_description="",
+    model_performance="",
+    fit_explainers=False,
+    training_set=None,
+    training_df=None,
+    label_column="label",
+    training_size=None,
+    fit_se=True,
+    validate=True,
+):
+    """
+    Insert a model (RealApp) into the database from a pickle file.
+
+    Args:
+        realApp (RealApp): RealApp object to insert
+        fit_explainers (bool): Whether to fit explainers on the training set.
+            If True, one of training_set or training_df must be provided
+        training_set (TrainingSet): TrainingSet object to fit explainers with.
+            Must be provided if fit_se=False
+        training_df (DataFrame): Training dataframe to fit explainers with.
+            Not used if training_set is provided
+        label_column (string): Name of the column containing labels (y-values) in training_df
+        model_id (string): Name of the model
+        model_description (string): Description of the model
+        model_performance (string): Performance description of the model
+        training_size (int): Number of training examples to use for fitting explainers
+        fit_se (bool): Whether to fit similar examples on the training set. The similar examples
+            explainer is very large when fit and may not fit in the database; if this is the case,
+            set fit_se to False.
+        validate (bool): Whether to validate the model and explainer by running predict and explain
+
+    Returns:
+        RealApp: the RealApp object inserted, possibly fit
+    """
     if model_id is None:
         model_id = "model"
 
-    try:
-        with open(explainer_fp, "rb") as f:
-            explainer_serial = f.read()
-            explainer = pickle.loads(explainer_serial)
-            explainer.id_column = "eid"
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Explainer file {explainer_fp} not found. ")
-
-    train_dataset, targets = _load_data(training_data_fp, target)
-
-    if fit_explainers:
-        explainer.prepare_feature_contributions(
-            x_train_orig=train_dataset,
-            y_train=targets,
-            training_size=training_size,
+    if not fit_se and training_set is None:
+        raise ValueError(
+            "Must provide training_set to fit similar examples explainer with if not fit at"
+            " database preprocessing time."
         )
-        explainer.prepare_feature_importance(
-            model_id=0,
-            x_train_orig=train_dataset,
-            y_train=targets,
-            training_size=training_size,
-        )
-        if fit_se:
-            explainer.prepare_similar_examples(
-                model_id=0,
-                x_train_orig=train_dataset,
-                y_train=targets,
-                training_size=training_size,
-                standardize=True,
+
+    if fit_explainers or validate:
+        if training_set is not None:
+            df = training_set.to_dataframe()
+            y_train = df["y"]
+            x_train_orig = df.drop(columns="y")
+        elif training_df is not None:
+            y_train = training_df[label_column]
+            x_train_orig = training_df.drop(columns=label_column)
+        else:
+            error_message = "Must provide training set or training dataframe if {}=True.".format(
+                "fit_explainers" if fit_explainers else "validate"
             )
-        explainer_serial = pickle.dumps(explainer)
+            raise ValueError(error_message)
 
-    # Check that everything is working correctly
-    _validate_model_and_explainer(explainer, train_dataset)
+        if fit_explainers:
+            realApp.prepare_feature_contributions(
+                x_train_orig=x_train_orig,
+                y_train=y_train,
+                training_size=training_size,
+            )
+            realApp.prepare_feature_importance(
+                model_id=0,
+                x_train_orig=x_train_orig,
+                y_train=y_train,
+                training_size=training_size,
+            )
+            if fit_se:
+                realApp.prepare_similar_examples(
+                    model_id=0,
+                    x_train_orig=x_train_orig,
+                    y_train=y_train,
+                    training_size=training_size,
+                    standardize=True,
+                )
+        if validate:
+            # Check that everything is working correctly
+            _validate_model_and_explainer(realApp, x_train_orig)
 
-    importance_dict = explainer.produce_feature_importance()
+    explainer_serial = pickle.dumps(realApp)
+
+    importance_dict = realApp.produce_feature_importance()
     importance_df = pd.DataFrame.from_dict(importance_dict)
     importance_df = importance_df.rename(
         columns={"Feature Name": "name", "Importance": "importance"}
@@ -336,20 +431,27 @@ def insert_model(
     items = {
         "model_id": model_id,
         "importances": importances,
-        "description": description,
-        "performance": performance,
+        "description": model_description,
+        "performance": model_performance,
         "explainer": explainer_serial,
-        "training_set": set_doc,
+        "training_set": training_set,
     }
     schema.Model.insert(**items)
-    return explainer
+    return realApp
 
 
 def prepare_database(config_file, directory=None):
     def _process_fp(fn):
-        if fn is not None:
-            return os.path.join(directory, fn)
-        return None
+        """
+        Process a filename to be relative to the directory
+
+        Args:
+            fn (string): Filename
+
+        Returns:
+            string: Relative filepath
+        """
+        return os.path.join(directory, fn)
 
     times = {
         "Categories": 2,
@@ -379,7 +481,8 @@ def prepare_database(config_file, directory=None):
 
     # INSERT CATEGORIES, IF PROVIDED
     pbar.set_description("Inserting categories...")
-    insert_categories_from_csv(_process_fp(cfg.get("category_fn")))
+    if cfg.get("category_fn"):
+        insert_categories_from_csv(_process_fp(cfg.get("category_fn")))
     pbar.update(times["Categories"])
 
     # INSERT FEATURES
