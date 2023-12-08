@@ -86,7 +86,7 @@ def features():
             "name": "bin_feat",
             "description": "abc",
             "category": "cat2",
-            "type": "binary",
+            "type": "boolean",
         },
         {
             "name": "A",

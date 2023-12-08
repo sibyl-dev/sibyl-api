@@ -151,7 +151,7 @@ class TestInsertFeaturesFromDataframe:
         features_df = pd.DataFrame({"name": ["feature1", "feature2", "feature3"]})
 
         # Call the function under test and expect a ValueError to be raised
-        with pytest.raises(ValueError):
+        with pytest.raises(ValidationError):
             preprocessing.insert_features_from_dataframe(features_df)
 
         # Assert that no features were inserted into the database
@@ -169,7 +169,7 @@ class TestInsertFeaturesFromDataframe:
         )
 
         # Call the function under test and expect a ValueError to be raised
-        with pytest.raises(ValueError):
+        with pytest.raises(ValidationError):
             preprocessing.insert_features_from_dataframe(features_df)
 
         # Assert that no features were inserted into the database

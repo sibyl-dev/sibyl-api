@@ -9,6 +9,7 @@ import pandas as pd
 from mongoengine import DENY, NULLIFY, PULL, ValidationError, fields
 
 from sibyl.db.base import SibylDocument
+from mongoengine import Document
 
 LOGGER = logging.getLogger(__name__)
 
@@ -133,13 +134,20 @@ class Feature(SibylDocument):
         Category the feature belongs to
     type : str
         Feature type (one of binary, categorical, and numeric)
+    values: list [str]
+        Possible values for categorical features
     """
 
     name = fields.StringField(required=True)
     description = fields.StringField()
     negated_description = fields.StringField()
     category = fields.StringField()  # name of Category
-    type = fields.StringField(choices=["binary", "categorical", "numeric"])
+    type = fields.StringField(choices=["boolean", "categorical", "numeric"], required=True)
+    values = fields.ListField(fields.StringField())
+
+    def clean(self):
+        if self.type != "categorical" and self.values:
+            raise ValidationError("Values should only be provided for categorical features")
 
     unique_key_fields = ["name"]
 

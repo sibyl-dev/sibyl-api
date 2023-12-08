@@ -184,6 +184,8 @@ class SibylDocument(Document, metaclass=SibylMeta):
     @classmethod
     def insert_many(cls, docs):
         wrapped_docs = [cls(**d) for d in docs]
+        for doc in wrapped_docs:
+            doc.validate()
         cls.objects.insert(wrapped_docs)
 
     @classmethod
