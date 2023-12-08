@@ -7,14 +7,16 @@ from sibyl.db import schema
 LOGGER = logging.getLogger(__name__)
 
 
-def get_feature(feature_doc):
+def get_feature(feature_doc, detailed=False):
     feature = {
         "name": feature_doc.name,
         "description": feature_doc.description,
         "type": feature_doc.type,
-        "negated_description": feature_doc.negated_description,
         "category": feature_doc.category,
     }
+    if detailed:
+        feature["values"] = feature_doc.values
+        feature["negated_description"] = feature_doc.negated_description
     return feature
 
 
@@ -62,7 +64,7 @@ class Feature(Resource):
             LOGGER.exception("Error getting feature. Feature %s does not exist.", feature_name)
             return {"message": "Feature {} does not exist".format(feature_name)}, 400
 
-        return get_feature(feature), 200
+        return get_feature(feature, detailed=True), 200
 
 
 class Features(Resource):
@@ -95,7 +97,7 @@ class Features(Resource):
         """
         documents = schema.Feature.find()
         try:
-            features = [get_feature(document) for document in documents]
+            features = [get_feature(document, detailed=False) for document in documents]
         except Exception as e:
             LOGGER.exception(e)
             return {"message": str(e)}, 500
