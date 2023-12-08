@@ -97,7 +97,7 @@ class Features(Resource):
         """
         documents = schema.Feature.find()
         try:
-            features = [get_feature(document, detailed=False) for document in documents]
+            features = [get_feature(document, detailed=True) for document in documents]
         except Exception as e:
             LOGGER.exception(e)
             return {"message": str(e)}, 500
