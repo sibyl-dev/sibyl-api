@@ -251,6 +251,9 @@ def insert_entities_from_dataframe(entity_df, label_column="label", max_entities
     if "eid" not in entity_df:
         raise ValueError("Entity dataframe must contain column 'eid' at a minimum.")
 
+    if entity_df.shape[1] < 2:
+        raise ValueError("Entity dataframe must contain at least one feature column.")
+
     if max_entities is not None:
         if max_entities < entity_df.shape[0]:
             entity_df = entity_df.sample(max_entities, ignore_index=True)
@@ -283,19 +286,20 @@ def insert_entities_from_dataframe(entity_df, label_column="label", max_entities
     return eids.tolist()
 
 
-def insert_training_set(eids, label_column):
+def insert_training_set(eids):
     """
     Insert a training set (set of eids to train on) into the database.
 
     Args:
         eids (list): list of eids
-        label_column (string): Name of the column containing labels (y-values)
 
     Returns:
         TrainingSet: TrainingSet object inserted
     """
+    if len(eids) == 0:
+        raise ValueError("Must provide at least one eid to insert training set.")
     references = [schema.Entity.find_one(eid=str(eid)) for eid in eids]
-    training_set = {"entities": references, "target": label_column}
+    training_set = {"entities": references}
 
     set_doc = schema.TrainingSet.insert(**training_set)
     return set_doc
@@ -306,7 +310,7 @@ def insert_model_from_file(
     model_id=None,
     model_description="",
     model_performance="",
-    fit_explainers=False,
+    fit_explainers=True,
     training_set=None,
     training_df=None,
     label_column="label",
@@ -365,7 +369,7 @@ def insert_model_from_object(
     model_id=None,
     model_description="",
     model_performance="",
-    fit_explainers=False,
+    fit_explainers=True,
     training_set=None,
     training_df=None,
     label_column="label",
@@ -469,7 +473,7 @@ def insert_model_from_object(
 
 def insert_models_from_directory(
     directory,
-    fit_explainers=False,
+    fit_explainers=True,
     training_set=None,
     training_df=None,
     label_column="label",
@@ -664,11 +668,11 @@ def prepare_database(
     pbar.set_description("Inserting training set...")
     training_set = None
     if training_eids is not None:
-        training_set = insert_training_set(training_eids, label_column)
+        training_set = insert_training_set(training_eids)
     elif use_entities_as_training_set:
         if eids is None:
             raise ValueError("Must provide entities or set use_entities_as_training_set=False")
-        training_set = insert_training_set(eids, label_column)
+        training_set = insert_training_set(eids)
     pbar.update(times["Training Set"])
 
     # INSERT MODEL
