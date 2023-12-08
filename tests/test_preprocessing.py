@@ -64,6 +64,7 @@ class TestInsertFeaturesFromDataframe:
                     "Negated Description 3",
                 ],
                 "category": ["Category 1", "Category 2", "Category 3"],
+                "values": [None, ["A", "B"], None],
             }
         )
 
@@ -89,46 +90,7 @@ class TestInsertFeaturesFromDataframe:
             "Negated Description 3",
         }
         assert set(inserted_features["category"]) == {"Category 1", "Category 2", "Category 3"}
-
-    #  Insert features with both required and optional columns
-    def test_insert_required_and_optional_columns(self):
-        # Create a dataframe with required and optional columns
-        features_df = pd.DataFrame(
-            {
-                "name": ["feature1", "feature2", "feature3"],
-                "type": ["numeric", "categorical", "boolean"],
-                "description": ["Description 1", "Description 2", "Description 3"],
-                "negated_description": [
-                    "Negated Description 1",
-                    "Negated Description 2",
-                    "Negated Description 3",
-                ],
-                "category": ["Category 1", "Category 2", "Category 3"],
-            }
-        )
-
-        # Call the function under test
-        result = preprocessing.insert_features_from_dataframe(features_df)
-
-        # Assert that the result is a list of the inserted feature names
-        assert result == ["feature1", "feature2", "feature3"]
-
-        # Assert that the features were inserted into the database correctly
-        inserted_features = schema.Feature.find(as_df_=True)
-        assert len(inserted_features) == 3
-        assert set(inserted_features["name"]) == {"feature1", "feature2", "feature3"}
-        assert set(inserted_features["type"]) == {"numeric", "categorical", "boolean"}
-        assert set(inserted_features["description"]) == {
-            "Description 1",
-            "Description 2",
-            "Description 3",
-        }
-        assert set(inserted_features["negated_description"]) == {
-            "Negated Description 1",
-            "Negated Description 2",
-            "Negated Description 3",
-        }
-        assert set(inserted_features["category"]) == {"Category 1", "Category 2", "Category 3"}
+        assert inserted_features.iloc[1, :]["values"] == ["A", "B"]
 
     #  Insert empty dataframe
     def test_insert_empty_dataframe(self):
