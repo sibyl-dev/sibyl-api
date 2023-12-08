@@ -253,7 +253,7 @@ def insert_entities_from_dataframe(entity_df, label_column="label", max_entities
 
     if max_entities is not None:
         if max_entities < entity_df.shape[0]:
-            entity_df = entity_df.sample(max_entities)
+            entity_df = entity_df.sample(max_entities, ignore_index=True)
 
     eids = entity_df["eid"]
 
