@@ -5,7 +5,7 @@ database_name: "housing"
 # Name of directory in dbdata with csv and pkl files (if different from database_name)
 directory: "housing"
 # If true, automatically drop existing database
-DROP_OLD: True
+drop_old: True
 
 # Data locations
 # =================================================================================================
@@ -27,6 +27,6 @@ context_config_fn: "context_config.yml"
 # Name of explainer, if only one is given
 explainer_name: "housing_model"
 # Name of target column in training dataset. If not given, assume "target"
-target: "SalePrice"
-# If False, do not prefit the similar entities explainer. Reduces objects sizes for database, but increases runtime
+label_column: "SalePrice"
+# If False, do not prefit the similar-entities explainer. Reduces object sizes for database, but increases runtime
 prefit_se: True

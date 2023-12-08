@@ -5,7 +5,7 @@ database_name:
 # Name of directory in dbdata with csv and pkl files (if different from database_name)
 directory:
 # If true, automatically drop existing database
-DROP_OLD: False
+drop_old: False
 
 # Data locations
 # =================================================================================================
@@ -17,8 +17,6 @@ feature_fn: "features.csv"
 explainer_fn: "explainer.pkl"
 # Name of directory containing pickled explainers. The name of the model docs will be set to the file name. Overrides explainer_fn
 explainer_directory_name:
-# Name of training dataset file. If not given, use entity_fn for training data (one row per entity, one column per feature)
-training_entities_fn:
 # Name of context config file. If not given, all context defaults will be used
 context_config_fn: "context_config.yml"
 # Name of categories property file
@@ -35,8 +33,8 @@ num_training_entities:
 # =================================================================================================
 # Name of explainer, if only one is given
 explainer_name:
-# Name of target column in training dataset. If not given, assume "target"
-target:
+# Name of label column in training dataset (y-values). If not given, assume "label"
+label_column: "label"
 # If True, fit all explainers in the explanation app using the provided training data at database creation. If False, this should be done manually before
 fit_explainers: False
 # The similiar entities explainer is especially large, and may not fit in the database. Fitting can be manually turned off for this explainer

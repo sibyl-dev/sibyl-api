@@ -13,7 +13,7 @@ from sibyl.db import schema
 from sibyl.utils import get_project_root
 
 
-def _load_data(training_entity_filepath, target, features):
+def _load_data(training_entity_filepath, target):
     try:
         data = pd.read_csv(training_entity_filepath)
     except FileNotFoundError:
@@ -35,68 +35,229 @@ def _validate_model_and_explainer(explainer, train_dataset):
     explainer.produce_feature_contributions(train_dataset.iloc[0:2])
 
 
-def insert_features(filepath):
+def connect_to_db(database_name, drop_old=True):
+    """
+    Connect to database_name
+    Args:
+        database_name (string): Name of database to connect to
+        drop_old (bool): Whether to drop the database if it already exists
+    """
+    if drop_old:
+        client = MongoClient("localhost", 27017)
+        client.drop_database(database_name)
+    connect(database_name, host="localhost", port=27017)
+
+
+def insert_features_from_csv(filepath=None):
+    """
+    Insert features from a csv file into the database.
+    Required columns:
+        - name: the name of the feature, as in the entity columns
+        - type: the type of the feature, one of "numeric", "categorical", "text", "boolean"
+    Optional columns:
+        - description: a description of the feature
+        - negated_description: a description of the feature when it is negated
+        - category: the category of the feature, as in the category table
+
+    Args:
+        filepath (string): Filepath of csv file
+
+    Returns:
+        list: List of feature names inserted
+    """
     try:
         features_df = pd.read_csv(filepath)
     except FileNotFoundError:
         raise FileNotFoundError(
             f"Features file {filepath} not found. Must provide valid features file"
         )
+    return insert_features_from_dataframe(features_df)
+
+
+def insert_features_from_dataframe(features_df=None):
+    """
+    Insert features from a pandas dataframe into the database.
+    Required columns:
+        - name: the name of the feature, as in the entity columns
+        - type: the type of the feature, one of "numeric", "categorical", "boolean"
+    Optional columns:
+        - description: a description of the feature
+        - negated_description: a description of the feature when it is negated
+        - category: the category of the feature, as in the category table
+
+    Args:
+        features_df (DataFrame): Dataframe of feature information
+
+    Returns:
+        list: List of feature names inserted
+    """
     if "category" in features_df:
         categories = set(features_df["category"])
         already_inserted_categories = schema.Category.find(as_df_=True, only_=["name"])
         if not already_inserted_categories.empty:
             already_inserted_categories = set(already_inserted_categories["name"])
-        schema.Category.insert_many(
-            [{"name": cat} for cat in categories if cat not in already_inserted_categories]
+        new_categories = [
+            {"name": cat} for cat in categories if cat not in already_inserted_categories
+        ]
+        if len(new_categories) > 0:
+            schema.Category.insert_many(new_categories)
+    if "name" not in features_df or "type" not in features_df:
+        raise ValueError("Features dataframe must contain columns 'name' and 'type' at a minimum.")
+
+    valid_types = ["numeric", "categorical", "boolean"]
+    if not set(features_df["type"]).issubset(valid_types):
+        raise ValueError(
+            f"Features dataframe contains invalid types. Must be one of {valid_types}."
         )
+
     items = features_df.to_dict(orient="records")
+    if len(items) == 0:
+        return []
     schema.Feature.insert_many(items)
     return features_df["name"].tolist()
 
 
-def insert_categories(filepath):
+def insert_categories_from_csv(filepath):
+    """
+    Insert categories from a csv file into the database.
+    Required columns:
+        - name: the name of the category
+    Optional columns:
+        - color: the color of the category (name, hex, or rgb)
+        - abbreviation: the abbreviation of the category
+
+    Args:
+        filepath (string): Filepath of csv file
+
+    Returns
+        list: List of category names inserted
+    """
     if filepath is None:
         return
     try:
-        cat_df = pd.read_csv(filepath)
+        category_df = pd.read_csv(filepath)
     except FileNotFoundError:
         raise FileNotFoundError(f"Categories file {filepath} not found. ")
-    items = cat_df.to_dict(orient="records")
+    return insert_features_from_dataframe(category_df)
+
+
+def insert_categories_from_dataframe(category_df=None):
+    """
+    Insert categories from a pandas dataframe into the database.
+    Required columns:
+        - name: the name of the category
+    Optional columns:
+        - color: the color of the category (name, hex, or rgb)
+        - abbreviation: the abbreviation of the category
+
+    Args:
+        category_df (DataFrame): Dataframe of category information
+
+    Returns
+        list: List of category names inserted
+    """
+    if "name" not in category_df:
+        raise ValueError("Category dataframe must contain column 'name' at a minimum.")
+    items = category_df.to_dict(orient="records")
+    if len(items) == 0:
+        return []
     schema.Category.insert_many(items)
+    return category_df["name"].tolist()
 
 
-def insert_context(context_config_fp, use_rows=None):
-    if context_config_fp is None:
+def insert_context_from_yaml(filepath):
+    """
+    Insert context from a yaml file into the database.
+    See sibyl/templates/context_config_template.yml for an example of the format.
+
+    Args:
+        filepath (string): Filepath of yaml file containing context information
+    """
+    if filepath is None:
         return
     try:
-        context_config = yaml.safe_load(open(context_config_fp, "r"))
+        context_dict = yaml.safe_load(open(filepath, "r"))
     except FileNotFoundError:
-        raise FileNotFoundError(f"Context config file {context_config_fp} not found. ")
+        raise FileNotFoundError(f"Context config file {filepath} not found. ")
 
-    if context_config.get("use_rows") is None:
-        context_config["use_rows"] = use_rows
+    return insert_context_from_dict(context_dict)
 
-    if "output_preset" in context_config:
+
+def insert_context_from_dict(context_dict):
+    """
+    Insert context from a python dictionary into the database.
+    See sibyl/templates/context_config_template.yml for an example of config options.
+
+    Args:
+        context_dict (dict): dict of {context_config_key : context_config_value}
+    """
+    if "output_preset" in context_dict:
         with open(os.path.join(get_project_root(), "sibyl", "db", "output_presets.yml"), "r") as f:
             output_preset_dict = yaml.safe_load(f)
-        if context_config["output_preset"] in output_preset_dict:
-            config_values = output_preset_dict[context_config["output_preset"]]
+        if context_dict["output_preset"] in output_preset_dict:
+            config_values = output_preset_dict[context_dict["output_preset"]]
             for config_name in config_values:
                 if config_name not in output_preset_dict:
-                    context_config[config_name] = config_values[config_name]
+                    context_dict[config_name] = config_values[config_name]
 
-    schema.Context.insert(config=context_config)
+    schema.Context.insert(config=context_dict)
 
 
-def insert_entities(entity_fp, target=None, num=None, pbar=None, total_time=30):
+def insert_entities_from_csv(filename, label_column=None, max_entities=None):
+    """
+    Insert entities from a csv file into the database.
+    Required columns:
+        - eid: the entity id
+        - [feature1, feature2, ...]: the feature values of the entity
+    Optional columns:
+        - row_id: the row_ids of each row
+        - [label_column]: the label (y-value) of the row
+    Args:
+        filename (string): Filepath of csv file
+        label_column (string): Name of the column containing labels (y-values)
+        max_entities (int): Maximum number of entities to insert
+
+    Returns:
+        list: List of eids inserted
+    """
     try:
-        entity_df = pd.read_csv(entity_fp)
+        entity_df = pd.read_csv(filename)
     except FileNotFoundError:
-        raise FileNotFoundError(f"Entities file {entity_fp} not found. Must provide valid file.")
+        raise FileNotFoundError(f"Entities file {filename} not found. Must provide valid file.")
 
-    if num is not None:
-        entity_df = entity_df.sample(num)
+    return insert_entities_from_dataframe(entity_df, label_column, max_entities)
+
+
+def insert_entities_from_dataframe(entity_df, label_column="label", max_entities=None):
+    """
+    Insert entities from a pandas Dataframe into the database.
+    Required columns:
+        - eid: the entity id
+        - [feature1, feature2, ...]: the feature values of the entity
+    Optional columns:
+        - row_id: the row_ids of each row
+        - [label_column]: the label (y-value) of the row
+    Args:
+        entity_df (Dataframe): Dataframe of entity information
+        label_column (string): Name of the column containing labels (y-values)
+        max_entities (int): Maximum number of entities to insert
+
+    Returns:
+        list: List of eids inserted
+    """
+    if entity_df.empty:
+        return []
+
+    if "eid" not in entity_df:
+        raise ValueError("Entity dataframe must contain column 'eid' at a minimum.")
+
+    if entity_df.shape[1] < 2:
+        raise ValueError("Entity dataframe must contain at least one feature column.")
+
+    if max_entities is not None:
+        if max_entities < entity_df.shape[0]:
+            entity_df = entity_df.sample(max_entities, ignore_index=True)
+
     eids = entity_df["eid"]
 
     if "row_id" not in entity_df:
@@ -116,77 +277,180 @@ def insert_entities(entity_fp, target=None, num=None, pbar=None, total_time=30):
         entity = {"eid": str(eid), "row_ids": list(raw_entities[eid].keys())}
         targets = {}
         for row_id in raw_entities[eid]:
-            if target in raw_entities[eid][row_id]:
-                targets[row_id] = raw_entities[eid][row_id].pop(target)
+            if label_column in raw_entities[eid][row_id]:
+                targets[row_id] = raw_entities[eid][row_id].pop(label_column)
         entity["features"] = raw_entities[eid]
         entity["labels"] = targets
         entities.append(entity)
-        if pbar is not None:
-            pbar.update(total_time / len(raw_entities))
     schema.Entity.insert_many(entities)
-    return eids, use_rows
+    return eids.tolist()
 
 
-def insert_training_set(eids, target):
+def insert_training_set(eids):
+    """
+    Insert a training set (set of eids to train on) into the database.
+
+    Args:
+        eids (list): list of eids
+
+    Returns:
+        TrainingSet: TrainingSet object inserted
+    """
+    if len(eids) == 0:
+        raise ValueError("Must provide at least one eid to insert training set.")
     references = [schema.Entity.find_one(eid=str(eid)) for eid in eids]
-    training_set = {"entities": references, "target": target}
+    training_set = {"entities": references}
 
     set_doc = schema.TrainingSet.insert(**training_set)
     return set_doc
 
 
-def insert_model(
-    training_data_fp,
-    target,
-    set_doc,
-    explainer_fp,
-    features,
+def insert_model_from_file(
+    filename,
     model_id=None,
+    model_description="",
+    model_performance="",
+    fit_explainers=True,
+    training_set=None,
+    training_df=None,
+    label_column="label",
     training_size=None,
-    fit_explainers=False,
     fit_se=True,
+    validate=True,
 ):
-    description = "placeholder"
-    performance = "placeholder"
+    """
+    Insert a model (RealApp) into the database from a pickle file.
+
+    Args:
+        filename (string): Filepath of pickled RealApp object
+        fit_explainers (bool): Whether to fit explainers on the training set.
+            If True, one of training_set or training_df must be provided
+        training_set (TrainingSet): TrainingSet object to fit explainers with.
+            Must be provided if fit_se=False
+        training_df (DataFrame): Training dataframe to fit explainers with.
+            Not used if training_set is provided
+        label_column (string): Name of the column containing labels (y-values) in training_df
+        model_id (string): Name of the model
+        model_description (string): Description of the model
+        model_performance (string): Performance description of the model
+        training_size (int): Number of training examples to use for fitting explainers
+        fit_se (bool): Whether to fit similar examples on the training set. The similar examples
+            explainer is very large when fit and may not fit in the database; if this is the case,
+            set fit_se to False.
+        validate (bool): Whether to validate the model and explainer by running predict and explain
+
+    Returns:
+        RealApp: the RealApp object inserted, possibly fit
+    """
+    try:
+        with open(filename, "rb") as realapp_file:
+            realApp = pickle.load(realapp_file)
+            realApp.id_column = "eid"
+    except FileNotFoundError:
+        raise FileNotFoundError(f"RealApp file {filename} not found. ")
+
+    return insert_model_from_object(
+        realApp,
+        model_id=model_id,
+        model_description=model_description,
+        model_performance=model_performance,
+        fit_explainers=fit_explainers,
+        training_set=training_set,
+        training_df=training_df,
+        label_column=label_column,
+        training_size=training_size,
+        fit_se=fit_se,
+        validate=validate,
+    )
+
+
+def insert_model_from_object(
+    realApp,
+    model_id=None,
+    model_description="",
+    model_performance="",
+    fit_explainers=True,
+    training_set=None,
+    training_df=None,
+    label_column="label",
+    training_size=None,
+    fit_se=True,
+    validate=True,
+):
+    """
+    Insert a model (RealApp) into the database from a pickle file.
+
+    Args:
+        realApp (RealApp): RealApp object to insert
+        fit_explainers (bool): Whether to fit explainers on the training set.
+            If True, one of training_set or training_df must be provided
+        training_set (TrainingSet): TrainingSet object to fit explainers with.
+            Must be provided if fit_se=False
+        training_df (DataFrame): Training dataframe to fit explainers with.
+            Not used if training_set is provided
+        label_column (string): Name of the column containing labels (y-values) in training_df
+        model_id (string): Name of the model
+        model_description (string): Description of the model
+        model_performance (string): Performance description of the model
+        training_size (int): Number of training examples to use for fitting explainers
+        fit_se (bool): Whether to fit similar examples on the training set. The similar examples
+            explainer is very large when fit and may not fit in the database; if this is the case,
+            set fit_se to False.
+        validate (bool): Whether to validate the model and explainer by running predict and explain
+
+    Returns:
+        RealApp: the RealApp object inserted, possibly fit
+    """
     if model_id is None:
         model_id = "model"
 
-    try:
-        with open(explainer_fp, "rb") as f:
-            explainer_serial = f.read()
-            explainer = pickle.loads(explainer_serial)
-            explainer.id_column = "eid"
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Explainer file {explainer_fp} not found. ")
-
-    train_dataset, targets = _load_data(training_data_fp, target, features)
-
-    if fit_explainers:
-        explainer.prepare_feature_contributions(
-            x_train_orig=train_dataset,
-            y_train=targets,
-            training_size=training_size,
+    if not fit_se and training_set is None:
+        raise ValueError(
+            "Must provide training_set to fit similar examples explainer with if not fit at"
+            " database preprocessing time."
         )
-        explainer.prepare_feature_importance(
-            model_id=0,
-            x_train_orig=train_dataset,
-            y_train=targets,
-            training_size=training_size,
-        )
-        if fit_se:
-            explainer.prepare_similar_examples(
-                model_id=0,
-                x_train_orig=train_dataset,
-                y_train=targets,
-                training_size=training_size,
-                standardize=True,
+
+    if fit_explainers or validate:
+        if training_set is not None:
+            df = training_set.to_dataframe()
+            y_train = df["y"]
+            x_train_orig = df.drop(columns="y")
+        elif training_df is not None:
+            y_train = training_df[label_column]
+            x_train_orig = training_df.drop(columns=label_column)
+        else:
+            error_message = "Must provide training set or training dataframe if {}=True.".format(
+                "fit_explainers" if fit_explainers else "validate"
             )
-        explainer_serial = pickle.dumps(explainer)
+            raise ValueError(error_message)
 
-    # Check that everything is working correctly
-    _validate_model_and_explainer(explainer, train_dataset)
+        if fit_explainers:
+            realApp.prepare_feature_contributions(
+                x_train_orig=x_train_orig,
+                y_train=y_train,
+                training_size=training_size,
+            )
+            realApp.prepare_feature_importance(
+                model_id=0,
+                x_train_orig=x_train_orig,
+                y_train=y_train,
+                training_size=training_size,
+            )
+            if fit_se:
+                realApp.prepare_similar_examples(
+                    model_id=0,
+                    x_train_orig=x_train_orig,
+                    y_train=y_train,
+                    training_size=training_size,
+                    standardize=True,
+                )
+        if validate:
+            # Check that everything is working correctly
+            _validate_model_and_explainer(realApp, x_train_orig)
 
-    importance_dict = explainer.produce_feature_importance()
+    explainer_serial = pickle.dumps(realApp)
+
+    importance_dict = realApp.produce_feature_importance()
     importance_df = pd.DataFrame.from_dict(importance_dict)
     importance_df = importance_df.rename(
         columns={"Feature Name": "name", "Importance": "importance"}
@@ -198,20 +462,161 @@ def insert_model(
     items = {
         "model_id": model_id,
         "importances": importances,
-        "description": description,
-        "performance": performance,
+        "description": model_description,
+        "performance": model_performance,
         "explainer": explainer_serial,
-        "training_set": set_doc,
+        "training_set": training_set,
     }
     schema.Model.insert(**items)
-    return explainer
+    return realApp
 
 
-def prepare_database(config_file, directory=None):
+def insert_models_from_directory(
+    directory,
+    fit_explainers=True,
+    training_set=None,
+    training_df=None,
+    label_column="label",
+    training_size=None,
+    fit_se=True,
+    validate=True,
+):
+    """
+    Insert multiple models (RealApp) into the database from a directory of pickle files.
+    Sets the model names to the filenames
+
+    Args:
+        directory (string): Directory path
+        fit_explainers (bool): Whether to fit explainers on the training set.
+            If True, one of training_set or training_df must be provided
+        training_set (TrainingSet): TrainingSet object to fit explainers with.
+            Must be provided if fit_se=False
+        training_df (DataFrame): Training dataframe to fit explainers with.
+            Not used if training_set is provided
+        label_column (string): Name of the column containing labels (y-values) in training_df
+        training_size (int): Number of training examples to use for fitting explainers
+        fit_se (bool): Whether to fit similar examples on the training set. The similar examples
+            explainer is very large when fit and may not fit in the database; if this is the case,
+            set fit_se to False.
+        validate (bool): Whether to validate the model and explainer by running predict and explain
+
+    Returns:
+        RealApp: the RealApp object inserted, possibly fit
+    """
+    for i, file in enumerate(os.listdir(directory)):
+        if file.endswith(".pkl"):  # Ignore other files in the directory
+            insert_model_from_file(
+                os.path.join(directory, file),
+                model_id=file[:-4],  # remove .pkl
+                fit_explainers=fit_explainers,
+                training_set=training_set,
+                training_df=training_df,
+                label_column=label_column,
+                training_size=training_size,
+                fit_se=fit_se,
+                validate=validate,
+            )
+
+
+def prepare_database_from_config(config_file, directory=None):
+    with open(config_file, "r") as f:
+        cfg = yaml.safe_load(f)
+
+    if "database_name" not in cfg:
+        raise ValueError("Must provide database_name in config file.")
+
+    if directory is None:
+        if cfg.get("directory") is None:
+            directory = os.path.join(get_project_root(), "dbdata", cfg["database_name"])
+        else:
+            directory = os.path.join(get_project_root(), "dbdata", cfg["directory"])
+
+    prepare_database(
+        cfg["database_name"],
+        directory=directory,
+        drop_old=cfg.get("drop_old", False),
+        category_filepath=cfg.get("category_fn"),
+        features_filepath=cfg.get("feature_fn", "features.csv"),
+        entities_filepath=cfg.get("entity_fn", "entities.csv"),
+        label_column=cfg.get("label_column", "label"),
+        context_filepath=cfg.get("context_config_fn"),
+        use_entities_as_training_set=True,
+        realapp_filepath=cfg.get("explainer_fn"),
+        realapp_directory=cfg.get("explainer_directory_name"),
+        model_id=cfg.get("explainer_name"),
+        fit_explainers=cfg.get("fit_explainers", True),
+        training_size=cfg.get("training_size"),
+        fit_se=cfg.get("fit_se", True),
+    )
+
+
+def prepare_database(
+    database_name,
+    directory=None,
+    drop_old=False,
+    features_df=None,
+    features_filepath=None,
+    entities_df=None,
+    entities_filepath=None,
+    label_column="label",
+    realapp_filepath=None,
+    realapp=None,
+    realapp_directory=None,
+    training_eids=None,
+    use_entities_as_training_set=True,
+    model_id=None,
+    fit_explainers=True,
+    training_size=None,
+    fit_se=True,
+    context_filepath=None,
+    context_dict=None,
+    category_df=None,
+    category_filepath=None,
+):
+    """
+    Fully prepare a database from files or objects
+
+    Args:
+        database_name (string): Name of database
+        directory (string): Directory where all files provided are located.
+            Not required if full paths are given or filepath parameters are not used.
+        drop_old (bool): If True and database already exists, drop the old database
+        features_df (DataFrame): Dataframe of feature information
+        features_filepath (string): Filepath of csv file containing feature information
+        entities_df (DataFrame): Dataframe of entity information
+        entities_filepath (string): Filepath of csv file containing entity information
+        label_column (string): Name of the column containing labels (y-values) in entities_df
+        realapp_filepath (string): Filepath of pickled RealApp object
+        realapp (RealApp): RealApp object to insert
+        realapp_directory (string): Directory path containing pickled RealApp objects
+        training_eids (list): List of eids to use as the training set
+        use_entities_as_training_set (bool): Whether to use the entities in
+            entities_df/entities_filepath as the training set
+        model_id (string): Name of the model
+        fit_explainers (bool): Whether to fit explainers on the training set.
+        training_size (int): Number of training examples to use for fitting explainers
+        fit_se (bool): Whether to fit similar examples on the training set. The similar examples
+            explainer is very large when fit and may not fit in the database; if this is the case,
+            set fit_se to False.
+        context_filepath (string): Filepath of yaml file containing context information
+        context_dict (dict): dict of {context_config_key : context_config_value}
+        category_df (DataFrame): Dataframe of category information
+        category_filepath (string): Filepath of csv file containing category information
+    """
+
     def _process_fp(fn):
-        if fn is not None:
-            return os.path.join(directory, fn)
-        return None
+        """
+        Process a filename to be relative to the directory
+
+        Args:
+            fn (string): Filename
+
+        Returns:
+            string: Relative filepath
+        """
+        if directory is None:
+            return fn
+        return os.path.join(directory, fn)
 
     times = {
         "Categories": 2,
@@ -223,103 +628,93 @@ def prepare_database(config_file, directory=None):
     }
     pbar = tqdm(total=sum(times.values()))
 
-    with open(config_file, "r") as f:
-        cfg = yaml.safe_load(f)
-
     # Begin database loading ---------------------------
-    database_name = cfg["database_name"]
-    if directory is None:
-        if cfg.get("directory") is None:
-            directory = os.path.join(get_project_root(), "dbdata", database_name)
-        else:
-            directory = os.path.join(get_project_root(), "dbdata", cfg["directory"])
-
-    if cfg.get("DROP_OLD", False):
-        client = MongoClient("localhost", 27017)
-        client.drop_database(database_name)
-    connect(database_name, host="localhost", port=27017)
+    connect_to_db(database_name, drop_old=drop_old)
 
     # INSERT CATEGORIES, IF PROVIDED
     pbar.set_description("Inserting categories...")
-    insert_categories(_process_fp(cfg.get("category_fn")))
+    if category_df is not None:
+        insert_categories_from_dataframe(category_df)
+    elif category_filepath is not None:
+        insert_categories_from_csv(_process_fp(category_filepath))
     pbar.update(times["Categories"])
 
     # INSERT FEATURES
     pbar.set_description("Inserting features...")
-    features = insert_features(_process_fp(cfg.get("features_fn", "features.csv")))
+    if features_df is not None:
+        insert_features_from_dataframe(features_df)
+    elif features_filepath is not None:
+        insert_features_from_csv(_process_fp(features_filepath))
     pbar.update(times["Features"])
-
-    # INSERT ENTITIES
-    pbar.set_description("Inserting entities...")
-    eids, use_rows = insert_entities(
-        _process_fp(cfg.get("entity_fn", "entities.csv")),
-        target=cfg.get("target", "target"),
-        pbar=pbar,
-        total_time=times["Entities"],
-    )
 
     # INSERT CONTEXT
     pbar.set_description("Inserting context...")
-    insert_context(_process_fp(cfg.get("context_config_fn")), use_rows=use_rows)
+    if context_dict is not None:
+        insert_context_from_dict(context_dict)
+    elif context_filepath is not None:
+        insert_context_from_yaml(_process_fp(context_filepath))
     pbar.update(times["Context"])
+
+    # INSERT ENTITIES
+    pbar.set_description("Inserting entities...")
+    eids = None
+    if entities_df is not None:
+        eids = insert_entities_from_dataframe(entities_df, label_column=label_column)
+    elif entities_filepath is not None:
+        eids = insert_entities_from_csv(_process_fp(entities_filepath), label_column=label_column)
+    pbar.update(times["Entities"])
 
     # INSERT FULL DATASET
     pbar.set_description("Inserting training set...")
-    if cfg.get("include_database", False) and cfg.get("training_entities_fn"):
-        eids, use_rows = insert_entities(
-            _process_fp(cfg.get("training_entities_fn")),
-            target=cfg.get("target", "target"),
-            pbar=pbar,
-            total_time=times["Training Set"],
-        )
-    else:
-        pbar.update(times["Training Set"])
-    set_doc = insert_training_set(eids, cfg.get("target"))
+    training_set = None
+    if training_eids is not None:
+        training_set = insert_training_set(training_eids)
+    elif use_entities_as_training_set:
+        if eids is None:
+            raise ValueError("Must provide entities or set use_entities_as_training_set=False")
+        training_set = insert_training_set(eids)
+    pbar.update(times["Training Set"])
 
     # INSERT MODEL
     pbar.set_description("Inserting model...")
-    if cfg.get("explainer_directory_name"):
-        explainer_directory = _process_fp(cfg.get("explainer_directory_name"))
-        if not os.path.isdir(explainer_directory):
+    if realapp_directory is not None:
+        realapp_directory = _process_fp(realapp_directory)
+        if not os.path.isdir(realapp_directory):
             raise FileNotFoundError(
-                f"Explainer directory {explainer_directory} is not a valid directory."
+                f"Explainer directory {realapp_directory} is not a valid directory."
             )
-        number_of_explainers = len(os.listdir(explainer_directory))
-        for i, explainer_file in enumerate(os.listdir(explainer_directory)):
-            if explainer_file.endswith(".pkl"):  # Ignore other files in the directory
-                insert_model(
-                    _process_fp(
-                        cfg.get("training_entities_fn") or cfg.get("entity_fn") or "entities.csv"
-                    ),
-                    cfg.get("target", "target"),
-                    set_doc,
-                    explainer_fp=os.path.join(explainer_directory, explainer_file),
-                    features=features,
-                    model_id=explainer_file[:-4],
-                    training_size=cfg.get("training_size"),
-                    fit_explainers=cfg.get("fit_explainers", False),
-                    fit_se=cfg.get("fit_se", True),
-                )
-            pbar.update(times["Model"] / number_of_explainers)
-    else:
-        insert_model(
-            _process_fp(cfg.get("training_entities_fn") or cfg.get("entity_fn") or "entities.csv"),
-            cfg.get("target", "target"),
-            set_doc,
-            explainer_fp=_process_fp(cfg.get("explainer_fn")),
-            features=features,
-            model_id=cfg.get("model_name"),
-            training_size=cfg.get("training_size"),
-            fit_explainers=cfg.get("fit_explainers", False),
-            fit_se=cfg.get("fit_se", True),
+        insert_models_from_directory(
+            realapp_directory,
+            fit_explainers=fit_explainers,
+            training_set=training_set,
+            training_size=training_size,
+            fit_se=fit_se,
         )
-        pbar.update(times["Model"])
+    elif realapp is not None:
+        insert_model_from_object(
+            realapp,
+            model_id=model_id,
+            fit_explainers=fit_explainers,
+            training_set=training_set,
+            training_size=training_size,
+            fit_se=fit_se,
+        )
+    elif realapp_filepath is not None:
+        insert_model_from_file(
+            _process_fp(realapp_filepath),
+            model_id=model_id,
+            fit_explainers=fit_explainers,
+            training_set=training_set,
+            training_size=training_size,
+            fit_se=fit_se,
+        )
+    pbar.update(times["Model"])
 
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
-        prepare_database(sys.argv[1])
+        prepare_database_from_config(sys.argv[1])
     elif len(sys.argv) == 3:
-        prepare_database(sys.argv[1], sys.argv[2])
+        prepare_database_from_config(sys.argv[1], sys.argv[2])
     else:
         print("Invalid arguments. Usage: python preprocessing.py CONFIG_FILE [DIRECTORY]")
