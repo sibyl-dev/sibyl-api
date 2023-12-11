@@ -273,8 +273,10 @@ def insert_entities_from_dataframe(
         feature_df = schema.Feature.find(as_df_=True, only_=["name", "type"])
         if not feature_df.empty:
             cat_features = feature_df["name"][feature_df["type"] == "categorical"]
-            cat_feature_values = entity_df[cat_features].astype(str)
-            cat_feature_values = cat_feature_values.apply(lambda col: col.unique())
+            cat_feature_values = entity_df[cat_features]
+            cat_feature_values = cat_feature_values.apply(
+                lambda col: col.dropna().unique().astype(str)
+            )
             for feature in cat_features:
                 doc = schema.Feature.find(name=feature).first()
                 existing_values = doc.values if doc.values is not None else []
