@@ -66,7 +66,7 @@ def insert_features_from_csv(filepath=None):
         list: List of feature names inserted
     """
     try:
-        features_df = pd.read_csv(filepath)
+        features_df = pd.read_csv(filepath).replace(np.nan, None)
     except FileNotFoundError:
         raise FileNotFoundError(
             f"Features file {filepath} not found. Must provide valid features file"
