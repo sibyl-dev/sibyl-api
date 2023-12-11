@@ -66,7 +66,7 @@ def insert_features_from_csv(filepath=None):
         list: List of feature names inserted
     """
     try:
-        features_df = pd.read_csv(filepath)
+        features_df = pd.read_csv(filepath).replace(np.nan, None)
     except FileNotFoundError:
         raise FileNotFoundError(
             f"Features file {filepath} not found. Must provide valid features file"
@@ -101,14 +101,6 @@ def insert_features_from_dataframe(features_df=None):
         ]
         if len(new_categories) > 0:
             schema.Category.insert_many(new_categories)
-    if "name" not in features_df or "type" not in features_df:
-        raise ValueError("Features dataframe must contain columns 'name' and 'type' at a minimum.")
-
-    valid_types = ["numeric", "categorical", "boolean"]
-    if not set(features_df["type"]).issubset(valid_types):
-        raise ValueError(
-            f"Features dataframe contains invalid types. Must be one of {valid_types}."
-        )
 
     items = features_df.to_dict(orient="records")
     if len(items) == 0:
@@ -203,7 +195,9 @@ def insert_context_from_dict(context_dict):
     schema.Context.insert(config=context_dict)
 
 
-def insert_entities_from_csv(filename, label_column=None, max_entities=None):
+def insert_entities_from_csv(
+    filename, label_column=None, max_entities=None, update_feature_values=False
+):
     """
     Insert entities from a csv file into the database.
     Required columns:
@@ -216,6 +210,8 @@ def insert_entities_from_csv(filename, label_column=None, max_entities=None):
         filename (string): Filepath of csv file
         label_column (string): Name of the column containing labels (y-values)
         max_entities (int): Maximum number of entities to insert
+        update_feature_values (bool):
+            Whether to update feature documents with the values in these entities
 
     Returns:
         list: List of eids inserted
@@ -225,10 +221,14 @@ def insert_entities_from_csv(filename, label_column=None, max_entities=None):
     except FileNotFoundError:
         raise FileNotFoundError(f"Entities file {filename} not found. Must provide valid file.")
 
-    return insert_entities_from_dataframe(entity_df, label_column, max_entities)
+    return insert_entities_from_dataframe(
+        entity_df, label_column, max_entities, update_feature_values
+    )
 
 
-def insert_entities_from_dataframe(entity_df, label_column="label", max_entities=None):
+def insert_entities_from_dataframe(
+    entity_df, label_column="label", max_entities=None, update_feature_values=False
+):
     """
     Insert entities from a pandas Dataframe into the database.
     Required columns:
@@ -241,6 +241,8 @@ def insert_entities_from_dataframe(entity_df, label_column="label", max_entities
         entity_df (Dataframe): Dataframe of entity information
         label_column (string): Name of the column containing labels (y-values)
         max_entities (int): Maximum number of entities to insert
+        update_feature_values (bool):
+            Whether to update feature documents with the values in these entities
 
     Returns:
         list: List of eids inserted
@@ -267,6 +269,19 @@ def insert_entities_from_dataframe(entity_df, label_column="label", max_entities
         entity_df["row_id"] = entity_df["row_id"].astype(str)
         use_rows = True
 
+    if update_feature_values:
+        feature_df = schema.Feature.find(as_df_=True, only_=["name", "type"])
+        if not feature_df.empty:
+            cat_features = feature_df["name"][feature_df["type"] == "categorical"]
+            cat_feature_values = entity_df[cat_features]
+            cat_feature_values = cat_feature_values.apply(
+                lambda col: col.dropna().unique().astype(str)
+            )
+            for feature in cat_features:
+                doc = schema.Feature.find(name=feature).first()
+                existing_values = doc.values if doc.values is not None else []
+                doc.values = existing_values + cat_feature_values[feature].tolist()
+                doc.save()
     entity_df = entity_df.set_index(["eid", "row_id"])
     raw_entities = {
         level: entity_df.xs(level).to_dict("index") for level in entity_df.index.levels[0]
@@ -659,9 +674,13 @@ def prepare_database(
     pbar.set_description("Inserting entities...")
     eids = None
     if entities_df is not None:
-        eids = insert_entities_from_dataframe(entities_df, label_column=label_column)
+        eids = insert_entities_from_dataframe(
+            entities_df, label_column=label_column, update_feature_values=True
+        )
     elif entities_filepath is not None:
-        eids = insert_entities_from_csv(_process_fp(entities_filepath), label_column=label_column)
+        eids = insert_entities_from_csv(
+            _process_fp(entities_filepath), label_column=label_column, update_feature_values=True
+        )
     pbar.update(times["Entities"])
 
     # INSERT FULL DATASET

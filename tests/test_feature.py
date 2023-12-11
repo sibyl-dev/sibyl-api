@@ -29,11 +29,14 @@ def test_get_features(client, features):
         for response_item in response["features"]:
             if response_item["name"] == expected_item["name"]:
                 found = True
-                for key in ["description", "category", "type"]:
+                for key in ["description", "category", "type", "values"]:
                     if key in expected_item:
                         assert response_item[key] == expected_item[key]
                     else:
-                        assert response_item[key] is None
+                        if key == "values":
+                            assert response_item[key] == []
+                        else:
+                            assert response_item[key] is None
         assert found
 
 
@@ -45,3 +48,8 @@ def test_get_feature(client, features):
     assert response["negated_description"] == feature["negated_description"]
     assert response["category"] == feature["category"]
     assert response["type"] == response["type"]
+    assert response["values"] == []
+
+    feature = features[1]
+    response = client.get("/api/v1/features/" + feature["name"] + "/").json
+    assert response["values"] == feature["values"]
