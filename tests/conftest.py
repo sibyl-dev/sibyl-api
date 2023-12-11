@@ -81,6 +81,7 @@ def features():
             "description": "jki",
             "category": "cat2",
             "type": "categorical",
+            "values": ["value1", "value2", "value3"],
         },
         {
             "name": "bin_feat",

@@ -359,6 +359,38 @@ class TestInsertEntitiesFromDataframe:
 
         assert len(schema.Entity.objects) == 3
 
+    def test_insert_entities_with_update_feature_values(self):
+        feature_df = pd.DataFrame(
+            {
+                "name": ["feature1", "feature2", "feature3"],
+                "type": ["numeric", "categorical", "categorical"],
+                "values": [None, ["C", "D"], None],
+            }
+        )
+        preprocessing.insert_features_from_dataframe(feature_df)
+        # Create a sample entity dataframe
+        entity_df = pd.DataFrame(
+            {
+                "eid": ["1", "2", "3"],
+                "feature1": [0.1, 0.2, 0.3],
+                "feature2": ["A", "B", "A"],
+                "feature3": ["A", "B", "A"],
+            }
+        )
+
+        # Insert entities with update_feature_values=True
+        preprocessing.insert_entities_from_dataframe(entity_df, update_feature_values=True)
+
+        # Check if the new features exist in the database
+        feature_df = schema.Feature.find(as_df_=True)
+        expected = {"A", "B", "C", "D"}
+        assert len(feature_df["values"][feature_df["name"] == "feature2"].squeeze()) == 4
+        assert set(feature_df["values"][feature_df["name"] == "feature2"].squeeze()) == expected
+
+        expected = {"A", "B"}
+        assert len(feature_df["values"][feature_df["name"] == "feature3"].squeeze()) == 2
+        assert set(feature_df["values"][feature_df["name"] == "feature3"].squeeze()) == expected
+
 
 class TestInsertTrainingSet:
     def test_valid_eids_and_label_column(self):

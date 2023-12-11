@@ -277,7 +277,8 @@ def insert_entities_from_dataframe(
             cat_feature_values = cat_feature_values.apply(lambda col: col.unique())
             for feature in cat_features:
                 doc = schema.Feature.find(name=feature).first()
-                doc.values = cat_feature_values[feature].tolist()
+                existing_values = doc.values if doc.values is not None else []
+                doc.values = existing_values + cat_feature_values[feature].tolist()
                 doc.save()
     entity_df = entity_df.set_index(["eid", "row_id"])
     raw_entities = {

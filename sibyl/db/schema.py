@@ -6,10 +6,9 @@ This module contains the classes that define the Sibyl Database Schema
 import logging
 
 import pandas as pd
-from mongoengine import DENY, NULLIFY, PULL, ValidationError, fields
+from mongoengine import DENY, NULLIFY, PULL, Document, ValidationError, fields
 
 from sibyl.db.base import SibylDocument
-from mongoengine import Document
 
 LOGGER = logging.getLogger(__name__)
 
