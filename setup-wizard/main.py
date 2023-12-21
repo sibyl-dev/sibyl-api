@@ -39,34 +39,6 @@ def _validate_categories(category_df):
         return False
 
 
-def upload_section(term, validate_func):
-    csv = st.file_uploader(f"Upload {term} file", type="csv")
-    df = None
-    if csv is not None:
-        df = pd.read_csv(csv)
-        validate_func(df)
-    expander = st.expander(f"Edit {term}")
-    table = None
-    with expander:
-        if df is not None:
-            column_config = None
-            if term == "features":
-                # df.loc[~df["category"].isin(st.session_state["categories"]), "category"] = None
-                column_config = {
-                    "type": st.column_config.SelectboxColumn(
-                        options=["categorical", "numerical", "boolean"]
-                    ),
-                    "category": st.column_config.SelectboxColumn(
-                        options=st.session_state["categories"]
-                    ),
-                }
-
-            table = show_table(df, key=f"{term}_editor", column_config=column_config)
-        else:
-            st.info(f"Upload {term} csv above to start editing")
-    return table
-
-
 def upload_file(term, validate_func):
     csv = st.file_uploader(f"Upload {term} file", type="csv")
     df = None
@@ -85,42 +57,53 @@ def entity_configs():
 
 
 def category_configs():
-    if "categories" not in st.session_state:
-        st.session_state["categories"] = []
+    # if "categories" not in st.session_state:
+    #    st.session_state["categories"] = []
 
-    category_df = pd.DataFrame(
-        {"name": st.session_state["categories"], "description": None}, dtype=str
-    )
-    category_df = show_table(
-        category_df,
-        key="category_editor",
+    # category_df_init = pd.DataFrame({"name": categories, "description": None}, dtype=str)
+    if "category_df" not in st.session_state:
+        category_df_ = pd.DataFrame({"name": [], "description": []}, dtype=str)
+    else:
+        category_df_ = st.session_state["category_df"]
+    st.session_state["category_df"] = show_table(
+        category_df_,
         column_config={"name": st.column_config.TextColumn()},
     )
-    st.session_state["categories"] = category_df["name"].tolist()
+    # st.session_state["category_df"] = category_df
 
 
 def feature_configs():
+    # if "category_df" not in st.session_state:
+    #    st.session_state["category_df"] = pd.DataFrame({"name": [], "description": []}, dtype=str)
     feature_df = upload_file("features", _validate_features)
     if feature_df is not None:
         button_col1, button_col2, _ = st.columns((1, 2, 5))
         with button_col1:
             autofill_categories = st.button("Autofill categories")
             if autofill_categories:
-                st.session_state["categories"] = list(
-                    set(st.session_state["categories"] + feature_df["category"].unique().tolist())
+                categories_to_add = [
+                    cat
+                    for cat in feature_df["category"].unique()
+                    if cat not in st.session_state["category_df"]["name"].values
+                ]
+                st.session_state["category_df"] = pd.concat(
+                    (st.session_state["category_df"], pd.DataFrame({"name": categories_to_add}))
                 )
         with button_col2:
             remove_categories = st.button("Remove unspecified categories")
             if remove_categories:
                 feature_df.loc[
-                    ~feature_df["category"].isin(st.session_state["categories"]), "category"
+                    ~feature_df["category"].isin(st.session_state["category_df"]["name"]),
+                    "category",
                 ] = None
 
         column_config = {
             "type": st.column_config.SelectboxColumn(
                 options=["categorical", "numerical", "boolean"]
             ),
-            "category": st.column_config.SelectboxColumn(options=st.session_state["categories"]),
+            "category": st.column_config.SelectboxColumn(
+                options=st.session_state["category_df"]["name"]
+            ),
         }
         table_col1, table_col2 = st.columns((2, 1))
         with table_col1:
