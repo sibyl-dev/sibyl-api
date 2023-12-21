@@ -56,62 +56,16 @@ def entity_configs():
         return st.info(f"Upload entity csv above to start editing")
 
 
-def category_configs():
-    # if "categories" not in st.session_state:
-    #    st.session_state["categories"] = []
-
-    # category_df_init = pd.DataFrame({"name": categories, "description": None}, dtype=str)
-    if "category_df" not in st.session_state:
-        category_df_ = pd.DataFrame({"name": [], "description": []}, dtype=str)
-    else:
-        category_df_ = st.session_state["category_df"]
-    st.session_state["category_df"] = show_table(
-        category_df_,
-        column_config={"name": st.column_config.TextColumn()},
-    )
-    # st.session_state["category_df"] = category_df
-
-
 def feature_configs():
-    # if "category_df" not in st.session_state:
-    #    st.session_state["category_df"] = pd.DataFrame({"name": [], "description": []}, dtype=str)
     feature_df = upload_file("features", _validate_features)
     if feature_df is not None:
-        button_col1, button_col2, _ = st.columns((1, 2, 5))
-        with button_col1:
-            autofill_categories = st.button("Autofill categories")
-            if autofill_categories:
-                categories_to_add = [
-                    cat
-                    for cat in feature_df["category"].unique()
-                    if cat not in st.session_state["category_df"]["name"].values
-                ]
-                st.session_state["category_df"] = pd.concat(
-                    (st.session_state["category_df"], pd.DataFrame({"name": categories_to_add}))
-                )
-        with button_col2:
-            remove_categories = st.button("Remove unspecified categories")
-            if remove_categories:
-                feature_df.loc[
-                    ~feature_df["category"].isin(st.session_state["category_df"]["name"]),
-                    "category",
-                ] = None
-
         column_config = {
             "type": st.column_config.SelectboxColumn(
                 options=["categorical", "numerical", "boolean"]
             ),
-            "category": st.column_config.SelectboxColumn(
-                options=st.session_state["category_df"]["name"]
-            ),
+            "category": st.column_config.SelectboxColumn(options=feature_df["category"].unique()),
         }
-        table_col1, table_col2 = st.columns((2, 1))
-        with table_col1:
-            st.caption("Features")
-            result_df = show_table(feature_df, key=f"feature_editor", column_config=column_config)
-        with table_col2:
-            st.caption("Categories")
-            category_configs()
+        result_df = show_table(feature_df, key=f"feature_editor", column_config=column_config)
         return result_df
     else:
         st.info(f"Upload a feature csv above to start editing")
