@@ -86,6 +86,14 @@ def load_existing_config(loader):
 
 def save_config(loader, config_data, existing_config):
     loader.default_flow_style = False
+    # Remove all empty strings from config_data
+    for key, value in config_data.items():
+        if isinstance(value, dict):
+            for key2, value2 in value.items():
+                if value2 is "":
+                    config_data[key][key2] = None
+        if value is "":
+            config_data[key] = None
     existing_config.update(config_data)
 
     with open("context_config.yml", "w") as yaml_file:
@@ -114,6 +122,10 @@ def context_configs():
     config_data["output_type"] = output_type.lower()
 
     if config_data["output_type"] == "boolean":
+        show_probs = st.radio(
+            "Does your model support probability outputs?", ["Yes", "No"], horizontal=True
+        )
+        config_data["show_probs"] = True if show_probs == "Yes" else False
         config_data["output_pos_label"] = st.text_input(
             "How should we label positive predictions?", max_chars=25
         )
@@ -150,16 +162,20 @@ def context_configs():
         else False if output_sentiment_is_negative == "Positive" else None
     )
 
-    with st.expander("Modify terms"):
+    with st.expander("Select here to modify terms"):
         terms = [
             ("Entity", "Label of whatever is being predicted on"),
-            ("Feature", ""),
-            ("Positive", "Features that increase the model output"),
-            ("Negative", "Features that decrease the model output"),
+            ("Feature", "Properties of entities"),
+            ("Prediction", "Output of model"),
+            ("Increasing", "Features that increase the model output"),
+            ("Decreasing", "Features that decrease the model output"),
         ]
         config_data["terms"] = dict()
         for term, helper in terms:
-            config_data["terms"][term] = st.text_input(term, max_chars=15, placeholder=helper)
+            config_data["terms"][term.lower()] = st.text_input(
+                term, max_chars=15, placeholder=helper
+            )
+    save_config(loader, config_data, existing_config)
 
     return config_data
 
