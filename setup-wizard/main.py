@@ -123,16 +123,32 @@ def context_configs():
     if config_data["output_type"] == "numeric":
         output_format_string = st.radio(
             "How should we format the output?",
-            ["$1,234", "$1,234.56", "1,234", "1,234.56", "No Formatting", "Custom"],
+            ["1,234", "1,234.56", "$1,234", "$1,234.56", "No Formatting", "Custom"],
             horizontal=True,
         )
         if output_format_string == "Custom":
             config_data["output_format_string"] = st.text_input(
                 "How should we format the output (python f-string)?"
             )
-        else:
-            formats = {"$1,234": "${:,.0f}", "$1,234.56": "${:,.2f}", "1,234": "{:,.0f}"}
+        elif output_format_string != "No Formatting":
+            formats = {
+                "$1,234": "${:,.0f}",
+                "$1,234.56": "${:,.2f}",
+                "1,234": "{:,.0f}",
+                "1,234.56": "{:,.2f}",
+            }
             config_data["output_format_string"] = formats[output_format_string]
+
+    output_sentiment_is_negative = st.radio(
+        "Does an increasing model prediction refer to a positive or negative outcome?",
+        ["Positive", "Negative", "Neither"],
+        horizontal=True,
+    )
+    config_data["output_sentiment_is_negative"] = (
+        True
+        if output_sentiment_is_negative == "Negative"
+        else False if output_sentiment_is_negative == "Positive" else None
+    )
 
     with st.expander("Modify terms"):
         terms = [
