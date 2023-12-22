@@ -1,13 +1,10 @@
-use_rows: true
-row_label:
-output_type: boolean
-show_probs: false
-output_pos_label: good
-output_neg_label: bad
-output_sentiment_is_negative: true
+use_rows: false
+output_type: numeric
+output_format_string: ${:,.2f}
+output_sentiment_is_negative: false
 terms:
   entity: House
   feature: Factor
   prediction: Price
-  increasing:
-  decreasing:
+  increasing: Beneficial
+  decreasing: Harmful

@@ -2,6 +2,9 @@ import streamlit as st
 import ruamel.yaml as yaml
 import os
 import pandas as pd
+import pickle
+from pyreal import RealApp
+from sibyl.db.preprocessing import prepare_database
 
 
 def represent_none(self, _):
@@ -36,7 +39,7 @@ def _validate_features(feature_df):
     return True
 
 
-def upload_file(term, validate_func):
+def upload_csv(term, validate_func):
     csv = st.file_uploader(f"Upload {term} file", type="csv")
     df = None
     if csv is not None:
@@ -48,19 +51,20 @@ def upload_file(term, validate_func):
 
 def entity_configs():
     st.header("Prepare Entities")
-    entity_df = upload_file("entities", _validate_entities)
+    entity_df = upload_csv("entities", _validate_entities)
     if entity_df is not None:
+        label_column = st.selectbox("What is your label column (y-values)?", entity_df.columns)
         with st.expander("Edit entities"):
             entity_df = show_table(entity_df)
-        return entity_df
+        return entity_df, label_column
     else:
         st.info(f"Upload entity csv above to start editing")
-        return None
+        return None, None
 
 
 def feature_configs():
     st.header("Prepare Features")
-    feature_df = upload_file("features", _validate_features)
+    feature_df = upload_csv("features", _validate_features)
     if feature_df is not None:
         column_config = {
             "type": st.column_config.SelectboxColumn(
@@ -74,6 +78,21 @@ def feature_configs():
     else:
         st.info(f"Upload a feature csv above to start editing")
         return None
+
+
+def explainer_configs():
+    st.header("Prepare Explainer")
+    explainer_file = st.file_uploader(f"Upload pickled RealApp", type="pkl")
+    if explainer_file is not None:
+        try:
+            explainer = pickle.load(explainer_file)
+        except Exception as e:
+            st.error(f"Error unpickling explainer: {e}")
+            return None
+        if type(explainer) is not RealApp:
+            st.error(f"Must provide pickled RealApp")
+            return None
+        return explainer
 
 
 def load_existing_config(loader):
@@ -98,7 +117,6 @@ def save_config(loader, config_data, existing_config):
 
     with open("context_config.yml", "w") as yaml_file:
         loader.dump(existing_config, yaml_file)
-    st.success("Configuration saved successfully!")
 
 
 def context_configs():
@@ -186,14 +204,34 @@ def main():
     # loader.add_representer(type(None), represent_none)
 
     st.title("Configuration Wizard")
+    database_name = st.text_input("Database name?", max_chars=15)
 
-    entity_df = entity_configs()
-    if entity_df is not None:
-        st.divider()
-        feature_df = feature_configs()
-        if feature_df is not None:
+    if database_name is not None and database_name != "":
+        entity_df, label_column = entity_configs()
+        if entity_df is not None:
             st.divider()
-            context = context_configs()
+            feature_df = feature_configs()
+            if feature_df is not None:
+                st.divider()
+                explainer = explainer_configs()
+                if explainer is not None:
+                    context = context_configs()
+                    st.divider()
+                    drop_old = st.checkbox("Drop old database if exists?")
+                    if st.button("Prepare Database"):
+                        try:
+                            prepare_database(
+                                database_name,
+                                entities_df=entity_df,
+                                features_df=feature_df,
+                                realapp=explainer,
+                                context_dict=context,
+                                label_column=label_column,
+                                drop_old=drop_old,
+                            )
+                        except Exception as e:
+                            st.error(f"Error preparing database: {e}")
+                        st.success("Database prepared successfully!")
 
 
 if __name__ == "__main__":
