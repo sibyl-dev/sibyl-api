@@ -11,14 +11,12 @@ LOGGER = logging.getLogger(__name__)
 def get_events(entity_doc):
     events = []
     for event_doc in entity_doc.events:
-        events.append(
-            {
-                "event_id": event_doc.event_id,
-                "datetime": str(event_doc.datetime),
-                "type": event_doc.type,
-                "property": event_doc.property,
-            }
-        )
+        events.append({
+            "event_id": event_doc.event_id,
+            "datetime": str(event_doc.datetime),
+            "type": event_doc.type,
+            "property": event_doc.property,
+        })
     events = {"events": events}
     return events
 

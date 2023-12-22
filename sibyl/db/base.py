@@ -85,13 +85,11 @@ class SibylMeta(TopLevelDocumentMetaclass):
 
         if "unique_key_fields" in attrs:
             indexes = attrs.setdefault("meta", {}).setdefault("indexes", [])
-            indexes.append(
-                {
-                    "fields": attrs["unique_key_fields"],
-                    "unique": True,
-                    "sparse": True,
-                }
-            )
+            indexes.append({
+                "fields": attrs["unique_key_fields"],
+                "unique": True,
+                "sparse": True,
+            })
 
         return super().__new__(mcs, name, bases, attrs)
 

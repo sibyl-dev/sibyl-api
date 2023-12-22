@@ -1,9 +1,11 @@
-import streamlit as st
-import ruamel.yaml as yaml
 import os
-import pandas as pd
 import pickle
+
+import pandas as pd
+import ruamel.yaml as yaml
+import streamlit as st
 from pyreal import RealApp
+
 from sibyl.db.preprocessing import prepare_database
 
 
@@ -111,9 +113,9 @@ def save_config(loader, config_data, existing_config):
     for key, value in config_data.items():
         if isinstance(value, dict):
             for key2, value2 in value.items():
-                if value2 is "":
+                if value2 == "":
                     config_data[key][key2] = None
-        if value is "":
+        if value == "":
             config_data[key] = None
     existing_config.update(config_data)
 
