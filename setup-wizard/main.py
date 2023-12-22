@@ -5,7 +5,6 @@ import pandas as pd
 import pickle
 from pyreal import RealApp
 from sibyl.db.preprocessing import prepare_database
-from tqdm import tqdm
 
 
 def represent_none(self, _):
@@ -54,7 +53,9 @@ def entity_configs():
     st.header("Prepare Entities")
     entity_df = upload_csv("entities", _validate_entities)
     if entity_df is not None:
-        label_column = st.selectbox("What is your label column (y-values)?", entity_df.columns)
+        label_column = st.selectbox(
+            "What is your label column (y-values)?", entity_df.columns[::-1]
+        )
         with st.expander("Edit entities"):
             entity_df = show_table(entity_df)
         return entity_df, label_column
@@ -217,21 +218,22 @@ def main():
                     drop_old = st.checkbox("Drop old database if exists?")
                     if st.button("Prepare Database"):
                         try:
-                            with st.spinner("Preparing database..."):
-                                prepare_database(
-                                    database_name,
-                                    entities_df=entity_df,
-                                    features_df=feature_df,
-                                    realapp=explainer,
-                                    context_dict=context,
-                                    label_column=label_column,
-                                    drop_old=drop_old,
-                                    gui_mode=True,
-                                )
+                            pbar = st.progress(0)
+                            prepare_database(
+                                database_name,
+                                entities_df=entity_df,
+                                features_df=feature_df,
+                                realapp=explainer,
+                                context_dict=context,
+                                label_column=label_column,
+                                drop_old=drop_old,
+                                streamlit_progress_bar_func=pbar.progress,
+                            )
                         except Exception as e:
                             st.error(f"Error preparing database: {e}")
-                        st.success("Database prepared successfully!")
-                        st.balloons()
+                        else:
+                            st.success("Database prepared successfully!")
+                            st.balloons()
 
 
 if __name__ == "__main__":
