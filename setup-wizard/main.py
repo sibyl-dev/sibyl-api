@@ -217,18 +217,21 @@ def main():
                     drop_old = st.checkbox("Drop old database if exists?")
                     if st.button("Prepare Database"):
                         try:
-                            prepare_database(
-                                database_name,
-                                entities_df=entity_df,
-                                features_df=feature_df,
-                                realapp=explainer,
-                                context_dict=context,
-                                label_column=label_column,
-                                drop_old=drop_old,
-                            )
+                            with st.spinner("Preparing database..."):
+                                prepare_database(
+                                    database_name,
+                                    entities_df=entity_df,
+                                    features_df=feature_df,
+                                    realapp=explainer,
+                                    context_dict=context,
+                                    label_column=label_column,
+                                    drop_old=drop_old,
+                                    gui_mode=True,
+                                )
                         except Exception as e:
                             st.error(f"Error preparing database: {e}")
                         st.success("Database prepared successfully!")
+                        st.balloons()
 
 
 if __name__ == "__main__":
