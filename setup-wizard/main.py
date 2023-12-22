@@ -19,7 +19,10 @@ def show_table(df, key=None, column_config=None):
     )
 
 
-def _validate_entities(_):
+def _validate_entities(entity_df):
+    if entity_df is None or entity_df.empty:
+        st.error("Invalid or empty file found")
+        return False
     return True
 
 
@@ -33,30 +36,30 @@ def _validate_features(feature_df):
     return True
 
 
-def _validate_categories(category_df):
-    if "name" not in category_df.columns:
-        st.error("Categories file is missing required column: name")
-        return False
-
-
 def upload_file(term, validate_func):
     csv = st.file_uploader(f"Upload {term} file", type="csv")
     df = None
     if csv is not None:
         df = pd.read_csv(csv)
-        validate_func(df)
+        if not validate_func(df):
+            return None
     return df
 
 
 def entity_configs():
+    st.header("Prepare Entities")
     entity_df = upload_file("entities", _validate_entities)
     if entity_df is not None:
-        return show_table(entity_df, key=f"entity_editor")
+        with st.expander("Edit entities"):
+            entity_df = show_table(entity_df)
+        return entity_df
     else:
-        return st.info(f"Upload entity csv above to start editing")
+        st.info(f"Upload entity csv above to start editing")
+        return None
 
 
 def feature_configs():
+    st.header("Prepare Features")
     feature_df = upload_file("features", _validate_features)
     if feature_df is not None:
         column_config = {
@@ -65,81 +68,86 @@ def feature_configs():
             ),
             "category": st.column_config.SelectboxColumn(options=feature_df["category"].unique()),
         }
-        result_df = show_table(feature_df, key=f"feature_editor", column_config=column_config)
+        with st.expander("Edit features"):
+            result_df = show_table(feature_df, key=f"feature_editor", column_config=column_config)
         return result_df
     else:
         st.info(f"Upload a feature csv above to start editing")
         return None
 
 
-def main():
-    st.set_page_config(layout="wide")
-
-    loader = yaml.YAML()
-    # loader.add_representer(type(None), represent_none)
-
-    st.title("Configuration Wizard")
-
-    entities_tab, features_tab, context_tab = st.tabs(["Entities", "Features", "Context"])
-    with entities_tab:
-        entity_configs()
-
-    with features_tab:
-        feature_configs()
-
-    with context_tab:
-        # Load existing configuration if available
-        existing_config = load_existing_config(loader)
-
-        with st.form("config_form"):
-            config_data = dict()
-
-            # Question 2: Use Multiple Rows
-            config_data["USE_MULTIPLE_ROWS"] = st.radio(
-                "Does your data have multiple rows?", ["Yes", "No"], horizontal=True
-            )
-
-            if config_data["USE_MULTIPLE_ROWS"] == "Yes":
-                config_data["ROW_LABEL"] = st.text_input(
-                    "How should we label rows?", value="Timestamp"
-                )
-
-            config_data["BAR_LENGTH"] = st.number_input(
-                "What is the length of the bar?", min_value=0, max_value=10, value=8
-            )
-
-            with st.expander("Modify terms"):
-                terms = [
-                    ("Entity", "Label of whatever is being predicted on"),
-                    ("Feature", ""),
-                    ("Positive", "Features that increase the model output"),
-                    ("Negative", "Features that decrease the model output"),
-                ]
-                for term, helper in terms:
-                    st.text_input(term, max_chars=15, placeholder=helper)
-
-            submitted = st.form_submit_button("Save config")
-
-        if submitted:
-            save_config(loader, config_data, existing_config)
-
-
 def load_existing_config(loader):
     existing_config = {}
     if os.path.exists("config.yml"):
-        with open("config.yml", "r") as yaml_file:
+        with open("context_config.yml", "r") as yaml_file:
             existing_config = loader.load(yaml_file)
     return existing_config
 
 
 def save_config(loader, config_data, existing_config):
     loader.default_flow_style = False
-
     existing_config.update(config_data)
 
-    with open("config2.yml", "w") as yaml_file:
+    with open("context_config.yml", "w") as yaml_file:
         loader.dump(existing_config, yaml_file)
     st.success("Configuration saved successfully!")
+
+
+def context_configs():
+    loader = yaml.YAML()
+
+    # Load existing configuration if available
+    existing_config = load_existing_config(loader)
+
+    config_data = dict()
+
+    use_rows = st.radio("Does your data have multiple rows?", ["Yes", "No"], horizontal=True)
+    config_data["use_rows"] = True if use_rows == "Yes" else False
+
+    if config_data["use_rows"]:
+        config_data["row_label"] = st.text_input("How should we label rows?", max_chars=25)
+
+    output_type = st.radio(
+        "What is your model's output type?", ["Numeric", "Boolean", "Categorical"], horizontal=True
+    )
+    config_data["output_type"] = output_type.lower()
+
+    if config_data["output_type"] == "boolean":
+        config_data["output_pos_label"] = st.text_input(
+            "How should we label positive predictions?", max_chars=25
+        )
+        config_data["output_neg_label"] = st.text_input(
+            "How should we label negative predictions?", max_chars=25
+        )
+
+    with st.expander("Modify terms"):
+        terms = [
+            ("Entity", "Label of whatever is being predicted on"),
+            ("Feature", ""),
+            ("Positive", "Features that increase the model output"),
+            ("Negative", "Features that decrease the model output"),
+        ]
+        config_data["terms"] = dict()
+        for term, helper in terms:
+            config_data["terms"][term] = st.text_input(term, max_chars=15, placeholder=helper)
+
+    return config_data
+
+
+def main():
+    st.set_page_config(layout="wide")
+
+    # loader.add_representer(type(None), represent_none)
+
+    st.title("Configuration Wizard")
+
+    entity_df = entity_configs()
+    if entity_df is not None:
+        st.divider()
+        feature_df = feature_configs()
+        if feature_df is not None:
+            st.divider()
+            context = context_configs()
 
 
 if __name__ == "__main__":

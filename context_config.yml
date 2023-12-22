@@ -1,0 +1,7 @@
+use_rows: Yes
+row_label: ''
+terms:
+  Entity: house
+  Feature: ''
+  Positive: test
+  Negative: tes
