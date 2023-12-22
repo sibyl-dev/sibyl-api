@@ -5,6 +5,7 @@ import pandas as pd
 import pickle
 from pyreal import RealApp
 from sibyl.db.preprocessing import prepare_database
+from tqdm import tqdm
 
 
 def represent_none(self, _):
@@ -123,9 +124,6 @@ def context_configs():
     st.header("Configure Context")
     loader = yaml.YAML()
 
-    # Load existing configuration if available
-    existing_config = load_existing_config(loader)
-
     config_data = dict()
 
     use_rows = st.radio("Does your data have multiple rows?", ["Yes", "No"], horizontal=True)
@@ -193,7 +191,6 @@ def context_configs():
             config_data["terms"][term.lower()] = st.text_input(
                 term, max_chars=15, placeholder=helper
             )
-    save_config(loader, config_data, existing_config)
 
     return config_data
 
