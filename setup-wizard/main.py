@@ -94,6 +94,7 @@ def save_config(loader, config_data, existing_config):
 
 
 def context_configs():
+    st.header("Configure Context")
     loader = yaml.YAML()
 
     # Load existing configuration if available
@@ -119,6 +120,19 @@ def context_configs():
         config_data["output_neg_label"] = st.text_input(
             "How should we label negative predictions?", max_chars=25
         )
+    if config_data["output_type"] == "numeric":
+        output_format_string = st.radio(
+            "How should we format the output?",
+            ["$1,234", "$1,234.56", "1,234", "1,234.56", "No Formatting", "Custom"],
+            horizontal=True,
+        )
+        if output_format_string == "Custom":
+            config_data["output_format_string"] = st.text_input(
+                "How should we format the output (python f-string)?"
+            )
+        else:
+            formats = {"$1,234": "${:,.0f}", "$1,234.56": "${:,.2f}", "1,234": "{:,.0f}"}
+            config_data["output_format_string"] = formats[output_format_string]
 
     with st.expander("Modify terms"):
         terms = [
@@ -135,7 +149,7 @@ def context_configs():
 
 
 def main():
-    st.set_page_config(layout="wide")
+    # st.set_page_config(layout="wide")
 
     # loader.add_representer(type(None), represent_none)
 
