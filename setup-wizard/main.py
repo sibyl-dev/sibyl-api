@@ -226,6 +226,7 @@ def main():
                                 label_column=label_column,
                                 drop_old=drop_old,
                                 streamlit_progress_bar_func=pbar.progress,
+                                fit_explainers=False,
                             )
                         except Exception as e:
                             st.error(f"Error preparing database: {e}")
