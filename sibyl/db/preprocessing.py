@@ -66,7 +66,7 @@ def insert_features_from_csv(filepath=None):
         list: List of feature names inserted
     """
     try:
-        features_df = pd.read_csv(filepath).replace(np.nan, None)
+        features_df = pd.read_csv(filepath)
     except FileNotFoundError:
         raise FileNotFoundError(
             f"Features file {filepath} not found. Must provide valid features file"
@@ -91,6 +91,7 @@ def insert_features_from_dataframe(features_df=None):
     Returns:
         list: List of feature names inserted
     """
+    features_df = features_df.replace(np.nan, None)
     if "category" in features_df:
         categories = set(features_df["category"])
         already_inserted_categories = schema.Category.find(as_df_=True, only_=["name"])
