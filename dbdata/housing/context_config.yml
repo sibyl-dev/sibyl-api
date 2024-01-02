@@ -19,5 +19,5 @@ terms:
   entity: "House"
   feature: "Factor"
   prediction: "Sale Price"
-  increasing: "Beneficial"
-  decreasing: "Detrimental"
+  positive: "Beneficial"
+  negative: "Detrimental"

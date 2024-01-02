@@ -21,16 +21,14 @@ def test_post_logging(client):
         )
         assert (
             log_file.readline().strip()
-            == ",".join(
-                (
-                    timestamp,
-                    user_id,
-                    eid,
-                    event["element"],
-                    event["action"],
-                    event["details"],
-                )
-            )
+            == ",".join((
+                timestamp,
+                user_id,
+                eid,
+                event["element"],
+                event["action"],
+                event["details"],
+            ))
             + ","
         )
     os.remove("test.csv")

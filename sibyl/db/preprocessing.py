@@ -66,7 +66,7 @@ def insert_features_from_csv(filepath=None):
         list: List of feature names inserted
     """
     try:
-        features_df = pd.read_csv(filepath).replace(np.nan, None)
+        features_df = pd.read_csv(filepath)
     except FileNotFoundError:
         raise FileNotFoundError(
             f"Features file {filepath} not found. Must provide valid features file"
@@ -91,6 +91,7 @@ def insert_features_from_dataframe(features_df=None):
     Returns:
         list: List of feature names inserted
     """
+    features_df = features_df.replace(np.nan, None)
     if "category" in features_df:
         categories = set(features_df["category"])
         already_inserted_categories = schema.Category.find(as_df_=True, only_=["name"])
@@ -587,6 +588,7 @@ def prepare_database(
     context_dict=None,
     category_df=None,
     category_filepath=None,
+    streamlit_progress_bar_func=None,
 ):
     """
     Fully prepare a database from files or objects
@@ -617,6 +619,8 @@ def prepare_database(
         context_dict (dict): dict of {context_config_key : context_config_value}
         category_df (DataFrame): Dataframe of category information
         category_filepath (string): Filepath of csv file containing category information
+        streamlit_progress_bar_func (function): Streamlit progress bar function to pass in for GUI
+            applications. Should generally be kept as None
     """
 
     def _process_fp(fn):
@@ -648,6 +652,8 @@ def prepare_database(
 
     # INSERT CATEGORIES, IF PROVIDED
     pbar.set_description("Inserting categories...")
+    if streamlit_progress_bar_func is not None:
+        streamlit_progress_bar_func(0, "Inserting categories...")
     if category_df is not None:
         insert_categories_from_dataframe(category_df)
     elif category_filepath is not None:
@@ -656,6 +662,8 @@ def prepare_database(
 
     # INSERT FEATURES
     pbar.set_description("Inserting features...")
+    if streamlit_progress_bar_func is not None:
+        streamlit_progress_bar_func(5, "Inserting features...")
     if features_df is not None:
         insert_features_from_dataframe(features_df)
     elif features_filepath is not None:
@@ -664,6 +672,8 @@ def prepare_database(
 
     # INSERT CONTEXT
     pbar.set_description("Inserting context...")
+    if streamlit_progress_bar_func is not None:
+        streamlit_progress_bar_func(15, "Inserting context...")
     if context_dict is not None:
         insert_context_from_dict(context_dict)
     elif context_filepath is not None:
@@ -672,6 +682,8 @@ def prepare_database(
 
     # INSERT ENTITIES
     pbar.set_description("Inserting entities...")
+    if streamlit_progress_bar_func is not None:
+        streamlit_progress_bar_func(20, "Inserting entities...")
     eids = None
     if entities_df is not None:
         eids = insert_entities_from_dataframe(
@@ -685,6 +697,8 @@ def prepare_database(
 
     # INSERT FULL DATASET
     pbar.set_description("Inserting training set...")
+    if streamlit_progress_bar_func is not None:
+        streamlit_progress_bar_func(50, "Inserting training set...")
     training_set = None
     if training_eids is not None:
         training_set = insert_training_set(training_eids)
@@ -696,6 +710,8 @@ def prepare_database(
 
     # INSERT MODEL
     pbar.set_description("Inserting model...")
+    if streamlit_progress_bar_func is not None:
+        streamlit_progress_bar_func(80, "Inserting model...")
     if realapp_directory is not None:
         realapp_directory = _process_fp(realapp_directory)
         if not os.path.isdir(realapp_directory):
@@ -728,6 +744,8 @@ def prepare_database(
             fit_se=fit_se,
         )
     pbar.update(times["Model"])
+    if streamlit_progress_bar_func is not None:
+        streamlit_progress_bar_func(100, "Finalizing...")
 
 
 if __name__ == "__main__":

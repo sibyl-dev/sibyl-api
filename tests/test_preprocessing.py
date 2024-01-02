@@ -31,12 +31,10 @@ class TestInsertFeaturesFromDataframe:
     #  Insert features with required columns only
     def test_insert_required_columns_only(self):
         # Create a dataframe with only the required columns
-        features_df = pd.DataFrame(
-            {
-                "name": ["feature1", "feature2", "feature3"],
-                "type": ["numeric", "categorical", "boolean"],
-            }
-        )
+        features_df = pd.DataFrame({
+            "name": ["feature1", "feature2", "feature3"],
+            "type": ["numeric", "categorical", "boolean"],
+        })
 
         # Call the function under test
         result = preprocessing.insert_features_from_dataframe(features_df)
@@ -53,20 +51,18 @@ class TestInsertFeaturesFromDataframe:
     #  Insert features with optional columns
     def test_insert_optional_columns(self):
         # Create a dataframe with required and optional columns
-        features_df = pd.DataFrame(
-            {
-                "name": ["feature1", "feature2", "feature3"],
-                "type": ["numeric", "categorical", "boolean"],
-                "description": ["Description 1", "Description 2", "Description 3"],
-                "negated_description": [
-                    "Negated Description 1",
-                    "Negated Description 2",
-                    "Negated Description 3",
-                ],
-                "category": ["Category 1", "Category 2", "Category 3"],
-                "values": [None, ["A", "B"], None],
-            }
-        )
+        features_df = pd.DataFrame({
+            "name": ["feature1", "feature2", "feature3"],
+            "type": ["numeric", "categorical", "boolean"],
+            "description": ["Description 1", "Description 2", "Description 3"],
+            "negated_description": [
+                "Negated Description 1",
+                "Negated Description 2",
+                "Negated Description 3",
+            ],
+            "category": ["Category 1", "Category 2", "Category 3"],
+            "values": [None, ["A", "B"], None],
+        })
 
         # Call the function under test
         result = preprocessing.insert_features_from_dataframe(features_df)
@@ -123,12 +119,10 @@ class TestInsertFeaturesFromDataframe:
     #  Insert dataframe with invalid type
     def test_insert_invalid_type(self):
         # Create a dataframe with an invalid type
-        features_df = pd.DataFrame(
-            {
-                "name": ["feature1", "feature2", "feature3"],
-                "type": ["numeric", "categorical", "invalid"],
-            }
-        )
+        features_df = pd.DataFrame({
+            "name": ["feature1", "feature2", "feature3"],
+            "type": ["numeric", "categorical", "invalid"],
+        })
 
         # Call the function under test and expect a ValueError to be raised
         with pytest.raises(ValidationError):
@@ -158,13 +152,11 @@ class TestInsertCategoriesFromDataframe:
     #  Insert categories with optional columns
     def test_insert_categories_optional_columns(self):
         # Create a sample dataframe with optional columns
-        category_df = pd.DataFrame(
-            {
-                "name": ["Category1", "Category2", "Category3"],
-                "color": ["red", "blue", "green"],
-                "abbreviation": ["C1", "C2", "C3"],
-            }
-        )
+        category_df = pd.DataFrame({
+            "name": ["Category1", "Category2", "Category3"],
+            "color": ["red", "blue", "green"],
+            "abbreviation": ["C1", "C2", "C3"],
+        })
 
         # Call the function under test
         result = preprocessing.insert_categories_from_dataframe(category_df)
@@ -237,14 +229,12 @@ class TestInsertEntitiesFromDataframe:
     #  Insert entities with required columns and labels
     def test_insert_entities_with_labels(self):
         # Create a sample dataframe with required columns and labels
-        entity_df = pd.DataFrame(
-            {
-                "eid": ["1", "2", "3"],
-                "feature1": [0.1, 0.2, 0.3],
-                "feature2": [0.4, 0.5, 0.6],
-                "label_col": [1, 0, 1],
-            }
-        )
+        entity_df = pd.DataFrame({
+            "eid": ["1", "2", "3"],
+            "feature1": [0.1, 0.2, 0.3],
+            "feature2": [0.4, 0.5, 0.6],
+            "label_col": [1, 0, 1],
+        })
 
         # Call the function under test
         eids = preprocessing.insert_entities_from_dataframe(entity_df, label_column="label_col")
@@ -265,14 +255,12 @@ class TestInsertEntitiesFromDataframe:
     #  Insert entities with optional row_id column
     def test_insert_entities_with_row_id(self):
         # Create a sample dataframe with required columns, labels, and row_id
-        entity_df = pd.DataFrame(
-            {
-                "eid": [1, 2],
-                "feature1": [0.1, 0.2],
-                "feature2": [0.4, 0.5],
-                "row_id": [10, 20],
-            }
-        )
+        entity_df = pd.DataFrame({
+            "eid": [1, 2],
+            "feature1": [0.1, 0.2],
+            "feature2": [0.4, 0.5],
+            "row_id": [10, 20],
+        })
 
         # Call the function under test
         eids = preprocessing.insert_entities_from_dataframe(entity_df)
@@ -323,14 +311,12 @@ class TestInsertEntitiesFromDataframe:
     #  Insert entities with maximum number of entities specified
     def test_insert_entities_max_entities_specified(self):
         # Create a sample dataframe with required columns and labels
-        entity_df = pd.DataFrame(
-            {
-                "eid": ["1", "2", "3", "4", "5"],
-                "feature1": [0.1, 0.2, 0.3, 0.4, 0.5],
-                "feature2": [0.4, 0.5, 0.6, 0.7, 0.8],
-                "label": [1, 0, 1, 0, 1],
-            }
-        )
+        entity_df = pd.DataFrame({
+            "eid": ["1", "2", "3", "4", "5"],
+            "feature1": [0.1, 0.2, 0.3, 0.4, 0.5],
+            "feature2": [0.4, 0.5, 0.6, 0.7, 0.8],
+            "label": [1, 0, 1, 0, 1],
+        })
 
         # Call the function under test with max_entities specified
         eids = preprocessing.insert_entities_from_dataframe(entity_df, max_entities=3)
@@ -342,14 +328,12 @@ class TestInsertEntitiesFromDataframe:
     #  Insert entities with maximum number of entities greater than number of entities in dataframe
     def test_insert_entities_max_entities_greater_than_dataframe(self):
         # Create a sample dataframe with required columns and labels
-        entity_df = pd.DataFrame(
-            {
-                "eid": [1, 2, 3],
-                "feature1": [0.1, 0.2, 0.3],
-                "feature2": [0.4, 0.5, 0.6],
-                "label": [1, 0, 1],
-            }
-        )
+        entity_df = pd.DataFrame({
+            "eid": [1, 2, 3],
+            "feature1": [0.1, 0.2, 0.3],
+            "feature2": [0.4, 0.5, 0.6],
+            "label": [1, 0, 1],
+        })
 
         # Call the function under test with max_entities greater than number of entities
         eids = preprocessing.insert_entities_from_dataframe(entity_df, max_entities=5)
@@ -360,23 +344,19 @@ class TestInsertEntitiesFromDataframe:
         assert len(schema.Entity.objects) == 3
 
     def test_insert_entities_with_update_feature_values(self):
-        feature_df = pd.DataFrame(
-            {
-                "name": ["feature1", "feature2", "feature3"],
-                "type": ["numeric", "categorical", "categorical"],
-                "values": [None, ["C", "D"], None],
-            }
-        )
+        feature_df = pd.DataFrame({
+            "name": ["feature1", "feature2", "feature3"],
+            "type": ["numeric", "categorical", "categorical"],
+            "values": [None, ["C", "D"], None],
+        })
         preprocessing.insert_features_from_dataframe(feature_df)
         # Create a sample entity dataframe
-        entity_df = pd.DataFrame(
-            {
-                "eid": ["1", "2", "3"],
-                "feature1": [0.1, 0.2, 0.3],
-                "feature2": ["A", "B", "A"],
-                "feature3": ["A", "B", "A"],
-            }
-        )
+        entity_df = pd.DataFrame({
+            "eid": ["1", "2", "3"],
+            "feature1": [0.1, 0.2, 0.3],
+            "feature2": ["A", "B", "A"],
+            "feature3": ["A", "B", "A"],
+        })
 
         # Insert entities with update_feature_values=True
         preprocessing.insert_entities_from_dataframe(entity_df, update_feature_values=True)
@@ -394,14 +374,12 @@ class TestInsertEntitiesFromDataframe:
 
 class TestInsertTrainingSet:
     def test_valid_eids_and_label_column(self):
-        entity_df = pd.DataFrame(
-            {
-                "eid": [1, 2, 3],
-                "feature1": [0.1, 0.2, 0.3],
-                "feature2": [0.4, 0.5, 0.6],
-                "y": [1, 0, 1],
-            }
-        )
+        entity_df = pd.DataFrame({
+            "eid": [1, 2, 3],
+            "feature1": [0.1, 0.2, 0.3],
+            "feature2": [0.4, 0.5, 0.6],
+            "y": [1, 0, 1],
+        })
         preprocessing.insert_entities_from_dataframe(entity_df, label_column="y")
 
         eids = ["1", "2", "3"]
@@ -428,13 +406,11 @@ class TestInsertTrainingSet:
 
     #  Set the TrainingSet to include an entity with no label, and ensure error is raised
     def test_no_label_column(self):
-        entity_df = pd.DataFrame(
-            {
-                "eid": [1, 2, 3],
-                "feature1": [0.1, 0.2, 0.3],
-                "feature2": [0.4, 0.5, 0.6],
-            }
-        )
+        entity_df = pd.DataFrame({
+            "eid": [1, 2, 3],
+            "feature1": [0.1, 0.2, 0.3],
+            "feature2": [0.4, 0.5, 0.6],
+        })
         preprocessing.insert_entities_from_dataframe(entity_df)
 
         eids = ["1", "2", "3"]
@@ -467,17 +443,15 @@ class TestInsertModelFromObject:
         model_id = "my_model"
         model_description = "This is my model"
         model_performance = "High accuracy"
-        training_df = pd.DataFrame(
-            {
-                "A": [6],
-                "B": [1],
-                "C": [3],
-                "num_feat": [1],
-                "cat_feat": ["value1"],
-                "bin_feat": [False],
-                "label": [1],
-            }
-        )
+        training_df = pd.DataFrame({
+            "A": [6],
+            "B": [1],
+            "C": [3],
+            "num_feat": [1],
+            "cat_feat": ["value1"],
+            "bin_feat": [False],
+            "label": [1],
+        })
         label_column = "label"
         training_size = 1000
 

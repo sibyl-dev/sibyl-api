@@ -116,7 +116,7 @@ def fix_lint(context):
 
     subprocess.run(["black", "sibyl"])
     subprocess.run(["black", "tests"])
-    subprocess.run(["isort", "--atomic", "sibyl", "tests"])
+    subprocess.run(["isort", "--atomic", "sibyl", "tests", "setup-wizard"])
 
 
 @task
@@ -125,7 +125,7 @@ def lint(context):
     Runs the linting and import sort process on all library files and tests and prints errors.
         Skips init.py files for import sorts
     """
-    subprocess.run(["isort", "-c", "sibyl", "tests"], check=True)
+    subprocess.run(["isort", "-c", "sibyl", "tests", "setup-wizard"], check=True)
 
 
 @task
