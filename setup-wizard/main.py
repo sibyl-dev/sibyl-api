@@ -186,8 +186,8 @@ def context_configs():
             ("Entity", "Label of whatever is being predicted on"),
             ("Feature", "Properties of entities"),
             ("Prediction", "Output of model"),
-            ("Increasing", "Features that increase the model output"),
-            ("Decreasing", "Features that decrease the model output"),
+            ("Positive", "Features that increase the model output"),
+            ("Negative", "Features that decrease the model output"),
         ]
         config_data["terms"] = dict()
         for term, helper in terms:
@@ -199,10 +199,6 @@ def context_configs():
 
 
 def main():
-    # st.set_page_config(layout="wide")
-
-    # loader.add_representer(type(None), represent_none)
-
     st.title("Configuration Wizard")
     database_name = st.text_input("Database name?", max_chars=15)
 
