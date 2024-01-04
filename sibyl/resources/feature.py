@@ -48,7 +48,7 @@ class Feature(Resource):
             description: Name of the feature to get info for
         responses:
           200:
-            description: Feature importance for the model
+            description: Feature information
             content:
               application/json:
                 schema:
@@ -69,7 +69,7 @@ class Feature(Resource):
 
     def put(self, feature_name):
         """
-        Update a feature by name
+        Update or create a feature by name
         ---
         tags:
           - feature
@@ -83,11 +83,17 @@ class Feature(Resource):
             required: true
             description: Name of the feature to update
         requestBody:
-          description: Feature object to update
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Feature'
+        responses:
+          200:
+            description: Feature information
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Feature'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -101,6 +107,10 @@ class Feature(Resource):
             feature = schema.Feature(**feature_data)
             feature.save()
         else:
+            if "type" in feature_data:
+                # Workaround because "type" is a reserved keyword in mongoengine
+                feature.type = feature_data.pop("type")
+                feature.save()
             feature.modify(**feature_data)
             feature = feature.save()
 
@@ -143,6 +153,43 @@ class Features(Resource):
             return {"message": str(e)}, 500
         else:
             return {"features": features}, 200
+
+    def put(self):
+        """
+        Update or create multiple features
+        ---
+        tags:
+          - feature
+        security:
+          - tokenAuth: []
+        requestBody:
+          content:
+            application/json:
+              schema:
+                features:
+                    type: list
+                    items:
+                        type: object
+                        properties:
+                            test:
+                                type: string
+        """
+        feature_data = request.json
+        features = [schema.Feature.find_one(name=feature["name"]) for feature in feature_data]
+        return_features = []
+        for feature in features:
+            if feature is None:
+                if "type" not in feature_data:
+                    LOGGER.exception("Error creating feature. Must provide type for new feature")
+                    return {"message": "Must provide type when adding new feature"}, 400
+                feature = schema.Feature(**feature_data)
+                feature.save()
+            else:
+                feature.modify(**feature_data)
+                feature = feature.save()
+            return_features.append(feature)
+
+        return [get_feature(feature, detailed=True) for feature in return_features], 200
 
 
 class Categories(Resource):
