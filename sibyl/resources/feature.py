@@ -1,6 +1,7 @@
 import logging
 
 from flask_restful import Resource
+from flask import request
 
 from sibyl.db import schema
 
@@ -63,6 +64,45 @@ class Feature(Resource):
         if feature is None:
             LOGGER.exception("Error getting feature. Feature %s does not exist.", feature_name)
             return {"message": "Feature {} does not exist".format(feature_name)}, 400
+
+        return get_feature(feature, detailed=True), 200
+
+    def put(self, feature_name):
+        """
+        Update a feature by name
+        ---
+        tags:
+          - feature
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: feature_name
+            in: path
+            schema:
+              type: string
+            required: true
+            description: Name of the feature to update
+        requestBody:
+          description: Feature object to update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feature'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+        feature_data = request.json
+        feature = schema.Feature.find_one(name=feature_name)
+        if feature is None:
+            if "type" not in feature_data:
+                LOGGER.exception("Error creating feature. Must provide type for new feature")
+                return {"message": "Must provide type when adding new feature"}, 400
+            feature_data["name"] = feature_name
+            feature = schema.Feature(**feature_data)
+            feature.save()
+        else:
+            feature.modify(**feature_data)
+            feature = feature.save()
 
         return get_feature(feature, detailed=True), 200
 
