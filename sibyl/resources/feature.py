@@ -30,6 +30,27 @@ def get_category(category_doc):
     return category
 
 
+def add_feature(feature, feature_data):
+    if feature is None:
+        if "type" not in feature_data:
+            LOGGER.exception("Error creating feature. Must provide type for new feature")
+            return {"message": "Must provide type when adding new feature"}, False
+        feature = schema.Feature(**feature_data)
+        feature.save()
+    else:
+        if "type" in feature_data:
+            # Prevent validation errors by removing values
+            if feature_data["type"] != "categorical":
+                feature.values = []
+            # Workaround because "type" is a reserved keyword in mongoengine
+            feature.type = feature_data.pop("type")
+            feature = feature.save()
+        if len(feature_data) > 0:
+            feature.modify(**feature_data)
+            feature = feature.save()
+    return feature, True
+
+
 class Feature(Resource):
     def get(self, feature_name):
         """
@@ -100,21 +121,12 @@ class Feature(Resource):
         feature_data = request.json
         feature = schema.Feature.find_one(name=feature_name)
         if feature is None:
-            if "type" not in feature_data:
-                LOGGER.exception("Error creating feature. Must provide type for new feature")
-                return {"message": "Must provide type when adding new feature"}, 400
             feature_data["name"] = feature_name
-            feature = schema.Feature(**feature_data)
-            feature.save()
+        added_feature, success = add_feature(feature, feature_data)
+        if not success:
+            return added_feature, 400
         else:
-            if "type" in feature_data:
-                # Workaround because "type" is a reserved keyword in mongoengine
-                feature.type = feature_data.pop("type")
-                feature.save()
-            feature.modify(**feature_data)
-            feature = feature.save()
-
-        return get_feature(feature, detailed=True), 200
+            return get_feature(added_feature, detailed=True), 200
 
 
 class Features(Resource):
@@ -166,28 +178,59 @@ class Features(Resource):
           content:
             application/json:
               schema:
-                features:
-                    type: list
+                type: object
+                properties:
+                  features:
+                    type: array
                     items:
-                        type: object
-                        properties:
-                            test:
-                                type: string
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        type:
+                          type: string
+                        category:
+                          type: string
+                        values:
+                          type: array
+                          items:
+                            type: string
+                        negated_description:
+                          type: string
+                      required: ['name', 'type']
+        responses:
+          200:
+            description: All added features
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    entities:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Feature'
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/features-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
         """
-        feature_data = request.json
-        features = [schema.Feature.find_one(name=feature["name"]) for feature in feature_data]
+        all_feature_data = request.json
         return_features = []
-        for feature in features:
-            if feature is None:
-                if "type" not in feature_data:
-                    LOGGER.exception("Error creating feature. Must provide type for new feature")
-                    return {"message": "Must provide type when adding new feature"}, 400
-                feature = schema.Feature(**feature_data)
-                feature.save()
+        for feature_data in all_feature_data:
+            if "name" not in feature_data:
+                LOGGER.exception("Error creating feature. Must provide name for new feature")
+                return {"message": "Must provide name when adding new feature"}, 400
+            feature = schema.Feature.find_one(name=feature_data["name"])
+            added_feature, success = add_feature(feature, feature_data)
+            if not success:
+                return added_feature, 400
             else:
-                feature.modify(**feature_data)
-                feature = feature.save()
-            return_features.append(feature)
+                return_features.append(added_feature)
 
         return [get_feature(feature, detailed=True) for feature in return_features], 200
 
