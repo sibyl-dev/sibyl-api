@@ -42,6 +42,18 @@ def get_entity_row(entity_doc, row_id=None, features=True):
     return entity
 
 
+def add_entity(entity, entity_data):
+    if entity is None:
+        if "row_ids" not in entity_data and "features" in entity_data:
+            entity_data["row_ids"] = list(entity_data["features"].keys())
+        entity = schema.Entity(**entity_data)
+        entity.save()
+    else:
+        entity.modify(**entity_data)
+        entity.save()
+    return entity, True
+
+
 class Entity(Resource):
     def get(self, eid):
         """
@@ -71,25 +83,6 @@ class Entity(Resource):
                 schema:
                   $ref: '#/components/schemas/Entity'
                 examples:
-                  inlineJson:
-                    summary: inline example
-                    value: {
-                        "eid": "18",
-                        "features": [
-                            {
-                                "name": "f1",
-                                "value": "v1"
-                            }
-                        ],
-                        "property": {
-                            "name": "Elsa",
-                            "referral_ids": [
-                                "ca19",
-                                "ca88",
-                                "ca133"
-                            ]
-                        }
-                  }
                   externalJson:
                     summary: external example
                     externalValue: '/examples/entity-get-200.json'
@@ -106,6 +99,53 @@ class Entity(Resource):
         if row_id is None:
             return get_entity(entity, features=True), 200
         return get_entity_row(entity, row_id, features=True), 200
+
+    def put(self, eid):
+        """
+        Modify an Entity by ID
+        ---
+        tags:
+          - entity
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: eid
+            in: path
+            schema:
+              type: string
+            required: true
+            description: ID of the entity to modify/create
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityWithoutEid'
+        responses:
+          200:
+            description: Entity that was modified
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Entity'
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/entity-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+        entity_data = request.json
+
+        entity = schema.Entity.find_one(eid=str(eid))
+        if entity is None:
+            entity_data["eid"] = eid
+
+        added_entity, success = add_entity(entity, entity_data)
+
+        if not success:
+            return added_entity, 400
+        else:
+            return get_entity(added_entity, features=True), 200
 
 
 class Entities(Resource):
@@ -174,6 +214,58 @@ class Entities(Resource):
                 LOGGER.log(20, "group %s has no entities" % str(group_id))
                 return []
             return [document.eid for document in entities], 200
+
+    def put(self):
+        """
+        Insert or modify multiple entities
+        ---
+        tags:
+          - entity
+        security:
+          - tokenAuth: []
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Entity'
+        responses:
+          200:
+            description: All entities
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    entities:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Entity'
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/entities-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+        all_entity_data = request.json["entities"]
+        return_entities = []
+        for entity_data in all_entity_data:
+            if "eid" not in entity_data:
+                LOGGER.exception("Error creating/modifying entity. Must provide eid.")
+                return {"message": "Must provide eid for all entities"}, 400
+            entity = schema.Entity.find_one(eid=entity_data["eid"])
+            added_entity, success = add_entity(entity, entity_data)
+            if not success:
+                return added_entity, 400
+            else:
+                return_entities.append(added_entity)
+
+        return [get_entity(entity, features=True) for entity in return_entities], 200
 
 
 class Events(Resource):

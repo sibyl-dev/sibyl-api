@@ -21,25 +21,22 @@ schemas = {
         "type": "object",
         "properties": {
             "eid": {"type": "string"},
-            "features": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "name": {"type": "string"},
-                        "value": {
-                            "oneOf": [
-                                {"type": "string"},
-                                {"type": "integer"},
-                                {"type": "number"},
-                            ]
-                        },
-                    },
-                },
-            },
-            "property": {"type": "object", "additionalProperties": {}},  # any
+            "features": {"type": "object"},
+            "row_ids": {"type": "array", "items": {"type": "string"}},
+            "labels": {"type": "object"},
+            "property": {"type": "object", "additionalProperties": {}},
         },
-        "required": ["code", "message"],
+        "required": ["eid", "message"],
+    },
+    "EntityWithoutEid": {
+        "type": "object",
+        "properties": {
+            "features": {"type": "object"},
+            "row_ids": {"type": "array", "items": {"type": "string"}},
+            "labels": {"type": "object"},
+            "property": {"type": "object", "additionalProperties": {}},
+        },
+        "required": ["eid", "message"],
     },
     "Model": {
         "type": "object",
@@ -68,7 +65,17 @@ schemas = {
             "category": {"type": "string"},
             "type": {"type": "string"},
         },
-        "required": ["name"],
+        "required": ["name", "type"],
+    },
+    "FeatureWithoutName": {
+        "type": "object",
+        "properties": {
+            "description": {"type": "string"},
+            "negated_description": {"type": "string"},
+            "category": {"type": "string"},
+            "type": {"type": "string"},
+        },
+        "required": [],
     },
     "Category": {
         "type": "object",

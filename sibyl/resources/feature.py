@@ -107,7 +107,7 @@ class Feature(Resource):
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Feature'
+                $ref: '#/components/schemas/FeatureWithoutName'
         responses:
           200:
             description: Feature information
@@ -146,7 +146,7 @@ class Features(Resource):
                 schema:
                   type: object
                   properties:
-                    entities:
+                    features:
                       type: array
                       items:
                         $ref: '#/components/schemas/Feature'
@@ -183,23 +183,7 @@ class Features(Resource):
                   features:
                     type: array
                     items:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                        description:
-                          type: string
-                        type:
-                          type: string
-                        category:
-                          type: string
-                        values:
-                          type: array
-                          items:
-                            type: string
-                        negated_description:
-                          type: string
-                      required: ['name', 'type']
+                      $ref: '#/components/schemas/Feature'
         responses:
           200:
             description: All added features
@@ -208,7 +192,7 @@ class Features(Resource):
                 schema:
                   type: object
                   properties:
-                    entities:
+                    features:
                       type: array
                       items:
                         $ref: '#/components/schemas/Feature'
@@ -219,12 +203,12 @@ class Features(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        all_feature_data = request.json
+        all_feature_data = request.json["features"]
         return_features = []
         for feature_data in all_feature_data:
             if "name" not in feature_data:
-                LOGGER.exception("Error creating feature. Must provide name for new feature")
-                return {"message": "Must provide name when adding new feature"}, 400
+                LOGGER.exception("Error creating/modifying feature. Must provide name.")
+                return {"message": "Must provide name for all features"}, 400
             feature = schema.Feature.find_one(name=feature_data["name"])
             added_feature, success = add_feature(feature, feature_data)
             if not success:

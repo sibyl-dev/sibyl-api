@@ -78,18 +78,20 @@ class Entity(SibylDocument):
     ----------
     eid : str
         Unique ID of the entity
+    row_ids : list [str]
     features : dict {feature_name : feature_value}
         Feature values for the entity
     property : dict {property : value}
         Domain-specific properties
+    labels : dict {row_id : label}
     events : list [Event object]
         List of events this entity was involved in
     """
 
-    eid = fields.StringField(validation=_valid_id, unique=True)
-    row_ids = fields.ListField(validation=_valid_row_ids)
+    eid = fields.StringField(validation=_valid_id, unique=True, required=True)
+    row_ids = fields.ListField(validation=_valid_row_ids, required=True)
 
-    features = fields.DictField()  # {row_id: {feature:value}}
+    features = fields.DictField(required=True)  # {row_id: {feature:value}}
     property = fields.DictField()  # {property:value}
     labels = fields.DictField()  # {row_id: ground_truth_label}, as provided
 
