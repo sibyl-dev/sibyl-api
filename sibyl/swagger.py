@@ -42,17 +42,29 @@ schemas = {
         "type": "object",
         "properties": {
             "id": {"type": "string"},
-            "name": {"type": "string"},
             "description": {"type": "string"},
             "performance": {"type": "string"},
+            "importances": {"type": "object"},
+            "explainer": {"type": "string"},
+            "training_set_id": {"type": "string"},
         },
-        "required": ["id"],
+        "required": ["id", "explainer"],
+    },
+    "ModelWithoutId": {
+        "type": "object",
+        "properties": {
+            "description": {"type": "string"},
+            "performance": {"type": "string"},
+            "importances": {"type": "object"},
+            "explainer": {"type": "string"},
+            "training_set_id": {"type": "string"},
+        },
+        "required": ["id", "explainer"],
     },
     "Model_Partial": {
         "type": "object",
         "properties": {
             "id": {"type": "string"},
-            "name": {"type": "string"},
         },
         "required": ["id"],
     },
@@ -112,7 +124,6 @@ schemas = {
 tags = [
     {"name": "default", "description": "Uncategorized APIs"},
     {"name": "entity", "description": "Everything about entity interactions"},
-    {"name": "referral", "description": "Everything about referral interactions"},
 ]
 
 
