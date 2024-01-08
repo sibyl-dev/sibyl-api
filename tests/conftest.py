@@ -82,6 +82,7 @@ def features():
             "category": "cat2",
             "type": "categorical",
             "values": ["value1", "value2", "value3"],
+            "negated_description": "not jki",
         },
         {
             "name": "bin_feat",
@@ -253,7 +254,7 @@ def models():
     return models
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(autouse=True)
 def testdb(categories, features, entities, groups, models, contexts):
     client = MongoClient(test_host, test_port)
     client.drop_database(test_database_name)

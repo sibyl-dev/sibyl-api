@@ -3,6 +3,7 @@
 
 """Tests for `sibylapp` package."""
 import json
+from sibyl.db import schema
 
 
 def test_get_categories(client, categories):
@@ -53,3 +54,52 @@ def test_get_feature(client, features):
     feature = features[1]
     response = client.get("/api/v1/features/" + feature["name"] + "/").json
     assert response["values"] == feature["values"]
+
+
+def test_update_existing_feature_with_valid_data(client, features):
+    feature_name = features[0]["name"]
+    feature_data = {
+        "description": "Updated description",
+        "type": "numeric",
+        "category": "existing_category",
+    }
+
+    response = client.put("/api/v1/features/" + feature_name + "/", json=feature_data).json
+    assert response["name"] == feature_name
+    for key in feature_data:
+        assert response[key] == feature_data[key]
+
+    # Confirm that feature got update in the database
+    updated_feature = schema.Feature.find_one(name=feature_name)
+    assert updated_feature is not None
+    for key in features[0]:
+        if key in feature_data:
+            assert updated_feature[key] == feature_data[key]
+        else:
+            assert updated_feature[key] == features[0][key]
+
+
+def test_add_feature_with_valid_data(client, features):
+    feature_name = "new_feature"
+    feature_data = {
+        "description": "Updated description",
+        "type": "numeric",
+        "category": "existing_category",
+    }
+
+    response = client.put("/api/v1/features/" + feature_name + "/", json=feature_data).json
+    assert response["name"] == feature_name
+    for key in feature_data:
+        assert response[key] == feature_data[key]
+
+    # Confirm that feature got update in the database
+    updated_feature = schema.Feature.find_one(name=feature_name)
+    assert updated_feature is not None
+    for key in features[1]:  # Just to get all keys
+        if key in feature_data:
+            assert updated_feature[key] == feature_data[key]
+        elif key != "name":
+            assert not updated_feature[key]
+
+
+# def test_add_or_modify_multiple:
