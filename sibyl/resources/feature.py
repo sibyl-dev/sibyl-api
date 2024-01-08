@@ -31,6 +31,9 @@ def get_category(category_doc):
 
 
 def add_feature(feature, feature_data):
+    if "category" in feature_data:
+        if schema.Category.find_one(name=feature_data["category"]) is None:
+            add_category(None, {"name": feature_data["category"]})
     if feature is None:
         if "type" not in feature_data:
             LOGGER.exception("Error creating feature. Must provide type for new feature")
@@ -49,6 +52,16 @@ def add_feature(feature, feature_data):
             feature.modify(**feature_data)
             feature = feature.save()
     return feature, True
+
+
+def add_category(category, category_data):
+    if category is None:
+        category = schema.Category(**category_data)
+        category.save()
+    else:
+        category.modify(**category_data)
+        category.save()
+    return category
 
 
 class Feature(Resource):
@@ -255,3 +268,51 @@ class Categories(Resource):
             return {"message": str(e)}, 500
         else:
             return {"categories": categories}, 200
+
+    def put(self):
+        """
+        Add or modify categories
+        ---
+        tags:
+          - feature
+        security:
+          - tokenAuth: []
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+        responses:
+          200:
+            description: Categories added or modified
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    entities:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Category'
+                examples:
+                  externalJson:
+                    summary: external example
+                    externalValue: '/examples/categories-get-200.json'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+        category_data = request.json["categories"]
+        return_categories = []
+        for category in category_data:
+            if "name" not in category:
+                LOGGER.exception("Error creating/modifying category. Must provide name.")
+                return {"message": "Must provide name for all categories"}, 400
+            document = schema.Category.find_one(name=category["name"])
+            added_category = add_category(document, category)
+            return_categories.append(added_category)
+        return [get_category(category) for category in return_categories], 200
