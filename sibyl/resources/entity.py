@@ -29,6 +29,8 @@ def get_entity(entity_doc, features=True):
     }
     if features:
         entity["features"] = entity_doc.features
+    if "labels" in entity_doc:
+        entity["labels"] = entity_doc.labels
     return entity
 
 

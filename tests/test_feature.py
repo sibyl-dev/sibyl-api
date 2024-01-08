@@ -126,3 +126,15 @@ def test_add_or_modify_multiple(client, features):
     for i in range(len(feature_data)):
         for key in feature_data[i]:
             assert response[i][key] == feature_data[i][key]
+
+    for i in range(len(feature_data)):
+        updated_feature = schema.Feature.find_one(name=feature_data[i]["name"])
+        assert updated_feature is not None
+        for key in features[0]:
+            if key in feature_data[i]:
+                assert updated_feature[key] == feature_data[i][key]
+            elif key != "name":
+                if i == 0:  # Existing feature
+                    assert updated_feature[key] == features[0][key]
+                else:  # New feature
+                    assert not updated_feature[key]
