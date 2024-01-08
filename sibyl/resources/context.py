@@ -1,6 +1,8 @@
 from logging import getLogger
 
 from flask_restful import Resource, reqparse
+from flask import request
+from mongoengine.errors import ValidationError
 
 from sibyl.db import schema
 
@@ -59,6 +61,49 @@ class Context(Resource):
                 "code": 400,
             }, 400
 
+        return {"context": get_context(context)}, 200
+
+    def put(self, context_id):
+        """
+        Update or create a context
+        ---
+        tags:
+          - context
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: context_id
+            in: path
+            schema:
+              type: string
+            description: ID of the context to update/create
+            required: true
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextConfig'
+        responses:
+          200:
+            description: Information about update model
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ContextConfig'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+        config_data = request.json
+        try:
+            context = schema.Context.find_one(id=context_id)
+        except ValidationError:  # context_id not a valid id
+            context = None
+        if context is None:
+            context = schema.Context(config=config_data)
+            context.save()
+        else:
+            context.config.update(config_data)
+            context = context.save()
         return {"context": get_context(context)}, 200
 
 

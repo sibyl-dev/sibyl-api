@@ -98,6 +98,10 @@ schemas = {
         },
         "required": ["name"],
     },
+    "ContextConfig": {
+        "type": "object",
+        "properties": {"config": {"type": "object"}},
+    },
     "Changes": {
         "type": "object",
         "additionalProperties": {"oneOf": [{"type": "string"}, {"type": "number"}]},
