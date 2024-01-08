@@ -1,3 +1,4 @@
+import base64
 import logging
 
 import numpy as np
@@ -63,7 +64,7 @@ class Model(Resource):
 
     def put(self, model_id):
         """
-        Update or create a model by id
+        Update or create a model by id. Does not currently support updating explainer.
         ---
         tags:
           - model
@@ -96,6 +97,8 @@ class Model(Resource):
         if "training_set_id" in model_data:
             training_set = schema.TrainingSet.find_one(id=model_data.pop("training_set_id"))
             model_data["training_set"] = training_set
+        if "explainer" in model_data:
+            model_data["explainer"] = base64.b64decode(model_data["explainer"])
         if model is None:
             model_data["model_id"] = model_id
             model = schema.Model(**model_data)
