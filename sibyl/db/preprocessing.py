@@ -220,7 +220,7 @@ def insert_entities_from_csv(
         list: List of eids inserted
     """
     try:
-        entity_df = pd.read_csv(filename)
+        entity_df = pd.read_csv(filename)  # .replace({np.nan: None})
     except FileNotFoundError:
         raise FileNotFoundError(f"Entities file {filename} not found. Must provide valid file.")
 
@@ -253,7 +253,7 @@ def insert_entities_from_dataframe(
     if entity_df.empty:
         return []
 
-    entity_df = entity_df.replace({np.nan: None})
+    # entity_df = entity_df.replace({np.nan: None})
 
     if "eid" not in entity_df:
         raise ValueError("Entity dataframe must contain column 'eid' at a minimum.")
