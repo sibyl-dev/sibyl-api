@@ -3,6 +3,7 @@
 
 """Tests for `sibylapp` package."""
 import json
+
 from sibyl.db import schema
 
 
