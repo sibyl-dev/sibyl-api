@@ -50,18 +50,20 @@ def categories():
 @pytest.fixture(scope="session")
 def contexts():
     context_1 = {
+        "context_id": "context_1",
         "config": {
             "terms": {"A": "a", "B": "b"},
             "A": "abc",
             "B": {"ab": "cd", "ef": "gh"},
-        }
+        },
     }
     context_2 = {
+        "context_id": "context_2",
         "config": {
             "terms": {"C": "c", "D": "d"},
             "A": "def",
             "B": {"12": "34", "56": "78"},
-        }
+        },
     }
     return [context_1, context_2]
 

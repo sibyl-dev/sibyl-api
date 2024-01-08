@@ -15,7 +15,7 @@ LOGGER = logging.getLogger(__name__)
 
 def _valid_id(val):
     if val is not None and not isinstance(val, str):
-        raise ValidationError("eid must be type string, given %s" % val)
+        raise ValidationError("IDs must be type string, given %s" % val)
 
 
 def _valid_row_ids(val):
@@ -233,8 +233,11 @@ class Context(SibylDocument):
     A **Context** contains information about UI configuration options specific to the given
     context.
     Attributes
+    context_id: str
+        ID of the context
     configs : dict {key : value}
         dictionary of application-specific configurations
     """
 
+    context_id = fields.StringField(required=True, validation=_valid_id)
     config = fields.DictField()

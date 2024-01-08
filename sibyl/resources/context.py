@@ -11,7 +11,7 @@ LOGGER = getLogger(__name__)
 
 def get_context(context_doc):
     context = {
-        "id": str(context_doc.id),
+        "context_id": str(context_doc.context_id),
         "config": context_doc.config,
     }
     return context
@@ -19,7 +19,7 @@ def get_context(context_doc):
 
 def get_context_id(context_doc):
     context = {
-        "id": str(context_doc.id),
+        "context_id": str(context_doc.context_id),
     }
     return context
 
@@ -53,7 +53,7 @@ class Context(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        context = schema.Context.find_one(id=str(context_id))
+        context = schema.Context.find_one(context_id=str(context_id))
         if context is None:
             LOGGER.exception("Error getting context. Context %s does not exist.", context_id)
             return {
@@ -94,12 +94,9 @@ class Context(Resource):
             $ref: '#/components/responses/ErrorMessage'
         """
         config_data = request.json
-        try:
-            context = schema.Context.find_one(id=context_id)
-        except ValidationError:  # context_id not a valid id
-            context = None
+        context = schema.Context.find_one(context_id=context_id)
         if context is None:
-            context = schema.Context(config=config_data)
+            context = schema.Context(context_id=context_id, config=config_data)
             context.save()
         else:
             context.config.update(config_data)

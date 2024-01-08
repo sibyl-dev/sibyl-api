@@ -158,13 +158,14 @@ def insert_categories_from_dataframe(category_df=None):
     return category_df["name"].tolist()
 
 
-def insert_context_from_yaml(filepath):
+def insert_context_from_yaml(filepath, context_id="context"):
     """
     Insert context from a yaml file into the database.
     See sibyl/templates/context_config_template.yml for an example of the format.
 
     Args:
         filepath (string): Filepath of yaml file containing context information
+        context_id (string): name of context to add
     """
     if filepath is None:
         return
@@ -173,16 +174,17 @@ def insert_context_from_yaml(filepath):
     except FileNotFoundError:
         raise FileNotFoundError(f"Context config file {filepath} not found. ")
 
-    return insert_context_from_dict(context_dict)
+    return insert_context_from_dict(context_dict, context_id)
 
 
-def insert_context_from_dict(context_dict):
+def insert_context_from_dict(context_dict, context_id="context"):
     """
     Insert context from a python dictionary into the database.
     See sibyl/templates/context_config_template.yml for an example of config options.
 
     Args:
         context_dict (dict): dict of {context_config_key : context_config_value}
+        context_id (string): name of context to add
     """
     if "output_preset" in context_dict:
         with open(os.path.join(get_project_root(), "sibyl", "db", "output_presets.yml"), "r") as f:
@@ -193,7 +195,7 @@ def insert_context_from_dict(context_dict):
                 if config_name not in output_preset_dict:
                     context_dict[config_name] = config_values[config_name]
 
-    schema.Context.insert(config=context_dict)
+    schema.Context.insert(context_id=context_id, config=context_dict)
 
 
 def insert_entities_from_csv(
