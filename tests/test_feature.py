@@ -61,7 +61,7 @@ def test_update_existing_feature_with_valid_data(client, features):
     feature_data = {
         "description": "Updated description",
         "type": "numeric",
-        "category": "existing_category",
+        "category": "cat1",
     }
 
     response = client.put("/api/v1/features/" + feature_name + "/", json=feature_data).json
@@ -84,7 +84,7 @@ def test_add_feature_with_valid_data(client, features):
     feature_data = {
         "description": "Updated description",
         "type": "numeric",
-        "category": "existing_category",
+        "category": "new_category",
     }
 
     response = client.put("/api/v1/features/" + feature_name + "/", json=feature_data).json
@@ -101,5 +101,28 @@ def test_add_feature_with_valid_data(client, features):
         elif key != "name":
             assert not updated_feature[key]
 
+    # assert new category was created
+    assert schema.Category.find_one(name="new_category") is not None
 
-# def test_add_or_modify_multiple:
+
+def test_add_or_modify_multiple(client, features):
+    feature_data = [
+        {
+            "name": features[0]["name"],
+            "description": "Updated description",
+            "type": "numeric",
+            "category": "cat1",
+        },
+        {
+            "name": "new_feature",
+            "description": "Updated description",
+            "type": "numeric",
+            "category": "new_category",
+        },
+    ]
+
+    response = client.put("/api/v1/features/", json={"features": feature_data}).json
+    assert len(response) == len(feature_data)
+    for i in range(len(feature_data)):
+        for key in feature_data[i]:
+            assert response[i][key] == feature_data[i][key]
