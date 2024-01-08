@@ -3,6 +3,8 @@
 
 """Tests for `sibylapp` package."""
 
+import base64
+
 from sibyl.db import schema
 
 
@@ -55,7 +57,7 @@ def test_get_prediction(client, models, entities):
     assert response["output"] == expected_output
 
 
-def test_multi_prediction(client, models, entities, multirow_entities):
+def test_multi_prediction(client, models, entities, features, multirow_entities):
     model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
 
     response = client.post(
@@ -81,7 +83,7 @@ def test_multi_prediction(client, models, entities, multirow_entities):
         assert response["predictions"][entity["eid"]] == features["A"] - features["B"]
 
 
-def test_multi_prediction_multi_rows(client, models, multirow_entities):
+def test_multi_prediction_multi_rows(client, models, features, multirow_entities):
     model_id = str(schema.Model.find_one(model_id=models[0]["model_id"]).model_id)
     entity = multirow_entities[0]
 
@@ -97,3 +99,39 @@ def test_multi_prediction_multi_rows(client, models, multirow_entities):
     for row in entity["row_ids"]:
         features = entity["features"][row]
         assert response["predictions"][row] == features["A"] - features["B"]
+
+
+def test_modify_model(client, models):
+    model_id = models[0]["model_id"]
+    changes = {"description": "new description", "performance": "new performance"}
+    model_response = client.put("/api/v1/models/" + model_id + "/", json=changes).json
+    assert model_response["model_id"] == model_id
+
+    model = schema.Model.find_one(model_id=model_id)
+    for key in models[0]:
+        if key in changes:
+            assert model[key] == changes[key]
+        else:
+            assert model[key] == models[0][key]
+
+
+import pickle
+
+
+def test_add_model(client, models):
+    model_id = "new_model"
+    changes = {
+        "description": "new description",
+        "performance": "new performance",
+        "explainer": base64.b64encode(models[0]["explainer"]).decode("utf-8"),
+    }
+    model_response = client.put("/api/v1/models/" + model_id + "/", json=changes).json
+    assert model_response["model_id"] == model_id
+
+    model = schema.Model.find_one(model_id=model_id)
+    for key in changes:
+        assert key in model
+        if key == "explainer":
+            assert model[key] == models[0]["explainer"]
+        else:
+            assert model[key] == changes[key]

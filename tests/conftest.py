@@ -50,18 +50,20 @@ def categories():
 @pytest.fixture(scope="session")
 def contexts():
     context_1 = {
+        "context_id": "context_1",
         "config": {
             "terms": {"A": "a", "B": "b"},
             "A": "abc",
             "B": {"ab": "cd", "ef": "gh"},
-        }
+        },
     }
     context_2 = {
+        "context_id": "context_2",
         "config": {
             "terms": {"C": "c", "D": "d"},
             "A": "def",
             "B": {"12": "34", "56": "78"},
-        }
+        },
     }
     return [context_1, context_2]
 
@@ -82,6 +84,7 @@ def features():
             "category": "cat2",
             "type": "categorical",
             "values": ["value1", "value2", "value3"],
+            "negated_description": "not jki",
         },
         {
             "name": "bin_feat",
@@ -253,7 +256,7 @@ def models():
     return models
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(autouse=True)
 def testdb(categories, features, entities, groups, models, contexts):
     client = MongoClient(test_host, test_port)
     client.drop_database(test_database_name)

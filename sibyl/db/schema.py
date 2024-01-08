@@ -15,7 +15,7 @@ LOGGER = logging.getLogger(__name__)
 
 def _valid_id(val):
     if val is not None and not isinstance(val, str):
-        raise ValidationError("eid must be type string, given %s" % val)
+        raise ValidationError("IDs must be type string, given %s" % val)
 
 
 def _valid_row_ids(val):
@@ -78,18 +78,20 @@ class Entity(SibylDocument):
     ----------
     eid : str
         Unique ID of the entity
+    row_ids : list [str]
     features : dict {feature_name : feature_value}
         Feature values for the entity
     property : dict {property : value}
         Domain-specific properties
+    labels : dict {row_id : label}
     events : list [Event object]
         List of events this entity was involved in
     """
 
-    eid = fields.StringField(validation=_valid_id, unique=True)
-    row_ids = fields.ListField(validation=_valid_row_ids)
+    eid = fields.StringField(validation=_valid_id, unique=True, required=True)
+    row_ids = fields.ListField(validation=_valid_row_ids, required=True)
 
-    features = fields.DictField()  # {row_id: {feature:value}}
+    features = fields.DictField(required=True)  # {row_id: {feature:value}}
     property = fields.DictField()  # {property:value}
     labels = fields.DictField()  # {row_id: ground_truth_label}, as provided
 
@@ -231,8 +233,11 @@ class Context(SibylDocument):
     A **Context** contains information about UI configuration options specific to the given
     context.
     Attributes
+    context_id: str
+        ID of the context
     configs : dict {key : value}
         dictionary of application-specific configurations
     """
 
+    context_id = fields.StringField(required=True, validation=_valid_id)
     config = fields.DictField()

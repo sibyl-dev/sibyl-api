@@ -21,41 +21,50 @@ schemas = {
         "type": "object",
         "properties": {
             "eid": {"type": "string"},
-            "features": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "name": {"type": "string"},
-                        "value": {
-                            "oneOf": [
-                                {"type": "string"},
-                                {"type": "integer"},
-                                {"type": "number"},
-                            ]
-                        },
-                    },
-                },
-            },
-            "property": {"type": "object", "additionalProperties": {}},  # any
+            "features": {"type": "object"},
+            "row_ids": {"type": "array", "items": {"type": "string"}},
+            "labels": {"type": "object"},
+            "property": {"type": "object", "additionalProperties": {}},
         },
-        "required": ["code", "message"],
+        "required": ["eid", "message"],
+    },
+    "EntityWithoutEid": {
+        "type": "object",
+        "properties": {
+            "features": {"type": "object"},
+            "row_ids": {"type": "array", "items": {"type": "string"}},
+            "labels": {"type": "object"},
+            "property": {"type": "object", "additionalProperties": {}},
+        },
+        "required": ["eid", "message"],
     },
     "Model": {
         "type": "object",
         "properties": {
             "id": {"type": "string"},
-            "name": {"type": "string"},
             "description": {"type": "string"},
             "performance": {"type": "string"},
+            "importances": {"type": "object"},
+            "explainer": {"type": "string"},
+            "training_set_id": {"type": "string"},
         },
-        "required": ["id"],
+        "required": ["id", "explainer"],
+    },
+    "ModelWithoutId": {
+        "type": "object",
+        "properties": {
+            "description": {"type": "string"},
+            "performance": {"type": "string"},
+            "importances": {"type": "object"},
+            "explainer": {"type": "string"},
+            "training_set_id": {"type": "string"},
+        },
+        "required": ["id", "explainer"],
     },
     "Model_Partial": {
         "type": "object",
         "properties": {
             "id": {"type": "string"},
-            "name": {"type": "string"},
         },
         "required": ["id"],
     },
@@ -68,7 +77,17 @@ schemas = {
             "category": {"type": "string"},
             "type": {"type": "string"},
         },
-        "required": ["name"],
+        "required": ["name", "type"],
+    },
+    "FeatureWithoutName": {
+        "type": "object",
+        "properties": {
+            "description": {"type": "string"},
+            "negated_description": {"type": "string"},
+            "category": {"type": "string"},
+            "type": {"type": "string"},
+        },
+        "required": [],
     },
     "Category": {
         "type": "object",
@@ -78,6 +97,10 @@ schemas = {
             "abbreviation": {"type": "string"},
         },
         "required": ["name"],
+    },
+    "ContextConfig": {
+        "type": "object",
+        "properties": {"config": {"type": "object"}},
     },
     "Changes": {
         "type": "object",
@@ -105,7 +128,6 @@ schemas = {
 tags = [
     {"name": "default", "description": "Uncategorized APIs"},
     {"name": "entity", "description": "Everything about entity interactions"},
-    {"name": "referral", "description": "Everything about referral interactions"},
 ]
 
 

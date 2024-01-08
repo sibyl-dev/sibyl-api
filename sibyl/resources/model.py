@@ -1,3 +1,4 @@
+import base64
 import logging
 
 import numpy as np
@@ -34,7 +35,7 @@ class Model(Resource):
         security:
           - tokenAuth: []
         parameters:
-          - name: model_name
+          - name: model_id
             in: path
             schema:
               type: string
@@ -59,6 +60,52 @@ class Model(Resource):
             LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
             return {"message": "Model {} does not exist".format(model_id)}, 400
 
+        return get_model(model, basic=False), 200
+
+    def put(self, model_id):
+        """
+        Update or create a model by id. Does not currently support updating explainer.
+        ---
+        tags:
+          - model
+        security:
+          - tokenAuth: []
+        parameters:
+          - name: model_id
+            in: path
+            schema:
+              type: string
+            required: true
+            description: Name of the model to update/create
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelWithoutId'
+        responses:
+          200:
+            description: Information about update model
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Model'
+          400:
+            $ref: '#/components/responses/ErrorMessage'
+        """
+        model_data = request.json
+        model = schema.Model.find_one(model_id=model_id)
+        if "training_set_id" in model_data:
+            training_set = schema.TrainingSet.find_one(id=model_data.pop("training_set_id"))
+            model_data["training_set"] = training_set
+        if "explainer" in model_data:
+            model_data["explainer"] = base64.b64decode(model_data["explainer"])
+        if model is None:
+            model_data["model_id"] = model_id
+            model = schema.Model(**model_data)
+            model.save()
+        else:
+            model.modify(**model_data)
+            model = model.save()
         return get_model(model, basic=False), 200
 
 
