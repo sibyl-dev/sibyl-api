@@ -195,6 +195,32 @@ def context_configs():
                 term, max_chars=15, placeholder=helper
             )
 
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("Select pages to enable:")
+        all_pages = [
+            "Explore a Prediction",
+            "Similar Entities",
+            "Compare Entities",
+            "Experiment with Changes",
+            "Understand the Model",
+            "Settings",
+        ]
+        show_pages_bools = []
+        for page in all_pages:
+            show_pages_bools.append(st.toggle(page, value=True))
+        config_data["pages_to_show"] = [
+            page for page, show in zip(all_pages, show_pages_bools) if show
+        ]
+    with col2:
+        allow_page_selection = st.radio(
+            "Should users be able to enable additional pages?",
+            ["Yes", "No"],
+            horizontal=True,
+            index=1,
+        )
+        config_data["allow_page_selection"] = True if allow_page_selection == "Yes" else False
+
     return config_data
 
 
