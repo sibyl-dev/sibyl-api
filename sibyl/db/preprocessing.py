@@ -355,7 +355,7 @@ def insert_model_from_file(
         fit_se (bool): Whether to fit similar examples on the training set. The similar examples
             explainer is very large when fit and may not fit in the database; if this is the case,
             set fit_se to False.
-        validate (bool): Whether to validate the model and explainer by running predict and explain
+        validate (bool): Whether to validate the model and realapp by running predict and explain
 
     Returns:
         RealApp: the RealApp object inserted, possibly fit
@@ -718,7 +718,7 @@ def prepare_database(
         realapp_directory = _process_fp(realapp_directory)
         if not os.path.isdir(realapp_directory):
             raise FileNotFoundError(
-                f"Explainer directory {realapp_directory} is not a valid directory."
+                f"RealApp directory {realapp_directory} is not a valid directory."
             )
         insert_models_from_directory(
             realapp_directory,

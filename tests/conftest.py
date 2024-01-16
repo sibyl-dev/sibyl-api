@@ -240,8 +240,8 @@ def models():
     dataset = pd.DataFrame(np.random.randint(0, 5, size=(100, 6)), columns=columns)
     transformer = FeatureSelectTransformer(columns=["A", "B", "C"]).fit(dataset)
 
-    explainer = RealApp(model, dataset, transformers=transformer, id_column="eid")
-    explainer_serial = pickle.dumps(explainer)
+    realapp = RealApp(model, dataset, transformers=transformer, id_column="eid")
+    realapp_serial = pickle.dumps(realapp)
 
     models = [
         {
@@ -249,9 +249,9 @@ def models():
             "description": "a model",
             "performance": "does well",
             "importances": {"A": 100, "B": 0, "C": 0, "D": 0, "E": 0, "F": 0},
-            "explainer": explainer_serial,
+            "realapp": realapp_serial,
         },
-        {"model_id": "filler", "explainer": explainer_serial},
+        {"model_id": "filler", "realapp": realapp_serial},
     ]
     return models
 

@@ -62,7 +62,7 @@ poetry run invoke load-housing-data
 
 Alternatively, you can manually prepare and load the database by running teh following two commands:
 ```bash
-poetry run python sibyl/sample_applications/prepare_housing_application.py   # Prepare model and explainer
+poetry run python sibyl/sample_applications/prepare_housing_application.py   # Prepare model and realapp
 poetry run python sibyl/db/preprocessing.py sibyl/sample_applications/housing_config.yml   # Load in database
 ```
 

@@ -123,7 +123,7 @@ def test_add_model(client, models):
     changes = {
         "description": "new description",
         "performance": "new performance",
-        "explainer": base64.b64encode(models[0]["explainer"]).decode("utf-8"),
+        "realapp": base64.b64encode(models[0]["realapp"]).decode("utf-8"),
     }
     model_response = client.put("/api/v1/models/" + model_id + "/", json=changes).json
     assert model_response["model_id"] == model_id
@@ -131,7 +131,7 @@ def test_add_model(client, models):
     model = schema.Model.find_one(model_id=model_id)
     for key in changes:
         assert key in model
-        if key == "explainer":
-            assert model[key] == models[0]["explainer"]
+        if key == "realapp":
+            assert model[key] == models[0]["realapp"]
         else:
             assert model[key] == changes[key]

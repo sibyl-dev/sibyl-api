@@ -19,21 +19,21 @@ def run():
     transformers = ames_housing.load_transformers()
     model = ames_housing.load_model()
 
-    explainer = RealApp(model, transformers=transformers, id_column="eid")
-    explainer.prepare_feature_contributions(
+    realapp = RealApp(model, transformers=transformers, id_column="eid")
+    realapp.prepare_feature_contributions(
         x_train_orig=x_orig.drop("eid", axis="columns"), y_train=y_orig
     )
-    explainer.prepare_feature_importance(
+    realapp.prepare_feature_importance(
         x_train_orig=x_orig.drop("eid", axis="columns"),
         y_train=y_orig,
     )
-    explainer.prepare_similar_examples(
+    realapp.prepare_similar_examples(
         x_train_orig=x_orig.drop("eid", axis="columns"),
         y_train=y_orig,
     )
 
-    print("Dumping housing explainer...")
-    pickle.dump(explainer, open(os.path.join(directory, "explainer.pkl"), "wb"))
+    print("Dumping housing realapp...")
+    pickle.dump(realapp, open(os.path.join(directory, "realapp.pkl"), "wb"))
 
 
 if __name__ == "__main__":

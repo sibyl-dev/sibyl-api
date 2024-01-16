@@ -64,7 +64,7 @@ class Model(Resource):
 
     def put(self, model_id):
         """
-        Update or create a model by id. Does not currently support updating explainer.
+        Update or create a model by id. Does not currently support updating realapp.
         ---
         tags:
           - model
@@ -97,8 +97,8 @@ class Model(Resource):
         if "training_set_id" in model_data:
             training_set = schema.TrainingSet.find_one(id=model_data.pop("training_set_id"))
             model_data["training_set"] = training_set
-        if "explainer" in model_data:
-            model_data["explainer"] = base64.b64decode(model_data["explainer"])
+        if "realapp" in model_data:
+            model_data["realapp"] = base64.b64decode(model_data["realapp"])
         if model is None:
             model_data["model_id"] = model_id
             model = schema.Model(**model_data)
@@ -255,14 +255,14 @@ class Prediction(Resource):
         else:
             entity_features = pd.DataFrame(first(entity.features), index=[0])
 
-        success, payload = helpers.load_explainer(model_id)
+        success, payload = helpers.load_realapp(model_id)
         if success:
-            explainer = payload[0]
+            realapp = payload[0]
         else:
             message, error_code = payload
             return message, error_code
 
-        prediction = explainer.predict(entity_features)[0].tolist()
+        prediction = realapp.predict(entity_features)[0].tolist()
         return {"output": prediction}, 200
 
 
@@ -332,19 +332,19 @@ class MultiPrediction(Resource):
 
         eids, model_id, row_ids, return_proba = get_and_validate_params(attr_info)
         entities = get_entities_table(eids, row_ids)
-        success, payload = helpers.load_explainer(model_id)
+        success, payload = helpers.load_realapp(model_id)
         if success:
-            explainer = payload[0]
+            realapp = payload[0]
         else:
             message, error_code = payload
             return message, error_code
         if return_proba:
-            prediction_probs = explainer.predict_proba(entities)
+            prediction_probs = realapp.predict_proba(entities)
             # the probability of the predicted class is the largest in the output probabilities
             predictions = {
                 key: numpy_decoder(np.max(prediction_probs[key])) for key in prediction_probs
             }
         else:
-            predictions = explainer.predict(entities)
+            predictions = realapp.predict(entities)
             predictions = {key: numpy_decoder(predictions[key]) for key in predictions}
         return {"predictions": predictions}, 200

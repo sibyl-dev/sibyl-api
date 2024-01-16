@@ -84,19 +84,19 @@ def feature_configs():
         return None
 
 
-def explainer_configs():
-    st.header("Prepare Explainer")
-    explainer_file = st.file_uploader(f"Upload pickled RealApp", type="pkl")
-    if explainer_file is not None:
+def realapp_configs():
+    st.header("Prepare Model and Explanation Application (RealApp)")
+    realapp_file = st.file_uploader(f"Upload pickled RealApp", type="pkl")
+    if realapp_file is not None:
         try:
-            explainer = pickle.load(explainer_file)
+            realapp = pickle.load(realapp_file)
         except Exception as e:
-            st.error(f"Error unpickling explainer: {e}")
+            st.error(f"Error unpickling RealApp: {e}")
             return None
-        if type(explainer) is not RealApp:
+        if type(realapp) is not RealApp:
             st.error(f"Must provide pickled RealApp")
             return None
-        return explainer
+        return realapp
 
 
 def load_existing_config(loader):
@@ -235,8 +235,8 @@ def main():
             feature_df = feature_configs()
             if feature_df is not None:
                 st.divider()
-                explainer = explainer_configs()
-                if explainer is not None:
+                realapp = realapp_configs()
+                if realapp is not None:
                     context = context_configs()
                     st.divider()
                     drop_old = st.checkbox("Drop old database if exists?")
@@ -247,7 +247,7 @@ def main():
                                 database_name,
                                 entities_df=entity_df,
                                 features_df=feature_df,
-                                realapp=explainer,
+                                realapp=realapp,
                                 context_dict=context,
                                 label_column=label_column,
                                 drop_old=drop_old,
