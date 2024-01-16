@@ -27,12 +27,12 @@ def _load_data(training_entity_filepath, target):
     return X, y
 
 
-def _validate_model_and_explainer(explainer, train_dataset):
+def _validate_model_and_realapp(realapp, train_dataset):
     """
     Run predict and explain processes to make sure everything is working correctly
     """
-    explainer.predict(train_dataset.iloc[0:2])
-    explainer.produce_feature_contributions(train_dataset.iloc[0:2])
+    realapp.predict(train_dataset.iloc[0:2])
+    realapp.produce_feature_contributions(train_dataset.iloc[0:2])
 
 
 def connect_to_db(database_name, drop_old=True):
@@ -383,7 +383,7 @@ def insert_model_from_file(
 
 
 def insert_model_from_object(
-    realApp,
+    realapp,
     model_id=None,
     model_description="",
     model_performance="",
@@ -399,7 +399,7 @@ def insert_model_from_object(
     Insert a model (RealApp) into the database from a pickle file.
 
     Args:
-        realApp (RealApp): RealApp object to insert
+        realapp (RealApp): RealApp object to insert
         fit_explainers (bool): Whether to fit explainers on the training set.
             If True, one of training_set or training_df must be provided
         training_set (TrainingSet): TrainingSet object to fit explainers with.
@@ -443,19 +443,19 @@ def insert_model_from_object(
             raise ValueError(error_message)
 
         if fit_explainers:
-            realApp.prepare_feature_contributions(
+            realapp.prepare_feature_contributions(
                 x_train_orig=x_train_orig,
                 y_train=y_train,
                 training_size=training_size,
             )
-            realApp.prepare_feature_importance(
+            realapp.prepare_feature_importance(
                 model_id=0,
                 x_train_orig=x_train_orig,
                 y_train=y_train,
                 training_size=training_size,
             )
             if fit_se:
-                realApp.prepare_similar_examples(
+                realapp.prepare_similar_examples(
                     model_id=0,
                     x_train_orig=x_train_orig,
                     y_train=y_train,
@@ -464,11 +464,11 @@ def insert_model_from_object(
                 )
         if validate:
             # Check that everything is working correctly
-            _validate_model_and_explainer(realApp, x_train_orig)
+            _validate_model_and_realapp(realapp, x_train_orig)
 
-    explainer_serial = pickle.dumps(realApp)
+    realapp_serial = pickle.dumps(realapp)
 
-    importance_dict = realApp.produce_feature_importance()
+    importance_dict = realapp.produce_feature_importance()
     importance_df = pd.DataFrame.from_dict(importance_dict)
     importance_df = importance_df.rename(
         columns={"Feature Name": "name", "Importance": "importance"}
@@ -482,11 +482,11 @@ def insert_model_from_object(
         "importances": importances,
         "description": model_description,
         "performance": model_performance,
-        "explainer": explainer_serial,
+        "realapp": realapp_serial,
         "training_set": training_set,
     }
     schema.Model.insert(**items)
-    return realApp
+    return realapp
 
 
 def insert_models_from_directory(
@@ -559,9 +559,9 @@ def prepare_database_from_config(config_file, directory=None):
         label_column=cfg.get("label_column", "label"),
         context_filepath=cfg.get("context_config_fn"),
         use_entities_as_training_set=True,
-        realapp_filepath=cfg.get("explainer_fn"),
-        realapp_directory=cfg.get("explainer_directory_name"),
-        model_id=cfg.get("explainer_name"),
+        realapp_filepath=cfg.get("realapp_fn"),
+        realapp_directory=cfg.get("realapp_directory_name"),
+        model_id=cfg.get("model_id"),
         fit_explainers=cfg.get("fit_explainers", True),
         training_size=cfg.get("training_size"),
         fit_se=cfg.get("fit_se", True),
