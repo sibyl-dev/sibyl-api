@@ -183,11 +183,14 @@ def context_configs():
 
     with st.expander("Select here to modify terms"):
         terms = [
-            ("Entity", "Label of whatever is being predicted on"),
-            ("Feature", "Properties of entities"),
-            ("Prediction", "Output of model"),
-            ("Positive", "Features that increase the model output"),
-            ("Negative", "Features that decrease the model output"),
+            ("Entity", "What is being predicted on (Patient, House, Region, ...)"),
+            ("Feature", "How to refer to information (Feature, Factor, Property, Variable, ...)"),
+            ("Prediction", "Output of model (Price, Score, Probability, ...)"),
+            ("Positive", "Features that increase the model output (Beneficial, Protective, ...)"),
+            (
+                "Negative",
+                "Features that decrease the model output (Detrimental, Risk, Harmful ...)",
+            ),
         ]
         config_data["terms"] = dict()
         for term, helper in terms:
