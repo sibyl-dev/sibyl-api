@@ -63,13 +63,44 @@ def get_entities_df():
     if len(entities) == 0:
         return pd.DataFrame()
     feature_dict = entities.set_index("eid")["features"].to_dict()
-    df = pd.DataFrame.from_dict(
+    feature_df = pd.DataFrame.from_dict(
         {(i, j): feature_dict[i][j] for i in feature_dict.keys() for j in feature_dict[i].keys()},
         orient="index",
     )
+    label_dict = entities.set_index("eid")["labels"].to_dict()
+    label_df = pd.DataFrame.from_dict(
+        {(i, j): label_dict[i][j] for i in label_dict.keys() for j in label_dict[i].keys()},
+        orient="index",
+        columns=["label"],
+    )
+    df = pd.concat([feature_df, label_df], axis=1)
     df.insert(0, "eid", df.index.get_level_values(0))
     df.insert(1, "row_id", df.index.get_level_values(1))
     return df.reset_index(drop=True)
+
+
+def get_features_df():
+    """
+    Get features dataframe from database
+    """
+    features = schema.Feature.find(as_df_=True)
+    features = features[
+        features.columns
+        & ["name", "description", "category", "type", "negated_description", "values"]
+    ]
+    if len(features) == 0:
+        return pd.DataFrame()
+    return features
+
+
+def get_context_dict():
+    """
+    Get context dictionary from database
+    """
+    context = schema.Context.find().first()
+    if len(context) == 0:
+        return {}
+    return context["config"]
 
 
 def insert_features_from_csv(filepath=None):

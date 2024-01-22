@@ -294,8 +294,9 @@ def existing_database():
             st.session_state.connected = False
             st.session_state.database_name = None
             st.rerun()
-        entities = db.get_entities_df()
-        st.data_editor(entities, key="entities")
+        st.data_editor(db.get_entities_df(), key="entities")
+        st.data_editor(db.get_features_df(), key="features")
+        st.write(db.get_context_dict())
 
 
 def main():
