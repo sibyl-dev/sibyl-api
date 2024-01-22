@@ -42,7 +42,7 @@ def _validate_features(feature_df):
 
 
 def upload_csv(term, validate_func):
-    csv = st.file_uploader(f"Upload {term} file", type="csv")
+    csv = st.file_uploader(f"Upload {term} file", type="csv", key=f"{term}_file")
     df = None
     if csv is not None:
         df = pd.read_csv(csv)
@@ -60,10 +60,10 @@ def entity_configs():
         )
         with st.expander("Edit entities"):
             entity_df = show_table(entity_df)
-        return entity_df, label_column
+        return {"entities_df": entity_df, "label_column": label_column}
     else:
         st.info(f"Upload entity csv above to start editing")
-        return None, None
+        return None
 
 
 def feature_configs():
@@ -78,7 +78,7 @@ def feature_configs():
         }
         with st.expander("Edit features"):
             result_df = show_table(feature_df, key=f"feature_editor", column_config=column_config)
-        return result_df
+        return {"features_df": result_df}
     else:
         st.info(f"Upload a feature csv above to start editing")
         return None
@@ -96,7 +96,7 @@ def explainer_configs():
         if type(explainer) is not RealApp:
             st.error(f"Must provide pickled RealApp")
             return None
-        return explainer
+        return {"explainer": explainer}
 
 
 def load_existing_config(loader):
@@ -221,44 +221,65 @@ def context_configs():
         )
         config_data["allow_page_selection"] = True if allow_page_selection == "Yes" else False
 
-    return config_data
+    return {"context": config_data}
+
+
+def get_setup_type():
+    setup_type = st.radio(
+        "What type of setup do you want to run?",
+        ["New Database", "Existing Database"],
+        horizontal=True,
+    )
+    if setup_type == "Existing Database":
+        database_name = st.text_input("Database name?", max_chars=15)
+    return setup_type
+
+
+def new_database(components, database_name):
+    results = {}
+    for title in components:
+        result = components[title]()
+        st.divider()
+        if result is None:
+            break
+        else:
+            results.update(result)
+
+    drop_old = st.checkbox("Drop old database if exists?")
+    if st.button("Prepare Database"):
+        try:
+            pbar = st.progress(0)
+            prepare_database(
+                database_name,
+                entities_df=results["entities_df"],
+                features_df=results["features_df"],
+                realapp=results["explainer"],
+                context_dict=results["context"],
+                label_column=results["label_column"],
+                drop_old=drop_old,
+                streamlit_progress_bar_func=pbar.progress,
+                fit_explainers=False,
+            )
+        except Exception as e:
+            st.error(f"Error preparing database: {e}")
+        else:
+            st.success("Database prepared successfully!")
+            st.balloons()
 
 
 def main():
     st.title("Configuration Wizard")
     database_name = st.text_input("Database name?", max_chars=15)
-
     if database_name is not None and database_name != "":
-        entity_df, label_column = entity_configs()
-        if entity_df is not None:
-            st.divider()
-            feature_df = feature_configs()
-            if feature_df is not None:
-                st.divider()
-                explainer = explainer_configs()
-                if explainer is not None:
-                    context = context_configs()
-                    st.divider()
-                    drop_old = st.checkbox("Drop old database if exists?")
-                    if st.button("Prepare Database"):
-                        try:
-                            pbar = st.progress(0)
-                            prepare_database(
-                                database_name,
-                                entities_df=entity_df,
-                                features_df=feature_df,
-                                realapp=explainer,
-                                context_dict=context,
-                                label_column=label_column,
-                                drop_old=drop_old,
-                                streamlit_progress_bar_func=pbar.progress,
-                                fit_explainers=False,
-                            )
-                        except Exception as e:
-                            st.error(f"Error preparing database: {e}")
-                        else:
-                            st.success("Database prepared successfully!")
-                            st.balloons()
+        new_database(
+            {
+                "Entities": entity_configs,
+                "Features": feature_configs,
+                "Explainer": explainer_configs,
+                "Context": context_configs,
+            },
+            database_name,
+        )
 
 
 if __name__ == "__main__":
