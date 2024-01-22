@@ -224,62 +224,53 @@ def context_configs():
     return {"context": config_data}
 
 
-def get_setup_type():
-    setup_type = st.radio(
-        "What type of setup do you want to run?",
-        ["New Database", "Existing Database"],
-        horizontal=True,
-    )
-    if setup_type == "Existing Database":
-        database_name = st.text_input("Database name?", max_chars=15)
-    return setup_type
-
-
-def new_database(components, database_name):
+def run_components(components):
     results = {}
     for title in components:
         result = components[title]()
         st.divider()
         if result is None:
-            break
+            return None
         else:
             results.update(result)
+    return results
 
-    drop_old = st.checkbox("Drop old database if exists?")
-    if st.button("Prepare Database"):
-        try:
-            pbar = st.progress(0)
-            prepare_database(
-                database_name,
-                entities_df=results["entities_df"],
-                features_df=results["features_df"],
-                realapp=results["explainer"],
-                context_dict=results["context"],
-                label_column=results["label_column"],
-                drop_old=drop_old,
-                streamlit_progress_bar_func=pbar.progress,
-                fit_explainers=False,
-            )
-        except Exception as e:
-            st.error(f"Error preparing database: {e}")
-        else:
-            st.success("Database prepared successfully!")
-            st.balloons()
+
+def new_database():
+    database_name = st.text_input("Database name?", max_chars=15)
+    if database_name is not None and database_name != "":
+        results = run_components({
+            "Entities": entity_configs,
+            "Features": feature_configs,
+            "Explainer": explainer_configs,
+            "Context": context_configs,
+        })
+        if results is not None:
+            drop_old = st.checkbox("Drop old database if exists?")
+            if st.button("Prepare Database"):
+                try:
+                    pbar = st.progress(0)
+                    prepare_database(
+                        database_name,
+                        entities_df=results["entities_df"],
+                        features_df=results["features_df"],
+                        realapp=results["explainer"],
+                        context_dict=results["context"],
+                        label_column=results["label_column"],
+                        drop_old=drop_old,
+                        streamlit_progress_bar_func=pbar.progress,
+                        fit_explainers=False,
+                    )
+                except Exception as e:
+                    st.error(f"Error preparing database: {e}")
+                else:
+                    st.success("Database prepared successfully!")
+                    st.balloons()
 
 
 def main():
     st.title("Configuration Wizard")
-    database_name = st.text_input("Database name?", max_chars=15)
-    if database_name is not None and database_name != "":
-        new_database(
-            {
-                "Entities": entity_configs,
-                "Features": feature_configs,
-                "Explainer": explainer_configs,
-                "Context": context_configs,
-            },
-            database_name,
-        )
+    new_database()
 
 
 if __name__ == "__main__":
