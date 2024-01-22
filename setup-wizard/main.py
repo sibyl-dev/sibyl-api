@@ -6,7 +6,7 @@ import ruamel.yaml as yaml
 import streamlit as st
 from pyreal import RealApp
 
-from sibyl.db.preprocessing import prepare_database
+from sibyl.db import preprocessing as db
 
 
 def represent_none(self, _):
@@ -253,7 +253,7 @@ def new_database():
             if st.button("Prepare Database"):
                 try:
                     pbar = st.progress(0)
-                    prepare_database(
+                    db.prepare_database(
                         database_name,
                         entities_df=results["entities_df"],
                         features_df=results["features_df"],
@@ -271,9 +271,40 @@ def new_database():
                     st.balloons()
 
 
+def existing_database():
+    if "connected" not in st.session_state:
+        st.session_state.connected = False
+    if "database_name" not in st.session_state:
+        st.session_state.database_name = None
+    if not st.session_state.connected:
+        st.text_input("Database name?", max_chars=15, key="database_name")
+        if st.session_state["database_name"] is not None:
+            if st.button("Connect to database"):
+                try:
+                    db.connect_to_db(st.session_state["database_name"], drop_old=False)
+                except Exception as e:
+                    st.error(f"Error connecting to database {e}")
+                else:
+                    st.session_state.connected = True
+                    st.rerun()
+    else:
+        st.info(f"Connected to {st.session_state.database_name}")
+        if st.button("Disconnect"):
+            db.disconnect_from_db()
+            st.session_state.connected = False
+            st.session_state.database_name = None
+            st.rerun()
+        entities = db.get_entities_df()
+        st.data_editor(entities, key="entities")
+
+
 def main():
     st.title("Configuration Wizard")
-    new_database()
+    setup_mode = st.radio("Setup mode", ["New Database", "Existing Database"], horizontal=True)
+    if setup_mode == "New Database":
+        new_database()
+    if setup_mode == "Existing Database":
+        existing_database()
 
 
 if __name__ == "__main__":
