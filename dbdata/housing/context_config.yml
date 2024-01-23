@@ -21,3 +21,12 @@ terms:
   prediction: "Sale Price"
   positive: "Beneficial"
   negative: "Detrimental"
+
+pages_to_show:
+  - Explore a Prediction
+  - Similar Entities
+  - Experiment with Changes
+  - Understand the Model
+  - Settings
+
+allow_page_selection: true

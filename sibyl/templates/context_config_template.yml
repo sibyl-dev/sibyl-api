@@ -28,3 +28,14 @@ terms:
   prediction:
   increasing:  # As in, `increasing features', or features that increase model prediction
   decreasing:  # As in, `decreasing features', or features that decrease model prediction
+
+# Pages to show in the UI (see UI configs for options)
+pages_to_show:
+  - Explore a Prediction
+  - Similar Entities
+  - Compare Entities
+  - Experiment with Changes
+  - Understand the Model
+  - Settings
+# Whether to allow users to select their own pages
+allow_page_selection:

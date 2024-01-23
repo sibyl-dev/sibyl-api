@@ -1,8 +1,7 @@
 from logging import getLogger
 
 from flask import request
-from flask_restful import Resource, reqparse
-from mongoengine.errors import ValidationError
+from flask_restful import Resource
 
 from sibyl.db import schema
 
