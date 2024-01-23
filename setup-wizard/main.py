@@ -138,41 +138,65 @@ def download_config(loader, config_data, existing_config):
 
 def context_configs(config_dict=None):
     st.header("Configure Context")
-    loader = yaml.YAML()
+    if config_dict is None:
+        config_dict = {}
 
     config_data = dict()
 
-    use_rows = st.radio("Does your data have multiple rows?", ["Yes", "No"], horizontal=True)
+    use_rows = st.radio(
+        "Does your data have multiple rows?",
+        ["No", "Yes"],
+        horizontal=True,
+        index=(1 if config_dict.get("use_rows", False) else 0),
+    )
     config_data["use_rows"] = True if use_rows == "Yes" else False
 
     if config_data["use_rows"]:
-        config_data["row_label"] = st.text_input("How should we label rows?", max_chars=25)
+        config_data["row_label"] = st.text_input(
+            "How should we label rows?", max_chars=25, value=config_dict.get("row_label", "")
+        )
 
     output_type = st.radio(
-        "What is your model's output type?", ["Numeric", "Boolean", "Categorical"], horizontal=True
+        "What is your model's output type?",
+        ["Numeric", "Boolean", "Categorical"],
+        horizontal=True,
+        index=(
+            0
+            if config_dict.get("output_type", "numeric") == "numeric"
+            else 1 if config_dict.get("output_type", "numeric") == "boolean" else 2
+        ),
     )
     config_data["output_type"] = output_type.lower()
 
     if config_data["output_type"] == "boolean":
         show_probs = st.radio(
-            "Does your model support probability outputs?", ["Yes", "No"], horizontal=True
+            "Does your model support probability outputs?",
+            ["No", "Yes"],
+            horizontal=True,
+            index=(1 if config_dict.get("show_probs", False) else 0),
         )
         config_data["show_probs"] = True if show_probs == "Yes" else False
         config_data["output_pos_label"] = st.text_input(
-            "How should we label positive predictions?", max_chars=25
+            "How should we label predictions of 'True'?",
+            max_chars=25,
+            value=(config_dict.get("output_pos_label", "")),
         )
         config_data["output_neg_label"] = st.text_input(
-            "How should we label negative predictions?", max_chars=25
+            "How should we label predictions of 'False'?",
+            max_chars=25,
+            value=(config_dict.get("output_neg_label", "")),
         )
     if config_data["output_type"] == "numeric":
         output_format_string = st.radio(
             "How should we format the output?",
             ["1,234", "1,234.56", "$1,234", "$1,234.56", "No Formatting", "Custom"],
             horizontal=True,
+            index=(0 if config_dict.get("output_format_string", None) is None else 5),
         )
         if output_format_string == "Custom":
             config_data["output_format_string"] = st.text_input(
-                "How should we format the output (python f-string)?"
+                "How should we format the output (python f-string)?",
+                value=config_dict.get("output_format_string", ""),
             )
         elif output_format_string != "No Formatting":
             formats = {
@@ -187,6 +211,11 @@ def context_configs(config_dict=None):
         "Does an increasing model prediction refer to a positive or negative outcome?",
         ["Positive", "Negative", "Neither"],
         horizontal=True,
+        index=(
+            1
+            if config_dict.get("output_sentiment_is_negative", None)
+            else 2 if config_dict.get("output_sentiment_is_negative", None) is None else 0
+        ),
     )
     config_data["output_sentiment_is_negative"] = (
         True
@@ -208,7 +237,10 @@ def context_configs(config_dict=None):
         config_data["terms"] = dict()
         for term, helper in terms:
             config_data["terms"][term.lower()] = st.text_input(
-                term, max_chars=15, placeholder=helper
+                term,
+                max_chars=15,
+                placeholder=helper,
+                value=config_dict.get("terms", {}).get(term.lower(), None),
             )
 
     col1, col2 = st.columns(2)
@@ -224,19 +256,25 @@ def context_configs(config_dict=None):
         ]
         show_pages_bools = []
         for page in all_pages:
-            show_pages_bools.append(st.toggle(page, value=True))
+            show_pages_bools.append(
+                st.toggle(
+                    page,
+                    value=(True if page in config_dict.get("pages_to_show", all_pages) else False),
+                )
+            )
         config_data["pages_to_show"] = [
             page for page, show in zip(all_pages, show_pages_bools) if show
         ]
     with col2:
         allow_page_selection = st.radio(
             "Should users be able to enable additional pages?",
-            ["Yes", "No"],
+            ["No", "Yes"],
             horizontal=True,
-            index=1,
+            index=(1 if config_dict.get("allow_page_selection", True) else 0),
         )
         config_data["allow_page_selection"] = True if allow_page_selection == "Yes" else False
 
+    loader = yaml.YAML()
     existing_config = load_existing_config(loader)
     download_config(loader, config_data, existing_config)
 
