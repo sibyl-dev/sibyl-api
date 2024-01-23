@@ -336,13 +336,10 @@ def new_database():
 
 
 def existing_database():
-    if "connected" not in st.session_state:
-        st.session_state.connected = False
-    if "database_name" not in st.session_state:
-        st.session_state.database_name = None
     if not st.session_state.connected:
-        st.text_input("Database name?", max_chars=15, key="database_name")
-        if st.session_state["database_name"] is not None:
+        database_name = st.text_input("Database name?", max_chars=15)
+        if database_name is not None:
+            st.session_state["database_name"] = database_name
             if st.button("Connect to database"):
                 try:
                     db.connect_to_db(st.session_state["database_name"], drop_old=False)
@@ -363,9 +360,32 @@ def existing_database():
             ("Features", feature_configs, db.get_features_df()),
             ("Context", context_configs, db.get_context_dict()),
         ])
+        if st.button("Prepare Database"):
+            try:
+                pbar = st.progress(0)
+                db.prepare_database(
+                    st.session_state["database_name"],
+                    entities_df=results["entities_df"],
+                    features_df=results["features_df"],
+                    context_dict=results["context"],
+                    label_column=results["label_column"],
+                    drop_old=True,
+                    streamlit_progress_bar_func=pbar.progress,
+                    fit_explainers=False,
+                )
+            except Exception as e:
+                st.error(f"Error preparing database: {e}")
+            else:
+                st.success("Database prepared successfully!")
+                st.balloons()
 
 
 def main():
+    if "connected" not in st.session_state:
+        st.session_state.connected = False
+    if "database_name" not in st.session_state:
+        st.session_state.database_name = None
+
     st.title("Configuration Wizard")
     setup_mode = st.radio("Setup mode", ["New Database", "Existing Database"], horizontal=True)
     if setup_mode == "New Database":
