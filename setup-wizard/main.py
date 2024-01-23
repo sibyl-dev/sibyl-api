@@ -1,3 +1,4 @@
+import io
 import os
 import pickle
 
@@ -7,6 +8,7 @@ import streamlit as st
 from pyreal import RealApp
 
 from sibyl.db import preprocessing as db
+from sibyl.utils import get_project_root
 
 
 def represent_none(self, _):
@@ -41,8 +43,11 @@ def _validate_features(feature_df):
     return True
 
 
-def upload_csv(term, validate_func):
-    csv = st.file_uploader(f"Upload {term} file", type="csv", key=f"{term}_file")
+def upload_csv(term, validate_func, edit_mode=False):
+    label = f"Upload {term} file"
+    if edit_mode:
+        label = f"Replace {term} file"
+    csv = st.file_uploader(label, type="csv", key=f"{term}_file")
     df = None
     if csv is not None:
         df = pd.read_csv(csv)
@@ -51,9 +56,11 @@ def upload_csv(term, validate_func):
     return df
 
 
-def entity_configs():
+def entity_configs(default=None):
     st.header("Prepare Entities")
-    entity_df = upload_csv("entities", _validate_entities)
+    entity_df = upload_csv("entities", _validate_entities, edit_mode=(default is not None))
+    if entity_df is None and default is not None:
+        entity_df = default
     if entity_df is not None:
         label_column = st.selectbox(
             "What is your label column (y-values)?", entity_df.columns[::-1]
@@ -66,15 +73,18 @@ def entity_configs():
         return None
 
 
-def feature_configs():
+def feature_configs(default=None):
     st.header("Prepare Features")
-    feature_df = upload_csv("features", _validate_features)
+    feature_df = upload_csv("features", _validate_features, edit_mode=(default is not None))
+    if feature_df is None and default is not None:
+        feature_df = default
     if feature_df is not None:
         column_config = {
             "type": st.column_config.SelectboxColumn(
                 options=["categorical", "numerical", "boolean"]
             ),
             "category": st.column_config.SelectboxColumn(options=feature_df["category"].unique()),
+            "values": st.column_config.ListColumn(),
         }
         with st.expander("Edit features"):
             result_df = show_table(feature_df, key=f"feature_editor", column_config=column_config)
@@ -101,13 +111,14 @@ def explainer_configs():
 
 def load_existing_config(loader):
     existing_config = {}
-    if os.path.exists("config.yml"):
-        with open("context_config.yml", "r") as yaml_file:
+    path = os.path.join(get_project_root(), "sibyl", "templates", "context_config_template.yml")
+    if os.path.exists(path):
+        with open(path, "r") as yaml_file:
             existing_config = loader.load(yaml_file)
     return existing_config
 
 
-def save_config(loader, config_data, existing_config):
+def download_config(loader, config_data, existing_config):
     loader.default_flow_style = False
     # Remove all empty strings from config_data
     for key, value in config_data.items():
@@ -119,11 +130,13 @@ def save_config(loader, config_data, existing_config):
             config_data[key] = None
     existing_config.update(config_data)
 
-    with open("context_config.yml", "w") as yaml_file:
-        loader.dump(existing_config, yaml_file)
+    stream = io.StringIO()
+    loader.dump(existing_config, stream)
+    stream.seek(0)
+    st.download_button(label="Download config", data=stream.read(), file_name="context_config.yml")
 
 
-def context_configs():
+def context_configs(config_dict=None):
     st.header("Configure Context")
     loader = yaml.YAML()
 
@@ -224,13 +237,26 @@ def context_configs():
         )
         config_data["allow_page_selection"] = True if allow_page_selection == "Yes" else False
 
+    existing_config = load_existing_config(loader)
+    download_config(loader, config_data, existing_config)
+
     return {"context": config_data}
 
 
 def run_components(components):
     results = {}
-    for title in components:
-        result = components[title]()
+    for component in components:
+        default = None
+        if len(component) == 2:
+            title, func = component
+        elif len(component) == 3:
+            title, func, default = component
+        else:
+            raise ValueError("Expected 2 or 3 values in component tuple (title, func, default)")
+        if default is not None:
+            result = func(default)
+        else:
+            result = func()
         st.divider()
         if result is None:
             return None
@@ -242,12 +268,12 @@ def run_components(components):
 def new_database():
     database_name = st.text_input("Database name?", max_chars=15)
     if database_name is not None and database_name != "":
-        results = run_components({
-            "Entities": entity_configs,
-            "Features": feature_configs,
-            "Explainer": explainer_configs,
-            "Context": context_configs,
-        })
+        results = run_components([
+            ("Entities", entity_configs),
+            ("Features", feature_configs),
+            ("Explainer", explainer_configs),
+            ("Context", context_configs),
+        ])
         if results is not None:
             drop_old = st.checkbox("Drop old database if exists?")
             if st.button("Prepare Database"):
@@ -294,9 +320,11 @@ def existing_database():
             st.session_state.connected = False
             st.session_state.database_name = None
             st.rerun()
-        st.data_editor(db.get_entities_df(), key="entities")
-        st.data_editor(db.get_features_df(), key="features")
-        st.write(db.get_context_dict())
+        results = run_components([
+            ("Entities", entity_configs, db.get_entities_df()),
+            ("Features", feature_configs, db.get_features_df()),
+            ("Context", context_configs, db.get_context_dict()),
+        ])
 
 
 def main():
