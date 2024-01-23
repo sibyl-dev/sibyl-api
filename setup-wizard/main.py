@@ -228,10 +228,10 @@ def context_configs(config_dict=None):
             ("Entity", "What is being predicted on (Patient, House, Region, ...)"),
             ("Feature", "How to refer to information (Feature, Factor, Property, Variable, ...)"),
             ("Prediction", "Output of model (Price, Score, Probability, ...)"),
-            ("Positive", "Features that increase the model output"),
+            ("Positive", "Features that increase the model output (Beneficial, Detrimental, ...)"),
             (
                 "Negative",
-                "Features that decrease the model output",
+                "Features that decrease the model output (Beneficial, Detrimental, ...)",
             ),
         ]
         config_data["terms"] = dict()
