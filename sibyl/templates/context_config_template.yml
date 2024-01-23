@@ -26,8 +26,8 @@ terms:
   entity:
   feature:
   prediction:
-  increasing:  # As in, `increasing features', or features that increase model prediction
-  decreasing:  # As in, `decreasing features', or features that decrease model prediction
+  positive:  # As in, `positive features', or features that increase model prediction
+  negative:  # As in, `negative features', or features that decrease model prediction
 
 # Pages to show in the UI (see UI configs for options)
 pages_to_show:
