@@ -195,9 +195,9 @@ class SingleChangePredictions(Resource):
 
         entity_features = get_entity_table(eid, row_id)
 
-        success, payload = helpers.load_explainer(model_id)
+        success, payload = helpers.load_realapp(model_id)
         if success:
-            explainer = payload[0]
+            realapp = payload[0]
         else:
             return payload
 
@@ -206,9 +206,9 @@ class SingleChangePredictions(Resource):
             modified = entity_features.copy()
             modified[feature] = change
             if return_proba:
-                prediction = explainer.predict_proba(modified, as_dict=False).max().tolist()[0]
+                prediction = realapp.predict_proba(modified, as_dict=False).max().tolist()[0]
             else:
-                prediction = explainer.predict(modified, as_dict=False).tolist()[0]
+                prediction = realapp.predict(modified, as_dict=False).tolist()[0]
             predictions.append([feature, prediction])
         return {"predictions": predictions}, 200
 
@@ -269,9 +269,9 @@ class ModifiedPrediction(Resource):
 
         entity_features = get_entity_table(eid, row_id)
 
-        success, payload = helpers.load_explainer(model_id)
+        success, payload = helpers.load_realapp(model_id)
         if success:
-            explainer = payload[0]
+            realapp = payload[0]
         else:
             return payload
 
@@ -279,9 +279,9 @@ class ModifiedPrediction(Resource):
         for feature, change in changes.items():
             modified[feature] = change
         if return_proba:
-            prediction = explainer.predict_proba(modified, as_dict=False).max().tolist()[0]
+            prediction = realapp.predict_proba(modified, as_dict=False).max().tolist()[0]
         else:
-            prediction = explainer.predict(modified, as_dict=False).tolist()[0]
+            prediction = realapp.predict(modified, as_dict=False).tolist()[0]
         return {"prediction": prediction}, 200
 
 
@@ -334,19 +334,19 @@ class FeatureContributions(Resource):
         entity_features = get_entity_table(eid, row_id)
 
         # LOAD IN AND VALIDATE MODEL DATA
-        success, payload = helpers.load_explainer(model_id)
+        success, payload = helpers.load_realapp(model_id)
         if success:
-            explainer = payload[0]
+            realapp = payload[0]
         else:
             return payload
 
-        contributions = explainer.produce_feature_contributions(entity_features)[0]
+        contributions = realapp.produce_feature_contributions(entity_features)[0]
         contributions_json = contributions.set_index("Feature Name").to_dict(orient="index")
         return {"result": contributions_json}, 200
 
 
-def get_contributions(explainer, entities):
-    contributions, values = explainer.produce_feature_contributions(entities, format_output=False)
+def get_contributions(realapp, entities):
+    contributions, values = realapp.produce_feature_contributions(entities, format_output=False)
     contributions_json = contributions.to_dict(orient="index")
     values_json = values.to_dict(orient="index")
 
@@ -417,13 +417,13 @@ class MultiFeatureContributions(Resource):
         eids, model_id, row_ids = get_and_validate_params(attr_info)
 
         entities = get_entities_table(eids, row_ids)
-        success, payload = helpers.load_explainer(model_id)
+        success, payload = helpers.load_realapp(model_id)
         if success:
-            explainer = payload[0]
+            realapp = payload[0]
         else:
             return payload
 
-        return get_contributions(explainer, entities)
+        return get_contributions(realapp, entities)
 
 
 class ModifiedFeatureContribution(Resource):
@@ -491,16 +491,16 @@ class ModifiedFeatureContribution(Resource):
         eid, model_id, row_id, changes = get_and_validate_params(attr_info)
 
         entity_features = get_entity_table(eid, row_id)
-        success, payload = helpers.load_explainer(model_id)
+        success, payload = helpers.load_realapp(model_id)
         if success:
-            explainer = payload[0]
+            realapp = payload[0]
         else:
             return payload
 
         modified = entity_features.copy()
         for feature, change in changes.items():
             modified[feature] = change
-        return get_contributions(explainer, modified)
+        return get_contributions(realapp, modified)
 
 
 class SimilarEntities(Resource):
@@ -548,15 +548,15 @@ class SimilarEntities(Resource):
             entities = get_entities_table(eids, row_id)
         else:
             entities = get_entities_table(eids, [row_id])
-        success, payload = helpers.load_explainer(model_id, include_dataset=True)
+        success, payload = helpers.load_realapp(model_id, include_dataset=True)
         if success:
-            explainer, dataset = payload
+            realapp, dataset = payload
         else:
             return payload
 
         y = dataset["y"]
         X = dataset.drop("y", axis=1)
-        similar_entities = explainer.produce_similar_examples(
+        similar_entities = realapp.produce_similar_examples(
             entities, x_train_orig=X, y_train=y, standardize=True
         )
 

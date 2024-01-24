@@ -6,36 +6,36 @@ from sibyl.db import schema
 LOGGER = logging.getLogger(__name__)
 
 
-def load_explainer(model_id, include_dataset=False):
+def load_realapp(model_id, include_dataset=False):
     """
-    Load a model explainer
-    :param model_id: string
-           Database id of the explainer wanted
-    :param include_dataset: boolean
-    :param include_dataset: boolean
-           If true, return the model dataset as well
-    :return: success->boolean, payload->object
-             If success is True, payload is (explainer, [dataset])
-             Else, payload is (error message, error code)
+    Load a realapp from a model doc
+    Args:
+        model_id (string): ID of model to get realapp from
+        include_dataset (bool): If true, return the realapp training dataset as well
+
+    Returns:
+        success (bool): True if realapp was loaded successfully
+        payload (object): If success is True, payload is (realapp, [dataset])
+                          Else, payload is (error message, error code)
     """
     model_doc = schema.Model.find_one(model_id=model_id)
     if model_doc is None:
         LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
         return False, ({"message": "Model {} does not exist".format(model_id)}, 400)
 
-    explainer_bytes = model_doc.explainer
-    if explainer_bytes is None:
-        LOGGER.exception("Model %s explainer has not been trained. ", model_id)
+    realapp_bytes = model_doc.realapp
+    if realapp_bytes is None:
+        LOGGER.exception("Model {} does not have trained RealApp".format(model_id))
         return False, (
-            {"message": "Model {} does not have trained explainer".format(model_id)},
+            {"message": "Model {} does not have trained RealApp".format(model_id)},
             400,
         )
     try:
-        explainer = pickle.loads(explainer_bytes)
+        realapp = pickle.loads(realapp_bytes)
     except Exception as e:
         LOGGER.exception(e)
         return False, ({"message": str(e)}, 500)
-    payload = (explainer,)
+    payload = (realapp,)
 
     if include_dataset:
         dataset_doc = model_doc.training_set
@@ -47,60 +47,5 @@ def load_explainer(model_id, include_dataset=False):
             ]
         dataset = dataset_doc.to_dataframe()
         payload += (dataset,)
-
-    return True, payload
-
-
-def load_model(model_id, include_dataset=False, include_explainer=False):
-    """
-    This function is **deprecated** since we don't need to directly load a model
-    Load a model and its components
-    :param model_id: string
-           Database id of the model wanted
-    :param include_dataset: boolean
-           If true, return the model dataset as well
-    :param include_explainer: boolean
-       If true, return the trained model explainer as well
-    :return: success->boolean, payload->object
-             If success is True, payload is (model, [dataset], [explainer])
-             Else, payload is (error message, error code)
-    """
-    model_doc = schema.Model.find_one(model_id=model_id)
-    if model_doc is None:
-        LOGGER.exception("Error getting model. Model %s does not exist.", model_id)
-        return False, ({"message": "Model {} does not exist".format(model_id)}, 400)
-    model_bytes = model_doc.model
-    try:
-        model = pickle.loads(model_bytes)
-    except Exception as e:
-        LOGGER.exception(e)
-        return False, ({"message": str(e)}, 500)
-
-    payload = (model,)
-    if include_dataset:
-        dataset_doc = model_doc.training_set
-        if dataset_doc is None:
-            LOGGER.exception("Error getting dataset. Model %s does not have a dataset.", model_id)
-            return False, [
-                {"message": "Model {} does have a dataset".format(model_id)},
-                400,
-            ]
-        dataset = dataset_doc.to_dataframe()
-        payload += (dataset,)
-
-    if include_explainer:
-        explainer_bytes = model_doc.explainer
-        if explainer_bytes is None:
-            LOGGER.exception("Model %s explainer has not been trained. ", model_id)
-            return False, (
-                {"message": "Model {} does not have trained explainer".format(model_id)},
-                400,
-            )
-        try:
-            explainer = pickle.loads(explainer_bytes)
-            payload += (explainer,)
-        except Exception as e:
-            LOGGER.exception(e)
-            return False, ({"message": str(e)}, 500)
 
     return True, payload

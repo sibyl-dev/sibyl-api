@@ -425,7 +425,7 @@ class TestInsertModelFromObject:
         schema.Entity.insert_many(entities)
         result = preprocessing.insert_training_set(["ent1", "ent2", "ent3"])
 
-        real_app = pickle.loads(models[0]["explainer"])
+        real_app = pickle.loads(models[0]["realapp"])
         result = preprocessing.insert_model_from_object(
             real_app,
             model_id="model",
@@ -439,7 +439,7 @@ class TestInsertModelFromObject:
 
     #  Insert a RealApp object into the database with all optional parameters.
     def test_all_optional_parameters(self, models, entities):
-        real_app = pickle.loads(models[0]["explainer"])
+        real_app = pickle.loads(models[0]["realapp"])
         model_id = "my_model"
         model_description = "This is my model"
         model_performance = "High accuracy"
@@ -470,6 +470,6 @@ class TestInsertModelFromObject:
 
     #  Insert a RealApp object into the database with fit_explainers=True and no training data.
     def test_fit_explainers_no_training_data(self, models):
-        real_app = pickle.loads(models[0]["explainer"])
+        real_app = pickle.loads(models[0]["realapp"])
         with pytest.raises(ValueError):
             preprocessing.insert_model_from_object(real_app, model_id="model", fit_explainers=True)

@@ -198,7 +198,7 @@ class Model(SibylDocument):
         Description of performance
     importances : dict {feature_name : importance}
         Importances of all features to the model
-    explainer : contribution explainer
+    realapp : explanation application object
         Trained contribution explainer
     training_set : TrainingSet
         Training set for the model
@@ -209,7 +209,7 @@ class Model(SibylDocument):
     performance = fields.StringField()
     importances = fields.DictField()  # {feature_name:importance}
 
-    explainer = fields.BinaryField(required=True)  # RealApp object
+    realapp = fields.BinaryField(required=True)
     training_set = fields.ReferenceField(TrainingSet, reverse_delete_rule=DENY)
 
 
