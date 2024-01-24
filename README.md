@@ -80,7 +80,10 @@ poetry run sibyl run -v
 Once Sibyl-API is running, you can access and test your APIs manually at `localhost:3000/apidocs`
 
 ## Preparing database
-Sibyl-API uses a MongoDB-based database system. You can fill the database using the `preprocessing.py` script by
+Sibyl-API uses a MongoDB-based database system. We offer several methods to setup your database.
+
+### With the prepare-db script
+You can fill the database using the `preprocessing.py` script by
 following these steps. Be sure to `start` your mongodb service before using the database.
 
 First, if it doesn't already exist, add a `dbdata` directory in the top-level `sibyl-api` directory.
@@ -93,7 +96,7 @@ sibyl-api
    |---domain_name
         |---entities.csv
         |   feature.csv
-        |   model.pkl
+        |   realapp.pkl
         |   ...
 ```
 
@@ -102,6 +105,16 @@ Next, copy `sibyl/db/config_template.yml` and fill it in with your file names.
 Finally, run the preprocessing script with:
 ```bash
 poetry run python preprocessing.py [CONFIG_NAME].yml
+```
+
+### Running the Setup Wizard
+First, install the optional setup dependencies with
+```bash
+poetry install --with setup
+```
+Then, run the setup wizard with
+```bash
+poetry run streamlit run setup-wizard/main.py
 ```
 
 ## Running APIs
