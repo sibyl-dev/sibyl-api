@@ -5,7 +5,7 @@ import sys
 import numpy as np
 import pandas as pd
 import yaml
-from mongoengine import connect
+from mongoengine import connect, disconnect
 from pymongo import MongoClient
 from tqdm import tqdm
 
@@ -35,7 +35,7 @@ def _validate_model_and_realapp(realapp, train_dataset):
     realapp.produce_feature_contributions(train_dataset.iloc[0:2])
 
 
-def connect_to_db(database_name, drop_old=True):
+def connect_to_db(database_name, drop_old=False):
     """
     Connect to database_name
     Args:
@@ -46,6 +46,61 @@ def connect_to_db(database_name, drop_old=True):
         client = MongoClient("localhost", 27017)
         client.drop_database(database_name)
     connect(database_name, host="localhost", port=27017)
+
+
+def disconnect_from_db():
+    """
+    Disconnect from the database
+    """
+    disconnect()
+
+
+def get_entities_df():
+    """
+    Get entities dataframe from database
+    """
+    entities = schema.Entity.find(as_df_=True)
+    if len(entities) == 0:
+        return pd.DataFrame()
+    feature_dict = entities.set_index("eid")["features"].to_dict()
+    feature_df = pd.DataFrame.from_dict(
+        {(i, j): feature_dict[i][j] for i in feature_dict.keys() for j in feature_dict[i].keys()},
+        orient="index",
+    )
+    label_dict = entities.set_index("eid")["labels"].to_dict()
+    label_df = pd.DataFrame.from_dict(
+        {(i, j): label_dict[i][j] for i in label_dict.keys() for j in label_dict[i].keys()},
+        orient="index",
+        columns=["label"],
+    )
+    df = pd.concat([feature_df, label_df], axis=1)
+    df.insert(0, "eid", df.index.get_level_values(0))
+    df.insert(1, "row_id", df.index.get_level_values(1))
+    return df.reset_index(drop=True)
+
+
+def get_features_df():
+    """
+    Get features dataframe from database
+    """
+    features = schema.Feature.find(as_df_=True)
+    features = features[
+        features.columns
+        & ["name", "description", "category", "type", "negated_description", "values"]
+    ]
+    if len(features) == 0:
+        return pd.DataFrame()
+    return features
+
+
+def get_context_dict():
+    """
+    Get context dictionary from database
+    """
+    context = schema.Context.find().first()
+    if len(context) == 0:
+        return {}
+    return context["config"]
 
 
 def insert_features_from_csv(filepath=None):
@@ -751,6 +806,8 @@ def prepare_database(
 
 
 if __name__ == "__main__":
+    connect_to_db("housing")
+    get_entities_df()
     if len(sys.argv) == 2:
         prepare_database_from_config(sys.argv[1])
     elif len(sys.argv) == 3:
