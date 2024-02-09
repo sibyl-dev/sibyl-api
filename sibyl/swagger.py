@@ -20,23 +20,66 @@ schemas = {
     "Entity": {
         "type": "object",
         "properties": {
-            "eid": {"type": "string"},
-            "features": {"type": "object"},
-            "row_ids": {"type": "array", "items": {"type": "string"}},
-            "labels": {"type": "object"},
-            "property": {"type": "object", "additionalProperties": {}},
+            "eid": {"type": "string", "description": "Entity ID"},
+            "row_ids": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Row IDs",
+            },
+            "features": {"type": "object", "description": "Feature values"},
+            "labels": {
+                "type": "object",
+                "description": "Ground-truth labels. Only included if available",
+            },
+            "property": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Additional properties",
+            },
         },
-        "required": ["eid", "message"],
+        "required": ["eid"],
     },
     "EntityWithoutEid": {
         "type": "object",
         "properties": {
-            "features": {"type": "object"},
-            "row_ids": {"type": "array", "items": {"type": "string"}},
-            "labels": {"type": "object"},
-            "property": {"type": "object", "additionalProperties": {}},
+            "row_ids": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Row IDs",
+            },
+            "features": {"type": "object", "description": "Feature values"},
+            "labels": {
+                "type": "object",
+                "description": "Ground-truth labels. Only included if available",
+            },
+            "property": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Additional properties",
+            },
         },
-        "required": ["eid", "message"],
+        "required": ["eid"],
+    },
+    "EntitySimplified": {
+        "type": "object",
+        "properties": {
+            "eid": {"type": "string", "readOnly": True, "description": "Entity ID"},
+            "row_ids": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Row IDs",
+            },
+            "labels": {
+                "type": "object",
+                "description": "Ground-truth labels. Only included if available",
+            },
+            "property": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Additional properties",
+            },
+        },
+        "required": ["eid"],
     },
     "Model": {
         "type": "object",

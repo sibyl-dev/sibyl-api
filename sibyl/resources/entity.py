@@ -183,7 +183,7 @@ class Entities(Resource):
                     entities:
                       type: array
                       items:
-                        $ref: '#/components/schemas/Entity'
+                        $ref: '#/components/schemas/EntitySimplified'
                 examples:
                   externalJson:
                     summary: external example
