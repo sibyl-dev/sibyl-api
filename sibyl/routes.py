@@ -43,14 +43,14 @@ def add_routes(app):
     api.add_resource(
         ctrl.computing.MultiFeatureContributions, API_VERSION + "multi_contributions/"
     )
-    # api.add_resource(
-    #     ctrl.computing.SingleChangePredictions,
-    #     API_VERSION + "single_change_predictions/",
-    # )
+    api.add_resource(
+        ctrl.computing.SingleChangePredictions,
+        API_VERSION + "single_change_predictions/",
+    )
     api.add_resource(ctrl.computing.ModifiedPrediction, API_VERSION + "modified_prediction/")
-    # api.add_resource(
-    #    ctrl.computing.ModifiedFeatureContribution, API_VERSION + "modified_contribution/"
-    # )
+    api.add_resource(
+        ctrl.computing.ModifiedFeatureContribution, API_VERSION + "modified_contribution/"
+    )
     api.add_resource(ctrl.computing.SimilarEntities, API_VERSION + "similar_entities/")
 
     api.add_resource(ctrl.logger.Logger, API_VERSION + "logging/")

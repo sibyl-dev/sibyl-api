@@ -173,9 +173,7 @@ class SingleChangePredictions(Resource):
                       items:
                         type: array
                         items:
-                          oneOf:
-                            type: string
-                            type: number
+                          type: ["string", "number"]
                 examples:
                   externalJson:
                     summary: external example
@@ -390,21 +388,15 @@ class MultiFeatureContributions(Resource):
                   properties:
                     contributions:
                       type: object
-                      additionalProperties:
-                        type: object
-                        additionalProperties:
-                          type: object
-                          properties:
-                            Feature Value:
-                              oneOf:
-                                type: string
-                                type: number
-                            Contribution:
-                              type: number
-                            Average\\/Mode:
-                              oneOf:
-                                type: string
-                                type: number
+                      properties:
+                        Feature Name:
+                            type: string
+                        Feature Value:
+                          type: ["string", "number"]
+                        Contribution:
+                          type: number
+                        Average\\/Mode:
+                          type: ["string", "number"]
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -461,19 +453,13 @@ class ModifiedFeatureContribution(Resource):
                   properties:
                     contribution:
                       type: object
-                      additionalProperties:
-                        type: object
-                        properties:
-                          Feature Value:
-                            oneOf:
-                              type: string
-                              type: number
-                          Contribution:
-                            type: number
-                          Average\\/Mode:
-                            oneOf:
-                              type: string
-                              type: number
+                      properties:
+                        Feature Value:
+                          type: ["string", "number"]
+                        Contribution:
+                          type: number
+                        Average\\/Mode:
+                          type: ["string", "number"]
                 examples:
                   externalJson:
                     summary: external example
