@@ -126,8 +126,15 @@ schemas = {
 }
 
 tags = [
-    {"name": "default", "description": "Uncategorized APIs"},
-    {"name": "entity", "description": "Everything about entity interactions"},
+    {"name": "entity", "description": "Entities being analyzed"},
+    {"name": "feature", "description": "ML model input features"},
+    {"name": "model", "description": "The full ML model pipeline"},
+    {"name": "context", "description": "Application-specific configurations"},
+    {"name": "group", "description": "Entity groups"},
+    {
+        "name": "computing",
+        "description": "Computed explanations and other ML augmenting information",
+    },
 ]
 
 
@@ -156,11 +163,11 @@ Logo_DAI_highres.png" alt=“DAI-Lab” />
 </p>
 
 # What is Sibyl?
-**Sibyl** introduction goes here!
+**Sibyl** is a highly configurable API for supporting the full human-ML decision making workflow.
 
 # License
 
-[The MIT License](https://github.com/DAI-Lab/sibyl-api/blob/master/LICENSE)
+[The MIT License](https://github.com/sibyl-dev/sibyl-api/blob/master/LICENSE)
 """
 
 

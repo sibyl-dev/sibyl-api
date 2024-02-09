@@ -11,7 +11,7 @@ API_VERSION = "/api/v1/"
 def add_routes(app):
     @app.route("/redoc")
     def redoc():
-        return render_template("./redoc.html")
+        return render_template("redoc.html")
 
     # configure RESTful APIs
     api = Api(app)
