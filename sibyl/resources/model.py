@@ -64,8 +64,10 @@ class Model(Resource):
 
     def put(self, model_id):
         """
-        Update or create a model by id. Does not currently support updating realapp.
+        Update or create a model by id.
         ---
+        description:
+          "Note: Does not currently support updating realapp."
         tags:
           - model
         security:
@@ -81,7 +83,7 @@ class Model(Resource):
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ModelWithoutId'
+                $ref: '#/components/schemas/FullModelNoRealapp'
         responses:
           200:
             description: Information about update model
@@ -129,7 +131,10 @@ class Models(Resource):
                     models:
                       type: array
                       items:
-                        $ref: '#/components/schemas/Model_Partial'
+                        type: object
+                        properties:
+                          model_id:
+                            type: string
                 examples:
                   externalJson:
                     summary: external example
@@ -150,7 +155,7 @@ class Models(Resource):
 class Importance(Resource):
     def get(self):
         """
-        Get a Model by ID
+        Get Model feature importances
         ---
         tags:
           - model
@@ -174,7 +179,8 @@ class Importance(Resource):
                     importances:
                       type: array
                       items:
-                        importance:
+                        type: object
+                        properties:
                           feature:
                             type: string
                           importance:
@@ -199,7 +205,7 @@ class Importance(Resource):
 class Prediction(Resource):
     def get(self):
         """
-        Get a prediction using the model
+        Get a model prediction
         ---
         tags:
           - model
@@ -229,7 +235,10 @@ class Prediction(Resource):
             content:
               application/json:
                 schema:
-                  type: number
+                  type: object
+                  properties:
+                    output:
+                      type: number
                 examples:
                   inlineJson:
                     summary: inline example
@@ -269,10 +278,12 @@ class Prediction(Resource):
 class MultiPrediction(Resource):
     def post(self):
         """
-        Get multiple predictions. If given multiple eids, return one prediction per eid
-        (first row). If given one eid, return one prediction per row_id. Only one of
-        eids and row_ids can contain more than one element.
+        Get multiple model predictions.
         ---
+        description:
+          If given multiple eids, return one prediction per eid (first row).
+          If given one eid, return one prediction per row_id.
+          Only one of eids and row_ids can contain more than one element.
         tags:
           - model
         security:
@@ -306,7 +317,7 @@ class MultiPrediction(Resource):
                 schema:
                   type: object
                   properties:
-                    contributions:
+                    predictions:
                       type: array
                       items:
                         type: number

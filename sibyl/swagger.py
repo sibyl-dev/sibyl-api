@@ -87,29 +87,17 @@ schemas = {
             "id": {"type": "string"},
             "description": {"type": "string"},
             "performance": {"type": "string"},
-            "importances": {"type": "object"},
-            "realapp": {"type": "string"},
-            "training_set_id": {"type": "string"},
         },
-        "required": ["id", "realapp"],
+        "required": ["id"],
     },
-    "ModelWithoutId": {
+    "FullModelNoRealapp": {
         "type": "object",
         "properties": {
             "description": {"type": "string"},
             "performance": {"type": "string"},
             "importances": {"type": "object"},
-            "realapp": {"type": "string"},
             "training_set_id": {"type": "string"},
         },
-        "required": ["id", "realapp"],
-    },
-    "Model_Partial": {
-        "type": "object",
-        "properties": {
-            "id": {"type": "string"},
-        },
-        "required": ["id"],
     },
     "Feature": {
         "type": "object",
