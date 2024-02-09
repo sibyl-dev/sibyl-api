@@ -98,7 +98,7 @@ schemas = {
         },
         "required": ["name"],
     },
-    "ContextConfig": {
+    "Context": {
         "type": "object",
         "properties": {"config": {"type": "object"}},
     },

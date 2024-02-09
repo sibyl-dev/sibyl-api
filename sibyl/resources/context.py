@@ -26,7 +26,7 @@ def get_context_id(context_doc):
 class Context(Resource):
     def get(self, context_id):
         """
-        Get a context by ID
+        Get a Context by ID
         ---
         tags:
           - context
@@ -81,14 +81,14 @@ class Context(Resource):
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContextConfig'
+                $ref: '#/components/schemas/Context'
         responses:
           200:
             description: Information about update model
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ContextConfig'
+                  $ref: '#/components/schemas/Context'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -120,7 +120,7 @@ class Contexts(Resource):
                 schema:
                   type: object
                   properties:
-                    models:
+                    contexts:
                       type: array
                       items:
                         $ref: '#/components/schemas/Contexts'

@@ -11,7 +11,7 @@ API_VERSION = "/api/v1/"
 def add_routes(app):
     @app.route("/redoc")
     def redoc():
-        return render_template("redoc.html")
+        return render_template("./redoc.html")
 
     # configure RESTful APIs
     api = Api(app)
@@ -22,12 +22,9 @@ def add_routes(app):
     # add resources
     api.add_resource(ctrl.entity.Entity, API_VERSION + "entities/<string:eid>/")
     api.add_resource(ctrl.entity.Entities, API_VERSION + "entities/")
-    api.add_resource(ctrl.entity.Events, API_VERSION + "events/")
 
     api.add_resource(ctrl.group.EntityGroups, API_VERSION + "groups/")
     api.add_resource(ctrl.group.EntityGroup, API_VERSION + "groups/<string:group_id>/")
-    # api.add_resource(ctrl.entity.EntitiesInReferral,
-    #                  API_VERSION + 'entities_in_referral/<string:referral_id>/')
 
     api.add_resource(ctrl.feature.Feature, API_VERSION + "features/<string:feature_name>/")
     api.add_resource(ctrl.feature.Features, API_VERSION + "features/")
@@ -46,16 +43,14 @@ def add_routes(app):
     api.add_resource(
         ctrl.computing.MultiFeatureContributions, API_VERSION + "multi_contributions/"
     )
-    api.add_resource(
-        ctrl.computing.SingleChangePredictions,
-        API_VERSION + "single_change_predictions/",
-    )
+    # api.add_resource(
+    #     ctrl.computing.SingleChangePredictions,
+    #     API_VERSION + "single_change_predictions/",
+    # )
     api.add_resource(ctrl.computing.ModifiedPrediction, API_VERSION + "modified_prediction/")
-    api.add_resource(
-        ctrl.computing.ModifiedFeatureContribution, API_VERSION + "modified_contribution/"
-    )
+    # api.add_resource(
+    #    ctrl.computing.ModifiedFeatureContribution, API_VERSION + "modified_contribution/"
+    # )
     api.add_resource(ctrl.computing.SimilarEntities, API_VERSION + "similar_entities/")
 
     api.add_resource(ctrl.logger.Logger, API_VERSION + "logging/")
-
-    api.add_resource(ctrl.test.Test, API_VERSION + "test/")

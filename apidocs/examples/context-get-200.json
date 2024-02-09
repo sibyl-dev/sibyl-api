@@ -1,5 +1,6 @@
 {
     "id": "abc1",
+    "output_type": "numeric",
     "terms": {
         "positive": "risk",
         "negative": "protective",
