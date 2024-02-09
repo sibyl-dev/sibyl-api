@@ -145,7 +145,7 @@ class Feature(Resource):
 class Features(Resource):
     def get(self):
         """
-        Get all Features
+        Get all features
         ---
         tags:
           - feature
@@ -235,7 +235,7 @@ class Features(Resource):
 class Categories(Resource):
     def get(self):
         """
-        Get all Categories
+        Get all feature categories
         ---
         tags:
           - feature
@@ -249,7 +249,7 @@ class Categories(Resource):
                 schema:
                   type: object
                   properties:
-                    entities:
+                    categories:
                       type: array
                       items:
                         $ref: '#/components/schemas/Category'

@@ -135,9 +135,9 @@ schemas = {
     "Category": {
         "type": "object",
         "properties": {
-            "name": {"type": "string"},
-            "color": {"type": "string"},
-            "abbreviation": {"type": "string"},
+            "name": {"type": "string", "description": "Category name"},
+            "color": {"type": "string", "description": "Color to use for category (HEX)"},
+            "abbreviation": {"type": "string", "description": "Abbreviated category name"},
         },
         "required": ["name"],
     },
