@@ -4,7 +4,7 @@ name: Build docs
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
   build:
@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build docs
-      run: ./make.sh
+      run: npx @redocly/cli build-docs docs/apispec.json --output index.html
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3 # https://github.com/peaceiris/actions-gh-pages
       with:
