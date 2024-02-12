@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from sibyl.core import Sibyl
 from sibyl.db.preprocessing import prepare_database_from_config
@@ -10,7 +11,10 @@ def _run(args):
     config = read_config("./sibyl/config.yml")
     sibyl = Sibyl(config, args.docker, args.dbhost, args.dbport, args.db)
 
-    sibyl.run_server(args.env, args.port)
+    if args.generate_docs:
+        sibyl.run_server(args.env, args.port, docs_filename=args.docs_filename)
+    else:
+        sibyl.run_server(args.env, args.port)
 
 
 def _prepare_db(args):
@@ -68,6 +72,21 @@ def get_parser():
     )
     run.add_argument(
         "-D", "--db", action="store", help="Database name to use. Overrides config", type=str
+    )
+    default_docs_file = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "docs", "apispec.json"
+    )
+    run.add_argument(
+        "--generate-docs",
+        "-G",
+        action="store_true",
+        help="Generate API documentation",
+    )
+    run.add_argument(
+        "--docs-filename",
+        action="store",
+        help="API documentation filename, if --generate-docs is set",
+        default=default_docs_file,
     )
 
     # sibyl prepare-db

@@ -20,23 +20,66 @@ schemas = {
     "Entity": {
         "type": "object",
         "properties": {
-            "eid": {"type": "string"},
-            "features": {"type": "object"},
-            "row_ids": {"type": "array", "items": {"type": "string"}},
-            "labels": {"type": "object"},
-            "property": {"type": "object", "additionalProperties": {}},
+            "eid": {"type": "string", "description": "Entity ID"},
+            "row_ids": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Row IDs",
+            },
+            "features": {"type": "object", "description": "Feature values"},
+            "labels": {
+                "type": "object",
+                "description": "Ground-truth labels. Only included if available",
+            },
+            "property": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Additional properties",
+            },
         },
-        "required": ["eid", "message"],
+        "required": ["eid"],
     },
     "EntityWithoutEid": {
         "type": "object",
         "properties": {
-            "features": {"type": "object"},
-            "row_ids": {"type": "array", "items": {"type": "string"}},
-            "labels": {"type": "object"},
-            "property": {"type": "object", "additionalProperties": {}},
+            "row_ids": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Row IDs",
+            },
+            "features": {"type": "object", "description": "Feature values"},
+            "labels": {
+                "type": "object",
+                "description": "Ground-truth labels. Only included if available",
+            },
+            "property": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Additional properties",
+            },
         },
-        "required": ["eid", "message"],
+        "required": ["eid"],
+    },
+    "EntitySimplified": {
+        "type": "object",
+        "properties": {
+            "eid": {"type": "string", "readOnly": True, "description": "Entity ID"},
+            "row_ids": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Row IDs",
+            },
+            "labels": {
+                "type": "object",
+                "description": "Ground-truth labels. Only included if available",
+            },
+            "property": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Additional properties",
+            },
+        },
+        "required": ["eid"],
     },
     "Model": {
         "type": "object",
@@ -44,29 +87,17 @@ schemas = {
             "id": {"type": "string"},
             "description": {"type": "string"},
             "performance": {"type": "string"},
-            "importances": {"type": "object"},
-            "realapp": {"type": "string"},
-            "training_set_id": {"type": "string"},
         },
-        "required": ["id", "realapp"],
+        "required": ["id"],
     },
-    "ModelWithoutId": {
+    "FullModelNoRealapp": {
         "type": "object",
         "properties": {
             "description": {"type": "string"},
             "performance": {"type": "string"},
             "importances": {"type": "object"},
-            "realapp": {"type": "string"},
             "training_set_id": {"type": "string"},
         },
-        "required": ["id", "realapp"],
-    },
-    "Model_Partial": {
-        "type": "object",
-        "properties": {
-            "id": {"type": "string"},
-        },
-        "required": ["id"],
     },
     "Feature": {
         "type": "object",
@@ -92,13 +123,13 @@ schemas = {
     "Category": {
         "type": "object",
         "properties": {
-            "name": {"type": "string"},
-            "color": {"type": "string"},
-            "abbreviation": {"type": "string"},
+            "name": {"type": "string", "description": "Category name"},
+            "color": {"type": "string", "description": "Color to use for category (HEX)"},
+            "abbreviation": {"type": "string", "description": "Abbreviated category name"},
         },
         "required": ["name"],
     },
-    "ContextConfig": {
+    "Context": {
         "type": "object",
         "properties": {"config": {"type": "object"}},
     },
@@ -126,8 +157,15 @@ schemas = {
 }
 
 tags = [
-    {"name": "default", "description": "Uncategorized APIs"},
-    {"name": "entity", "description": "Everything about entity interactions"},
+    {"name": "entity", "description": "Entities being analyzed"},
+    {"name": "feature", "description": "ML model input features"},
+    {"name": "model", "description": "The full ML model pipeline"},
+    {"name": "context", "description": "Application-specific configurations"},
+    {"name": "group", "description": "Entity groups"},
+    {
+        "name": "computing",
+        "description": "Computed explanations and other ML augmenting information",
+    },
 ]
 
 
@@ -135,7 +173,7 @@ swagger_config = {
     "title": "Sibyl RestAPI Documentation",
     "uiversion": 3,
     "openapi": "3.0.2",
-    "doc_dir": "./apidocs/resources/",
+    "doc_dir": "./docs/",
     "headers": [],
     "specs": [{
         "endpoint": "apispec",
@@ -145,7 +183,7 @@ swagger_config = {
     }],
     "swagger_ui": True,
     "specs_route": "/apidocs/",
-    # 'static_folder': './apidocs/examples/'
+    # "static_folder": "./docs/examples/",
 }
 
 markdown_text = """
@@ -156,11 +194,11 @@ Logo_DAI_highres.png" alt=“DAI-Lab” />
 </p>
 
 # What is Sibyl?
-**Sibyl** introduction goes here!
+**Sibyl** is a highly configurable API for supporting the full human-ML decision making workflow.
 
 # License
 
-[The MIT License](https://github.com/DAI-Lab/sibyl-api/blob/master/LICENSE)
+[The MIT License](https://github.com/sibyl-dev/sibyl-api/blob/master/LICENSE)
 """
 
 

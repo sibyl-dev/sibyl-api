@@ -140,8 +140,6 @@ class SingleChangePredictions(Resource):
         ---
         tags:
           - computing
-        security:
-          - tokenAuth: []
         requestBody:
            required: true
            content:
@@ -173,13 +171,7 @@ class SingleChangePredictions(Resource):
                       items:
                         type: array
                         items:
-                          oneOf:
-                            type: string
-                            type: number
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/singlechangepredictions-get-200.json'
+                          type: ["string", "number"]
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -220,8 +212,6 @@ class ModifiedPrediction(Resource):
         ---
         tags:
           - computing
-        security:
-          - tokenAuth: []
         requestBody:
            required: true
            content:
@@ -250,10 +240,6 @@ class ModifiedPrediction(Resource):
                   properties:
                     prediction:
                       type: number
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/modifiedprediction-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -292,8 +278,6 @@ class FeatureContributions(Resource):
         ---
         tags:
           - computing
-        security:
-          - tokenAuth: []
         requestBody:
           required: true
           content:
@@ -320,10 +304,6 @@ class FeatureContributions(Resource):
                       type: object
                       additionalProperties:
                         type: number
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/contributions-post-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -360,8 +340,6 @@ class MultiFeatureContributions(Resource):
         ---
         tags:
           - computing
-        security:
-          - tokenAuth: []
         requestBody:
           required: true
           content:
@@ -390,21 +368,15 @@ class MultiFeatureContributions(Resource):
                   properties:
                     contributions:
                       type: object
-                      additionalProperties:
-                        type: object
-                        additionalProperties:
-                          type: object
-                          properties:
-                            Feature Value:
-                              oneOf:
-                                type: string
-                                type: number
-                            Contribution:
-                              type: number
-                            Average\\/Mode:
-                              oneOf:
-                                type: string
-                                type: number
+                      properties:
+                        Feature Name:
+                            type: string
+                        Feature Value:
+                          type: ["string", "number"]
+                        Contribution:
+                          type: number
+                        Average\\/Mode:
+                          type: ["string", "number"]
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -433,8 +405,6 @@ class ModifiedFeatureContribution(Resource):
         ---
         tags:
           - computing
-        security:
-          - tokenAuth: []
         requestBody:
            required: true
            content:
@@ -461,23 +431,13 @@ class ModifiedFeatureContribution(Resource):
                   properties:
                     contribution:
                       type: object
-                      additionalProperties:
-                        type: object
-                        properties:
-                          Feature Value:
-                            oneOf:
-                              type: string
-                              type: number
-                          Contribution:
-                            type: number
-                          Average\\/Mode:
-                            oneOf:
-                              type: string
-                              type: number
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/modifiedcontribution-post-200.json'
+                      properties:
+                        Feature Value:
+                          type: ["string", "number"]
+                        Contribution:
+                          type: number
+                        Average\\/Mode:
+                          type: ["string", "number"]
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -510,8 +470,6 @@ class SimilarEntities(Resource):
         ---
         tags:
           - computing
-        security:
-          - tokenAuth: []
         requestBody:
           required: true
           content:

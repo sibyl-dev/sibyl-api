@@ -32,8 +32,6 @@ class Model(Resource):
         ---
         tags:
           - model
-        security:
-          - tokenAuth: []
         parameters:
           - name: model_id
             in: path
@@ -48,10 +46,6 @@ class Model(Resource):
               application/json:
                 schema:
                   $ref: '#/components/schemas/Model'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/model-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -64,12 +58,12 @@ class Model(Resource):
 
     def put(self, model_id):
         """
-        Update or create a model by id. Does not currently support updating realapp.
+        Update or create a model by id.
         ---
+        description:
+          "Note: Does not currently support updating realapp."
         tags:
           - model
-        security:
-          - tokenAuth: []
         parameters:
           - name: model_id
             in: path
@@ -81,7 +75,7 @@ class Model(Resource):
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ModelWithoutId'
+                $ref: '#/components/schemas/FullModelNoRealapp'
         responses:
           200:
             description: Information about update model
@@ -116,8 +110,6 @@ class Models(Resource):
         ---
         tags:
           - model
-        security:
-          - tokenAuth: []
         responses:
           200:
             description: All models
@@ -129,11 +121,10 @@ class Models(Resource):
                     models:
                       type: array
                       items:
-                        $ref: '#/components/schemas/Model_Partial'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/models-get-200.json'
+                        type: object
+                        properties:
+                          model_id:
+                            type: string
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -150,12 +141,10 @@ class Models(Resource):
 class Importance(Resource):
     def get(self):
         """
-        Get a Model by ID
+        Get Model feature importances
         ---
         tags:
           - model
-        security:
-          - tokenAuth: []
         parameters:
           - name: model_id
             in: path
@@ -174,15 +163,12 @@ class Importance(Resource):
                     importances:
                       type: array
                       items:
-                        importance:
+                        type: object
+                        properties:
                           feature:
                             type: string
                           importance:
                             type: float
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/importance-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -199,12 +185,10 @@ class Importance(Resource):
 class Prediction(Resource):
     def get(self):
         """
-        Get a prediction using the model
+        Get a model prediction
         ---
         tags:
           - model
-        security:
-          - tokenAuth: []
         parameters:
           - name: model_id
             in: query
@@ -229,11 +213,10 @@ class Prediction(Resource):
             content:
               application/json:
                 schema:
-                  type: number
-                examples:
-                  inlineJson:
-                    summary: inline example
-                    value: 10.0
+                  type: object
+                  properties:
+                    output:
+                      type: number
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -269,14 +252,14 @@ class Prediction(Resource):
 class MultiPrediction(Resource):
     def post(self):
         """
-        Get multiple predictions. If given multiple eids, return one prediction per eid
-        (first row). If given one eid, return one prediction per row_id. Only one of
-        eids and row_ids can contain more than one element.
+        Get multiple model predictions.
         ---
+        description:
+          If given multiple eids, return one prediction per eid (first row).
+          If given one eid, return one prediction per row_id.
+          Only one of eids and row_ids can contain more than one element.
         tags:
           - model
-        security:
-          - tokenAuth: []
         requestBody:
           required: true
           content:
@@ -306,7 +289,7 @@ class MultiPrediction(Resource):
                 schema:
                   type: object
                   properties:
-                    contributions:
+                    predictions:
                       type: array
                       items:
                         type: number

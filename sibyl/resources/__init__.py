@@ -11,7 +11,6 @@ from sibyl.resources import (
     group,
     logger,
     model,
-    test,
 )
 
 
@@ -20,7 +19,6 @@ __all__ = (
     "feature",
     "model",
     "computing",
-    "test",
     "logger",
     "group",
     "context",

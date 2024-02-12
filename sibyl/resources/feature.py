@@ -71,8 +71,6 @@ class Feature(Resource):
         ---
         tags:
           - feature
-        security:
-          - tokenAuth: []
         parameters:
           - name: feature_name
             in: path
@@ -87,10 +85,6 @@ class Feature(Resource):
               application/json:
                 schema:
                   $ref: '#/components/schemas/Feature'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/feature-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -107,8 +101,6 @@ class Feature(Resource):
         ---
         tags:
           - feature
-        security:
-          - tokenAuth: []
         parameters:
           - name: feature_name
             in: path
@@ -145,12 +137,10 @@ class Feature(Resource):
 class Features(Resource):
     def get(self):
         """
-        Get all Features
+        Get all features
         ---
         tags:
           - feature
-        security:
-          - tokenAuth: []
         responses:
           200:
             description: All features
@@ -163,10 +153,6 @@ class Features(Resource):
                       type: array
                       items:
                         $ref: '#/components/schemas/Feature'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/features-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -185,8 +171,6 @@ class Features(Resource):
         ---
         tags:
           - feature
-        security:
-          - tokenAuth: []
         requestBody:
           content:
             application/json:
@@ -209,10 +193,6 @@ class Features(Resource):
                       type: array
                       items:
                         $ref: '#/components/schemas/Feature'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/features-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -235,12 +215,10 @@ class Features(Resource):
 class Categories(Resource):
     def get(self):
         """
-        Get all Categories
+        Get all feature categories
         ---
         tags:
           - feature
-        security:
-          - tokenAuth: []
         responses:
           200:
             description: All categories
@@ -249,14 +227,10 @@ class Categories(Resource):
                 schema:
                   type: object
                   properties:
-                    entities:
+                    categories:
                       type: array
                       items:
                         $ref: '#/components/schemas/Category'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/categories-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -275,8 +249,6 @@ class Categories(Resource):
         ---
         tags:
           - feature
-        security:
-          - tokenAuth: []
         requestBody:
           content:
             application/json:
@@ -299,10 +271,6 @@ class Categories(Resource):
                       type: array
                       items:
                         $ref: '#/components/schemas/Category'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/categories-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """

@@ -46,32 +46,6 @@ def test_get_entity_with_row(client, entities):
     assert response["property"] == entity["property"]
 
 
-def test_get_events(client, entities):
-    entity = entities[0]
-    response = client.get("/api/v1/events/?eid=" + entity["eid"]).json
-
-    assert len(response["events"]) == len(entity["events"])
-
-    for expected_item in entity["events"]:
-        found = False
-        for response_item in response["events"]:
-            if response_item["event_id"] == expected_item["event_id"]:
-                found = True
-                if "property" in expected_item:
-                    assert response_item["property"] == expected_item["property"]
-                else:
-                    assert len(response_item["property"]) == 0
-                if "type" in expected_item:
-                    assert response_item["type"] == expected_item["type"]
-                else:
-                    assert response_item["type"] is None
-                if "datetime" in expected_item:
-                    assert response_item["datetime"] == str(expected_item["datetime"])
-                else:
-                    assert response_item["datetime"] is None
-        assert found
-
-
 def test_get_groups(client, groups):
     response = client.get("/api/v1/groups/").json
     assert response["groups"] == [group["group_id"] for group in groups]

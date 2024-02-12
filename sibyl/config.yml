@@ -27,4 +27,4 @@ flask:
 
 # LOGGING
 #===================================
-log_filename: "screening_log.csv"
+log_filename: "log.csv"
