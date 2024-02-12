@@ -1,10 +1,10 @@
 import argparse
+import os
 
 from sibyl.core import Sibyl
 from sibyl.db.preprocessing import prepare_database_from_config
 from sibyl.sample_applications import prepare_housing_application
 from sibyl.utils import read_config, setup_logging
-import os
 
 
 def _run(args):

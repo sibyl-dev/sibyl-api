@@ -1,11 +1,11 @@
+import json
+
 from flasgger import Swagger
 from flask import render_template
 from flask_restful import Api
 
 import sibyl.resources as ctrl
 from sibyl.swagger import swagger_config, swagger_tpl
-
-import json
 
 API_VERSION = "/api/v1/"
 
