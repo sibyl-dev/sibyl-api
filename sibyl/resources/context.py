@@ -123,7 +123,7 @@ class Contexts(Resource):
                     contexts:
                       type: array
                       items:
-                        $ref: '#/components/schemas/Contexts'
+                        $ref: '#/components/schemas/Context'
                 examples:
                   externalJson:
                     summary: external example

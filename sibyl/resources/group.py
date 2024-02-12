@@ -34,7 +34,12 @@ class EntityGroup(Resource):
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Group'
+                  type: object
+                  properties:
+                      group_id:
+                        type: string
+                      property:
+                        type: object
                 examples:
                   externalJson:
                     summary: external example
@@ -71,7 +76,12 @@ class EntityGroups(Resource):
                     groups:
                       type: array
                       items:
-                        $ref: '#/components/schemas/Group'
+                        type: object
+                        properties:
+                          group_id:
+                            type: string
+                          property:
+                            type: object
                 examples:
                   externalJson:
                     summary: external example

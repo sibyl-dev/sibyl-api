@@ -63,8 +63,6 @@ class Entity(Resource):
         ---
         tags:
           - entity
-        security:
-          - tokenAuth: []
         parameters:
           - name: eid
             in: path
@@ -84,10 +82,12 @@ class Entity(Resource):
               application/json:
                 schema:
                   $ref: '#/components/schemas/Entity'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/entity-get-200.json'
+                example:
+                  eid: "123"
+                  features: {"row_1": {"f1": 10, "f2": 20}, "row_2": {"f1": 20, "f2": 30}}
+                  row_ids: ["row_1", "row_2"]
+                  labels: {"row_1": 1, "row_2": 0}
+                  property: {"group_id": "group_1"}
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -108,8 +108,6 @@ class Entity(Resource):
         ---
         tags:
           - entity
-        security:
-          - tokenAuth: []
         parameters:
           - name: eid
             in: path
@@ -129,10 +127,6 @@ class Entity(Resource):
               application/json:
                 schema:
                   $ref: '#/components/schemas/Entity'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/entity-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -163,8 +157,6 @@ class Entities(Resource):
         ---
         tags:
           - entity
-        security:
-          - tokenAuth: []
         parameters:
           - name: group_id
             in: query
@@ -184,10 +176,6 @@ class Entities(Resource):
                       type: array
                       items:
                         $ref: '#/components/schemas/EntitySimplified'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/entities-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -223,8 +211,6 @@ class Entities(Resource):
         ---
         tags:
           - entity
-        security:
-          - tokenAuth: []
         requestBody:
           content:
             application/json:
@@ -247,10 +233,6 @@ class Entities(Resource):
                       type: array
                       items:
                         $ref: '#/components/schemas/Entity'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/entities-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -282,8 +264,6 @@ class Events(Resource):
         ---
         tags:
           - entity
-        security:
-          - tokenAuth: []
         parameters:
           - name: eid
             in: query
