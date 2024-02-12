@@ -154,4 +154,9 @@ poetry run invoke fix-lint
 poetry run invoke lint
 ```
 5. You can manually run `sibyl/test_apis_on_database.ipynb` on your database(s) to test further.
-6. Once all tests/linting pass, push all code and make a pull request. One all checks pass and the PR has been approved, merge your code and delete the branch.
+6. Before making a PR with your final changes, update the api docs by running Sibyl with the -G flag, ie.
+```
+# Generate docs
+poetry run sibyl run -G
+```
+8. Once all tests/linting pass, push all code and make a pull request. One all checks pass and the PR has been approved, merge your code and delete the branch.
