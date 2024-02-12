@@ -19,8 +19,6 @@ class EntityGroup(Resource):
         ---
         tags:
           - group
-        security:
-          - tokenAuth: []
         parameters:
           - name: group_id
             in: path
@@ -40,10 +38,6 @@ class EntityGroup(Resource):
                         type: string
                       property:
                         type: object
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/group-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -63,8 +57,6 @@ class EntityGroups(Resource):
         ---
         tags:
           - group
-        security:
-          - tokenAuth: []
         responses:
           200:
             description: All EntityGroups
@@ -82,10 +74,6 @@ class EntityGroups(Resource):
                             type: string
                           property:
                             type: object
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/groups-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """

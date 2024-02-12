@@ -71,8 +71,6 @@ class Feature(Resource):
         ---
         tags:
           - feature
-        security:
-          - tokenAuth: []
         parameters:
           - name: feature_name
             in: path
@@ -87,10 +85,6 @@ class Feature(Resource):
               application/json:
                 schema:
                   $ref: '#/components/schemas/Feature'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/feature-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -107,8 +101,6 @@ class Feature(Resource):
         ---
         tags:
           - feature
-        security:
-          - tokenAuth: []
         parameters:
           - name: feature_name
             in: path
@@ -149,8 +141,6 @@ class Features(Resource):
         ---
         tags:
           - feature
-        security:
-          - tokenAuth: []
         responses:
           200:
             description: All features
@@ -163,10 +153,6 @@ class Features(Resource):
                       type: array
                       items:
                         $ref: '#/components/schemas/Feature'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/features-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -185,8 +171,6 @@ class Features(Resource):
         ---
         tags:
           - feature
-        security:
-          - tokenAuth: []
         requestBody:
           content:
             application/json:
@@ -209,10 +193,6 @@ class Features(Resource):
                       type: array
                       items:
                         $ref: '#/components/schemas/Feature'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/features-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -239,8 +219,6 @@ class Categories(Resource):
         ---
         tags:
           - feature
-        security:
-          - tokenAuth: []
         responses:
           200:
             description: All categories
@@ -253,10 +231,6 @@ class Categories(Resource):
                       type: array
                       items:
                         $ref: '#/components/schemas/Category'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/categories-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -275,8 +249,6 @@ class Categories(Resource):
         ---
         tags:
           - feature
-        security:
-          - tokenAuth: []
         requestBody:
           content:
             application/json:
@@ -299,10 +271,6 @@ class Categories(Resource):
                       type: array
                       items:
                         $ref: '#/components/schemas/Category'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/categories-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """

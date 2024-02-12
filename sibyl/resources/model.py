@@ -32,8 +32,6 @@ class Model(Resource):
         ---
         tags:
           - model
-        security:
-          - tokenAuth: []
         parameters:
           - name: model_id
             in: path
@@ -48,10 +46,6 @@ class Model(Resource):
               application/json:
                 schema:
                   $ref: '#/components/schemas/Model'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/model-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -70,8 +64,6 @@ class Model(Resource):
           "Note: Does not currently support updating realapp."
         tags:
           - model
-        security:
-          - tokenAuth: []
         parameters:
           - name: model_id
             in: path
@@ -118,8 +110,6 @@ class Models(Resource):
         ---
         tags:
           - model
-        security:
-          - tokenAuth: []
         responses:
           200:
             description: All models
@@ -135,10 +125,6 @@ class Models(Resource):
                         properties:
                           model_id:
                             type: string
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/models-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -159,8 +145,6 @@ class Importance(Resource):
         ---
         tags:
           - model
-        security:
-          - tokenAuth: []
         parameters:
           - name: model_id
             in: path
@@ -185,10 +169,6 @@ class Importance(Resource):
                             type: string
                           importance:
                             type: float
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/importance-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -209,8 +189,6 @@ class Prediction(Resource):
         ---
         tags:
           - model
-        security:
-          - tokenAuth: []
         parameters:
           - name: model_id
             in: query
@@ -239,10 +217,6 @@ class Prediction(Resource):
                   properties:
                     output:
                       type: number
-                examples:
-                  inlineJson:
-                    summary: inline example
-                    value: 10.0
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -286,8 +260,6 @@ class MultiPrediction(Resource):
           Only one of eids and row_ids can contain more than one element.
         tags:
           - model
-        security:
-          - tokenAuth: []
         requestBody:
           required: true
           content:

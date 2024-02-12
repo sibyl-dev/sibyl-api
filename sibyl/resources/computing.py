@@ -140,8 +140,6 @@ class SingleChangePredictions(Resource):
         ---
         tags:
           - computing
-        security:
-          - tokenAuth: []
         requestBody:
            required: true
            content:
@@ -174,10 +172,6 @@ class SingleChangePredictions(Resource):
                         type: array
                         items:
                           type: ["string", "number"]
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/singlechangepredictions-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -218,8 +212,6 @@ class ModifiedPrediction(Resource):
         ---
         tags:
           - computing
-        security:
-          - tokenAuth: []
         requestBody:
            required: true
            content:
@@ -248,10 +240,6 @@ class ModifiedPrediction(Resource):
                   properties:
                     prediction:
                       type: number
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/modifiedprediction-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -290,8 +278,6 @@ class FeatureContributions(Resource):
         ---
         tags:
           - computing
-        security:
-          - tokenAuth: []
         requestBody:
           required: true
           content:
@@ -318,10 +304,6 @@ class FeatureContributions(Resource):
                       type: object
                       additionalProperties:
                         type: number
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/contributions-post-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -358,8 +340,6 @@ class MultiFeatureContributions(Resource):
         ---
         tags:
           - computing
-        security:
-          - tokenAuth: []
         requestBody:
           required: true
           content:
@@ -425,8 +405,6 @@ class ModifiedFeatureContribution(Resource):
         ---
         tags:
           - computing
-        security:
-          - tokenAuth: []
         requestBody:
            required: true
            content:
@@ -460,10 +438,6 @@ class ModifiedFeatureContribution(Resource):
                           type: number
                         Average\\/Mode:
                           type: ["string", "number"]
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/modifiedcontribution-post-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -496,8 +470,6 @@ class SimilarEntities(Resource):
         ---
         tags:
           - computing
-        security:
-          - tokenAuth: []
         requestBody:
           required: true
           content:

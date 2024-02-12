@@ -30,8 +30,6 @@ class Context(Resource):
         ---
         tags:
           - context
-        security:
-          - tokenAuth: []
         parameters:
           - name: context_id
             in: path
@@ -46,9 +44,6 @@ class Context(Resource):
               application/json:
                 schema:
                   $ref: '#/components/schemas/Context'
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/context-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -68,8 +63,6 @@ class Context(Resource):
         ---
         tags:
           - context
-        security:
-          - tokenAuth: []
         parameters:
           - name: context_id
             in: path
@@ -110,8 +103,6 @@ class Contexts(Resource):
         ---
         tags:
           - context
-        security:
-          - tokenAuth: []
         responses:
           200:
             description: Get all contexts
@@ -124,10 +115,6 @@ class Contexts(Resource):
                       type: array
                       items:
                         $ref: '#/components/schemas/Context'
-                examples:
-                  externalJson:
-                    summary: external example
-                    externalValue: '/examples/contexts-get-200.json'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """

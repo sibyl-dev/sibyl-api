@@ -10,7 +10,7 @@ import json
 API_VERSION = "/api/v1/"
 
 
-def add_routes(app):
+def add_routes(app, docs_filename=None):
     @app.route("/redoc")
     def redoc():
         return render_template("redoc.html")
@@ -25,7 +25,7 @@ def add_routes(app):
     api.add_resource(ctrl.entity.Entity, API_VERSION + "entities/<string:eid>/")
     api.add_resource(ctrl.entity.Entities, API_VERSION + "entities/")
 
-    """api.add_resource(ctrl.group.EntityGroups, API_VERSION + "groups/")
+    api.add_resource(ctrl.group.EntityGroups, API_VERSION + "groups/")
     api.add_resource(ctrl.group.EntityGroup, API_VERSION + "groups/<string:group_id>/")
 
     api.add_resource(ctrl.feature.Feature, API_VERSION + "features/<string:feature_name>/")
@@ -55,8 +55,9 @@ def add_routes(app):
     )
     api.add_resource(ctrl.computing.SimilarEntities, API_VERSION + "similar_entities/")
 
-    api.add_resource(ctrl.logger.Logger, API_VERSION + "logging/")"""
+    api.add_resource(ctrl.logger.Logger, API_VERSION + "logging/")
 
-    with open("apispec.json", "w") as fp:
-        with app.app_context():
-            json.dump(swag.get_apispecs(endpoint="apispec"), fp)
+    if docs_filename:
+        with open(docs_filename, "w") as fp:
+            with app.app_context():
+                json.dump(swag.get_apispecs(endpoint=swagger_config["specs"][0]["endpoint"]), fp)

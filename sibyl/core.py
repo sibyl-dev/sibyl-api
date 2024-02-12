@@ -27,7 +27,7 @@ class Sibyl:
             Whether launch app in docker environment.
     """
 
-    def _init_flask_app(self, env):
+    def _init_flask_app(self, env, docs_filename=None):
         app = Flask(
             __name__,
             static_url_path="",
@@ -47,7 +47,7 @@ class Sibyl:
             app.config.from_mapping(DEBUG=False, TESTING=True)
 
         CORS(app)
-        add_routes(app)
+        add_routes(app, docs_filename)
 
         # set up global variables
         g["config"] = self._conf
@@ -79,7 +79,7 @@ class Sibyl:
         self._db = connect(**kargs)
         # TODO - using testing datasets in test env
 
-    def run_server(self, env=None, port=None):
+    def run_server(self, env=None, port=None, docs_filename=None):
         env = self._conf["flask"]["ENV"] if env is None else env
         port = self._conf["flask"]["PORT"] if port is None else port
 
@@ -91,7 +91,7 @@ class Sibyl:
         # in case running app with the absolute path
         sys.path.append(os.path.dirname(__file__))
 
-        app = self._init_flask_app(env)
+        app = self._init_flask_app(env, docs_filename=docs_filename)
 
         LOGGER.info(colored("Starting up FLASK APP in {} mode".format(env), "yellow"))
 
