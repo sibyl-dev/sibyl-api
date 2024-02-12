@@ -14,7 +14,7 @@
 
 APIs for explainable ML.
 
--   API Documentation: [https://sibyl-ml.dev/sibyl-api/] (https://sibyl-ml.dev/sibyl-api/)
+-   API Documentation: [https://sibyl-ml.dev/sibyl-api/](https://sibyl-ml.dev/sibyl-api/)
 
 # Overview
 
