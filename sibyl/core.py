@@ -31,8 +31,8 @@ class Sibyl:
         app = Flask(
             __name__,
             static_url_path="",
-            static_folder="../apidocs",
-            template_folder="../apidocs",
+            static_folder="../docs",
+            template_folder="../docs",
         )
 
         app.config.from_mapping(**self._conf["flask"])

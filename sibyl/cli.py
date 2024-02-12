@@ -74,7 +74,7 @@ def get_parser():
         "-D", "--db", action="store", help="Database name to use. Overrides config", type=str
     )
     default_docs_file = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "..", "apidocs", "apispec.json"
+        os.path.dirname(os.path.abspath(__file__)), "..", "docs", "apispec.json"
     )
     run.add_argument(
         "--generate-docs",

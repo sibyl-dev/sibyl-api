@@ -173,7 +173,7 @@ swagger_config = {
     "title": "Sibyl RestAPI Documentation",
     "uiversion": 3,
     "openapi": "3.0.2",
-    "doc_dir": "./apidocs/",
+    "doc_dir": "./docs/",
     "headers": [],
     "specs": [{
         "endpoint": "apispec",
@@ -183,7 +183,7 @@ swagger_config = {
     }],
     "swagger_ui": True,
     "specs_route": "/apidocs/",
-    # "static_folder": "./apidocs/examples/",
+    # "static_folder": "./docs/examples/",
 }
 
 markdown_text = """
