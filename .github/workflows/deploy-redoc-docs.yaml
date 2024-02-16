@@ -4,7 +4,7 @@ name: Build docs
 on:
   push:
     branches:
-      - dev
+      - stable
 
 jobs:
   build:
