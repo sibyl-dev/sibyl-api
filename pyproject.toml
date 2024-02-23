@@ -42,7 +42,6 @@ numpy = "^1.23.3"
 pandas = "^1.5.0"
 
 # ML Dependencies
-xgboost = "0.90"
 
 # Web server dependencies
 Flask = "2.2.2"
