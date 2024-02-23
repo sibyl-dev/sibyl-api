@@ -1,9 +1,11 @@
+import os
+import pickle
+
 import pandas as pd
 from pyreal import RealApp
 from pyreal.sample_applications import ames_housing
+
 from sibyl.db.preprocessing import prepare_database_from_config
-import os
-import pickle
 
 
 def run():
