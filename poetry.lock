@@ -4730,22 +4730,6 @@ files = [
 ]
 
 [[package]]
-name = "xgboost"
-version = "0.90"
-description = "XGBoost Python Package"
-optional = false
-python-versions = ">=3.4"
-files = [
-    {file = "xgboost-0.90-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:898f26bb66589c644d17deff1b03961504f7ad79296ed434d0d7a5e9cb4deae6"},
-    {file = "xgboost-0.90-py2.py3-none-win_amd64.whl", hash = "sha256:5ec073f6d68348784e9afdb831371fefb89de896d8eb58e79244ad05177c5753"},
-    {file = "xgboost-0.90.tar.gz", hash = "sha256:d69f90d61a63e8889fd39a31ad00c629bac1ca627f8406b9b6d4594c9e29ab84"},
-]
-
-[package.dependencies]
-numpy = "*"
-scipy = "*"
-
-[[package]]
 name = "zipp"
 version = "3.17.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
@@ -4834,4 +4818,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.9.7 || >3.9.7,<3.12"
-content-hash = "13270c3c4d0faa1b2a8e3d2e00182ba4a1bc32806f2592291324b76c0b076991"
+content-hash = "80b537e023ba6f33836b88d510f17f2f6a7404572298e176cce9b66bfaa621e6"

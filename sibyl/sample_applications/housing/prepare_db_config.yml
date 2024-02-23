@@ -2,7 +2,7 @@
 # =================================================================================================
 # Name of database to create
 database_name: "housing"
-# Name of directory in dbdata with csv and pkl files (if different from database_name)
+# Path of directory in dbdata with csv and pkl files (if different from database_name)
 directory: "housing"
 # If true, automatically drop existing database
 drop_old: True

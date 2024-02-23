@@ -116,8 +116,10 @@ sibyl-api-env/
 # app specific added
 .vscode/
 dbdata/*
-!dbdata/housing/
-!dbdata/housing/*
 sibyl_test/
 screening_log.csv
 sibyl/db/dump/
+
+# sample application data
+sibyl/sample_applications/housing/entities.csv
+sibyl/sample_applications/housing/realapp.pkl
