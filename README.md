@@ -58,7 +58,7 @@ cd sibyl-api
 poetry install
 ```
 
-## Quickstart
+# Quickstart
 Follow these steps to get started with the built-in Ames Housing dataset example.
 You can prepare and load the Ames Housing dataset by running
 ```bash
@@ -75,8 +75,64 @@ poetry run sibyl run -D housing -v
 
 Once Sibyl-API is running, you can access and test your APIs manually at `localhost:3000/apidocs`
 
-## Preparing database
+# Preparing database
 Sibyl-API uses a MongoDB-based database system. We offer several methods to setup your database.
+
+## Preparing data
+### Required inputs
+At minimum, sibyl-API requires the following inputs (either as a DataFrame or csv, see creation options below):
+
+**entities**: A table with the entities to be explained. Each row should correspond to a single observation.
+
+Columns:
+  - `eid` (*required*): unique identifier specifying which entity this observation corresponds to
+  - `row_id`: unique identifier specifying the observation ID. Together, `eid` and `row_id` should uniquely identify each observation.
+  - `label`: the ground-truth label for this observation
+  - `[FEATURES]`: additional columns for each feature used to make predictions. These columns should be named the same as the features used in the model.
+
+Sample table:
+
+| `eid`  | `row_id` | `label` | `feature1` | `feature2` | `feature3` |
+|--------|----------|---------|------------|------------|------------|
+| house1 | 101      | 0       | 0.1        | 0.2        | 0.3        |
+| house1 | 102      | 1       | 0.2        | 0.3        | 0.4        |
+| house2 | 204      | 1       | 0.3        | 0.4        | 0.5        |
+
+**features**: A table with the features used to make predictions. Each row should correspond to a single feature.
+
+Columns:
+  - `feature` (*required*): the name of the feature
+  - `type` (*required*): the type of the feature. This can be `categorical`, `numerical`, or `boolean`
+  - `description`: a description of the feature
+  - `negative_description`: a description of the feature when it is not present. Only for boolean features
+  - `values`: a list of possible values for the feature. Only for categorical features.
+
+Sample table:
+
+| `feature` | `type` | `description` | `negative_description` | `values` |
+|-----------|--------|---------------|------------------------|----------|
+| feature1  | numerical | the first feature | | |
+| feature2  | boolean | the second feature | the second feature is not present | |
+| feature3  | categorical | the third feature | | [A, B, C] |
+
+**realapp**: A pickled `pyreal.RealApp` object. This object is used to generate explanations for the model.
+
+### Optional inputs
+Additionally, you can configure APIs futher with:
+
+**config**: a configuration file (YAML or python dictionary) specifying
+additional settings. See `sibyl/db/config_template.yml` for options.
+
+**categories**: a table with the categories used to make predictions. Each row should correspond to a single category.
+
+Columns:
+  - `category` (*required*): the name of the category
+  - `description`: a description of the category
+  - `color`: color to use for the category
+  - `abbreviation`: abbreviation to use for the category
+
+
+## Creating the Mongo database
 
 ### With the prepare-db script
 Be sure to `start` your mongodb service before preparing the database
@@ -102,7 +158,7 @@ Then, run the setup wizard with
 poetry run streamlit run setup-wizard/main.py
 ```
 
-## Running APIs
+# Running APIs
 
 Once the library has been installed, you can run the APIs locally with:
 
