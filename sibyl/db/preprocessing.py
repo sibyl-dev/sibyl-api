@@ -600,9 +600,9 @@ def prepare_database_from_config(config_file, directory=None):
 
     if directory is None:
         if cfg.get("directory") is None:
-            directory = os.path.join(get_project_root(), "dbdata", cfg["database_name"])
+            raise ValueError("Must provide directory in config file or as argument.")
         else:
-            directory = os.path.join(get_project_root(), "dbdata", cfg["directory"])
+            directory = cfg["directory"]
 
     prepare_database(
         cfg["database_name"],
@@ -803,14 +803,3 @@ def prepare_database(
     pbar.update(times["Model"])
     if streamlit_progress_bar_func is not None:
         streamlit_progress_bar_func(100, "Finalizing...")
-
-
-"""if __name__ == "__main__":
-    connect_to_db("housing")
-    get_entities_df()
-    if len(sys.argv) == 2:
-        prepare_database_from_config(sys.argv[1])
-    elif len(sys.argv) == 3:
-        prepare_database_from_config(sys.argv[1], sys.argv[2])
-    else:
-        print("Invalid arguments. Usage: python preprocessing.py CONFIG_FILE [DIRECTORY]")"""

@@ -9,6 +9,8 @@ import os
 
 from sibyl.db.preprocessing import prepare_database_from_config
 from sibyl.sample_applications import prepare_housing_application
+from sibyl.utils import get_project_root
+import yaml
 
 
 def print_red(s):
@@ -192,6 +194,10 @@ def prepare_db(context, config, directory=None):
     """
     Load a database into the currently connected mongo database
     """
+    if directory is None:
+        with open(config) as stream:
+            db_name = yaml.safe_load(stream)["database_name"]
+            directory = os.path.join(get_project_root(), "dbdata", db_name)
     prepare_database_from_config(config, directory)
 
 

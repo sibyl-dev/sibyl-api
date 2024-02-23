@@ -18,7 +18,7 @@ def _run(args):
 
 
 def _prepare_db(args):
-    prepare_database_from_config(args.config, args.dir)
+    prepare_database_from_config(args.config, args.directory)
 
 
 def _prepare_housing_db(args):
@@ -29,18 +29,6 @@ def _prepare_housing_db(args):
 def get_parser():
     # Common Parent - Shared options
     common = argparse.ArgumentParser(add_help=False)
-
-    common.add_argument("-l", "--logfile", help="Name of the logfile.If not given, log to stdout.")
-
-    common.add_argument(
-        "-v",
-        "--verbose",
-        action="count",
-        default=0,
-        help="Be verbose. Use -vv for increased verbosity.",
-    )
-
-    common.add_argument("--docker", action="store_true", help="Deploy in docker environment")
 
     parser = argparse.ArgumentParser(description="Sibyl Command Line Interface.")
     parser.set_defaults(function=None)
@@ -73,6 +61,17 @@ def get_parser():
     run.add_argument(
         "-D", "--db", action="store", help="Database name to use. Overrides config", type=str
     )
+    run.add_argument("-l", "--logfile", help="Name of the logfile.If not given, log to stdout.")
+
+    run.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Be verbose. Use -vv for increased verbosity.",
+    )
+
+    run.add_argument("--docker", action="store_true", help="Deploy in docker environment")
     default_docs_file = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "..", "docs", "apispec.json"
     )
@@ -97,7 +96,7 @@ def get_parser():
 
     prepare_db.add_argument("config", action="store", help="Path to config file to use")
     prepare_db.add_argument(
-        "--dir", "--directory", action="store", help="Path of directory containing data"
+        "directory", action="store", help="Path of directory containing files listed in config"
     )
 
     # sibyl prepare-sample-db

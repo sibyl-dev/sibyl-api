@@ -2,7 +2,7 @@
 # =================================================================================================
 # Name of database to create
 database_name:
-# Name of directory in dbdata with csv and pkl files (if different from database_name)
+# Absolute path to directory with csv and pkl files
 directory:
 # If true, automatically drop existing database
 drop_old: False
