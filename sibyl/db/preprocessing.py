@@ -805,7 +805,7 @@ def prepare_database(
         streamlit_progress_bar_func(100, "Finalizing...")
 
 
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     connect_to_db("housing")
     get_entities_df()
     if len(sys.argv) == 2:
@@ -813,4 +813,4 @@ if __name__ == "__main__":
     elif len(sys.argv) == 3:
         prepare_database_from_config(sys.argv[1], sys.argv[2])
     else:
-        print("Invalid arguments. Usage: python preprocessing.py CONFIG_FILE [DIRECTORY]")
+        print("Invalid arguments. Usage: python preprocessing.py CONFIG_FILE [DIRECTORY]")"""

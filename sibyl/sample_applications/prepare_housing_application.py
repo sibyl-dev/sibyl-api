@@ -34,7 +34,3 @@ def run():
 
     print("Dumping housing realapp...")
     pickle.dump(realapp, open(os.path.join(directory, "realapp.pkl"), "wb"))
-
-
-if __name__ == "__main__":
-    run()

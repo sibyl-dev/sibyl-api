@@ -7,6 +7,9 @@ from invoke import task
 from sys import executable
 import os
 
+from sibyl.db.preprocessing import prepare_database_from_config
+from sibyl.sample_applications import prepare_housing_application
+
 
 def print_red(s):
     print("\033[91m {}\033[00m".format(s), end="")
@@ -172,24 +175,24 @@ def test_scripts(context):
 
 
 @task
-def load_housing_data(context):
+def prepare_sample_db(context):
     """
-    Load the housing sample application into the currently connect mongo database
+    Load the housing sample application into the currently connected mongo database
     """
-    subprocess.run(
-        ["poetry", "run", "python", "./sibyl/sample_applications/prepare_housing_application.py"],
-        check=True,
+    prepare_housing_application.run()
+    prepare_database_from_config(
+        os.path.join(
+            os.path.dirname(prepare_housing_application.__file__), "housing_prepare_db_config.yml"
+        )
     )
-    subprocess.run(
-        [
-            "poetry",
-            "run",
-            "python",
-            "./sibyl/db/preprocessing.py",
-            "./sibyl/sample_applications/housing_prepare_db_config.yml",
-        ],
-        check=True,
-    )
+
+
+@task
+def prepare_db(context, config, directory=None):
+    """
+    Load a database into the currently connected mongo database
+    """
+    prepare_database_from_config(config, directory)
 
 
 @task
