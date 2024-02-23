@@ -4,11 +4,10 @@ import shutil
 
 from pathlib import Path
 from invoke import task
-from sys import executable
 import os
 
 from sibyl.db.preprocessing import prepare_database_from_config
-from sibyl.sample_applications import prepare_housing_application
+from sibyl.sample_applications.housing import prepare_db as prepare_housing_db
 from sibyl.utils import get_project_root
 import yaml
 
@@ -181,12 +180,7 @@ def prepare_sample_db(context):
     """
     Load the housing sample application into the currently connected mongo database
     """
-    prepare_housing_application.run()
-    prepare_database_from_config(
-        os.path.join(
-            os.path.dirname(prepare_housing_application.__file__), "housing_prepare_db_config.yml"
-        )
-    )
+    prepare_housing_db.run()
 
 
 @task

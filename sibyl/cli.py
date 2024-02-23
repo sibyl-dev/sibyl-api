@@ -3,7 +3,7 @@ import os
 
 from sibyl.core import Sibyl
 from sibyl.db.preprocessing import prepare_database_from_config
-from sibyl.sample_applications import prepare_housing_application
+from sibyl.sample_applications.housing import prepare_db
 from sibyl.utils import read_config, setup_logging
 
 
@@ -22,13 +22,22 @@ def _prepare_db(args):
 
 
 def _prepare_housing_db(args):
-    prepare_housing_application.run()
-    prepare_database_from_config("./sibyl/sample_applications/housing_prepare_db_config.yml")
+    prepare_db.run()
 
 
 def get_parser():
     # Common Parent - Shared options
     common = argparse.ArgumentParser(add_help=False)
+
+    common.add_argument("-l", "--logfile", help="Name of the logfile.If not given, log to stdout.")
+
+    common.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Be verbose. Use -vv for increased verbosity.",
+    )
 
     parser = argparse.ArgumentParser(description="Sibyl Command Line Interface.")
     parser.set_defaults(function=None)
@@ -60,15 +69,6 @@ def get_parser():
     )
     run.add_argument(
         "-D", "--db", action="store", help="Database name to use. Overrides config", type=str
-    )
-    run.add_argument("-l", "--logfile", help="Name of the logfile.If not given, log to stdout.")
-
-    run.add_argument(
-        "-v",
-        "--verbose",
-        action="count",
-        default=0,
-        help="Be verbose. Use -vv for increased verbosity.",
     )
 
     run.add_argument("--docker", action="store_true", help="Deploy in docker environment")

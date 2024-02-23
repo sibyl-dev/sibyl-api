@@ -1,15 +1,13 @@
-import os
-import pickle
-
 import pandas as pd
 from pyreal import RealApp
 from pyreal.sample_applications import ames_housing
-
-from sibyl.utils import get_project_root
+from sibyl.db.preprocessing import prepare_database_from_config
+import os
+import pickle
 
 
 def run():
-    directory = os.path.join(get_project_root(), "dbdata", "housing")
+    directory = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
     x_orig, y_orig = ames_housing.load_data(include_targets=True)
     x_orig = x_orig.rename({"Id": "eid"}, axis="columns")
@@ -31,6 +29,6 @@ def run():
         x_train_orig=x_orig.drop("eid", axis="columns"),
         y_train=y_orig,
     )
-
-    print("Dumping housing realapp...")
     pickle.dump(realapp, open(os.path.join(directory, "realapp.pkl"), "wb"))
+
+    prepare_database_from_config(os.path.join(directory, "prepare_db_config.yml"), directory)
