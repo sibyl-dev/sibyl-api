@@ -92,11 +92,11 @@ Columns:
 
 Sample table:
 
-| `eid`  | `row_id` | `label` | `feature1` | `feature2` | `feature3` |
-|--------|----------|---------|------------|------------|------------|
-| house1 | 101      | 0       | 0.1        | 0.2        | 0.3        |
-| house1 | 102      | 1       | 0.2        | 0.3        | 0.4        |
-| house2 | 204      | 1       | 0.3        | 0.4        | 0.5        |
+| `eid`   | `row_id` | `label` | `feature1` | `feature2` | `feature3` |
+|---------|----------|---------|------------|------------|------------|
+| entity1 | 101      | 0       | 0.1        | 0.2        | 0.3        |
+| entity1 | 102      | 1       | 0.2        | 0.3        | 0.4        |
+| entity2 | 204      | 1       | 0.3        | 0.4        | 0.5        |
 
 **features**: A table with the features used to make predictions. Each row should correspond to a single feature.
 
@@ -109,11 +109,11 @@ Columns:
 
 Sample table:
 
-| `feature` | `type` | `description` | `negative_description` | `values` |
-|-----------|--------|---------------|------------------------|----------|
-| feature1  | numerical | the first feature | | |
-| feature2  | boolean | the second feature | the second feature is not present | |
-| feature3  | categorical | the third feature | | [A, B, C] |
+| `feature` | `type` | `description`        | `negative_description`         | `values`                    |
+|-----------|--------|----------------------|--------------------------------|-----------------------------|
+| size      | numerical | size in square feet  |                                |                             |
+| has_ac    | boolean | has air conditioning | does not have air conditioning |                             |
+| nghbrh    | categorical | neighborhood         |                                | [Oceanview, Ridge, Oakvale] |
 
 **realapp**: A pickled `pyreal.RealApp` object. This object is used to generate explanations for the model.
 
@@ -131,14 +131,13 @@ Columns:
   - `color`: color to use for the category
   - `abbreviation`: abbreviation to use for the category
 
-
 ## Creating the Mongo database
 
 ### With the prepare-db script
 Be sure to `start` your mongodb service before preparing the database
 
-Copy `sibyl/db/config_template.yml` and fill it in with your configurations. You will need to
-place your `entities.csv`, `features.csv`, and `realapp.pkl` in a single directory.
+Copy `sibyl/db/config_template.yml` and fill it in with your configurations. Place required data
+in a common directory.
 
 Next, run the preprocessing script with:
 ```bash
