@@ -146,7 +146,7 @@ sibyl run prepare-db [CONFIG_NAME].yml [DIRECTORY]
 where `[CONFIG_NAME].yml` is the path to your configuration file and `[DIRECTORY]` is
 the directory containing your data.
 
-### Running the Setup Wizard
+### With the Setup Wizard
 Currently, the setup wizard is only available when installing from source.
 First, install the optional setup dependencies with
 ```bash
