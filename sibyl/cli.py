@@ -3,12 +3,12 @@ import os
 
 from sibyl.core import Sibyl
 from sibyl.db.preprocessing import prepare_database_from_config
-from sibyl.sample_applications.housing import prepare_db
-from sibyl.utils import read_config, setup_logging
+from sibyl.sample_applications.housing import prepare_db as prepare_housing_db
+from sibyl.utils import get_project_root, read_config, setup_logging
 
 
 def _run(args):
-    config = read_config("./sibyl/config.yml")
+    config = read_config(os.path.join(get_project_root(), "sibyl", "config.yml"))
     sibyl = Sibyl(config, args.docker, args.dbhost, args.dbport, args.db)
 
     if args.generate_docs:
@@ -22,7 +22,7 @@ def _prepare_db(args):
 
 
 def _prepare_housing_db(args):
-    prepare_db.run()
+    prepare_housing_db.run()
 
 
 def get_parser():
