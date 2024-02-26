@@ -27,14 +27,6 @@ json_encoder = _JSONEncoder().encode
 
 
 def read_config(path_to_config):
-    """Load YAML file and return Dict."""
-    if os.path.isfile(path_to_config):
-        pass
-    else:
-        path_to_config = "../{}".format(path_to_config)
-
-    dictionary = None
-
     try:
         with open(path_to_config, "r") as f:
             dictionary = load(f.read(), Loader=Loader)
