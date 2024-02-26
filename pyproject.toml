@@ -5,7 +5,7 @@ license = "MIT"
 name = "sibyl-api"
 packages = [{include = "sibyl"}]
 readme = "README.md"
-version = "0.1.0.1"
+version = "0.1.0.2"
 
 repository = "https://github.com/DAI-Lab/sibyl-api"
 
@@ -42,7 +42,6 @@ numpy = "^1.23.3"
 pandas = "^1.5.0"
 
 # ML Dependencies
-xgboost = "0.90"
 
 # Web server dependencies
 Flask = "2.2.2"
