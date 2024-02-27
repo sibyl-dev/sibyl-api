@@ -136,7 +136,7 @@ class SingleChangePredictions(Resource):
     def post(self):
         """
         Get the resulting model predictions after changing the value of a single feature
-        of an entity for each feature-value pair provided in the request.
+        of an entity for each feature-value pair provided in the request
         ---
         tags:
           - computing
