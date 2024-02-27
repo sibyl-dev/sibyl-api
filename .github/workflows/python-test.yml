@@ -38,7 +38,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Populate DB
-        run: poetry run invoke load-housing-data
+        run: poetry run invoke prepare-sample-db
 
       - name: Lint
         run: poetry run invoke lint

@@ -3,12 +3,12 @@ import os
 
 from sibyl.core import Sibyl
 from sibyl.db.preprocessing import prepare_database_from_config
-from sibyl.sample_applications import prepare_housing_application
-from sibyl.utils import read_config, setup_logging
+from sibyl.sample_applications.housing import prepare_db as prepare_housing_db
+from sibyl.utils import get_project_root, read_config, setup_logging
 
 
 def _run(args):
-    config = read_config("./sibyl/config.yml")
+    config = read_config(os.path.join(get_project_root(), "sibyl", "config.yml"))
     sibyl = Sibyl(config, args.docker, args.dbhost, args.dbport, args.db)
 
     if args.generate_docs:
@@ -18,12 +18,11 @@ def _run(args):
 
 
 def _prepare_db(args):
-    prepare_database_from_config(args.config, args.dir)
+    prepare_database_from_config(args.config, args.directory)
 
 
 def _prepare_housing_db(args):
-    prepare_housing_application.run()
-    prepare_database_from_config("./sibyl/sample_applications/housing_prepare_db_config.yml")
+    prepare_housing_db.run()
 
 
 def get_parser():
@@ -39,8 +38,6 @@ def get_parser():
         default=0,
         help="Be verbose. Use -vv for increased verbosity.",
     )
-
-    common.add_argument("--docker", action="store_true", help="Deploy in docker environment")
 
     parser = argparse.ArgumentParser(description="Sibyl Command Line Interface.")
     parser.set_defaults(function=None)
@@ -73,6 +70,8 @@ def get_parser():
     run.add_argument(
         "-D", "--db", action="store", help="Database name to use. Overrides config", type=str
     )
+
+    run.add_argument("--docker", action="store_true", help="Deploy in docker environment")
     default_docs_file = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "..", "docs", "apispec.json"
     )
@@ -97,7 +96,7 @@ def get_parser():
 
     prepare_db.add_argument("config", action="store", help="Path to config file to use")
     prepare_db.add_argument(
-        "--dir", "--directory", action="store", help="Path of directory containing data"
+        "directory", action="store", help="Path of directory containing files listed in config"
     )
 
     # sibyl prepare-sample-db

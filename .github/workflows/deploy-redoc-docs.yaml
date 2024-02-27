@@ -4,12 +4,12 @@ name: Build docs
 on:
   push:
     branches:
-      - stable
+      - dev
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Build docs
+    - name: Build
       run: npx @redocly/cli build-docs docs/apispec.json --output index.html

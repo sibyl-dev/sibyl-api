@@ -4,8 +4,12 @@ import shutil
 
 from pathlib import Path
 from invoke import task
-from sys import executable
 import os
+
+from sibyl.db.preprocessing import prepare_database_from_config
+from sibyl.sample_applications.housing import prepare_db as prepare_housing_db
+from sibyl.utils import get_project_root
+import yaml
 
 
 def print_red(s):
@@ -172,24 +176,23 @@ def test_scripts(context):
 
 
 @task
-def load_housing_data(context):
+def prepare_sample_db(context):
     """
-    Load the housing sample application into the currently connect mongo database
+    Load the housing sample application into the currently connected mongo database
     """
-    subprocess.run(
-        ["poetry", "run", "python", "./sibyl/sample_applications/prepare_housing_application.py"],
-        check=True,
-    )
-    subprocess.run(
-        [
-            "poetry",
-            "run",
-            "python",
-            "./sibyl/db/preprocessing.py",
-            "./sibyl/sample_applications/housing_prepare_db_config.yml",
-        ],
-        check=True,
-    )
+    prepare_housing_db.run()
+
+
+@task
+def prepare_db(context, config, directory=None):
+    """
+    Load a database into the currently connected mongo database
+    """
+    if directory is None:
+        with open(config) as stream:
+            db_name = yaml.safe_load(stream)["database_name"]
+            directory = os.path.join(get_project_root(), "dbdata", db_name)
+    prepare_database_from_config(config, directory)
 
 
 @task

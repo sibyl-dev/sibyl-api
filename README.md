@@ -27,13 +27,21 @@ Sibylapp is an online interactive tool built on the top of Sibyl (python library
 
 ## Requirements
 
-**Sibyl-API** has been developed and tested on [Python 3.9, 3.10, and 3.11](https://www.python.org/downloads/), and on [MongoDB version 6](https://www.mongodb.com/try/download/community).
+**Sibyl-API** has been developed and tested on [Python 3.9, 3.10, and 3.11](https://www.python.org/downloads/), and on [MongoDB version 6 and 7](https://www.mongodb.com/try/download/community).
 
-This library uses Poetry for package management.
+To install MongoDB, follow the instructions
+[here](https://www.mongodb.com/docs/manual/administration/install-community/).
+
+## Install from PyPi
+
+Sibyl-API can be installed from pypi:
+```bash
+pip install sibyl-api
+```
 
 ## Install from source
 
-If you do not have **poetry** installed, please head to [poetry installation guide](https://python-poetry.org/docs/#installation)
+Sibyl-API uses **Poetry** for dependency management. If you do not have *Poetry* installed, please head to [poetry installation guide](https://python-poetry.org/docs/#installation)
 and install poetry according to the instructions.
 Run the following command to make sure poetry is activated. You may need to close and reopen the terminal.
 
@@ -41,7 +49,7 @@ Run the following command to make sure poetry is activated. You may need to clos
 poetry --version
 ```
 
-Finally, you can clone this repository and install it from
+Then, you can clone this repository and install it from
 source by running `poetry install`:
 
 ```bash
@@ -50,64 +58,96 @@ cd sibyl-api
 poetry install
 ```
 
-Sibyl-API runs using MongoDB, tested for versions 5 and 6. To install, follow the instructions
-[here](https://www.mongodb.com/docs/manual/administration/install-community/).
-
-## Quickstart
+# Quickstart
 Follow these steps to get started with the built-in Ames Housing dataset example.
-You can prepare and load the Ames Housing dataset by running:
+You can prepare and load the Ames Housing dataset by running
 ```bash
-poetry run invoke load-housing-data
+sibyl prepare-sample-db
 ```
+> ⚠️ This function will overwrite any
+existing database on localhost:27017 with the name **housing**):
 
-Alternatively, you can manually prepare and load the database by running teh following two commands:
-```bash
-poetry run python sibyl/sample_applications/prepare_housing_application.py   # Prepare model and realapp
-poetry run python sibyl/db/preprocessing.py sibyl/sample_applications/housing_config.yml   # Load in database
-```
 
-You can test your APIs with the housing dataset by running `sibyl/test_apis_on_database.ipynb`.
-You can also automatically run all unit tests and the testing script with:
+You can now run Sibyl-API with the sample dataset with:
 ```bash
-poetry run invoke test
-```
-
-To run Sibyl-API, make sure the `db` parameter under `mongodb` in `sibyl/config.yml` is set to `housing`, and then run  Sibyl-API with:
-```bash
-poetry run sibyl run -v
+poetry run sibyl run -D housing -v
 ```
 
 Once Sibyl-API is running, you can access and test your APIs manually at `localhost:3000/apidocs`
 
-## Preparing database
+# Preparing database
 Sibyl-API uses a MongoDB-based database system. We offer several methods to setup your database.
 
+## Preparing data
+### Required inputs
+At minimum, sibyl-API requires the following inputs (either as a DataFrame or csv, see creation options below):
+
+**entities**: A table with the entities to be explained. Each row should correspond to a single observation.
+
+Columns:
+  - `eid` (*required*): unique identifier specifying which entity this observation corresponds to
+  - `row_id`: unique identifier specifying the observation ID. Together, `eid` and `row_id` should uniquely identify each observation.
+  - `label`: the ground-truth label for this observation
+  - `[FEATURES]`: additional columns for each feature used to make predictions. These columns should be named the same as the features used in the model.
+
+Sample table:
+
+| `eid`   | `row_id` | `label` | `feature1` | `feature2` | `feature3` |
+|---------|----------|---------|------------|------------|------------|
+| entity1 | 101      | 0       | 0.1        | 0.2        | 0.3        |
+| entity1 | 102      | 1       | 0.2        | 0.3        | 0.4        |
+| entity2 | 204      | 1       | 0.3        | 0.4        | 0.5        |
+
+**features**: A table with the features used to make predictions. Each row should correspond to a single feature.
+
+Columns:
+  - `feature` (*required*): the name of the feature
+  - `type` (*required*): the type of the feature. This can be `categorical`, `numerical`, or `boolean`
+  - `description`: a description of the feature
+  - `negative_description`: a description of the feature when it is not present. Only for boolean features
+  - `values`: a list of possible values for the feature. Only for categorical features.
+
+Sample table:
+
+| `feature` | `type` | `description`        | `negative_description`         | `values`                    |
+|-----------|--------|----------------------|--------------------------------|-----------------------------|
+| size      | numerical | size in square feet  |                                |                             |
+| has_ac    | boolean | has air conditioning | does not have air conditioning |                             |
+| nghbrh    | categorical | neighborhood         |                                | [Oceanview, Ridge, Oakvale] |
+
+**realapp**: A pickled `pyreal.RealApp` object. This object is used to generate explanations for the model.
+
+### Optional inputs
+Additionally, you can configure APIs futher with:
+
+**config**: a configuration file (YAML or python dictionary) specifying
+additional settings. See `sibyl/db/config_template.yml` for options.
+
+**categories**: a table with the categories used to make predictions. Each row should correspond to a single category.
+
+Columns:
+  - `category` (*required*): the name of the category
+  - `description`: a description of the category
+  - `color`: color to use for the category
+  - `abbreviation`: abbreviation to use for the category
+
+## Creating the Mongo database
+
 ### With the prepare-db script
-You can fill the database using the `preprocessing.py` script by
-following these steps. Be sure to `start` your mongodb service before using the database.
+Be sure to `start` your mongodb service before preparing the database
 
-First, if it doesn't already exist, add a `dbdata` directory in the top-level `sibyl-api` directory.
+Copy `sibyl/db/config_template.yml` and fill it in with your configurations. Place required data
+in a common directory.
 
-Next, add a directory in `dbdata` named after your domain, and fill it with your data files. You should end with a file
-structure that looks like:
-```
-sibyl-api
-|---dbdata
-   |---domain_name
-        |---entities.csv
-        |   feature.csv
-        |   realapp.pkl
-        |   ...
-```
-
-Next, copy `sibyl/db/config_template.yml` and fill it in with your file names.
-
-Finally, run the preprocessing script with:
+Next, run the preprocessing script with:
 ```bash
-poetry run python preprocessing.py [CONFIG_NAME].yml
+sibyl run prepare-db [CONFIG_NAME].yml [DIRECTORY]
 ```
+where `[CONFIG_NAME].yml` is the path to your configuration file and `[DIRECTORY]` is
+the directory containing your data.
 
-### Running the Setup Wizard
+### With the Setup Wizard
+Currently, the setup wizard is only available when installing from source.
 First, install the optional setup dependencies with
 ```bash
 poetry install --with setup
@@ -117,19 +157,19 @@ Then, run the setup wizard with
 poetry run streamlit run setup-wizard/main.py
 ```
 
-## Running APIs
+# Running APIs
 
 Once the library has been installed, you can run the APIs locally with:
 
 ```bash
-poetry run sibyl run -v
+poetry run sibyl run -v -D [DATABASE_NAME]
 ```
 
 Or, to run in development mode:
 ```bash
 poetry shell
 
-sibyl run -E development -v
+sibyl run -E development -v -D [DATABASE_NAME]
 ```
 
 You can then access your APIs locally at http://localhost:3000/apidocs
