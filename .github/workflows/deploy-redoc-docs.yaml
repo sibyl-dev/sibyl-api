@@ -4,7 +4,7 @@ name: Build docs
 on:
   push:
     branches:
-      - stable
+      - dev
 
 jobs:
   build:
@@ -14,9 +14,7 @@ jobs:
     - name: Build docs
       run: npx @redocly/cli build-docs docs/apispec.json --output index.html
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3 # https://github.com/peaceiris/actions-gh-pages
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        deploy_key: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: .
-        force_orphan: true
-        exclude_assets: '.github,openapi,.redocly.yaml,LICENSE,README.md,make.sh'
+        deploy_key: ${{secrets.GITHUB_TOKEN}}
+        publish_dir: docs/_build
