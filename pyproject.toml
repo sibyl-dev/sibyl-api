@@ -5,7 +5,7 @@ license = "MIT"
 name = "sibyl-api"
 packages = [{include = "sibyl"}]
 readme = "README.md"
-version = "0.1.0"
+version = "0.1.0.2"
 
 repository = "https://github.com/DAI-Lab/sibyl-api"
 
