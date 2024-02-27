@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Build docs
+    - name: Build
       run: npx @redocly/cli build-docs docs/apispec.json --output index.html
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
