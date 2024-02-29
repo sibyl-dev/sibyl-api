@@ -135,8 +135,7 @@ def get_entities_table(eids, row_ids, all_rows=False):
 class SingleChangePredictions(Resource):
     def post(self):
         """
-        Get the resulting model predictions after changing the value of a single feature
-        of an entity for each feature-value pair provided in the request.
+        Change one feature value at a fime and get the resulting model predictions.
         ---
         tags:
           - computing
