@@ -254,10 +254,6 @@ class MultiPrediction(Resource):
         """
         Get multiple model predictions.
         ---
-        description:
-          If given multiple eids, return one prediction per eid (first row).
-          If given one eid, return one prediction per row_id.
-          Only one of eids and row_ids can contain more than one element.
         tags:
           - model
         requestBody:
@@ -322,12 +318,16 @@ class MultiPrediction(Resource):
             message, error_code = payload
             return message, error_code
         if return_proba:
-            prediction_probs = realapp.predict_proba(entities)
-            # the probability of the predicted class is the largest in the output probabilities
-            predictions = {
-                key: numpy_decoder(np.max(prediction_probs[key])) for key in prediction_probs
-            }
+            predictions = realapp.predict_proba(entities)
+            func = np.max
         else:
             predictions = realapp.predict(entities)
+            func = lambda x: x
+        if row_ids is not None:
+            predictions = {
+                key: {row_id: numpy_decoder(func(predictions[key][row_id])) for row_id in row_ids}
+                for key in predictions
+            }
+        else:
             predictions = {key: numpy_decoder(predictions[key]) for key in predictions}
         return {"predictions": predictions}, 200

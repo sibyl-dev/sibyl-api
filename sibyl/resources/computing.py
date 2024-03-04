@@ -105,30 +105,18 @@ def get_entity_table(eid, row_id):
     return pd.DataFrame(get_features_for_row(entity.features, row_id), index=[eid])
 
 
-def get_entities_table(eids, row_ids, all_rows=False):
-    if not all_rows:
+def get_entities_table(eids, row_ids):
+    def get_features(features):
         if row_ids is None:
-            entities = [
-                dict(get_features_for_row(entity.features, row_ids), **{"eid": entity.eid})
-                for entity in schema.Entity.objects(eid__in=eids)
-            ]
-        elif len(eids) > 1 and len(row_ids) > 1:
-            LOGGER.exception("Only one of eids and row_ids can have more than one element")
-            return {"message": "Only one of eids and row_ids can have more than one element"}, 400
-        elif len(eids) > 1:
-            entities = [
-                dict(get_features_for_row(entity.features, row_ids[0]), **{"eid": entity.eid})
-                for entity in schema.Entity.objects(eid__in=eids)
-            ]
-        else:
-            entity = schema.Entity.find_one(eid=eids[0])
-            entities = [dict(entity.features[row_id], **{"eid": row_id}) for row_id in row_ids]
+            return [get_features_for_row(features, None)]
+        return [get_features_for_row(features, row_id) for row_id in row_ids]
 
-    else:
-        entity_dict = schema.Entity.objects(eid=eids[0]).first().features
-        # We mislabel the row_ids as eids intentionally here to take advantage of the
-        #  underlying RealApp object having the id column set to "eid"
-        entities = [dict(entity_dict[row_id], **{"eid": row_id}) for row_id in entity_dict]
+    entities = schema.Entity.objects(eid__in=eids)
+    print(get_features(entities[0].features))
+    entities = [
+        dict(get_features(entity.features), **{"eid": entity.eid})
+        for entity in schema.Entity.objects(eid__in=eids)
+    ]
     return pd.DataFrame(entities)
 
 
