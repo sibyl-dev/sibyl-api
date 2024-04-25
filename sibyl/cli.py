@@ -1,5 +1,6 @@
 import argparse
 import os
+import subprocess
 
 from sibyl.core import Sibyl
 from sibyl.db.preprocessing import prepare_database_from_config
@@ -23,6 +24,11 @@ def _prepare_db(args):
 
 def _prepare_housing_db(args):
     prepare_housing_db.run()
+
+
+def _run_setup_wizard(args):
+    abs_path = os.path.join(get_project_root(), "sibyl", "setup_wizard", "main.py")
+    subprocess.run(["streamlit", "run", abs_path])
 
 
 def get_parser():
@@ -104,6 +110,9 @@ def get_parser():
         "prepare-sample-db", help="Prepare sample database (housing)", parents=[common]
     )
     prepare_sample_db.set_defaults(function=_prepare_housing_db)
+
+    setup = action.add_parser("setup", help="Run the setup wizard", parents=[common])
+    setup.set_defaults(function=_run_setup_wizard)
 
     return parser
 
