@@ -1,11 +1,11 @@
 import argparse
 import os
+import subprocess
 
 from sibyl.core import Sibyl
 from sibyl.db.preprocessing import prepare_database_from_config
 from sibyl.sample_applications.housing import prepare_db as prepare_housing_db
 from sibyl.utils import get_project_root, read_config, setup_logging
-import subprocess
 
 
 def _run(args):
