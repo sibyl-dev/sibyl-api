@@ -3,31 +3,42 @@
 <i>An open source project from Data to AI Lab at MIT.</i>
 </p>
 
-<!-- Uncomment these lines after releasing the package to PyPI for version and downloads badges -->
-<!--[![PyPI Shield](https://img.shields.io/pypi/v/sibylapp.svg)](https://pypi.python.org/pypi/sibylapp)-->
-<!--[![Downloads](https://pepy.tech/badge/sibylapp)](https://pepy.tech/project/sibylapp)-->
-
-[![Travis CI Shield](https://travis-ci.org/HDI-Project/sibylapp.svg?branch=master)](https://travis-ci.org/HDI-Project/sibylapp)
-[![Coverage Status](https://codecov.io/gh/HDI-Project/sibylapp/branch/master/graph/badge.svg)](https://codecov.io/gh/HDI-Project/sibylapp)
+[![PyPI - Version](https://img.shields.io/pypi/v/sibyl-api)](https://pypi.org/project/sibyl-api/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sibyl-api)](https://pypi.org/project/sibyl-api/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/sibyl-api)](https://pypi.org/project/sibyl-api/)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/sibyl-dev/sibyl-api/python-test.yml)](https://github.com/sibyl-dev/sibyl-api/actions/workflows/python-test.yml)
+[![Static Badge](https://img.shields.io/badge/slack-sibyl-purple?logo=slack)](https://join.slack.com/t/sibyl-ml/shared_invite/zt-2dyfwbgo7-2ALinuT2KDZpsVJ4rntJuA)
 
 # Sibyl-API
 
-APIs for explainable ML.
+REST-API endpoints for understanding and interacting with ML models. 
 
--   API Documentation: [https://sibyl-ml.dev/sibyl-api/](https://sibyl-ml.dev/sibyl-api/)
+| Important Links                               |                                                                      |
+| --------------------------------------------- | -------------------------------------------------------------------- |
+| :book: **[Documentation]**                    | Quickstart and user guides                                           |
+| :memo: **[API Reference]**                    | Endpoint usage and details                                           |
+| :scroll: **[License]**                        | The repository is published under the MIT License.                   |
+| :computer: **[Website]**                      | Check out the Sibyl Project Website for more information.            |
+
+[Website]: https://sibyl-ml.dev/
+[Documentation]: https://dtail.gitbook.io/sibyl/
+[License]: https://github.com/sibyl-dev/sibyl-api/blob/dev/LICENSE
+[Community]: https://join.slack.com/t/sibyl-ml/shared_invite/zt-2dyfwbgo7-2ALinuT2KDZpsVJ4rntJuA
+[API Reference]: https://sibyl-ml.dev/sibyl-api/
 
 # Overview
 
-Interpretability is perhaps most impactful in situations where humans make decisions with input from amachine learning model. In such situations, humans have traditionally made decisions without ML models, and as such use the ML model predictions as an aideto improve their effectiveness or speed.
-In these cases, explanations can serve many functions. They may help build user trust in the model, identify possible mistakes in the model’s prediction, expedite decisionmaking, maintain accountability, validate their hypotheses, or satisfy curiosity.
+Sibyl-API offers API endpoints for easy-to-understand ML model explanations and smooth interactions. 
 
-Sibylapp is an online interactive tool built on the top of Sibyl (python library) to provide explanations to predictive models on tabular data.
+To get started with Sibyl-API, follow the instructions below or in our documentation to setup your Sibyl database. From there, 
+you can easily make model predictions, get and modify information about model features, and get a variety of explanations
+about your models and their predictions.
 
 # Install
 
 ## Requirements
 
-**Sibyl-API** has been developed and tested on [Python 3.9, 3.10, and 3.11](https://www.python.org/downloads/), and on [MongoDB version 6 and 7](https://www.mongodb.com/try/download/community).
+**Sibyl-API** requires [MongoDB version 6 or 7](https://www.mongodb.com/try/download/community).
 
 To install MongoDB, follow the instructions
 [here](https://www.mongodb.com/docs/manual/administration/install-community/).
@@ -115,13 +126,14 @@ Sample table:
 | has_ac    | boolean | has air conditioning | does not have air conditioning |                             |
 | nghbrh    | categorical | neighborhood         |                                | [Oceanview, Ridge, Oakvale] |
 
-**realapp**: A pickled `pyreal.RealApp` object. This object is used to generate explanations for the model.
+**realapp**: A pickled `pyreal.RealApp` object. This object is used to generate explanations for the model. 
+See [the pyreal documentation](https://dtail.gitbook.io/pyreal/) for details on setting this up.
 
 ### Optional inputs
 Additionally, you can configure APIs futher with:
 
 **config**: a configuration file (YAML or python dictionary) specifying
-additional settings. See `sibyl/db/config_template.yml` for options.
+additional settings. See our [config documentation](https://dtail.gitbook.io/sibyl/user-guides/preparing-the-database/configuring-applications) for details.
 
 **categories**: a table with the categories used to make predictions. Each row should correspond to a single category.
 
@@ -175,28 +187,5 @@ sibyl run -E development -v -D [DATABASE_NAME]
 You can then access your APIs locally at http://localhost:3000/apidocs
 
 # Contributing Guide
-We appreciate contributions of all kinds! To contribute code to the repo please follow these steps:
-1. Clone and install the library and load in your test database(s) following the instructions above.
-2. Make a new branch off of `dev` with a descriptive name describing your change.
-3. Make changes to that branch, committing and pushing code as you go.
-4. Run the following commands to ensure your code passed required code style guidelines and tests:
-```
-# Run all tests
-poetry run invoke test
+We appreciate contributions of all kinds! See [our contributing guide](https://dtail.gitbook.io/sibyl/developer-guides/contributing-to-sibyl) for instructions.
 
-# Run unit tests only
-poetry run invoke test-unit
-
-# Fix most linting errors
-poetry run invoke fix-lint
-
-# Ensure no linting errors remain
-poetry run invoke lint
-```
-5. You can manually run `sibyl/test_apis_on_database.ipynb` on your database(s) to test further.
-6. Before making a PR with your final changes, update the api docs by running Sibyl with the -G flag, ie.
-```
-# Generate docs
-poetry run sibyl run -G
-```
-8. Once all tests/linting pass, push all code and make a pull request. One all checks pass and the PR has been approved, merge your code and delete the branch.
