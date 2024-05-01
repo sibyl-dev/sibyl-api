@@ -37,6 +37,7 @@ class Logger(Resource):
                             timestamp:
                                 type: integer
                                 description: timestamp in seconds-since-epoch
+                                required: True
                             user_id:
                                 type: string
                             eid:

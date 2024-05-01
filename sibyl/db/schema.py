@@ -248,12 +248,12 @@ class Log(SibylDocument):
     A **Log** contains information about an action taken in the system
     Attributes
     ----------
+    timestamp : DateTime
+        Date and time the action was taken. Required
     user : str
         ID of user that took the action
     eid : str
         Entity ID the action was taken on
-    timestamp : DateTime
-        Date and time the action was taken
     action : str
         Action taken
     interface : str
@@ -264,9 +264,10 @@ class Log(SibylDocument):
         Element the action was taken on
     """
 
+    timestamp = fields.DateTimeField(required=True)
+
     user_id = fields.StringField()
     eid = fields.StringField()
-    timestamp = fields.DateTimeField()
 
     action = fields.StringField()
     interface = fields.StringField()
