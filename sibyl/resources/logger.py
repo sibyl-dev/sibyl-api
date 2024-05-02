@@ -26,14 +26,14 @@ class Logger(Resource):
                             event:
                                 type: object
                                 properties:
-                                    element:
-                                        type: string
-                                    action:
-                                        type: string
-                                    details:
-                                        type: object
-                                    interface:
-                                        type: string
+                                element:
+                                    type: string
+                                action:
+                                    type: string
+                                details:
+                                    type: object
+                                interface:
+                                    type: string
                             timestamp:
                                 type: integer
                                 description: timestamp in seconds-since-epoch
@@ -87,8 +87,7 @@ class Logger(Resource):
 
         event = body.get("event")
         if event is None:
-            LOGGER.exception("Must provide event to log")
-            return {"Must provide event to log"}, 400
+            event = {}
 
         full_message = {
             "user_id": user_id,
