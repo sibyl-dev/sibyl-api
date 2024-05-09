@@ -1,10 +1,10 @@
+import datetime
 import logging
 
 from flask import request
 from flask_restful import Resource
 
 from sibyl.db import schema
-import datetime
 
 LOGGER = logging.getLogger(__name__)
 
