@@ -58,22 +58,20 @@ class Logger(Resource):
         body = request.json
 
         user_id = body.get("user_id")
-        if user_id is None:
-            user_id = ""
-        try:
-            user_id = str(user_id)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
+        if user_id is not None:
+            try:
+                user_id = str(user_id)
+            except Exception as e:
+                LOGGER.exception(e)
+                return {"message": str(e)}, 400
 
         eid = body.get("eid")
-        if eid is None:
-            eid = ""
-        try:
-            eid = str(eid)
-        except Exception as e:
-            LOGGER.exception(e)
-            return {"message": str(e)}, 400
+        if eid is not None:
+            try:
+                eid = str(eid)
+            except Exception as e:
+                LOGGER.exception(e)
+                return {"message": str(e)}, 400
 
         timestamp = body.get("timestamp")
         if timestamp is None:
