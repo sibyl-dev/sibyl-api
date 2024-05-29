@@ -24,13 +24,14 @@ def get_events(entity_doc):
 def get_entity(entity_doc, features=True):
     entity = {
         "eid": entity_doc.eid,
-        "row_ids": entity_doc.row_ids,
         "property": entity_doc.property,
     }
+    if "primary_keys" in entity_doc:
+        entity["primary_keys"] = entity_doc.primary_keys
+    if "secondary_keys" in entity_doc:
+        entity["secondary_keys"] = entity_doc.secondary_keys
     if features:
-        entity["features"] = entity_doc.features
-    if "labels" in entity_doc:
-        entity["labels"] = entity_doc.labels
+        entity["features"] = entity_doc.data.features
     return entity
 
 
