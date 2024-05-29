@@ -70,32 +70,46 @@ class Event(SibylDocument):
     unique_key_fields = ["event_id"]
 
 
+class EntityRow(SibylDocument):
+    """
+    An **EntityRow** holds the feature values and details for one model input
+
+    Attributes
+    ----------
+    keys : list [str]
+        List of keys in hierarchical order
+    features : dict {feature_name : feature_value}
+        Feature values for the entity
+    label : string
+        Ground truth label
+    """
+
+    keys = fields.ListField()
+    features = fields.DictField(required=True)  # {feature:value}
+    label = fields.StringField()
+
+
 class Entity(SibylDocument):
     """
-    An **Entity** holds the feature values and details for one model input
+    An **Entity** holds details for one entity
 
     Attributes
     ----------
     eid : str
         Unique ID of the entity
-    row_ids : list [str]
-    features : dict {feature_name : feature_value}
-        Feature values for the entity
     property : dict {property : value}
         Domain-specific properties
-    labels : dict {row_id : label}
-    events : list [Event object]
-        List of events this entity was involved in
+    keys : list [str]
+        List of keys in hierarchical order.
+        Keys should be unique within their level across entities
+    data : EntityRow object
+        Reference to the EntityRow object
     """
 
     eid = fields.StringField(validation=_valid_id, unique=True, required=True)
-    row_ids = fields.ListField(validation=_valid_row_ids, required=True)
-
-    features = fields.DictField(required=True)  # {row_id: {feature:value}}
     property = fields.DictField()  # {property:value}
-    labels = fields.DictField()  # {row_id: ground_truth_label}, as provided
-
-    events = fields.ListField(fields.ReferenceField(Event, reverse_delete_rule=PULL))
+    keys = fields.ListField()  # List of keys in hierarchical order
+    data = fields.ReferenceField(EntityRow, reverse_delete_rule=2)  # CASCADE delete rule
 
 
 class Category(SibylDocument):
@@ -175,11 +189,7 @@ class TrainingSet(SibylDocument):
         Returns this dataset as a Pandas dataframe
         :return: dataframe
         """
-        features = [
-            dict(entity.features[row_id], **{"y": entity.labels[row_id]})
-            for entity in self.entities
-            for row_id in entity.features
-        ]
+        features = [dict(entity.data.features, **{"y": entity.labels}) for entity in self.entities]
         training_set_df = pd.DataFrame(features)
         return training_set_df
 
