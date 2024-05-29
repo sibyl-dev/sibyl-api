@@ -116,27 +116,6 @@ def features():
 
 @pytest.fixture(scope="session")
 def entities():
-    events = [
-        {
-            "event_id": "123",
-            "datetime": datetime.datetime(2020, 1, 1),
-            "type": "type1",
-            "property": {"prop1": "x"},
-        },
-        {
-            "event_id": "456",
-            "datetime": datetime.datetime(2020, 5, 1),
-            "type": "type2",
-            "property": {"prop1": "y"},
-        },
-        {
-            "event_id": "789",
-            "datetime": datetime.datetime(2019, 6, 15),
-            "type": "type1",
-            "property": {"prop1": "x"},
-        },
-    ]
-
     features1 = {
         "A": 14,
         "B": 5,
@@ -181,40 +160,71 @@ def entities():
     entities = [
         {
             "eid": "ent1",
-            "row_ids": ["row_a", "row_b"],
+            "primary_keys": ["row_a", "row_b"],
             "property": {"group_ids": ["101", "102"]},
-            "features": {"row_a": features1, "row_b": features3},
-            "labels": {"row_b": 1, "row_a": 0},
-            "events": [events[0], events[1]],
         },
         {
             "eid": "ent2",
-            "row_ids": ["row_a", "row_b"],
+            "primary_keys": ["row_a", "row_b"],
             "property": {"group_ids": ["101"]},
-            "features": {"row_a": features1_b, "row_b": features2_b},
-            "labels": {"row_a": 2, "row_b": 2},
         },
         {
             "eid": "ent3",
-            "row_ids": ["row_a"],
+            "primary_keys": ["row_a"],
             "property": {"name": "First Last"},
-            "features": {"row_a": features2},
-            "labels": {"row_a": 3},
         },
         {
             "eid": "ent4",
-            "row_ids": ["row_a"],
+            "primary_keys": ["row_a"],
             "property": {"name": "First Last"},
-            "features": {"row_a": features2_b},
         },
         {
             "eid": "ent5",
-            "row_ids": ["row_a"],
-            "features": {"row_a": features3},
-            "events": [events[2]],
+            "primary_keys": ["row_a"],
         },
     ]
-    return entities
+
+    entity_rows = {
+        "ent1": [
+            {
+                "primary_key": "row_a",
+                "features": features1,
+                "label": "0",
+            },
+            {
+                "primary_key": "row_b",
+                "features": features3,
+                "label": "1",
+            },
+        ],
+        "ent2": [
+            {
+                "primary_key": "row_a",
+                "features": features1_b,
+                "label": "2",
+            },
+            {
+                "primary_key": "row_b",
+                "features": features2_b,
+                "label": "2",
+            },
+        ],
+        "ent3": [{
+            "primary_key": "row_a",
+            "features": features2,
+            "label": "3",
+        }],
+        "ent4": [{
+            "primary_key": "row_a",
+            "features": features2_b,
+        }],
+        "ent5": [{
+            "primary_key": "row_a",
+            "features": features3,
+        }],
+    }
+
+    return entities, entity_rows
 
 
 @pytest.fixture(scope="session")
@@ -266,15 +276,13 @@ def testdb(categories, features, entities, groups, models, contexts):
 
     schema.Feature.insert_many(features)
 
+    entities, entity_rows = entities
     for item in entities:
-        item_with_ref = item.copy()
-        if "events" in item_with_ref:
-            ref_events = []
-            for event in item_with_ref["events"]:
-                ref = schema.Event.insert(**event)
-                ref_events.append(ref)
-            item_with_ref["events"] = ref_events
-        schema.Entity.insert_many([item_with_ref])  # this line does not appear to work with insert
+        rows = []
+        for row in entity_rows[item["eid"]]:
+            rows.append(schema.EntityRow.insert(**row))
+        item["data"] = rows
+        schema.Entity.insert_many([item])
 
     schema.EntityGroup.insert_many(groups)
 

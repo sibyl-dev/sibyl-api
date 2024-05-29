@@ -38,36 +38,13 @@ def _eid_exists(val):
 
 def _validate_training_set(entities):
     for entity in entities:
-        if entity.labels is None or entity.labels.keys() != entity.features.keys():
-            raise ValidationError(
-                "All training set entries must have one label per row. Incorrect labels on eid {}"
-                .format(entity.eid)
-            )
-
-
-class Event(SibylDocument):
-    """
-    An **Event** holds information about an event an entity was involved with
-
-    Attributes
-    ----------
-    event_id : str
-        Reference ID for the event
-    datetime : DateTime
-        Date and time of the event
-    type : str
-        Type of event
-    property : dict {property : value}
-        Domain specific properties of the event
-    """
-
-    event_id = fields.StringField()
-    datetime = fields.DateTimeField(required=True)
-    # TODO: choices from config
-    type = fields.StringField(required=True)
-    property = fields.DictField()  # {property:value}
-
-    unique_key_fields = ["event_id"]
+        for row in entity.data:
+            if row.label is None:
+                raise ValidationError(
+                    "All training set entries must have labels. Missing labels on eid {}".format(
+                        entity.eid
+                    )
+                )
 
 
 class EntityRow(SibylDocument):
@@ -76,15 +53,18 @@ class EntityRow(SibylDocument):
 
     Attributes
     ----------
-    keys : list [str]
-        List of keys in hierarchical order
+    primary_key : str
+        Primary key
+    secondary_key: str
+        Secondary key
     features : dict {feature_name : feature_value}
         Feature values for the entity
     label : string
         Ground truth label
     """
 
-    keys = fields.ListField()
+    primary_key = fields.StringField()
+    secondary_key = fields.StringField()
     features = fields.DictField(required=True)  # {feature:value}
     label = fields.StringField()
 
@@ -99,17 +79,17 @@ class Entity(SibylDocument):
         Unique ID of the entity
     property : dict {property : value}
         Domain-specific properties
-    keys : list [str]
-        List of keys in hierarchical order.
-        Keys should be unique within their level across entities
     data : EntityRow object
         Reference to the EntityRow object
     """
 
     eid = fields.StringField(validation=_valid_id, unique=True, required=True)
     property = fields.DictField()  # {property:value}
-    keys = fields.ListField()  # List of keys in hierarchical order
-    data = fields.ReferenceField(EntityRow, reverse_delete_rule=2)  # CASCADE delete rule
+    primary_keys = fields.ListField(fields.StringField())
+    secondary_keys = fields.ListField(fields.StringField())
+    data = fields.ListField(
+        fields.ReferenceField(EntityRow, reverse_delete_rule=2, required=True)
+    )  # CASCADE delete rule
 
 
 class Category(SibylDocument):
@@ -189,7 +169,9 @@ class TrainingSet(SibylDocument):
         Returns this dataset as a Pandas dataframe
         :return: dataframe
         """
-        features = [dict(entity.data.features, **{"y": entity.labels}) for entity in self.entities]
+        features = [
+            dict(entity.data.features, **{"y": entity.data.label}) for entity in self.entities
+        ]
         training_set_df = pd.DataFrame(features)
         return training_set_df
 
