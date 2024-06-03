@@ -181,6 +181,7 @@ class Features(Resource):
                     type: array
                     items:
                       $ref: '#/components/schemas/Feature'
+                    description: List of features to add or modify
         responses:
           200:
             description: All added features
@@ -259,6 +260,7 @@ class Categories(Resource):
                     type: array
                     items:
                       $ref: '#/components/schemas/Category'
+                    description: List of categories to add or modify
         responses:
           200:
             description: Categories added or modified
