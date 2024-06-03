@@ -166,6 +166,7 @@ tags = [
         "name": "computing",
         "description": "Computed explanations and other ML augmenting information",
     },
+    {"name": "logging", "description": "Logging user actions and system events"},
 ]
 
 

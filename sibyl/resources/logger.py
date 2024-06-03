@@ -15,46 +15,48 @@ class Logger(Resource):
         Save a log message.
         ---
         tags:
-            - Logger
+          - logging
         requestBody:
-            required: true
             content:
                 application/json:
                     schema:
                         type: object
                         properties:
+                            user_id:
+                                type: string
+                                description: The id of the user performing the action
+                            eid:
+                                type: string
+                                description: The id of the entity being acted upon
+                            timestamp:
+                                type: integer
+                                description: The time the event occurred, in seconds since the epoch
                             event:
                                 type: object
                                 properties:
-                                element:
-                                    type: string
-                                action:
-                                    type: string
-                                details:
-                                    type: object
-                                interface:
-                                    type: string
-                            timestamp:
-                                type: integer
-                                description: timestamp in seconds-since-epoch
-                                required: True
-                            user_id:
-                                type: string
-                            eid:
-                                type: string
+                                    element:
+                                        type: string
+                                        description: The UI element being acted on
+                                    action:
+                                        type: string
+                                        description: The type of action being performed
+                                    details:
+                                        type: object
+                                        description: Additional details about the event (key:value)
+                                    interface:
+                                        type: string
+                                        description: The interface or page on which the action is
+                                                     taken
+                                description: The details of the event being logged
+                        required:
+                          - timestamp
         responses:
             200:
                 description: Log successful
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            properties:
-                                message:
-                                    type: string
             400:
-                $ref: '#/components/responses/ErrorMessage'
+                description: Bad request
         """
+
         body = request.json
 
         user_id = body.get("user_id")
