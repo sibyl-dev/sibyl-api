@@ -207,7 +207,7 @@ class Entities(Resource):
 
     def put(self):
         """
-        Insert or modify multiple entities
+        Insert or modify multiple Entities
         ---
         tags:
           - entity

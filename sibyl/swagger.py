@@ -84,39 +84,63 @@ schemas = {
     "Model": {
         "type": "object",
         "properties": {
-            "id": {"type": "string"},
-            "description": {"type": "string"},
-            "performance": {"type": "string"},
+            "id": {"type": "string", "description": "Model ID"},
+            "description": {"type": "string", "description": "Description of model"},
+            "performance": {
+                "type": "string",
+                "description": "Text description of model performance metrics",
+            },
         },
         "required": ["id"],
     },
     "FullModelNoRealapp": {
         "type": "object",
         "properties": {
-            "description": {"type": "string"},
-            "performance": {"type": "string"},
-            "importances": {"type": "object"},
-            "training_set_id": {"type": "string"},
+            "description": {"type": "string", "description": "Description of model"},
+            "performance": {
+                "type": "string",
+                "description": "Text description of model performance metrics",
+            },
+            "importances": {
+                "type": "object",
+                "description": "Feature importance scores {feature_name:score}",
+            },
+            "training_set_id": {
+                "type": "string",
+                "description": "ID of training set to use for this model",
+            },
         },
     },
     "Feature": {
         "type": "object",
         "properties": {
-            "name": {"type": "string"},
-            "description": {"type": "string"},
-            "negated_description": {"type": "string"},
-            "category": {"type": "string"},
-            "type": {"type": "string"},
+            "name": {"type": "string", "description": "Feature name"},
+            "description": {"type": "string", "description": "Feature description"},
+            "negated_description": {
+                "type": "string",
+                "description": "Negated feature description (for Boolean features)",
+            },
+            "category": {"type": "string", "description": "Category feature belongs to"},
+            "type": {
+                "type": "string",
+                "description": "Feature type (numeric, boolean, or categorical)",
+            },
         },
         "required": ["name", "type"],
     },
     "FeatureWithoutName": {
         "type": "object",
         "properties": {
-            "description": {"type": "string"},
-            "negated_description": {"type": "string"},
-            "category": {"type": "string"},
-            "type": {"type": "string"},
+            "description": {"type": "string", "description": "Feature description"},
+            "negated_description": {
+                "type": "string",
+                "description": "Negated feature description",
+            },
+            "category": {"type": "string", "description": "Category feature belongs to"},
+            "type": {
+                "type": "string",
+                "description": "Feature type (numeric, boolean, or categorical)",
+            },
         },
         "required": [],
     },
@@ -131,7 +155,13 @@ schemas = {
     },
     "Context": {
         "type": "object",
-        "properties": {"config": {"type": "object"}},
+        "properties": {
+            "context_id": {"type": "string", "description": "Context ID"},
+            "config": {
+                "type": "object",
+                "description": "context config in {config_name: config_value} format",
+            },
+        },
     },
     "Changes": {
         "type": "object",
