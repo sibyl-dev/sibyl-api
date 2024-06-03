@@ -152,7 +152,7 @@ class Entities(Resource):
 
     def get(self):
         """
-        Get all Entities
+        Get all Entities.
         If group ID is specified, return entities of that group.
         ---
         tags:
@@ -207,7 +207,7 @@ class Entities(Resource):
 
     def put(self):
         """
-        Insert or modify multiple entities
+        Insert or modify multiple Entities
         ---
         tags:
           - entity
@@ -221,6 +221,7 @@ class Entities(Resource):
                     type: array
                     items:
                       $ref: '#/components/schemas/Entity'
+                    description: List of entities to insert or modify
         responses:
           200:
             description: All entities

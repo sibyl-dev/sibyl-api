@@ -67,7 +67,7 @@ def add_category(category, category_data):
 class Feature(Resource):
     def get(self, feature_name):
         """
-        Get a feature by name
+        Get a Feature by name
         ---
         tags:
           - feature
@@ -97,7 +97,7 @@ class Feature(Resource):
 
     def put(self, feature_name):
         """
-        Update or create a feature by name
+        Update or create a Feature by name
         ---
         tags:
           - feature
@@ -137,7 +137,7 @@ class Feature(Resource):
 class Features(Resource):
     def get(self):
         """
-        Get all features
+        Get all Features
         ---
         tags:
           - feature
@@ -167,7 +167,7 @@ class Features(Resource):
 
     def put(self):
         """
-        Update or create multiple features
+        Update or create multiple Features
         ---
         tags:
           - feature
@@ -181,6 +181,7 @@ class Features(Resource):
                     type: array
                     items:
                       $ref: '#/components/schemas/Feature'
+                    description: List of features to add or modify
         responses:
           200:
             description: All added features
@@ -215,7 +216,7 @@ class Features(Resource):
 class Categories(Resource):
     def get(self):
         """
-        Get all feature categories
+        Get all feature Categories
         ---
         tags:
           - feature
@@ -245,7 +246,7 @@ class Categories(Resource):
 
     def put(self):
         """
-        Add or modify categories
+        Add or modify feature Categories
         ---
         tags:
           - feature
@@ -259,6 +260,7 @@ class Categories(Resource):
                     type: array
                     items:
                       $ref: '#/components/schemas/Category'
+                    description: List of categories to add or modify
         responses:
           200:
             description: Categories added or modified
@@ -267,7 +269,7 @@ class Categories(Resource):
                 schema:
                   type: object
                   properties:
-                    entities:
+                    categories:
                       type: array
                       items:
                         $ref: '#/components/schemas/Category'

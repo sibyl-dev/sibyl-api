@@ -135,7 +135,8 @@ def get_entities_table(eids, row_ids, all_rows=False):
 class SingleChangePredictions(Resource):
     def post(self):
         """
-        Change one feature value at a time and get the resulting model predictions.
+        Modify and Predict (one at the time)
+        Modify one feature value at a time and return all resulting predictions.
         ---
         tags:
           - computing
@@ -148,18 +149,22 @@ class SingleChangePredictions(Resource):
                  properties:
                    eid:
                      type: string
+                     description: ID of entity to modify
                    row_id:
                      type: string
+                     description: Row ID of entity to modify
                    model_id:
                      type: string
+                     description: ID of model to use
                    changes:
                      $ref: '#/components/schemas/Changes'
                    return_proba:
                      type: boolean
+                     description: Return probabilities instead of predictions
                  required: ['eid', 'model_id', 'changes']
         responses:
           200:
-            description: Resulting predictions after making changes
+            description: Resulting predictions after making modifications
             content:
               application/json:
                 schema:
@@ -171,6 +176,7 @@ class SingleChangePredictions(Resource):
                         type: array
                         items:
                           type: ["string", "number"]
+                      description: One new prediction value per change
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -207,7 +213,8 @@ class SingleChangePredictions(Resource):
 class ModifiedPrediction(Resource):
     def post(self):
         """
-        Get the resulting model prediction after making all changes
+        Modify and Predict (all at once)
+        Make all modifications and return the resulting prediction.
         ---
         tags:
           - computing
@@ -220,18 +227,22 @@ class ModifiedPrediction(Resource):
                  properties:
                    eid:
                      type: string
+                     description: ID of entity to modify
                    row_id:
                      type: string
+                     description: Row ID of entity to modify
                    model_id:
                      type: string
+                     description: ID of model to use
                    changes:
                      $ref: '#/components/schemas/Changes'
                    return_proba:
                      type: boolean
+                     description: Return probabilities instead of predictions
                  required: ['eid', 'model_id', 'changes']
         responses:
           200:
-            description: Resulting predictions after making changes
+            description: Resulting prediction after making all changes
             content:
               application/json:
                 schema:
@@ -273,7 +284,7 @@ class ModifiedPrediction(Resource):
 class FeatureContributions(Resource):
     def post(self):
         """
-        Get feature contributions
+        Get Feature Contributions
         ---
         tags:
           - computing
@@ -286,10 +297,13 @@ class FeatureContributions(Resource):
                 properties:
                   eid:
                     type: string
+                    description: ID of entity to get contributions for
                   row_id:
                     type: string
+                    description: Row ID of entity to get contributions for
                   model_id:
                     type: string
+                    description: ID of model to use
                 required: ['eid', 'model_id']
         responses:
           200:
@@ -299,10 +313,9 @@ class FeatureContributions(Resource):
                 schema:
                   type: object
                   properties:
-                    contributions:
+                    result:
                       type: object
-                      additionalProperties:
-                        type: number
+                      $ref: '#/components/schemas/FeatureContributions'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -335,7 +348,9 @@ def get_contributions(realapp, entities):
 class MultiFeatureContributions(Resource):
     def post(self):
         """
-        Get feature contributions for multiple eids, or for multiple row_ids in a single entity
+        Get multiple Feature Contributions
+        Get feature contributions for multiple entities, or for multiple rows in a single entity <br>
+        Only one of eids or row_ids can have multiple elements
         ---
         tags:
           - computing
@@ -350,12 +365,15 @@ class MultiFeatureContributions(Resource):
                     type: array
                     items:
                       type: string
+                    description: Entity ID(s) to get contributions for
                   model_id:
                     type: string
+                    description: ID of model to use
                   row_ids:
                     type: array
                     items:
                       type: string
+                    description: Row ID(s) to get contributions for
                 required: ['eids', 'model_id']
         responses:
           200:
@@ -367,15 +385,12 @@ class MultiFeatureContributions(Resource):
                   properties:
                     contributions:
                       type: object
-                      properties:
-                        Feature Name:
-                            type: string
-                        Feature Value:
-                          type: ["string", "number"]
-                        Contribution:
-                          type: number
-                        Average\\/Mode:
-                          type: ["string", "number"]
+                      additionalProperties:
+                        description: Feature contributions for each input
+                    values:
+                      type: object
+                      additionalProperties:
+                        description: Corresponding feature values for each input
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -400,7 +415,8 @@ class MultiFeatureContributions(Resource):
 class ModifiedFeatureContribution(Resource):
     def post(self):
         """
-        Get the feature contribution of an entity modified by changes
+        Modify and Get Feature Contributions
+        Modify entity feature values and return the resulting feature contributions
         ---
         tags:
           - computing
@@ -413,30 +429,32 @@ class ModifiedFeatureContribution(Resource):
                  properties:
                    eid:
                      type: string
+                     description: ID of entity to modify
                    row_id:
                      type: string
+                     description: Row ID of entity to modify
                    model_id:
                      type: string
+                     description: ID of model to use
                    changes:
                      $ref: '#/components/schemas/Changes'
                  required: ['eid', 'model_id', 'changes']
         responses:
           200:
-            description: Resulting feature contribution after making changes to entity
+            description: Resulting feature contributions after making changes to entity
             content:
               application/json:
                 schema:
                   type: object
                   properties:
-                    contribution:
+                    contributions:
                       type: object
-                      properties:
-                        Feature Value:
-                          type: ["string", "number"]
-                        Contribution:
-                          type: number
-                        Average\\/Mode:
-                          type: ["string", "number"]
+                      additionalProperties:
+                        description: Feature contributions for each input
+                    values:
+                      type: object
+                      additionalProperties:
+                        description: Corresponding feature values for each input
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -465,7 +483,9 @@ class ModifiedFeatureContribution(Resource):
 class SimilarEntities(Resource):
     def post(self):
         """
-        Get nearest neighbors for list of eids, or for all rows in a single eid
+        Get Similar Entities
+        Get nearest neighbors for list of eids, or for all rows in a single eid <br>
+        Only one of eids or row_ids can have multiple elements
         ---
         tags:
           - computing
@@ -480,21 +500,34 @@ class SimilarEntities(Resource):
                     type: array
                     items:
                       type: string
+                    description: Entity ID(s) to get similar entities for
                   model_id:
                     type: string
+                    description: ID of model to use
                 required: ['eids', 'model_id']
         responses:
           200:
-            description: Feature contributions
+            description: Similar entities
             content:
               application/json:
                 schema:
                   type: object
                   properties:
-                    contributions:
-                        type: array
-                        items:
-                            type: number
+                    similar_entities:
+                        type: object
+                        additionalProperties:
+                            type: object
+                            properties:
+                                X:
+                                    type: object
+                                    description: Similar entity feature values
+                                y:
+                                    type: object
+                                    description: Similar entity ground-truth labels
+                                Input:
+                                    type: object
+                                    description: Input entity feature values
+                            description: One per eid/row_id
           400:
             $ref: '#/components/responses/ErrorMessage'
         """

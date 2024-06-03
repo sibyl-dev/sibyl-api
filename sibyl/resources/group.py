@@ -53,7 +53,7 @@ class EntityGroup(Resource):
 class EntityGroups(Resource):
     def get(self):
         """
-        Get all EntityGroups
+        Get all EntityGroup IDs
         ---
         tags:
           - group
@@ -72,8 +72,6 @@ class EntityGroups(Resource):
                         properties:
                           group_id:
                             type: string
-                          property:
-                            type: object
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
