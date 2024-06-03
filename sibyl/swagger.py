@@ -166,6 +166,25 @@ schemas = {
     "Changes": {
         "type": "object",
         "additionalProperties": {"oneOf": [{"type": "string"}, {"type": "number"}]},
+        "description": "Changes to features to  make (feature_name:new_value pairs)",
+    },
+    "FeatureContributions": {
+        "type": "object",
+        "properties": {
+            "Feature Name": {"type": "string", "description": "Feature Name"},
+            "Feature Value": {
+                "oneOf": [{"type": "string"}, {"type": "number"}],
+                "description": "Feature Value",
+            },
+            "Contribution": {"type": "number", "description": "Contribution to model prediction"},
+            "Average/Mode": {
+                "type": "number",
+                "description": (
+                    "Average (for numeric features) or Mode (for categorical/boolean features)"
+                    " value of the feature"
+                ),
+            },
+        },
     },
     "Message": {
         "type": "object",
