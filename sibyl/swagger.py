@@ -84,39 +84,63 @@ schemas = {
     "Model": {
         "type": "object",
         "properties": {
-            "id": {"type": "string"},
-            "description": {"type": "string"},
-            "performance": {"type": "string"},
+            "id": {"type": "string", "description": "Model ID"},
+            "description": {"type": "string", "description": "Description of model"},
+            "performance": {
+                "type": "string",
+                "description": "Text description of model performance metrics",
+            },
         },
         "required": ["id"],
     },
     "FullModelNoRealapp": {
         "type": "object",
         "properties": {
-            "description": {"type": "string"},
-            "performance": {"type": "string"},
-            "importances": {"type": "object"},
-            "training_set_id": {"type": "string"},
+            "description": {"type": "string", "description": "Description of model"},
+            "performance": {
+                "type": "string",
+                "description": "Text description of model performance metrics",
+            },
+            "importances": {
+                "type": "object",
+                "description": "Feature importance scores {feature_name:score}",
+            },
+            "training_set_id": {
+                "type": "string",
+                "description": "ID of training set to use for this model",
+            },
         },
     },
     "Feature": {
         "type": "object",
         "properties": {
-            "name": {"type": "string"},
-            "description": {"type": "string"},
-            "negated_description": {"type": "string"},
-            "category": {"type": "string"},
-            "type": {"type": "string"},
+            "name": {"type": "string", "description": "Feature name"},
+            "description": {"type": "string", "description": "Feature description"},
+            "negated_description": {
+                "type": "string",
+                "description": "Negated feature description (for Boolean features)",
+            },
+            "category": {"type": "string", "description": "Category feature belongs to"},
+            "type": {
+                "type": "string",
+                "description": "Feature type (numeric, boolean, or categorical)",
+            },
         },
         "required": ["name", "type"],
     },
     "FeatureWithoutName": {
         "type": "object",
         "properties": {
-            "description": {"type": "string"},
-            "negated_description": {"type": "string"},
-            "category": {"type": "string"},
-            "type": {"type": "string"},
+            "description": {"type": "string", "description": "Feature description"},
+            "negated_description": {
+                "type": "string",
+                "description": "Negated feature description",
+            },
+            "category": {"type": "string", "description": "Category feature belongs to"},
+            "type": {
+                "type": "string",
+                "description": "Feature type (numeric, boolean, or categorical)",
+            },
         },
         "required": [],
     },
@@ -131,11 +155,36 @@ schemas = {
     },
     "Context": {
         "type": "object",
-        "properties": {"config": {"type": "object"}},
+        "properties": {
+            "context_id": {"type": "string", "description": "Context ID"},
+            "config": {
+                "type": "object",
+                "description": "context config in {config_name: config_value} format",
+            },
+        },
     },
     "Changes": {
         "type": "object",
         "additionalProperties": {"oneOf": [{"type": "string"}, {"type": "number"}]},
+        "description": "Changes to features to  make (feature_name:new_value pairs)",
+    },
+    "FeatureContributions": {
+        "type": "object",
+        "properties": {
+            "Feature Name": {"type": "string", "description": "Feature Name"},
+            "Feature Value": {
+                "oneOf": [{"type": "string"}, {"type": "number"}],
+                "description": "Feature Value",
+            },
+            "Contribution": {"type": "number", "description": "Contribution to model prediction"},
+            "Average/Mode": {
+                "type": "number",
+                "description": (
+                    "Average (for numeric features) or Mode (for categorical/boolean features)"
+                    " value of the feature"
+                ),
+            },
+        },
     },
     "Message": {
         "type": "object",
@@ -166,6 +215,7 @@ tags = [
         "name": "computing",
         "description": "Computed explanations and other ML augmenting information",
     },
+    {"name": "logging", "description": "Logging user actions and system events"},
 ]
 
 

@@ -58,7 +58,7 @@ class Model(Resource):
 
     def put(self, model_id):
         """
-        Update or create a model by id.
+        Update or create a Model by id.
         ---
         description:
           "Note: Does not currently support updating realapp."
@@ -141,7 +141,7 @@ class Models(Resource):
 class Importance(Resource):
     def get(self):
         """
-        Get Model feature importances
+        Get Model feature importance scores
         ---
         tags:
           - model
@@ -185,7 +185,7 @@ class Importance(Resource):
 class Prediction(Resource):
     def get(self):
         """
-        Get a model prediction
+        Get a Model prediction
         ---
         tags:
           - model
@@ -252,11 +252,11 @@ class Prediction(Resource):
 class MultiPrediction(Resource):
     def post(self):
         """
-        Get multiple model predictions.
+        Get multiple Model predictions.
         ---
         description:
-          If given multiple eids, return one prediction per eid (first row).
-          If given one eid, return one prediction per row_id.
+          If given multiple eids, return one prediction per eid (first row). <br>
+          If given one eid, return one prediction per row_id. <br>
           Only one of eids and row_ids can contain more than one element.
         tags:
           - model
@@ -271,15 +271,18 @@ class MultiPrediction(Resource):
                     type: array
                     items:
                       type: string
+                    description: Entity ID(s) to predict on
                   model_id:
                     type: string
+                    description: ID of the model to use to predict
                   row_ids:
                     type: array
                     items:
                       type: string
-                    description: row_ids to select from the given eid
+                    description: row_id(s) to select from the given eid
                   return_proba:
                     type: boolean
+                    description: If True, return probabilities instead of class predictions
                 required: ['eids', 'model_id']
         responses:
           200:

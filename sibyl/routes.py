@@ -55,7 +55,7 @@ def add_routes(app, docs_filename=None):
     )
     api.add_resource(ctrl.computing.SimilarEntities, API_VERSION + "similar_entities/")
 
-    api.add_resource(ctrl.logger.Logger, API_VERSION + "logging/")
+    api.add_resource(ctrl.logger.Logger, API_VERSION + "log/")
 
     if docs_filename:
         with open(docs_filename, "w") as fp:

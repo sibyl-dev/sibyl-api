@@ -43,7 +43,11 @@ class Context(Resource):
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Context'
+                  type: object
+                  properties:
+                    context:
+                        type: object
+                        $ref: '#/components/schemas/Context'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -59,7 +63,7 @@ class Context(Resource):
 
     def put(self, context_id):
         """
-        Update or create a context
+        Update or create a Context
         ---
         tags:
           - context
@@ -77,11 +81,15 @@ class Context(Resource):
                 $ref: '#/components/schemas/Context'
         responses:
           200:
-            description: Information about update model
+            description: Added or created Context
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Context'
+                  type: object
+                  properties:
+                    context:
+                        type: object
+                        $ref: '#/components/schemas/Context'
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
@@ -105,7 +113,7 @@ class Contexts(Resource):
           - context
         responses:
           200:
-            description: Get all contexts
+            description: All contexts
             content:
               application/json:
                 schema:
