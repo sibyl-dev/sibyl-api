@@ -98,7 +98,7 @@ def get_context_dict():
     Get context dictionary from database
     """
     context = schema.Context.find().first()
-    if len(context) == 0:
+    if context is None or len(context) == 0:
         return {}
     return context["config"]
 
