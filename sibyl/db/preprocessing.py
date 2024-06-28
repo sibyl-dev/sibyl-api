@@ -528,10 +528,8 @@ def insert_model_from_object(
     importance_df = importance_df.rename(
         columns={"Feature Name": "name", "Importance": "importance"}
     )
-    importance_df.set_index("name")
-
+    importance_df.set_index("name", inplace=True)
     importances = importance_df.to_dict(orient="dict")["importance"]
-
     items = {
         "model_id": model_id,
         "importances": importances,
