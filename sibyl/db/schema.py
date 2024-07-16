@@ -53,15 +53,16 @@ class Row(DynamicDocument):
     ----------
     eid : str
         Reference ID for the entity
-    timestamp : str
+    row_id : str
         Optional timestamp associated with the row
     label : float
         Label value for the row
     """
 
     eid = fields.StringField(required=True, validation=_eid_exists)
-    timestamp = fields.DateTimeField()
+    row_id = fields.StringField(required=True)
     label = fields.FloatField()
+    features = fields.DictField()
 
 
 class Entity(SibylDocument):
@@ -79,7 +80,9 @@ class Entity(SibylDocument):
     """
 
     eid = fields.StringField(validation=_valid_id, unique=True, required=True)
-    rows = fields.ListField(fields.ReferenceField(Row, reverse_delete_rule=PULL))
+    rows = fields.ListField(
+        fields.ReferenceField(Row, reverse_delete_rule=PULL)
+    )  # Should be correctly sorted
     properties = fields.DictField()
 
 
@@ -144,14 +147,14 @@ class TrainingSet(SibylDocument):
 
     Attributes
     ----------
-    entities : list [Entity object[
-        List of entities in the dataset
+    rows : list [Row object[
+        List of rows in the dataset
     neighbors : trained NN classifier
         Trained nearest neighbors classifier for the dataset
     """
 
-    entities = fields.ListField(
-        fields.ReferenceField(Entity, reverse_delete_rule=PULL), validation=_validate_training_set
+    rows = fields.ListField(
+        fields.ReferenceField(Row, reverse_delete_rule=PULL), validation=_validate_training_set
     )
     neighbors = fields.BinaryField()  # trained NN classifier
 

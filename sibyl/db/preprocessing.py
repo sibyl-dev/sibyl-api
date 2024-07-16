@@ -341,10 +341,13 @@ def insert_entities_from_dataframe(
                 doc.values = existing_values + cat_feature_values[feature].tolist()
                 doc.save()
     entities = {}
+    if "row_id" not in entity_df:
+        entity_df["row_id"] = pd.Series(np.arange(0, entity_df.shape[0])).astype(str)
     for _, row in entity_df.iterrows():
         eid = str(row["eid"])
         label = row[label_column]
         features = row.drop(["eid", label_column]).to_dict()
+        row_id = row["row_id"]
         if eid not in entities:
             entity = schema.Entity(eid=eid, properties={})
             entity.save()
@@ -353,7 +356,7 @@ def insert_entities_from_dataframe(
             entity = entities[eid]
 
             # Create the row
-        row_doc = schema.Row(eid=eid, label=label, **features)
+        row_doc = schema.Row(eid=eid, label=label, features=features, row_id=row_id)
         row_doc.save()
 
         # Update the entity with the new row reference

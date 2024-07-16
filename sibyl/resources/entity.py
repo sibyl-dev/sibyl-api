@@ -94,7 +94,7 @@ class Entity(Resource):
         # Find the rows associated with the entity, filtering by query_params
         rows = schema.Row.objects(__raw__=query_params)
         # Convert rows to a list of dictionaries
-        rows_list = [row.to_mongo().to_dict() for row in rows]
+        rows_list = {row.row_id: row.features for row in rows}
         for row in rows_list:
             row.pop("_id", None)
 
@@ -111,7 +111,7 @@ class Entity(Resource):
         rows_list = replace_nan(rows_list)
 
         # Return the entity and rows as JSON
-        return jsonify({"eid": entity["eid"], "rows": rows_list})
+        return jsonify({"eid": entity["eid"], "features": rows_list})
 
     def put(self, eid):
         """
