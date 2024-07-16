@@ -1,6 +1,8 @@
 import logging
+import json
+import numpy as np
 
-from flask import request
+from flask import request, jsonify
 from flask_restful import Resource, reqparse
 
 from sibyl.db import schema
@@ -8,40 +10,27 @@ from sibyl.db import schema
 LOGGER = logging.getLogger(__name__)
 
 
-def get_events(entity_doc):
-    events = []
-    for event_doc in entity_doc.events:
-        events.append({
-            "event_id": event_doc.event_id,
-            "datetime": str(event_doc.datetime),
-            "type": event_doc.type,
-            "property": event_doc.property,
-        })
-    events = {"events": events}
-    return events
-
-
-def get_entity(entity_doc, features=True):
+def get_entity(entity_doc):
     entity = {
         "eid": entity_doc.eid,
-        "row_ids": entity_doc.row_ids,
-        "property": entity_doc.property,
+        "properties": entity_doc.properties,
     }
-    if features:
-        entity["features"] = entity_doc.features
-    if "labels" in entity_doc:
-        entity["labels"] = entity_doc.labels
     return entity
 
 
-def get_entity_row(entity_doc, row_id=None, features=True):
-    entity = {
-        "eid": entity_doc.eid,
-        "property": entity_doc.property,
-    }
-    if features:
-        entity["features"] = entity_doc.features[row_id]
-    return entity
+def get_row(row_doc):
+    row = {"row_id": row_doc.row_id, "features": row_doc.features, "label": row_doc.label}
+    return row
+
+
+# def get_entity_row(entity_doc, row_id=None, features=True):
+#     entity = {
+#         "eid": entity_doc.eid,
+#         "property": entity_doc.property,
+#     }
+#     if features:
+#         entity["features"] = entity_doc.features[row_id]
+#     return entity
 
 
 def add_entity(entity, entity_data):
@@ -59,7 +48,7 @@ def add_entity(entity, entity_data):
 class Entity(Resource):
     def get(self, eid):
         """
-        Get an Entity by ID
+        Get an Entity and all its data by ID, optionally filtering by params
         ---
         tags:
           - entity
@@ -70,37 +59,59 @@ class Entity(Resource):
               type: string
             required: true
             description: ID of the entity to get
-          - name: row_id
+          - name: timestamp
             in: query
             schema:
               type: string
-            description: ID of the row to get for the entity
+            required: false
         responses:
           200:
-            description: Entity to be returned
+            description: Entity
             content:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Entity'
-                example:
-                  eid: "123"
-                  features: {"row_1": {"f1": 10, "f2": 20}, "row_2": {"f1": 20, "f2": 30}}
-                  row_ids: ["row_1", "row_2"]
-                  labels: {"row_1": 1, "row_2": 0}
-                  property: {"group_id": "group_1"}
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-        row_id = request.args.get("row_id", None)
-
-        entity = schema.Entity.find_one(eid=str(eid))
+        entity = schema.Entity.objects(eid=eid).first()
         if entity is None:
             LOGGER.exception("Error getting entity. Entity %s does not exist.", eid)
             return {"message": "Entity {} does not exist".format(eid), "code": 400}, 400
 
-        if row_id is None:
-            return get_entity(entity, features=True), 200
-        return get_entity_row(entity, row_id, features=True), 200
+        query_params_str = request.args.get("params", "{}")
+        try:
+            query_params = json.loads(query_params_str)
+        except json.JSONDecodeError:
+            return {
+                "message": "Invalid params format. Must be a valid JSON object.",
+                "code": 400,
+            }, 400
+
+            # Ensure the 'eid' is included in the query parameters
+        query_params["eid"] = eid
+
+        # Find the rows associated with the entity, filtering by query_params
+        rows = schema.Row.objects(__raw__=query_params)
+        # Convert rows to a list of dictionaries
+        rows_list = [row.to_mongo().to_dict() for row in rows]
+        for row in rows_list:
+            row.pop("_id", None)
+
+        def replace_nan(obj):
+            if isinstance(obj, float) and np.isnan(obj):
+                return None
+            elif isinstance(obj, dict):
+                return {k: replace_nan(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [replace_nan(i) for i in obj]
+            else:
+                return obj
+
+        rows_list = replace_nan(rows_list)
+
+        # Return the entity and rows as JSON
+        return jsonify({"eid": entity["eid"], "rows": rows_list})
 
     def put(self, eid):
         """
@@ -179,7 +190,6 @@ class Entities(Resource):
           400:
             $ref: '#/components/responses/ErrorMessage'
         """
-
         try:
             args = self.parser_get.parse_args()
         except Exception as e:
@@ -190,20 +200,19 @@ class Entities(Resource):
         if group_id is None:
             # no referral filter applied
             documents = schema.Entity.find()
-            try:
-                entities = [get_entity(document, features=False) for document in documents]
-            except Exception as e:
-                LOGGER.exception(e)
-                return {"message": str(e)}, 500
-            else:
-                return {"entities": entities}
         else:
             # filter entities by referral ID
-            entities = schema.Entity.find(property__group_ids__contains=group_id)
-            if entities is None:
+            documents = schema.Entity.find(properties__group_ids__contains=group_id)
+            if documents is None:
                 LOGGER.log(20, "group %s has no entities" % str(group_id))
-                return []
-            return [document.eid for document in entities], 200
+                return {"message": "group %s has no entities" % str(group_id)}, 400
+        try:
+            entities = [get_entity(document) for document in documents]
+        except Exception as e:
+            LOGGER.exception(e)
+            return {"message": str(e)}, 500
+        else:
+            return {"entities": entities}
 
     def put(self):
         """

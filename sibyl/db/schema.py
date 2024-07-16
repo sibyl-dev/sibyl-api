@@ -6,7 +6,7 @@ This module contains the classes that define the Sibyl Database Schema
 import logging
 
 import pandas as pd
-from mongoengine import DENY, NULLIFY, PULL, Document, ValidationError, fields
+from mongoengine import DENY, NULLIFY, PULL, Document, ValidationError, fields, DynamicDocument
 
 from sibyl.db.base import SibylDocument
 
@@ -45,57 +45,42 @@ def _validate_training_set(entities):
             )
 
 
-class Event(SibylDocument):
+class Row(DynamicDocument):
     """
-    An **Event** holds information about an event an entity was involved with
+    An **Row** holds a single row of features for an entity, as well as its target value
 
     Attributes
     ----------
-    event_id : str
-        Reference ID for the event
-    datetime : DateTime
-        Date and time of the event
-    type : str
-        Type of event
-    property : dict {property : value}
-        Domain specific properties of the event
+    eid : str
+        Reference ID for the entity
+    timestamp : str
+        Optional timestamp associated with the row
+    label : float
+        Label value for the row
     """
 
-    event_id = fields.StringField()
-    datetime = fields.DateTimeField(required=True)
-    # TODO: choices from config
-    type = fields.StringField(required=True)
-    property = fields.DictField()  # {property:value}
-
-    unique_key_fields = ["event_id"]
+    eid = fields.StringField(required=True, validation=_eid_exists)
+    timestamp = fields.DateTimeField()
+    label = fields.FloatField()
 
 
 class Entity(SibylDocument):
     """
-    An **Entity** holds the feature values and details for one model input
+    An **Entity** holds the details for one entity
 
     Attributes
     ----------
     eid : str
         Unique ID of the entity
-    row_ids : list [str]
-    features : dict {feature_name : feature_value}
-        Feature values for the entity
-    property : dict {property : value}
+    rows : list [str]
+        Rows of data associated with the entity
+    properties : dict {property : value}
         Domain-specific properties
-    labels : dict {row_id : label}
-    events : list [Event object]
-        List of events this entity was involved in
     """
 
     eid = fields.StringField(validation=_valid_id, unique=True, required=True)
-    row_ids = fields.ListField(validation=_valid_row_ids, required=True)
-
-    features = fields.DictField(required=True)  # {row_id: {feature:value}}
-    property = fields.DictField()  # {property:value}
-    labels = fields.DictField()  # {row_id: ground_truth_label}, as provided
-
-    events = fields.ListField(fields.ReferenceField(Event, reverse_delete_rule=PULL))
+    rows = fields.ListField(fields.ReferenceField(Row, reverse_delete_rule=PULL))
+    properties = fields.DictField()
 
 
 class Category(SibylDocument):

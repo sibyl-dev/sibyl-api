@@ -320,12 +320,12 @@ def insert_entities_from_dataframe(
 
     eids = entity_df["eid"]
 
-    if "row_id" not in entity_df:
-        entity_df["row_id"] = pd.Series(np.arange(0, entity_df.shape[0])).astype(str)
-        use_rows = False
-    else:
-        entity_df["row_id"] = entity_df["row_id"].astype(str)
-        use_rows = True
+    # if "row_id" not in entity_df:
+    #     entity_df["row_id"] = pd.Series(np.arange(0, entity_df.shape[0])).astype(str)
+    #     use_rows = False
+    # else:
+    #     entity_df["row_id"] = entity_df["row_id"].astype(str)
+    #     use_rows = True
 
     if update_feature_values:
         feature_df = schema.Feature.find(as_df_=True, only_=["name", "type"])
@@ -340,22 +340,25 @@ def insert_entities_from_dataframe(
                 existing_values = doc.values if doc.values is not None else []
                 doc.values = existing_values + cat_feature_values[feature].tolist()
                 doc.save()
-    entity_df = entity_df.set_index(["eid", "row_id"])
-    raw_entities = {
-        level: entity_df.xs(level).to_dict("index") for level in entity_df.index.levels[0]
-    }
+    entities = {}
+    for _, row in entity_df.iterrows():
+        eid = str(row["eid"])
+        label = row[label_column]
+        features = row.drop(["eid", label_column]).to_dict()
+        if eid not in entities:
+            entity = schema.Entity(eid=eid, properties={})
+            entity.save()
+            entities[eid] = entity
+        else:
+            entity = entities[eid]
 
-    entities = []
-    for i, eid in enumerate(raw_entities):
-        entity = {"eid": str(eid), "row_ids": list(raw_entities[eid].keys())}
-        targets = {}
-        for row_id in raw_entities[eid]:
-            if label_column in raw_entities[eid][row_id]:
-                targets[row_id] = raw_entities[eid][row_id].pop(label_column)
-        entity["features"] = raw_entities[eid]
-        entity["labels"] = targets
-        entities.append(entity)
-    schema.Entity.insert_many(entities)
+            # Create the row
+        row_doc = schema.Row(eid=eid, label=label, **features)
+        row_doc.save()
+
+        # Update the entity with the new row reference
+        entity.update(push__rows=row_doc)
+
     return eids.tolist()
 
 
