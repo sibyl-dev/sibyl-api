@@ -332,7 +332,9 @@ class FeatureContributions(Resource):
         else:
             return payload
 
-        contributions = realapp.produce_feature_contributions(entity_features)[0]
+        contributions = realapp.produce_feature_contributions(entity_features)
+        contributions = contributions[next(iter(contributions))]
+
         contributions_json = contributions.set_index("Feature Name").to_dict(orient="index")
         return {"result": contributions_json}, 200
 
