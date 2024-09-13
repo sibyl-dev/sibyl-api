@@ -159,14 +159,13 @@ where `[CONFIG_NAME].yml` is the path to your configuration file and `[DIRECTORY
 the directory containing your data.
 
 ### With the Setup Wizard
-Currently, the setup wizard is only available when installing from source.
 First, install the optional setup dependencies with
 ```bash
-poetry install --with setup
+poetry install -E setup
 ```
 Then, run the setup wizard with
 ```bash
-poetry run streamlit run setup-wizard/main.py
+sibyl setup
 ```
 
 # Running APIs
